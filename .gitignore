@@ -1,0 +1,8 @@
+# Local Claude Code state (settings.local.json, etc.)
+.claude/
+
+# Common OS / editor cruft
+Thumbs.db
+.DS_Store
+*.swp
+.vscode/
