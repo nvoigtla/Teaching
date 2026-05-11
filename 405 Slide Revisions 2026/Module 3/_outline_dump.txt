@@ -1,0 +1,825 @@
+Total slides: 81
+================================================================================
+
+--- Slide 1 | Layout: Section Header ---
+TITLE: Production and Costs
+BODY:
+  - Professor Nico Voigtländer
+  - Management 405: Module 3
+
+--- Slide 2 | Layout: Title and Content ---
+TITLE: ZOOM-Specific Logistics
+BODY:
+  - If your internet permits, keep video on, mic muted
+  - Class discussions: raise hand
+  - Will call on you to unmute
+  - Chat on Zoom: Only clarifying questions to TA
+  - TA will filter questions and raise hand if needed.
+  - Group discussions/exercises: breakout rooms
+  - 2
+
+--- Slide 3 | Layout: Title and Content ---
+TITLE: Announcements
+BODY:
+  - Midterm logistics
+  - 6 hour window at home, any time between Thu, Jan 26 12.01am and Feb 2 11.59pm
+  - Window with guaranteed TA availability: Probably Saturday, Jan 28, 9am-3pm.
+  - All material from Modules 1 and 2
+  - Includes PS 1 + 2
+  - Problem-solving exercises similar to PS 1+2
+  - Review sessions during the midterm week
+
+--- Slide 4 | Layout: Title and Content ---
+TITLE: Recap of module 2
+BODY:
+  - 4
+  - The law of demand
+  - Holding everything else constant, if P  goes down, Q increases
+  - Elasticities
+  - Responsiveness of demand to: own-price, income, competitors’ price
+  - Demand and revenue
+  - Own-price elasticity and total revenue
+  - Marginal revenue: the 3 step method
+  - Demand estimation
+  - Market experimentation and regression analysis
+
+--- Slide 5 | Layout: Title and Content ---
+TITLE: agenda for the class
+BODY:
+  - 1. Basic Principles and Economic Way of Thinking
+
+--- Slide 6 | Layout: Title and Content ---
+TITLE: OUTLINE OF Module 3
+BODY:
+  - Production
+  - Production functions
+  - Short run vs. long run
+  - Short-run production decisions
+  - Diminishing marginal returns
+  - Optimal hiring decisions
+  - Wage searchers
+  - Long-run production decisions
+  - Optimal mix of inputs
+  - Costs
+  - Fixed, sunk, variable costs
+  - Marginal costs
+  - Long-run costs and economies of scale
+
+--- Slide 7 | Layout: Title and Content ---
+TITLE: Context and Tools
+BODY:
+  - Context: How do we optimize production?
+  - We want to produce a given output at the minimum cost
+  - Some inputs may be fixed in the short run (e.g., capital), so we can only choose the others (labor)
+  - Careful with short run vs. long run
+  - Tools needed:
+  - Understand production functions
+  - Marginal analysis
+  - 7
+
+--- Slide 8 | Layout: Title and Content ---
+TITLE: Big Picture for Module 3
+BODY:
+  - Production Functions
+  - 8
+  - Demand
+
+--- Slide 9 | Layout: Title and Content ---
+TITLE: OUTLINE OF Module 3
+BODY:
+  - Production
+  - Production functions
+  - Short run vs. long run
+  - Short-run production decisions
+  - Diminishing marginal returns
+  - Optimal hiring decisions
+  - Wage searchers
+  - Long-run production decisions
+  - Optimal mix of inputs
+  - Costs
+  - Fixed, sunk, variable costs
+  - Marginal costs
+  - Long-run costs and economies of scale
+
+--- Slide 10 | Layout: Title and Content ---
+TITLE: The production function
+BODY:
+  - Where:
+  - Q : Output
+  - f : a function of inputs:
+  - K : Capital (physical)
+  - L : Labor
+  - M : Raw materials
+  - Output depends on inputs
+  - 10
+NOTES:
+    Discuss examples: restaurants in general, ghost kitchen, cars...
+
+--- Slide 11 | Layout: Title and Content ---
+TITLE: Short vs. Long Run: A Critical Distinction
+BODY:
+  - In the short run some inputs (known as fixed factors) cannot be increased or decreased
+  - The long run is a period long enough for all inputs to be variable
+  - 11
+NOTES:
+    Capital is not always the fixed factor. An example is Lasik surgery – there was limited capacity, not because of the limited availability of laser equipment, but because of the unavailability of trained ophthalmologists to perform the procedures. Here labor was fixed in the short run, rather than capital. Similarly, in Europe, due to inflexible labor markets, labor can be fixed in the short run, at least on the dismissal side.
+    But with these caveats in mind we will follow the convention that K is fixed in the short run, and L is variable. How long is the long-run? It varies.
+    Example: When [...]
+
+--- Slide 12 | Layout: Title and Content ---
+TITLE: TESLA MODEL S Production FunctionOutput of Tesla Gigafactory per Week
+BODY:
+  - Number of
+  - workers
+  - (L)
+  - Number of Robots (K)
+  - 12
+NOTES:
+    Tesla Gigafactory stats:
+    Today, more than 10,000 employees work at the Fremont factory.
+    The manufacturing process uses more than 160 specialist robots, including 10 of the largest robots in the world, which are named after X-Men characters.
+    Tesla's Fremont factory is currently able to produce up to 500,000 Model 3/Model Y a year
+    Article on Tesla Costs: https://qz.com/1294282/the-tesla-model-3-cost-28000-to-build-german-engineers-say-and-it-still-may-not-be-profitable/
+
+--- Slide 13 | Layout: Title and Content ---
+TITLE: CORRECTION: A student made me realize that in the Tesla production function table, some numbers suggest increasing marginal returns of capital, see below highlighted in yellow. And actually also of labor, highlighted in orange.
+NOTES:
+    Tesla Gigafactory stats:
+    Today, more than 10,000 employees work at the Fremont factory.
+    The manufacturing process uses more than 160 specialist robots, including 10 of the largest robots in the world, which are named after X-Men characters.
+    Tesla's Fremont factory is currently able to produce up to 500,000 Model 3/Model Y a year
+    Article on Tesla Costs: https://qz.com/1294282/the-tesla-model-3-cost-28000-to-build-german-engineers-say-and-it-still-may-not-be-profitable/
+
+--- Slide 14 | Layout: Title and Content ---
+TITLE: Production Function: Plotting total Output
+
+--- Slide 15 | Layout: Title and Content ---
+TITLE: OUTLINE OF Module 3
+BODY:
+  - Production
+  - Production functions
+  - Short run vs. long run
+  - Short-run production decisions
+  - Diminishing marginal returns
+  - Optimal hiring decisions
+  - Wage searchers
+  - Long-run production decisions
+  - Optimal mix of inputs
+  - Costs
+  - Fixed, sunk, variable costs
+  - Marginal costs
+  - Long-run costs and economies of scale
+
+--- Slide 16 | Layout: Title and Content ---
+TITLE: Short Run: Marginal Product of Labor
+
+--- Slide 17 | Layout: Title and Content ---
+TITLE: Marginal Product of Labor
+BODY:
+  - 17
+  - Data From the Tesla Production Function:
+NOTES:
+    In the short term, Capital is fixed. The only way to scale up production is to hire more labor, and when you do so with a fixed amount of capital, you bump up against the law of diminishing marginal returns. Each person will have fewer and fewer machines to work with, so the product of each additional worker will be lower. That does not mean the total return will decline, unless the marginal product of labor (MPL) becomes negative.
+
+--- Slide 18 | Layout: Title and Content ---
+TITLE: Diminishing Marginal Product of Labor
+BODY:
+  - We hold one input fixed (capital) and…
+  - Use more and more of a variable input (labor)
+  - Then total output will increase by less and less
+  - i.e., the Marginal Product of Labor (MPL) goes down
+  - Note: MPL is the slope (d𝑄/d𝐿) of the output curve
+
+--- Slide 19 | Layout: Title and Content ---
+TITLE: Famous example for diminishing marginal returns
+BODY:
+  - The (agriculture-based) economy before 1800:
+  - Land as a fixed factor, labor variable
+  - Q=f(labor, land);   no capital
+  - In 1348, the Black Death killed almost half the population (labor).
+  - What happened to the return to labor?
+
+--- Slide 20 | Layout: Title and Content ---
+TITLE: Hiring Decisions in the Short Run–– Context & Scenario ––
+BODY:
+  - Demand and output price is given
+  - Large number of Model S ordered at price of $90k
+  - Costs of raw material per car $40k
+  - Short Run: Capital (factory size/#robots) is fixed
+  - The only way to expand production is to hire more workers
+  - How many workers should Tesla optimally hire?
+
+--- Slide 21 | Layout: Title and Content ---
+TITLE: Hiring Decisions in the Short Run–– Concepts ––
+
+--- Slide 22 | Layout: Title and Content ---
+TITLE: Marginal Revenue Product of Labor–– Detail ––
+
+--- Slide 23 | Layout: Title and Content ---
+TITLE: Example: Calculate the marginal revenue product of labor (MRPL)
+BODY:
+  - Information: Tesla currently has 100 robots and 6,000 employees in its Freemont Gigafactory
+  - What is MRPL? (in $ per week)
+  - Hints:
+  - Recall sales price is $90k; material cost is $40k
+  - Use marginal revenue net of material input costs
+  - 23
+  - Discussion break
+
+--- Slide 24 | Layout: Blank ---
+TITLE: (no title)
+NOTES:
+    Poll Title: Do not modify the notes in this section to avoid tampering with the Poll Everywhere activity.
+    More info at polleverywhere.com/support
+    What is MRPL at 6,000 employees and 100 robots?
+    https://www.polleverywhere.com/multiple_choice_polls/5eW8vwUXcayHTYCs7p43O?state=opened&flow=Default&onscreen=persist
+
+--- Slide 25 | Layout: Title and Content ---
+TITLE: Solution: MRPL of TEsla
+NOTES:
+    Note that MR is given in this particular case because Tesla has already sold a large number of cars at $90k; they only have to be produced. So here, we can actually think of Tesla as a price taker.
+
+--- Slide 26 | Layout: Title and Content ---
+TITLE: Should Tesla Hire more workers?
+BODY:
+  - Suppose the weekly gross wage is $1,400
+  - Yes!  MRPL > w
+  - With an additional worker, revenues per week (net of material) increase by 1,600, while wage costs increase only by 1,400  net revenues increase by $200 weekly if we hire one more worker.
+
+--- Slide 27 | Layout: Title and Content ---
+TITLE: What is the Optimal Number of workers?
+BODY:
+  - Compute MRPL as a function of L
+  - Use the MPL function from above. MRPL=MPL∙$50k
+  - Plot wage
+  - Optimum at MRPL= w
+
+--- Slide 28 | Layout: Title and Content ---
+TITLE: OUTLINE OF Module 3
+BODY:
+  - Production
+  - Production functions
+  - Short run vs. long run
+  - Short-run production decisions
+  - Diminishing marginal returns
+  - Optimal hiring decisions
+  - Wage searchers
+  - Long-run production decisions
+  - Optimal mix of inputs
+  - Costs
+  - Fixed, sunk, variable costs
+  - Marginal costs
+  - Long-run costs and economies of scale
+
+--- Slide 29 | Layout: Title and Content ---
+TITLE: Caution: Wages are not necessarily Constant
+
+--- Slide 30 | Layout: Title and Content ---
+TITLE: The case of wage searchers
+BODY:
+  - Large firm (relative to the labor market)
+  - To recruit more labor, firm needs to increase the wage
+  - For wage searchers, the wage rate can be upward sloping in employment
+  - E.g.: Hospital hiring highly specialized surgeons
+
+--- Slide 31 | Layout: Title and Content ---
+TITLE: Salary comparisons…
+
+--- Slide 32 | Layout: Title and Content ---
+TITLE: Example: The full cost of a new Tesla Designer
+BODY:
+  - Tesla is trying to hire a star designer from BMW for its next models
+  - Designer says she’d be willing to join for $2M annual salary
+  - Tesla already employs 2 star designers, each earning $1.5M
+  - If the new designer is hired, the two existing ones would demand the same salary
+  - What is marginal cost of the 3rd designer?
+  - 32
+
+--- Slide 33 | Layout: Blank ---
+TITLE: (no title)
+NOTES:
+    Poll Title: Do not modify the notes in this section to avoid tampering with the Poll Everywhere activity.
+    More info at polleverywhere.com/support
+    What is the full cost of the new Tesla star designer?
+    https://www.polleverywhere.com/multiple_choice_polls/cPS0LtnN4qMOgM7zmKYIO?state=opened&flow=Default&onscreen=persist
+
+--- Slide 34 | Layout: Title and Content ---
+TITLE: Solution
+BODY:
+  - The star designer herself will have to be paid $2M
+  - The two existing designers would earn $0.5M extra
+  - The marginal cost of the 3rd designer is thus $2M+2*$0.5M = $3M
+  - 34
+
+--- Slide 35 | Layout: Title and Content ---
+TITLE: Wage = MRPL ?
+BODY:
+  - 35
+  - Search tool: https://ucannualwage.ucop.edu/wage/
+
+--- Slide 36 | Layout: Title and Content ---
+TITLE: OUTLINE OF Module 3
+BODY:
+  - Production
+  - Production functions
+  - Short run vs. long run
+  - Short-run production decisions
+  - Diminishing marginal returns
+  - Optimal hiring decisions
+  - Wage searchers
+  - Long-run production decisions
+  - Optimal mix of inputs
+  - Costs
+  - Fixed, sunk, variable costs
+  - Marginal costs
+  - Long-run costs and economies of scale
+
+--- Slide 37 | Layout: Title and Content ---
+TITLE: NOW: Long Run
+BODY:
+  - Context: Tesla builds a new Gigafactory
+  - Both capital and labor are flexible inputs
+  - What is the optimal input mix?
+  - E.g., robots (K) and workers (L)
+  - We will…
+  - Use marginal analysis
+  - Learn a simple rule for the optimal combination of inputs
+
+--- Slide 38 | Layout: Title and Content ---
+TITLE: Optimal Combination of Inputs
+BODY:
+  - 38
+
+--- Slide 39 | Layout: Title and Content ---
+TITLE: The « Bang for the Buck » Rule
+BODY:
+  - Simple rule for the optimal use of inputs in the long run:
+  - This holds in the long run, when both L and K are flexible
+  - It refers to a given output quantity Q
+  - i.e., keep output constant while changing the input mix
+  - It also relies on the assumption that w and pK are constant
+  - Equalize “bang for the buck”
+NOTES:
+    If a factor is relatively efficient, or relatively cheaper, use it more!
+    As you do so, that factor will become relatively less productive, while the other will become relatively more productive
+    This will bring the two terms in the Bang-for-the-buck rule closer together
+
+--- Slide 40 | Layout: Title and Content ---
+TITLE: Applying « Bang for the Buck » Rule(« recipe » for exams)
+
+--- Slide 41 | Layout: Title and Content ---
+TITLE: Example: Tesla’s New Gigafactory
+BODY:
+  - Tesla is building a new Gigafactory in Berlin, Germany
+  - They ask for your advice on the optimal mix of robots and workers
+  - You know:
+  - Tesla is planning to produce 500 cars per week
+  - Weekly wages for suitable workers: w =1.2 (in 1,000$)
+  - Cost of a robot (per week): pK = $20 (in 1,000$)
+  - Current plan: Use 200 robots and 5,000 workers
+  - 41
+  - 41
+
+--- Slide 42 | Layout: Title and Content ---
+TITLE: Is Tesla’s Current Plan optimal?
+BODY:
+  - Let’s look at the production function again:
+  - Current mix of workers and robots to produce 500 cars per week (200 robots, 5,000 workers)
+  - Other input mixes are possible
+  - 42
+  - 42
+
+--- Slide 43 | Layout: Title and Content ---
+TITLE: Is Tesla’s Current Plan optimal?
+BODY:
+  - 43
+  - 43
+
+--- Slide 44 | Layout: Blank ---
+TITLE: (no title)
+NOTES:
+    Poll Title: Do not modify the notes in this section to avoid tampering with the Poll Everywhere activity.
+    More info at polleverywhere.com/support
+    Is Tesla's input mix (L=5,000 and K=200) optimal to produce 500 cars?
+    https://www.polleverywhere.com/multiple_choice_polls/JJjbqK3pFb3ItkbAnO48r?flow=Default&onscreen=persist
+
+--- Slide 45 | Layout: Title and Content ---
+TITLE: Solution on Optimal input mix
+BODY:
+  - 45
+  - 45
+
+--- Slide 46 | Layout: Title and Content ---
+TITLE: Tesla’s input mixTwo modifications
+BODY:
+  - What’s the effect of on the optimal input mix if…
+  - The government introduces a high tax on robots?
+  - Labor unions demand significantly higher wages?
+  - 46
+  - 46
+NOTES:
+    1.: price of K goes up  bang for the buck for K goes down  use relatively less K in the long run, and more workers
+    2. Wages go up  bang for the buck for L goes down  use relatively fewer workers and more robots
+
+--- Slide 47 | Layout: Title and Content ---
+TITLE: “Bang for the Buck” in Grocery Shopping
+BODY:
+  - 47
+
+--- Slide 48 | Layout: Title and Content ---
+TITLE: OUTLINE OF Module 3
+BODY:
+  - Production
+  - Production functions
+  - Short run vs. long run
+  - Short-run production decisions
+  - Diminishing marginal returns
+  - Optimal hiring decisions
+  - Wage searchers
+  - Long-run production decisions
+  - Optimal mix of inputs
+  - Costs
+  - Fixed, sunk, variable costs
+  - Marginal costs
+  - Long-run costs and economies of scale
+
+--- Slide 49 | Layout: Title and Content ---
+TITLE: Cost types
+BODY:
+  - Fixed costs
+  - Do not depend on quantity produced (Q)
+  - Sunk costs
+  - A fixed cost that cannot be recovered
+  - A fixed cost may be partially sunk (e.g., if you can re-sell for a lower price than bought)
+  - Sunk costs should not affect your decision-making!
+  - Variable
+  - Depends on volume produced (Q)
+  - 49
+NOTES:
+    Now we shift from production to costs.
+    We will start by discussing generally the concept of an economic cost. Accounting costs and economic costs are different. In cost accounting, only explicit costs are included. In economics, we include implicit costs like the earnings foregone by choosing to attend an MBA program. Economists count opportunity costs, accountants count explicit costs, i.e. direct monetary outlays.
+    Economists are not so interested in the timing of costs (accountants report periodically on costs and only costs incurred during a given period are recorded), but are very int [...]
+
+--- Slide 50 | Layout: Title and Content ---
+TITLE: Group work: choosing a car
+BODY:
+  - For a business trip, you can use:
+  - Your own car and get reimbursed 50 cents/mile
+  - The company car (full cost incl. gas covered)
+  - Costs associated with your car (on average per mile driven):
+  - 20 cents for insurance
+  - 20 cents for maintenance
+  - 15 cents for electricity
+  - 45 cents for the lease you are paying on the vehicle
+  - 50
+  - Should you use your own car or the company car?
+  - Discussion break
+NOTES:
+    Insurance, maintenance and lease costs are fixed (although if your lease has a max mileage or your insurance premium depends on miles/year, we can debate whether these are truly fixed costs).
+    Net benefit per mile of taking your own car is actually 35 cents (50 cents reimbursed minus 15 cents you will spend on gas).
+
+--- Slide 51 | Layout: Title Only ---
+TITLE: Why do film studios make movies that they know will lose money?
+BODY:
+  - Sunk cost in waterworld (1995)
+  - 51
+NOTES:
+    Waterworld came out in 1995, was filmed almost entirely under water in a Hawaiian harbor and cost $175 million in 1995 dollars to produce (before marketing and distribution expenses), at the time was the most expensive movie ever made.
+    Grossed $88 million in the US and about twice that abroad (about $300 million in ticket sales, assume studios get 50%). Studios only get a fraction of total ticket sales, so big flop.
+    Let’s use the principle of relevant costs to think through the decision making process of the studio at various stages of the production process.
+    At the beginning of production [...]
+
+--- Slide 52 | Layout: Title Only ---
+TITLE: Sunk cost in waterworld
+BODY:
+  - 150
+  - 150
+  - 150
+  - 16
+  - 100
+  - 140
+  - 100
+  - 175
+  - 140
+  - +50
+  - -25
+  - +10
+  - 84    (<150)
+  - 40    (<150)
+  - 35    (<150)
+  - Make the film!
+  - Make the film!
+  - Make the film!
+NOTES:
+    As filming began, $16 million of the $100 million dollar expected costs were sunk. Should Universal make the film? Yes!
+    Things started to go wrong quickly: filming location was windy so crew became seasick; giving the crew Dramamine made them drowsy and impaired their ability to operate the cameras and other equipment; divers suffered decompression sickness from being underwater for too long; a one minute action sequence took 5 weeks to film; every additional day of filming added something like 350K to the film’s cost. A few months into filming, the film was expected to take 120 days and cost [...]
+
+--- Slide 53 | Layout: Title and Content ---
+TITLE: accounting for Opportunity CostS
+BODY:
+  - 53
+  - Tesla needs to expand production capacity
+  - Either build new factory for $6 billion
+  - Or expand/upgrade outdated existing plant for $5 billion
+  - Both options yield identical final plants
+  - $5B
+  - $2B
+  - 0
+  - $5B
+  - $7B
+  - $5B
+  - Sunk
+  - Resell opportunity
+  -  Expansion is best option
+  -  Build new is best option
+NOTES:
+    Note that since we can sell the old plant for $2 billion, this has to be counted as a relevant fixed cost. This is also an opportunity cost – it is the value of the plant that we give up if we expand it (instead of selling it).
+
+--- Slide 54 | Layout: Title and Content ---
+TITLE: Dictionary of costs
+BODY:
+  - 54
+
+--- Slide 55 | Layout: Title and Content ---
+TITLE: Relationship to Accounting: Ross Stores annual report
+BODY:
+  - Part of FC
+  - Mix FC & VC
+NOTES:
+    Using Ross Stores Annual report for illustration: https://www.sec.gov/ix?doc=/Archives/edgar/data/745732/000074573222000014/rost-20220129.htm#i84f0090916e6417881836bdad18ed609_64
+    Highlight the 3 items under “costs and expenses”
+    Costs of goods sold = variable
+    Selling, general and administrative = a bit of both (sales commissions would be variable but the CEO salary fixed)
+    Interest expense (the cost of borrowing money) = fixed
+
+--- Slide 56 | Layout: Title and Content ---
+TITLE: Marginal Cost in Action:What is the MC of a Burn60 Workout?
+BODY:
+  - 56
+  - PACKAGES
+  - 10 CLASSES FOR $10 EACH
+  - 20 CLASSES for $8 EACH
+  - Buy Now
+  - Poll Everywhere break
+
+--- Slide 57 | Layout: Blank ---
+TITLE: (no title)
+NOTES:
+    Poll Title: Do not modify the notes in this section to avoid tampering with the Poll Everywhere activity.
+    More info at polleverywhere.com/support
+    What is the MC of each additional session beyond the 10th?
+    https://www.polleverywhere.com/multiple_choice_polls/e8vgMSwxJub6cH5f34ukk?display_state=chart&activity_state=opened&state=opened&flow=Default&onscreen=persist
+
+--- Slide 58 | Layout: Title and Content ---
+TITLE: Solution: MC = $6
+BODY:
+  - TC of 20 lessons: 20*$8=$160
+  - TC of 10 lessons: 10*$10=$100
+  - So 10 additional sessions cost $160-$100=$60, or $6 per session.
+  - More significant discount than it seems at first.
+  - Intuition: “save” $2 on the first 10 sessions as well when buying 20 at $8.
+  - 58
+
+--- Slide 59 | Layout: Title and Content ---
+TITLE: Marginal Cost Example
+BODY:
+  - Two options for a personal loan:
+  - 100k at 5% annual interest
+  - 110k at 6% annual interest
+  - What is the marginal interest rate charged for the additional 10k?
+  - Additional interest payment: 6,600-5,000 = 1,600
+  - Additional loan amount: 10,000
+  - Interest on extra 10k: 1,600/10,000 = 16%
+  - 59
+
+--- Slide 60 | Layout: Title and Content ---
+TITLE: Tesla’s Gigafactory – weekly Cost
+BODY:
+  - Collect data on total cost at different output levels (Q)
+  - Estimate the cost function
+  - Total Cost= 10,000,000+30,000*Q+40*Q2
+  - 60
+
+--- Slide 61 | Layout: Title and Content ---
+TITLE: Tesla’s Gigafactory – Cost Components
+BODY:
+  - 61
+
+--- Slide 62 | Layout: Title and Content ---
+TITLE: Tesla’s Gigafactory – Per-Unit Costs
+BODY:
+  - 62
+
+--- Slide 63 | Layout: Title and Content ---
+TITLE: Cost Estimation
+BODY:
+  - Without Internet Access!
+  - What is the average variable cost of producing a current-generation iPhone?
+  - Provide a numerical guess
+  - Split this (roughly) into components:
+  - Processor
+  - Other material inputs
+  - Labor
+  - Discussion break
+
+--- Slide 64 | Layout: Blank ---
+TITLE: (no title)
+NOTES:
+    Poll Title: Do not modify the notes in this section to avoid tampering with the Poll Everywhere activity.
+    More info at polleverywhere.com/support
+    AVC of producing a current-generation iPhone?
+    https://www.polleverywhere.com/multiple_choice_polls/FhTT6eUUOT8aIdHJK5GSO?display_state=chart&activity_state=opened&state=opened&flow=Default&onscreen=persist
+
+--- Slide 65 | Layout: Title and Content ---
+TITLE: cost estimation: AVC of iphone 11 Pro Max
+BODY:
+  - Retail price: $1099
+  - TVC: ~$500
+  - Some missing components
+  - Shipping & Handling
+  - Customer service
+  - Warranty costs
+  - 65
+NOTES:
+    https://www.techinsights.com/blog/apple-iphone-11-pro-max-teardown
+    To be updated if models change [iphone 12 currently not available]
+
+--- Slide 66 | Layout: Title and Content ---
+TITLE: iphone: “Naïve Cost Function”
+BODY:
+  - $
+  - Q (Quantity Produced)
+  - Total Cost =TFC + 500*Q
+  - TFC
+  - 66
+
+--- Slide 67 | Layout: Title and Content ---
+TITLE: iphone: “Naïve Cost Function”
+BODY:
+  - $ per unit
+  - Q (Quantity Produced)
+  - 500
+  - 67
+  - When MC  is constant, it equals AVC
+
+--- Slide 68 | Layout: Title and Content ---
+TITLE: More COmplex Cost FUnctions
+BODY:
+  - 68
+  - Give rise to non-linear marginal cost (MC)
+  - E.g., in the textbook:
+  - We will only use these if absolutely necessary for the concept
+  - Whenever possible, we will use the simpler linear MC
+
+--- Slide 69 | Layout: Title and Content ---
+TITLE: OUTLINE OF Module 3
+BODY:
+  - Production
+  - Production functions
+  - Short run vs. long run
+  - Short-run production decisions
+  - Diminishing marginal returns
+  - Optimal hiring decisions
+  - Wage searchers
+  - Long-run production decisions
+  - Optimal mix of inputs
+  - Costs
+  - Fixed, sunk, variable costs
+  - Marginal costs
+  - Long-run costs and economies of scale
+
+--- Slide 70 | Layout: Title and Content ---
+TITLE: Short-run v. long-run costs
+BODY:
+  - Distinction between short- and long-run costs
+  - Short run: cost of producing different quantities when capital is fixed (while labor is flexible)
+  - Long run: cost of producing different quantities when both capital and labor can adjust
+  - In general, total and average costs in the short run are equal to or larger than total average costs in the long run
+  - 70
+
+--- Slide 71 | Layout: Title and Content ---
+TITLE: Long-Run Average Cost is the lower Envelope of Short-Run Average Cost Curves
+BODY:
+  - $/q
+  - q
+  - 71
+
+--- Slide 72 | Layout: Title and Content ---
+TITLE: Economies of Scale
+BODY:
+  - What happens to long-run average costs (LAC) as output increases?
+  - Economies of scale: LAC falls with output
+  - Constant economies of scale: LAC is the same for different output levels
+  - Diseconomies of scale: LAC rises with output
+  - Economies of scale may result from:
+  - Falling input prices as output grows
+  - Technological reasons (« Returns to scale »)
+  - 72
+NOTES:
+    Economies of scale refer to the impact of a higher rate of output on long run average costs.
+    cost elasticity wrt to output > 1 if diseconomies of scale
+    cost elasticity wrt to output < 1 if economies of scale
+    So economies of scale is a cost-elasticity concept. Increasing returns to scale are a technological concept – relating quantity of output to quantity of inputs. Increasing returns to scale are a factor in bringing about economies of scale, but it’s not the only factor. You could have constant returns to scale and still have economies of scale if the cost of factors falls as you purchase [...]
+
+--- Slide 73 | Layout: Title and Content ---
+TITLE: Technological Reasons For Economies of Scale
+BODY:
+  - Specialization and division of labor
+  - Lumpiness and indivisibilities of some expenditures (e.g., network infrastructure, R&D)
+  - Arithmetical: Storage volume/passenger room increases at higher rate than input material
+  - E.g., Airplane or cargo ship bodies
+  - Appropriate technology changes with scale
+  - 73
+NOTES:
+    Example for arithmetical relationship: A cylinder (airplane body):
+    Circumference is proportional to radius r: c=2πr; Surface = 2πr∙height
+    Volume is proportional to the square of the radius: V=πr2∙height
+
+--- Slide 74 | Layout: Title and Content ---
+TITLE: Economies of Scale: technology
+BODY:
+  - Embraer ERJ-145
+  - $20M
+  - 40 passengers
+  - Total Cost per flight hour: $1,300
+  - TC per passenger-hour: $32.50
+  - Boeing 787
+  - $190 million
+  - 300 passengers
+  - Total Cost per flight hour: $8,200
+  - TC per passenger-hour: $27.30
+  - 74
+NOTES:
+    Source for costs: https://www.faa.gov/regulations_policies/policy_guidance/benefit_cost/media/econ-value-section-4-op-costs.pdf  (Table 4-6)
+
+--- Slide 75 | Layout: Title and Content ---
+TITLE: Reasons for Dis-Economies of Scale
+BODY:
+  - Coordination, communication and control become more difficult at a larger scale
+  - Disproportionately harder to manage/monitor a larger work force
+  - Disproportionate requirement for more staff functions
+  - Accounting, human resources…
+
+--- Slide 76 | Layout: Title and Content ---
+TITLE: Economies of scope
+BODY:
+  - Produce two or more products  Avg. cost goes down
+  - Ability of a firm to produce a portfolio of related products cheaper than if each product were produced by separate, independent firms
+  - Benefit from sharing capabilities across products:
+  - Input production
+  - Engineering know-how
+  - R&D
+  - Marketing
+  - Example: Airbus A380 and A318
+
+--- Slide 77 | Layout: Title and Content ---
+TITLE: (no title)
+BODY:
+  - Amazon: Economies of Scale / Scope / or both?
+  - 77
+
+--- Slide 78 | Layout: Title and Content ---
+TITLE: Costs Mini-case: shark tank
+BODY:
+  - 78
+  - Group Discussion
+  - Watch first: https://vimeo.com/236977187
+  - What is the volume sold last year, and expected volume this year?
+  - What is the average cost per can at these volumes?
+  - PollEV 1: Are there economies of scale?
+  - PollEV 2: Which deal would you choose?
+  - $100k for royalty of 25c per can sold
+  - $75k for 15% equity
+NOTES:
+    Watch the rest here: https://vimeo.com/236977187
+    Important part on sales and costs: 4:50-5:40
+
+--- Slide 79 | Layout: Title and Content ---
+TITLE: Numbers / Calculations
+BODY:
+  - Sales last year: 135k; expected this year: 300k
+  - Avg. cost last year: $1.30; expected avg. cost this year: $1.10
+  - Thus, there are economies of scale
+  - Price charged to distribution: $2.69
+  - Profit per can: roughly $1.50   ($2.69-$1.10)
+  - Comparison of Deals:
+  - Deal A: 25 cents per can is about 16.6% of profits
+  - Deal B: 15% equity
+  -  quite similar
+  - 79
+
+--- Slide 80 | Layout: Blank ---
+TITLE: (no title)
+NOTES:
+    Poll Title: Do not modify the notes in this section to avoid tampering with the Poll Everywhere activity.
+    More info at polleverywhere.com/support
+    Do the data suggest that there are economies of scale?
+    https://www.polleverywhere.com/multiple_choice_polls/LGxgRYKPWWOvvmlmmZ1iY?display_state=chart&activity_state=opened&state=opened&flow=Default&onscreen=persist
+
+--- Slide 81 | Layout: Blank ---
+TITLE: (no title)
+NOTES:
+    Poll Title: Do not modify the notes in this section to avoid tampering with the Poll Everywhere activity.
+    More info at polleverywhere.com/support
+    Which deal would you choose?
+    https://www.polleverywhere.com/multiple_choice_polls/Cxt2GrT7sLrOCFbjniPB2?display_state=chart&activity_state=opened&state=opened&flow=Default&onscreen=persist
