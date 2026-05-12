@@ -7,22 +7,51 @@ slide number, a tag (`[KEEP]`, `[REVISE]`, `[NEW]`, `[MERGE]`, `[CUT]`),
 the proposed title, and a one-line content summary. The "(was #X)"
 pointer ties back to the original deck so you can see what moves.
 
-**Net change:** 81 slides → 73 slides. Roughly the same lecture length
-once you account for the better-paced section dividers (~2:30 hr).
+**Net change:** 81 slides → 76 slides (after 2026-05-11 session-2 decisions:
+slide #5 "agenda" kept; closing synthesis added). Roughly the same lecture
+length once you account for the better-paced section dividers (~2:30 hr).
 
 ---
 
-## Front matter (5 slides, was 9)
+## Decisions locked – 2026-05-11 session 2
+
+The five open questions at the bottom of this file were resolved:
+
+1. **Section dividers** – use the new **405 Slides Template** style (navy top
+   bar, gold left-edge accent, action title format). All four dividers
+   (Part 1, §1.2, Part 2, §2.2) follow this layout.
+2. **Tesla density** – swap the opportunity-cost example (old #53 / new #47)
+   from Tesla to **Apple's canceled Apple Car (Project Titan, 2024)**.
+   Same industry (auto), but breaks the Tesla monoculture; recent EMBA-
+   friendly news story; capital + ~2,000 engineers reallocated to AI.
+3. **Old slide #5 ("agenda for the class")** – **kept** as intentional.
+   Will need a content pass: draft a real agenda slide (today's flow:
+   Production → Costs → preview of M4) before rebuild. Front matter
+   now 6 slides, not 5.
+4. **Closing synthesis slide** – **add it.** Becomes new slide #76 (was
+   penciled in as #75 pre-shift).
+5. **Speaker notes** – proposed plan confirmed. New/merged slides get
+   drafted notes; revised-title slides keep existing notes UNLESS the
+   retitle changes the framing (then I tweak intro/transition lines only).
+
+**Slide numbers below are pre-shift** (i.e., assume old #5 is cut). Every
+slide number from old #5 onward shifts by +1 in the final deck; the closing
+synthesis becomes #76. Full renumbering will happen at .pptx rebuild time.
+
+---
+
+## Front matter (6 slides, was 9)
 
 | # | Tag | Title (proposed) | Content / Notes |
 |---|---|---|---|
 | 1 | [KEEP] | Production and Costs – Module 3 | Title slide. (was #1) |
 | 2 | [MERGE] | Logistics & Announcements | Combine Zoom rules + midterm logistics on one slide. (was #2 + #3) |
 | 3 | [KEEP] | Recap of Module 2: Demand and Revenue | (was #4) |
-| 4 | [REVISE] | Every executive decision is a production-and-cost decision | Replace sparse "Big Picture" with a real "why this matters" slide. Frame: pricing, hiring, capacity, sourcing all rest on the production/cost framework. Bridges from M2 (demand) to M4 (pricing & profit). (was #8) |
-| 5 | [KEEP] | Outline of Module 3 | Single master outline – shown once. (was #6) |
+| 4 | [KEEP] | Agenda for the class | Per 2026-05-11 decision: kept as intentional. **Nico will draft the agenda copy himself at rebuild time** – leave the slide structure open for now. (was #5) |
+| 5 | [REVISE] | Every executive decision is a production-and-cost decision | Replace sparse "Big Picture" with a real "why this matters" slide. Frame: pricing, hiring, capacity, sourcing all rest on the production/cost framework. Bridges from M2 (demand) to M4 (pricing & profit). (was #8) |
+| 6 | [KEEP] | Outline of Module 3 | Single master outline – shown once. (was #6) |
 
-**Cut from front matter:** old slide #5 ("agenda for the class" – orphan stub), old slide #7 ("Context and Tools" – content folds into slide 4 above), old slide #9 (duplicate outline).
+**Cut from front matter:** old slide #7 ("Context and Tools" – content folds into the new Big Picture slide), old slide #9 (duplicate outline).
 
 ---
 
@@ -105,7 +134,7 @@ once you account for the better-paced section dividers (~2:30 hr).
 | 43 | [KEEP] | Group work: your car or the company car? | (was #50) |
 | 44 | [REVISE] | Why studios finish movies they know will flop: Waterworld | Takeaway title. (was #51) |
 | 45 | [KEEP] | Sunk cost in Waterworld – decision tree | (was #52) |
-| 46 | [REVISE] | Opportunity cost is a real cost: Tesla's expansion choice | (was #53) – consider replacing Tesla here with a different firm for variety. |
+| 46 | [REVISE] | Opportunity cost is a real cost: Apple's canceled Apple Car | **Locked 2026-05-11 session 2 – swapped from Tesla to Apple.** Frame: Apple killed Project Titan in 2024 after ~10 years and ~$10B sunk; the real story is the opportunity cost – capital and ~2,000 engineers reallocated to AI/Apple Intelligence. Sunk cost ≠ reason to continue; opportunity cost = reason to stop. (was #53) |
 | 47 | [KEEP] | Dictionary of costs | Summary reference. (was #54) |
 | 48 | [KEEP] | Cost concepts in the real world: Ross Stores annual report | (was #55) |
 | 49 | [REVISE] | Marginal cost ≠ average cost: Burn60 workout packages | Takeaway title. (was #56) |
@@ -174,12 +203,10 @@ once you account for the better-paced section dividers (~2:30 hr).
 
 ---
 
-## Open questions for you before I touch the .pptx
+## Open questions – RESOLVED (2026-05-11 session 2)
 
-1. **Section dividers** – do you have a preferred visual style for them, or should I match the existing "Section Header" layout from slide 1?
-2. **Tesla density** – I flagged slide #53 (now #46) as a candidate to swap to a non-Tesla company. Want me to suggest replacements, or keep Tesla throughout?
-3. **The "agenda for the class" slide (#5)** – am I right that it's orphan/leftover, or is it intentional and just incomplete?
-4. **Closing synthesis slide** – worth adding, or do you prefer ending on the Shark Tank polls?
-5. **Speaker notes** – the existing notes are mostly good. For merged/new slides I'll draft new notes; for revised-title slides I'll leave existing notes intact unless the retitle changes the framing. OK?
+See **Decisions locked** section at the top of this file. All five questions
+answered; outline is now locked pending one remaining content decision:
 
-Let me know on these and I'll then update the .pptx to match.
+- **Old slide #5 ("agenda for the class")** – kept per Q3, but content needs
+  to be drafted. Proposal due before .pptx rebuild.
