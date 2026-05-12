@@ -6,3 +6,10 @@ Thumbs.db
 .DS_Store
 *.swp
 .vscode/
+
+# Python build artifacts
+__pycache__/
+*.pyc
+
+# Office temp lockfiles
+~$*

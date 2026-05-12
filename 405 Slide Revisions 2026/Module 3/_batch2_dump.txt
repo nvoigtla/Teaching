@@ -1,0 +1,254 @@
+==========================================================================================
+SLIDE 7
+==========================================================================================
+[AUTO_SHAPE (1)] Rectangle 1 @ (0.00, 0.00) 13.33x0.34
+[TEXT_BOX (17)] TextBox 2 @ (0.28, 0.00) 12.00x0.34
+    L0: MODULE 3 · SECTION DIVIDER
+[TEXT_BOX (17)] TextBox 3 @ (0.28, 0.55) 12.78x0.70
+    L0: Agenda
+[AUTO_SHAPE (1)] Rectangle 4 @ (0.28, 1.25) 12.78x0.02
+[AUTO_SHAPE (1)] Rectangle 5 @ (0.28, 1.24) 2.20x0.05
+[TEXT_BOX (17)] TextBox 6 @ (0.28, 1.85) 12.78x0.60
+    L0: Part 1: Production – Picking the Right Inputs
+[TEXT_BOX (17)] TextBox 7 @ (0.68, 2.45) 12.38x1.35
+    L0: Short Run – Hiring Decisions
+    L0: Long Run – Optimal Input Mix
+[TEXT_BOX (17)] TextBox 8 @ (0.28, 3.95) 12.78x0.60
+    L0: Part 2: Costs – Producing at the Lowest Price
+[TEXT_BOX (17)] TextBox 9 @ (0.68, 4.55) 12.38x1.35
+    L0: Cost Concepts
+    L0: Scale & Scope
+[AUTO_SHAPE (1)] Rectangle 10 @ (0.00, 7.15) 13.33x0.02
+[AUTO_SHAPE (1)] Rectangle 11 @ (0.28, 7.13) 2.20x0.05
+[TEXT_BOX (17)] TextBox 12 @ (0.28, 7.22) 11.00x0.30
+    L0: Management 405  ·  Module 3  ·  Production and Costs
+[TEXT_BOX (17)] TextBox 13 @ (12.60, 7.22) 0.50x0.30
+    L0: 7
+NOTES: Entering Part 1 – Production. The core question for the next 40 minutes: how does output depend on inputs? We'll do short-run hiring decisions first, then long-run input choice.
+
+==========================================================================================
+SLIDE 8
+==========================================================================================
+[PLACEHOLDER (14)] Title 2 @ (0.50, 0.14) 9.00x1.25
+    L0: The production function
+[PLACEHOLDER (14)] Content Placeholder 3 @ (0.50, 2.61) 9.00x2.86
+    L0: Where:
+    L0: Q : Output
+    L0: f : a function of inputs:
+    L0: K : Capital (physical)
+    L0: L : Labor
+    L0: M : Raw materials
+[AUTO_SHAPE (1)] Rectangle 8 @ (1.02, 5.75) 7.96x0.89
+    L0: Output depends on inputs
+[PLACEHOLDER (14)] Slide Number Placeholder 1 @ (7.35, 7.10) 2.33x0.40
+    L0: 8
+[PICTURE (13)] Picture 6 @ (5.98, 3.13) 1.82x1.82
+NOTES: The production function in its most basic form: output Q is a function of capital K, labor L, and materials M. Capital is more than buildings – it includes machinery, software, IP, AI systems – anything you've already paid for that keeps producing. Everything else in the module is built on this expression.
+
+==========================================================================================
+SLIDE 9
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Short vs. Long Run: A Critical Distinction
+[PLACEHOLDER (14)] Content Placeholder 2 @ (0.50, 1.61) 9.00x3.35
+    L0: In the short run some inputs (known as fixed factors) cannot be increased or decreased
+    L0: The long run is a period long enough for all inputs to be variable
+[PLACEHOLDER (14)] Slide Number Placeholder 3 @ (7.35, 7.10) 2.33x0.40
+    L0: 9
+[GROUP (6)] Group 8 @ (0.79, 3.85) 4.21x2.96
+  [PICTURE (13)] Picture 9 @ (0.79, 4.92) 4.21x2.62
+[GROUP (6)] Group 11 @ (5.54, 3.86) 4.24x2.95
+  [PICTURE (13)] Picture 12 @ (5.90, 4.92) 3.94x2.62
+NOTES: The single most important time-scale distinction in this course. Short run = your capacity (K) is fixed. You can only adjust labor and materials. Long run = everything is variable, including the plant itself. The factory walls are literally what defines 'short run.'
+
+==========================================================================================
+SLIDE 10
+==========================================================================================
+[PLACEHOLDER (14)] Title 3 @ (0.10, 0.14) 9.70x1.26
+    L0: TESLA MODEL S Production FunctionOutput of Tesla Gigafactory per Week
+[AUTO_SHAPE (1)] Rectangle 8 @ (0.50, 3.95) 1.56x0.46
+    L0: Number of
+    L0: workers
+    L0: (L)
+[AUTO_SHAPE (1)] Rectangle 9 @ (4.10, 1.60) 2.44x0.48
+    L0: Number of Robots (K)
+[AUTO_SHAPE (1)] Line 10 @ (6.54, 1.75) 1.53x0.00
+[AUTO_SHAPE (1)] Line 11 @ (1.41, 5.05) 0.00x2.31
+[TABLE (19)] Table 10 @ (1.93, 2.05) 6.14x5.20
+[PLACEHOLDER (14)] Slide Number Placeholder 1 @ (7.35, 7.10) 2.33x0.40
+    L0: 10
+[GROUP (6)] Group 2 @ (3.04, 2.08) 4.95x5.14
+  [AUTO_SHAPE (1)] Rectangle 11 @ (5.56, 2.11) 2.44x5.12
+  [AUTO_SHAPE (1)] Rectangle 12 @ (3.04, 2.08) 1.18x5.12
+[GROUP (6)] Group 4 @ (3.01, 2.48) 5.02x4.72
+  [AUTO_SHAPE (1)] Rectangle 13 @ (3.01, 5.17) 4.99x2.02
+  [AUTO_SHAPE (1)] Rectangle 14 @ (3.04, 2.48) 4.99x2.14
+[GROUP (6)] Group 17 @ (4.11, 3.75) 5.68x1.48
+  [AUTO_SHAPE (1)] Oval 5 @ (4.11, 4.47) 1.56x0.76
+  [AUTO_SHAPE (1)] Rectangle 8 @ (8.24, 3.75) 1.56x0.46
+      L0: Number of
+      L0: cars
+  [AUTO_SHAPE (1)] Line 11 @ (5.67, 4.08) 2.81x0.69
+NOTES: Concrete example: Tesla's Gigafactory weekly output as a function of workers, given fixed K. Note the corrected table – last year's version had an increasing-marginal-returns error that I've fixed in place. Look at the pattern: more workers, more output, but the gains per worker shrink.
+
+==========================================================================================
+SLIDE 11
+==========================================================================================
+[PICTURE (13)] Picture 2 @ (1.61, 2.01) 6.77x4.31
+[PICTURE (13)] Picture 3 @ (1.61, 2.02) 6.77x4.31
+[PICTURE (13)] Picture 5 @ (1.61, 2.03) 6.77x4.31
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Production Function: Plotting total Output
+[PICTURE (13)] Picture 6 @ (1.61, 2.02) 6.77x4.31
+NOTES: Same data as the previous slide, now plotted. The shape – rising but flattening – is the visual signature of diminishing returns. Memorize this curve shape; you'll see it everywhere.
+
+==========================================================================================
+SLIDE 12
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Short Run: Marginal Product of Labor
+NOTES: MPL – marginal product of labor – is simply the extra output you get from one more worker. It's the slope of the total-output curve from the last slide. With K fixed, MPL falls as L rises: the slope flattens.
+
+==========================================================================================
+SLIDE 13
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.15, 0.14) 9.85x1.25
+    L0: Diminishing Marginal Product of Labor
+[PICTURE (13)] Picture 3 @ (0.15, 3.90) 3.97x2.52
+[PICTURE (13)] Picture 6 @ (5.13, 3.89) 4.72x2.54
+[PLACEHOLDER (14)] Content Placeholder 2 @ (0.63, 1.24) 9.00x2.54
+    L0: We hold one input fixed (capital) and…
+    L0: Use more and more of a variable input (labor)
+    L1: Then total output will increase by less and less
+    L2: i.e., the Marginal Product of Labor (MPL) goes down
+[GROUP (6)] Group 16 @ (4.18, 4.54) 0.88x0.98
+  [AUTO_SHAPE (1)] Rectangle 2 @ (4.18, 3.31) 0.88x0.98
+      L0: plot the slope
+  [AUTO_SHAPE (1)] Arrow: Right 8 @ (4.29, 3.75) 0.61x0.25
+[LINE (9)] Straight Connector 10 @ (0.37, 5.29) 1.02x0.85
+[LINE (9)] Straight Connector 13 @ (2.19, 5.09) 1.24x0.17
+[AUTO_SHAPE (1)] Rectangle 17 @ (2.01, 6.63) 5.48x0.51
+    L0: Note: MPL is the slope (d𝑄/d𝐿) of the output curve
+NOTES: The headline of this section. Diminishing MPL is a near-universal feature of short-run production: each additional worker has to share the same fixed capital, so the marginal contribution shrinks. This isn't a quirk of Tesla – it's nearly always true.
+
+==========================================================================================
+SLIDE 14
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Famous example for diminishing marginal returns
+[PLACEHOLDER (14)] Content Placeholder 2 @ (0.50, 1.55) 9.00x1.89
+    L0: The (agriculture-based) economy before 1800:
+    L0: Land as a fixed factor, labor variable
+    L1: Q=f(labor, land);   no capital
+[TEXT_BOX (17)] Content Placeholder 2 @ (0.50, 3.75) 4.11x3.38
+    L0: In 1348, the Black Death killed almost half the population (labor).
+    L0: What happened to the return to labor?
+[GROUP (6)] Group 14 @ (4.28, 3.57) 5.61x3.68
+  [GROUP (6)] Group 12 @ (4.17, 3.57) 5.72x3.68
+    [PICTURE (13)] Picture 6 @ (4.17, 3.57) 5.72x3.68
+    [LINE (9)] Straight Arrow Connector 9 @ (5.50, 4.29) 0.45x1.00
+  [TEXT_BOX (17)] TextBox 13 @ (5.50, 4.16) 0.66x0.47
+      L0: Popu-lation
+[GROUP (6)] Group 8 @ (6.08, 4.92) 0.91x1.03
+  [LINE (9)] Straight Arrow Connector 10 @ (5.81, 5.28) 0.67x0.99
+  [TEXT_BOX (17)] TextBox 11 @ (5.96, 5.84) 0.76x0.47
+      L0: Return to labor
+NOTES: A favorite historical example. The Black Death killed roughly 40% of Europe's labor force in the 14th century. Wages of survivors rose sharply – consistent with their (now higher) marginal product. Real-world proof of marginal-product reasoning, 600 years before economists named it.
+
+==========================================================================================
+SLIDE 15
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Hiring Decisions in the Short Run–– Context & Scenario ––
+[PLACEHOLDER (14)] Content Placeholder 2 @ (0.50, 3.53) 9.00x3.60
+    L0: Demand and output price is given
+    L1: Large number of Model S ordered at price of $90k
+    L1: Costs of raw material per car $40k
+    L0: Short Run: Capital (factory size/#robots) is fixed
+    L0: The only way to expand production is to hire more workers
+    L0: How many workers should Tesla optimally hire?
+[PICTURE (13)] Picture 3 @ (0.72, 1.51) 6.32x1.26
+[PICTURE (13)] Picture 7 @ (7.03, 1.66) 2.84x1.60
+NOTES: Setup for the next eight slides. We're going to derive Tesla's optimal hiring level. Given: cars sell at $90K, materials cost $40K per car, capital is fixed. Question: how many workers should Tesla hire?
+
+==========================================================================================
+SLIDE 16
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Hiring Decisions in the Short Run–– Concepts ––
+[GROUP (6)] Group 5 @ (1.54, 6.67) 6.27x0.62
+  [TEXT_BOX (17)] Rectangle 3 @ (0.07, 6.75) 3.75x0.62
+      L0: Teaching Note – Hiring Decisions in the Short Run
+  [AUTO_SHAPE (1)] Right Arrow 1 @ (0.16, 6.89) 0.23x0.33
+NOTES: MRPL = Marginal Revenue Product of Labor. In plain terms: how much extra revenue does one more worker produce? It equals MPL times the price per unit. This is what a worker is 'worth' to the firm in dollar terms.
+
+==========================================================================================
+SLIDE 17
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Marginal Revenue Product of Labor–– Detail ––
+NOTES: Same definition, more carefully. Notice: when MPL falls, MRPL falls. So even if the price stays constant, each additional worker is worth less than the previous one. The economic value of a marginal hire shrinks as you scale up.
+
+==========================================================================================
+SLIDE 18
+==========================================================================================
+[PLACEHOLDER (14)] Content Placeholder 2 @ (0.50, 1.68) 9.00x5.21
+    L0: Information: Tesla currently has 100 robots and 6,000 employees in its Freemont Gigafactory
+    L0: What is MRPL? (in $ per week)
+    L0: Hints:
+    L1: Recall sales price is $90k; material cost is $40k
+    L1: Use marginal revenue net of material input costs
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Example: Calculate the marginal revenue product of labor (MRPL)
+[PLACEHOLDER (14)] Slide Number Placeholder 2 @ (7.35, 7.10) 2.33x0.40
+    L0: 18
+[GROUP (6)] Group 5 @ (5.87, 2.67) 3.82x2.63
+  [PICTURE (13)] Picture 3 @ (6.48, 2.72) 3.08x2.39
+  [AUTO_SHAPE (1)] Oval 4 @ (7.53, 4.11) 0.33x0.17
+[AUTO_SHAPE (1)] Parallelogram 7 @ (5.20, 6.72) 4.80x0.76
+    L0: Discussion break
+NOTES: A specific number to anchor the concept. Walk through it: at 6,000 workers and 100 robots, output per additional worker is X, price per car is $50K (after subtracting materials), so MRPL is X times $50K.
+
+==========================================================================================
+SLIDE 19
+==========================================================================================
+[PICTURE (13)] Picture 2 @ (0.21, 0.21) 9.58x7.08
+NOTES: Quick PollEv – compute the MRPL at 6,000 employees and submit. Give them 30 seconds. The point isn't to get the number perfectly, it's to make sure everyone is doing the calculation in their head.
+
+==========================================================================================
+SLIDE 20
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Solution: MRPL of TEsla
+NOTES: Reveal the answer. Walk through anyone's confusion – the most common slip is forgetting to net out materials cost.
+
+==========================================================================================
+SLIDE 21
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: Should Tesla Hire more workers?
+[PLACEHOLDER (14)] Content Placeholder 2 @ (0.50, 1.55) 9.00x4.95
+    L0: Suppose the weekly gross wage is $1,400
+    L1: Yes!  MRPL > w
+    L2: With an additional worker, revenues per week (net of material) increase by 1,600, while wage costs increase only by 1,40
+NOTES: The hiring rule in one sentence. Hire as long as the next worker brings in more than they cost. Stop the moment the next worker just breaks even. That's it – the rest is just applying this in different settings.
+
+==========================================================================================
+SLIDE 22
+==========================================================================================
+[PLACEHOLDER (14)] Title 1 @ (0.50, 0.14) 9.00x1.25
+    L0: What is the Optimal Number of workers?
+[PLACEHOLDER (14)] Content Placeholder 2 @ (0.50, 1.55) 9.19x4.95
+    L0: Compute MRPL as a function of L
+    L1: Use the MPL function from above. MRPL=MPL∙$50k
+    L0: Plot wage
+    L0: Optimum at MRPL= w
+[PICTURE (13)] Picture 4 @ (2.31, 4.22) 5.57x3.00
+[PICTURE (13)] Picture 5 @ (2.31, 4.22) 5.57x3.00
+[LINE (9)] Straight Connector 7 @ (6.35, 5.13) 0.00x1.72
+[GROUP (6)] Group 10 @ (8.25, 1.83) 1.55x1.21
+  [AUTO_SHAPE (1)] Oval 8 @ (8.58, 2.31) 0.83x0.72
+  [TEXT_BOX (17)] TextBox 9 @ (8.25, 1.83) 1.55x0.50
+      L0: Revenue per car net of material cost
+NOTES: The same rule, in algebra: MRPL = w at the optimum. Burn this into your brain. Every short-run hiring problem you encounter as an executive is some version of this comparison.
+

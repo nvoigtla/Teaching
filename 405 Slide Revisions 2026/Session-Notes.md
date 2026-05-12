@@ -1,5 +1,188 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-12 – Clean deck rebuild on the "405 Slides Layout" (single layout)
+
+**One-line summary.** Started a fresh `Module 3_clean.pptx` built from
+scratch on the 6-type template system, with the PowerPoint Layout dropdown
+stripped down to a single `405 Slides Layout`. Completed 42 of 78 slides
+in three batches: front matter (1-6), §1.1 Short Run (7-22), §1.1b Wage
+Searchers + §1.2 Long Run + Part 2 section divider (23-42). Added native
+OMML (Cambria Math) equation rendering for `MP_K / p_K = MP_L / w` style
+formulas, and a distinct "external-document reference" visual for
+Teaching Note callouts (cream + dashed navy border + page icon + gold
+`SEE TEACHING NOTE →` label).
+
+### Final deck state
+
+- [Module 3/Module 3_clean.pptx](Module 3/Module 3_clean.pptx) – **42 slides**, single layout (`405 Slides Layout`), audit clean (0 broken rels, 0 missing parts, 0 non-integer EMUs).
+- Front matter (1-6): title cover, Zoom logistics, M2 recap, course-roadmap diagram, "every executive decision is a production-and-cost decision" diagram, hierarchical outline.
+- §1.1 Short Run (7-22): section divider, production function with Karl Marx book, short-vs-long-run pair, rebuilt 9×9 production-function table, output curve, MPL with "plot the slope" callout, Black Death with half-page parchment textbox + chart, Tesla hiring setup, MRPL concept (with Teaching Note callout), MRPL detail, MRPL example, **poll slide using the source PollEv screenshot**, solution, MRPL > wage rule, optimum L\* (with "Revenue per car net of material cost" callout).
+- §1.1b Wage Searchers (23-29): caution slide, big-employers-bid-wages-up, salary comparison chart, AI-researcher poaching example with Hassabis photo, poll, solution = **$8M**, UC wage search tool box.
+- §1.2 Long Run (30-41): section divider (Part 1.2), Rivian Georgia plant context, optimal-input-mix concept with OMML formula, bang-for-the-buck rule (54pt OMML stacked-fraction headline), 5-step recipe with inline OMML inequalities, Rivian Georgia example, optimality check (production function), analysis with OMML inequality callout, poll, solution table, comparative statics (robot tax | union wages), grocery-shopping intuition reinforcer.
+- Part 2 section divider (42): full Module 3 agenda with Part 2 now navy, Part 1 faded.
+
+### Files added or modified this session
+
+| File | Status | Notes |
+|---|---|---|
+| [Module 3/_build_clean_deck.py](Module 3/_build_clean_deck.py) | **New (main script)** | ~2000 lines. Builds the entire `Module 3_clean.pptx` from scratch. Imports primitives from `_build_template_samples.py`. Has builders for slides 1-42, the layout-stripping post-process, OMML helpers, and the new takeaway/Teaching Note/discussion-break/callout helpers. |
+| [Module 3/Module 3_clean.pptx](Module 3/Module 3_clean.pptx) | **New (output)** | 42-slide draft. |
+| Module 3/_source_images/ | New | Pictures extracted from `Module 3_NEW_draft.pptx` (slides 8-22 and 23-42), reused for image embedding in the clean deck. ~5 MB. |
+| [Module 3/_zoom_logo.png](Module 3/_zoom_logo.png) | New | Extracted from source slide 2; used by `slide_2()`. |
+| [Module 3/_batch2_dump.txt](Module 3/_batch2_dump.txt), [Module 3/_batch3_dump.txt](Module 3/_batch3_dump.txt) | New | Scratch reference dumps of source slides 7-22 and 23-42 with all shape positions, used as input for writing the per-slide builders. Kept for repeatability. |
+
+### Decisions made this session
+
+1. **Approach: per-slide builders, NOT wholesale XML surgery.** First considered lifting source slide XML wholesale and stripping/replacing chrome (the `_rebuild_via_zip.py` pattern), but landed on per-slide builders that explicitly add each source element (pictures, callouts, half-page textboxes, Teaching Notes). Reason: more readable, easier to iterate on per-slide visual issues, and we don't need to preserve animation timing XML (user can re-add in PowerPoint).
+
+2. **Single-layout deck.** Stripped 10 of the 11 default python-pptx layouts via `strip_unused_layouts()`. Kept only the Blank layout, renamed to `405 Slides Layout`. The PowerPoint Layout dropdown now shows exactly one entry.
+
+3. **Font sizes bumped for 2-up handout legibility.** Bullet text 32 pt / sub 28 pt where it fits; 24-26 pt in diagram boxes; section tag 16 pt; footer 12 pt. Slide 6 outline (13 lines) had to stay at 24/20 to fit; flagged as a candidate for splitting if you ever need bigger.
+
+4. **Title case for all chrome.** Removed the `.upper()` from the top-bar helper. Section tags now read "Module 3 · Part 1 · Production" not "MODULE 3 · PART 1 · PRODUCTION". Action titles also title-cased.
+
+5. **Lift-and-faithful-preserve over rewrite.** Every source element the user flagged got added back: Karl Marx book (slide 8), "plot the slope" callout (13), half-page parchment textbox (14), both Tesla images (15), Teaching Note + Optimal Hiring major-concept box (16), MRPL formula box (17), Discussion break parallelogram (18), full PollEv screenshot (19, 27, 38), Revenue-per-car callout (22), Teaching Note (32), Recipe-for-Exams Teaching Note (34), comparative-statics two-column (40), grocery pictures (41).
+
+6. **Teaching Note redesigned as external-doc reference.** Previously rendered as a solid navy bar with gold arrow. Now: cream parchment fill, dashed navy border, navy folded-corner page icon on the left, gold `SEE TEACHING NOTE →` label, italic navy title. Visually distinct from in-slide takeaway/major-concept callouts.
+
+7. **OMML formulas for TeX-feel rendering.** Used Office Math Markup Language (the same engine Insert > Equation uses) for `MP_K / p_K = MP_L / w` on slides 32, 33, 34, 37, 39 (inequality variant), and MRPL formula on slide 17. Native stacked fractions, italic Cambria Math variables, proper subscripts. NOT a hand-styled Unicode hack.
+
+8. **Tesla → Rivian image correction on slide 35.** Source slide 35 still showed a Tesla plant despite the 2026 Tesla→Rivian currency revision. Replaced with `_rivian.jpg` (Rivian R1T, CC BY-SA Wikimedia) and corrected the caption.
+
+### Gotchas — READ BEFORE CONTINUING ON HOME COMPUTER
+
+1. **Non-integer EMU values silently break the file in PowerPoint.** Any
+   `<a:off>` or `<a:ext>` with a decimal value (e.g. `3855567.5`) causes
+   PowerPoint to refuse to open the deck. Cause: `int / 2` returns a
+   float; `Inches(0.7) / 2` returns a float. Defense: always wrap shape
+   coordinates with `int()` at the helper boundary, or use `//` for
+   integer division. All five shape-primitive helpers
+   (`_add_filled_box`, `_add_outlined_box`, `_add_arrow_shape`,
+   `_add_arrow`, `_add_half_textbox`) now cast inputs defensively.
+   **Test:** `python -c "..."` scanning for `(?:cx|cy|x|y)="-?\d+\.\d+"`
+   in slide XML – expect 0 hits.
+
+2. **OMML in a textbox needs `<a14:m>` wrapper to render.** Without it
+   PowerPoint shows empty boxes instead of the equation. Required
+   structure:
+   ```xml
+   <a:p>
+     <a14:m>
+       <m:oMathPara><m:oMath>…</m:oMath></m:oMathPara>
+     </a14:m>
+     <a:endParaRPr/>
+   </a:p>
+   ```
+   `xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main"`
+   must be declared on (or above) the `<a:p>` element.
+
+3. **For italic math variables, DO NOT emit `<m:rPr><m:sty m:val="p"/></m:rPr>`.**
+   `m:sty="p"` forces "plain" (upright) style which silently overrides
+   the italic property in `<a:rPr i="1">`. `_omml_run()` (italic var) is
+   stripped of m:rPr; only `_omml_text()` (operators, numbers, acronyms)
+   includes `m:sty="p"`.
+
+4. **Animations (click-to-reveal) are NOT preserved on rebuild.**
+   python-pptx has no clean API for `<p:timing>`. All the "appear on
+   click" build animations from the original deck are flat in the clean
+   deck. They have to be re-added in PowerPoint (select shape →
+   Animations tab → Appear/Fade on click). Specific slides where this
+   matters: 13 ("plot the slope" callout), 16 (Teaching Note), 32
+   (Teaching Note), and any other animated callouts.
+
+5. **The Teaching Note style is reserved for external-document references
+   only.** Don't mix it with in-slide major-concept boxes. Teaching Note:
+   cream + dashed navy border + page icon + gold `SEE TEACHING NOTE →`
+   label. In-slide takeaway/major-concept: solid navy or gold fill,
+   bold text. The visual separation is intentional.
+
+6. **Source deck has stale Tesla images on Rivian-themed slides.** The
+   2026 currency-revision pass swapped Tesla text → Rivian text but
+   missed some images. Slide 35 was the one found and fixed; **watch
+   for similar issues on slides 53-57** (cost-function chain that was
+   also Tesla→Rivian-renamed) when working through batch 4 / §2.1.
+
+7. **Numbers on slide 28 ($8M) and slide 39 (illustrative MP values) need
+   user verification.** Slide 28: speaker notes say $8M ($5M + 2×$1.5M);
+   stale source body had $3M – I went with $8M. Slide 39: MP_K ≈ 4 cars,
+   MP_L ≈ 0.1 cars are illustrative numbers that produce the right
+   directional conclusion – swap in actual classroom values when ready.
+
+8. **Slide 32 and 34 content was built from speaker notes.** Source had
+   only a title placeholder + Teaching Note callout on slide 32, and
+   only a title on slide 34. I generated the major-concept content and
+   the 5-step recipe from the bang-for-the-buck logic. Sanity check
+   against your teaching notes.
+
+### Pending – next session(s)
+
+- [ ] **Batch 4: §2.1 Cost Concepts (slides 43-62, 20 slides).** Sunk costs, Waterworld decision tree, Apple Car opportunity-cost example, cost dictionary, Ross Stores annual report, ChatGPT subscription tier MC ≠ AC, Burn60-equivalent calculations, MC in finance, Rivian Georgia weekly cost function, iPhone teardown poll, naïve vs. complex cost functions. Several slides have **tables and complex group shapes** (Waterworld decision tree especially) that will need bespoke per-slide builders.
+- [ ] **Batch 5: §2.2 Scale & Scope (slides 63-74, 12 slides).** Long-run AC envelope, economies of scale technological reasons, Embraer ERJ-145 vs Boeing 787 (also AI-training scale slides per session 2), diseconomies, scope (Airbus A380 / A318), Amazon scale-or-scope, Shark Tank case + two PollEv slides.
+- [ ] **Batch 6: Closing synthesis (slide 75, 1 slide).** Use Layout 6 (the closing synthesis template) – top half Module 3 recap, bottom half Module 4 preview.
+- [ ] **Animation pass** in PowerPoint after the deck is structurally final – add Appear/Fade on click for "plot the slope", Teaching Notes, takeaway bars where appropriate.
+- [ ] **Verify slide 28 ($8M)**, **slide 39 numbers**, **slide 34 recipe**, **slide 32 content** with classroom material.
+- [ ] **Slide 6 outline** (13 lines @ 24/20 with tight spacing) – decide if it should be split into two slides to allow bigger type for handouts.
+- [ ] **Re-add manual styling** to slide 19 / 27 / 38 poll slides if you want the cleaner Layout 5 design (A/B/C/D auto-numbered options + POLL pill) instead of the source PollEv screenshot picture.
+- [ ] **Stale Tesla images** – sweep slides 53-57 for the same Tesla→Rivian issue I caught on slide 35.
+
+### Commands worth remembering
+
+- **Rebuild the clean deck from scratch:**
+  ```powershell
+  cd "h:/Claude Code/Teaching/405 Slide Revisions 2026/Module 3"
+  Remove-Item "Module 3_clean.pptx" -ErrorAction SilentlyContinue
+  $env:PYTHONIOENCODING = "utf-8"
+  python _build_clean_deck.py
+  ```
+- **Audit the deck (broken rels, missing parts, declared-but-missing):**
+  ```powershell
+  python _audit_package.py "Module 3_clean.pptx"
+  ```
+- **Scan for non-integer EMU values (should always be 0):**
+  ```powershell
+  python -c "import zipfile, re; z=zipfile.ZipFile('Module 3_clean.pptx'); bad=0
+  for n in z.namelist():
+      if n.startswith('ppt/slides/') and n.endswith('.xml'):
+          x = z.read(n).decode('utf-8')
+          for m in re.finditer(r'(?:cx|cy|x|y)=\"(\-?\d+\.\d+)\"', x):
+              print(f'{n}: bad {m.group(0)}'); bad += 1
+  print(f'Non-integer EMU values: {bad}')"
+  ```
+- **Extract source images for the next batch:**
+  ```powershell
+  # Edit slide range at top of the extraction script, then:
+  python -c "import zipfile, re; from pathlib import Path
+  OUT = Path('_source_images'); OUT.mkdir(exist_ok=True)
+  src = zipfile.ZipFile('Module 3_NEW_draft.pptx')
+  for sno in range(43, 63):  # next batch range
+      try: rels = src.read(f'ppt/slides/_rels/slide{sno}.xml.rels').decode('utf-8')
+      except KeyError: continue
+      for m in re.finditer(r'<Relationship Id=\"(rId\d+)\" Type=\"[^\"]*image\" Target=\"([^\"]+)\"', rels):
+          rid, target = m.group(1), m.group(2)
+          media = 'ppt/' + target[3:] if target.startswith('../') else target
+          try: data = src.read(media)
+          except KeyError: continue
+          (OUT / f'slide{sno}_{rid}.{media.rsplit(chr(46),1)[-1]}').write_bytes(data)"
+  ```
+- **Dump source slide content for a batch (input for writing builders):**
+  ```powershell
+  # Inside python:
+  from pptx import Presentation
+  from pptx.enum.shapes import MSO_SHAPE_TYPE
+  # ...iterate slides, dump shapes with positions, see _batch2_dump.txt / _batch3_dump.txt for format
+  ```
+
+### Useful context for resuming
+
+- Working directory is the network share `H:\Claude Code\Teaching\` on this machine. On the home computer it will be a different path – grep for hard-coded paths if any builds fail (there shouldn't be – the script uses `Path(__file__).parent`).
+- `python-pptx 1.0.2` on Python 3.14 confirmed working. Use `lxml` for namespace-aware XML manipulation.
+- The git remote is `https://github.com/nvoigtla/Teaching.git`, branch `main`.
+- The 405 Slides Template definition is in [Module 3/_build_template_samples.py](Module 3/_build_template_samples.py) (single source of truth for visual constants `NAVY`, `GOLD`, `FADED`, `RULE`, `GRAY`, `WHITE`, `MARGIN`, `RULE_W`, `GOLD_W`, `SLIDE_W`, `SLIDE_H` and the chrome helpers `_add_text`, `_add_rect`, `_draw_action_title`, `_add_bulleted_list`, `_set_bullet_char`, `_blank_slide`, `MODULE_AGENDA`, `FOOTER_TEXT`).
+- The clean-deck script `_build_clean_deck.py` adds: `_draw_top_bar_tc` (title-cased top bar, replacing the all-caps default), `_draw_footer` (with bigger 12pt type), `_add_filled_box` / `_add_outlined_box` / `_add_arrow_shape` / `_add_arrow` (diagram primitives), `_add_takeaway_bar` / `_add_teaching_note` / `_add_discussion_break` / `_add_callout_box` / `_add_half_textbox` (callout helpers), `_omml_run` / `_omml_text` / `_omml_sub` / `_omml_frac` / `_add_math_equation` / `_formula_bang_for_buck` / `_formula_mp_ratio` (OMML formula helpers), `strip_unused_layouts` (post-process layout pruning).
+- **Critical visual constants** in `_build_template_samples.py`: NAVY=`#0B2B4E`, GOLD=`#E09F3E`, RULE=`#C8CDD3` (light grey horizontal rule), GRAY=`#555B66` (body text grey), FADED=`#B0B5BC` (inactive agenda items), Calibri throughout, 0.7 cm side margins (MARGIN ≈ 0.276" ≈ 251999 EMU).
+
+---
+
 ## 2026-05-11 (session 2) – Module 3 rebuild + 2026 currency revision
 
 **One-line summary.** Locked the open outline decisions, cycled the
