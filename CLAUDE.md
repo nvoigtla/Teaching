@@ -106,6 +106,12 @@ For work in this folder, you are assisting with **teaching materials**
 - Within a course folder, organize by lecture or topic as I direct.
 - A `Session-Notes.md` lives in each course subfolder for that
   course's continuity (per the universal CLAUDE.md rules).
+- **Session-Notes location is at the course-folder level only.** If a
+  session is started from any nested subfolder of a course (e.g., a
+  lecture, module, or topic folder), walk **up** the directory tree
+  until you find the course folder's `Session-Notes.md`, and read that
+  one. There is exactly one `Session-Notes.md` per course; do not
+  create per-subfolder session-notes files.
 - Shared materials (general visual templates, recurring case examples,
   reusable diagrams) can live in `Teaching\Shared\` and be referenced
   from any course.
