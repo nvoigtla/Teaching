@@ -125,3 +125,45 @@ For work in this folder, you are assisting with **teaching materials**
 - Estimate slide count from lecture length: roughly **one slide per
   2 – 3 minutes** of lecture time for EMBA pacing, since slides are
   visual-heavy and discussion-anchored.
+
+## When working on PowerPoint slides...
+
+### Formulas
+- **Use OMML / Cambria Math, not plain text**, anywhere a formula
+  contains subscripts, superscripts, fractions, or Greek letters.
+  Convert things like `p_K`, `MP_L`, `MRPL = w` to proper math runs.
+- **Variables italic, acronyms upright.** In OMML, set `m:sty=p` for
+  multi-letter acronyms (MRPL, MPL, MC, TFC). Single-letter variables
+  (Q, K, L, w) stay italic by default. This matches journal-style
+  notation and is the cue economists expect.
+
+### Workflow with existing .pptx decks
+- **Never round-trip an existing deck through python-pptx.** It
+  silently strips NULL hyperlink rels and other elements PowerPoint
+  expects, corrupting the file. For modifications, use direct zip +
+  lxml surgery on the OOXML parts.
+- **All EMU values must be integers.** Decimal EMUs break PowerPoint
+  silently (the file opens but shapes vanish or misposition). Always
+  wrap computed positions in `int(...)`.
+- **The build script is the source of truth.** When the user makes a
+  manual tweak in PowerPoint (resized box, deleted variable,
+  repositioned label), preserve it in the build script so the next
+  rebuild doesn't undo their work. Note these as visual-preference
+  signals, not edge cases.
+- **Single-layout master.** For new decks, keep one slide layout for
+  the whole deck. Multiple layouts invite drift and make consistent
+  rebuilds harder.
+
+### Iteration is the norm
+- **Expect 2 – 3 rounds of "too cluttered → simplify"** on any
+  diagram slide. Don't try to land it in one shot. Propose a layout,
+  build, look at it through EMBA eyes, cut.
+- **When in doubt, step back into the student's shoes.** What does
+  an executive see in the first 30 seconds? If the answer isn't
+  immediately the takeaway in the slide title, the slide isn't ready.
+
+### Conflicts between source slides and notes
+- **When a previous deck's speaker notes contradict its slide
+  content, prefer the slide content.** The slide is what was actually
+  shown; the notes may be outdated drafts. Flag the discrepancy in
+  chat so I can decide whether the notes had a good reason.

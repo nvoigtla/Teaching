@@ -1,5 +1,66 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-12 (session 2) – Tail import, sweep, slide 10/11 rebuild
+
+**One-line summary.** Finished the back half of Module 3 (12 new slides for §2.2 Long-Run Costs & Economies of Scale), restructured the deck (dropped textual outline at slide 6, promoted concept-map to slide 6, renumbered everything), applied slide-7 lessons across the deck (MB=MC anchor on slide 22, Unicode-subscript cleanups), and rebuilt slides 10 and 11 around a clean Cobb-Douglas production function with strict diminishing MPL **and** MPK. Deck is now **74 slides**. Slide 10 still to refine tomorrow from the office computer.
+
+### Files modified
+
+| File | Status | Notes |
+|---|---|---|
+| [Module 3/_build_clean_deck.py](Module 3/_build_clean_deck.py) | Heavy edit | Added 12 new slide builders (`slide_63`–`slide_74`), shared `_pf_value()` / `_pf_table()` helpers, new SECTION_TAG_P2_LR constant, slide_concept_map updated (Cost-types OMML header, MR=MC sub-label, downward arrow from Average Costs to scale annotation), slide_22 got MB=MC star anchor, slides 33/+ Unicode-subscript bullets. Old `slide_6` function removed. |
+| [Module 3/Module 3_clean.pptx](Module 3/Module 3_clean.pptx) | Rebuilt | 74 slides. |
+| [Module 3/_source_images/](Module 3/_source_images/) | New files | Renamed-for-use images: `slide63_rId1/2.jpg` (cost curves & MC chart), `slide69_rId1.png` + `slide69_rId2.jpg` (Embraer + Boeing 787), `slide71_rId1.jpg` (BA A380+A318). Also `_orig_chart_image18..21.png` extracted for chart-style reference. |
+| [../CLAUDE.md](../CLAUDE.md) | Edit | Added "When working on PowerPoint slides..." section: Formulas (OMML, m:sty=p for acronyms), .pptx workflow (no python-pptx round-tripping, integer EMUs, build script is source of truth, single layout), Iteration is the norm, Source-vs-notes conflict policy. |
+
+### Decisions made this session
+
+1. **Slide 6 dropped, concept-map promoted to slide 6.** Textual outline replaced by the visual concept map. All later slide `page_num=` values decremented by 1 to keep footer numbering tight.
+
+2. **§2.2 Long-Run Costs subsection added at the end (slides 63–74).** Mirrors what the original deck had as positions 68–79: More Complex Cost Functions (transition slide); §2.2 sub-divider; Short-Run vs. Long-Run Costs (two-column + OMML TC_SR ≥ TC_LR); LR-AC envelope schematic (three SAC bands with the LAC drawn as a gold lower envelope); Economies of Scale – three patterns; technological reasons for EoS; **Aviation case** with Embraer ERJ-145 vs. Boeing 787-9 (numbers updated to ~$25M / ~$290M list price, ~$28 vs. ~$31 per passenger-hour); Diseconomies of Scale (added Boeing-2024 quality-issues reference); Economies of Scope (Airbus A380+A318 photo); **Amazon case re-styled as text/discussion**, dropped the dated Bezos screenshot; Shark Tank mini-case (Vimeo link preserved, two PollEV questions); Shark Tank solution with the deal-comparison numbers.
+
+3. **MB=MC star anchor extended to slide 22 (Optimal Hiring Rule).** Same 12-point star pattern as the concept map. Star sits at bottom-left with arrow pointing into the navy rule-statement bar – signals to students that MRPL = w is the "labor case" of MB = MC, consistent with the visual convention established on slide 6.
+
+4. **Plain-text subscripts → Unicode subscripts in bulleted slides.** `p_K`, `MP_K`, `MP_L` rendered as `pₖ`, `MPₖ`, `MPₗ` in bullets on slides 33+ (long-run application slides). Cleaner than rebuilding bullets as OMML mixed-runs, which would have required a major bullet-rendering rewrite. Standalone formulas (the headline equations) remain in OMML.
+
+5. **Cost-types header on slide 6 (concept map) re-rendered in OMML.** Six cost acronyms (TFC / TVC / AFC / AVC / ATC / MC) drawn in upright Cambria Math, matching the TeX-style convention.
+
+6. **Slide 10 production-function table fully regenerated.**
+   - **Root cause:** the original table values had MPK *constant* across the first three K-steps (then dropping). That violates strict diminishing returns to K – the same bug that earned a "CORRECTION" slide in the source deck (orig slide 13).
+   - **Fix:** the table is now generated programmatically from **Q = 0.5 · √(K · L)** (Cobb-Douglas with α = β = 0.5, CRS overall but strictly concave in each input separately). K = {100, 200, 300, 400}, L = {0, 1000, …, 10 000}. Integer-rounded values verified to give strictly diminishing MPL down every column **and** strictly diminishing MPK along every row.
+   - **Single source of truth:** lifted the function and grids into module-level `PF_A / PF_ALPHA / PF_BETA / PF_K_VALS / PF_L_VALS` constants and a `_pf_value(K, L)` helper. Slide 10 (table) and slide 11 (chart) both call `_pf_value()` so they can't drift apart.
+
+7. **Slide 11 rebuilt as a native python-pptx chart.** Previously a static source image. Now a real `XL_CHART_TYPE.LINE` chart with four series (K=100 blue circles / K=200 red triangles / K=300 gray squares / K=400 gold diamonds), markers added per series via direct XML, legend pinned **inside** the plot area (top-left, via `c:manualLayout`), Y axis fixed 0–1000, X axis 0…10 000, no gridlines (removed via XML). Visually matches the original deck's chart styling.
+
+### Pending — start here tomorrow
+
+- **Slide 10 not yet finalised.** User flagged the slide as "not quite finished" before wrap-up. Likely candidates for cleanup: table cell padding / column widths, exact axis-label placement, possibly a derived-MPL/MPK callout next to the table, or surfacing the **Q = 0.5 · √(K · L)** formula explicitly somewhere on the slide. Pick this up first thing tomorrow.
+
+### Gotchas (carry forward)
+
+1. **PowerPoint file lock.** Every rebuild requires the .pptx to be closed in PowerPoint, otherwise `python _build_clean_deck.py` exits with `PermissionError: [Errno 13]`. If a rebuild fails for this reason, ask the user (or close it locally) before retrying – do NOT retry in a loop.
+
+2. **Render-and-check pattern.** When changing chart styling or OMML rendering, always do one Python test-build to a side-path (e.g. `Module 3_clean_test.pptx`) before overwriting the canonical file – cheaper than waiting for PowerPoint to release the lock.
+
+3. **Build script is source of truth.** Manual PowerPoint tweaks the user makes (resized boxes, repositioned labels, removed variables like `M` in `Q = f(K, L, M)`) need to be preserved in the build script so the next rebuild doesn't undo them. Note them when you see them.
+
+4. **Renaming source images.** `_add_source_image(slide, N, rid)` resolves files matching `slide{N}_{rid}.*` in `_source_images/`. When importing new images from the original deck, rename them to match the NEW slide position (e.g. `orig_slide68_image55.jpg` → `slide63_rId1.jpg`).
+
+### Useful commands
+
+```powershell
+# Rebuild the whole deck (close PowerPoint first!)
+cd "d:/Claude Code/Teaching/405 Slide Revisions 2026/Module 3"
+python _build_clean_deck.py
+
+# Audit: count slides + dump titles
+python -c "import zipfile; from lxml import etree; ..."  # see prior scripts
+
+# Verify strict diminishing returns on the production-function table
+python -c "from _build_clean_deck import _pf_table, PF_K_VALS, PF_L_VALS; ..."
+```
+
+
 ## 2026-05-12 – Clean deck rebuild on the "405 Slides Layout" (single layout)
 
 **One-line summary.** Started a fresh `Module 3_clean.pptx` built from

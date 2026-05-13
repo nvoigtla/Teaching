@@ -1,0 +1,530 @@
+Source dump – slides 43-62 from Module 3_NEW_draft.pptx
+================================================================================
+
+--- Slide 43 ---
+TITLE: Cost types
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Title 3"  pos=(0.50in,0.14in)  size=(9.00in,1.25in)
+      text: Cost types
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Content Placeholder 4"  pos=(0.50in,1.55in)  size=(9.00in,4.95in)
+      text: Fixed costs
+      text: Do not depend on quantity produced (Q)
+      text: Sunk costs
+      text: A fixed cost that cannot be recovered
+      text: A fixed cost may be partially sunk (e.g., if you can re-sell for a lower price than bought)
+      text: Sunk costs should not affect your decision-making!
+      text: Variable
+      text: Depends on volume produced (Q)
+  [2] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 1"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 43
+  [3] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [4] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [6] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [7] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [8] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 43
+  [9] Shape type=AUTO_SHAPE (1) name="Chrome106"  pos=(0.00in,0.34in)  size=(13.33in,0.70in)
+  [10] Shape type=TEXT_BOX (17) name="ChromeText107"  pos=(0.28in,0.40in)  size=(12.78in,0.65in)
+      text: Sunk costs should never drive decisions
+  [11] Shape type=AUTO_SHAPE (1) name="Chrome108"  pos=(0.28in,1.06in)  size=(12.78in,0.02in)
+  [12] Shape type=AUTO_SHAPE (1) name="Chrome109"  pos=(0.28in,1.04in)  size=(2.20in,0.05in)
+  NOTES: The single most important cost concept for executives, in five words: sunk costs are not costs. They've already been spent; they cannot be recovered. Any forward-looking decision should ignore them. Period.
+
+--- Slide 44 ---
+TITLE: Group work: choosing a car
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Rectangle 2"  pos=(0.20in,0.25in)  size=(9.44in,0.91in)
+      text: Group work: choosing a car
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Rectangle 3"  pos=(0.65in,1.21in)  size=(8.69in,5.39in)
+      text: For a business trip, you can use:
+      text: Your own car and get reimbursed 50 cents/mile
+      text: The company car (full cost incl. gas covered)
+      text: Costs associated with your car (on average per mile driven):
+      text: 20 cents for insurance
+      text: 20 cents for maintenance
+      text: 15 cents for electricity
+      text: 45 cents for the lease you are paying on the vehicle
+  [2] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 1"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 44
+  [3] Shape type=TEXT_BOX (17) name="TextBox 2"  pos=(0.66in,5.32in)  size=(9.44in,0.88in)
+      text: Should you use your own car or the company car?
+  [4] Shape type=AUTO_SHAPE (1) name="Parallelogram 6"  pos=(4.65in,6.33in)  size=(5.35in,1.14in)
+      text: Discussion break
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [6] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [7] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [9] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [10] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 44
+  NOTES: A group-work exercise. Two cars, same daily operating cost, but different sunk amounts. Which should you drive today? Whatever your gut says, the answer is: ignore the sunk cost – it's the same either way.
+
+--- Slide 45 ---
+TITLE: Why do film studios make movies that they know will lose money?
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.26in)  size=(9.00in,1.25in)
+      text: Why do film studios make movies that they know will lose money?
+  [1] Picture type=PICTURE (13) name="Picture 2"  pos=(0.45in,1.60in)  size=(9.10in,5.12in)
+  [2] Shape type=TEXT_BOX (17) name="Title 1"  pos=(0.66in,3.78in)  size=(9.00in,1.25in)
+      text: Sunk cost in waterworld (1995)
+  [3] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 1"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 45
+  [4] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [5] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [6] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [7] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [8] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [9] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 45
+  [10] Shape type=AUTO_SHAPE (1) name="Chrome106"  pos=(0.00in,0.34in)  size=(13.33in,0.70in)
+  [11] Shape type=TEXT_BOX (17) name="ChromeText107"  pos=(0.28in,0.40in)  size=(12.78in,0.65in)
+      text: Why studios finish movies they know will flop: Waterworld
+  [12] Shape type=AUTO_SHAPE (1) name="Chrome108"  pos=(0.28in,1.06in)  size=(12.78in,0.02in)
+  [13] Shape type=AUTO_SHAPE (1) name="Chrome109"  pos=(0.28in,1.04in)  size=(2.20in,0.05in)
+  NOTES: Hollywood case. Kevin Costner's Waterworld – they knew it would flop, why release it anyway? Answer: even a flop adds revenue net of marketing/release costs. The hundreds of millions already spent on production are sunk. Decision should be forward-looking only.
+
+--- Slide 46 ---
+TITLE: Sunk cost in waterworld
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.14in)  size=(9.00in,1.25in)
+      text: Sunk cost in waterworld
+  [1] GraphicFrame type=TABLE (19) name="Table 2"  pos=(0.61in,1.46in)  size=(8.54in,4.84in)
+  [2] Shape type=TEXT_BOX (17) name="TextBox 7"  pos=(3.47in,2.28in)  size=(0.58in,0.40in)
+      text: 150
+  [3] Shape type=TEXT_BOX (17) name="TextBox 8"  pos=(7.78in,2.28in)  size=(0.58in,0.40in)
+      text: 150
+  [4] Shape type=TEXT_BOX (17) name="TextBox 9"  pos=(5.54in,2.28in)  size=(0.58in,0.40in)
+      text: 150
+  [5] Shape type=TEXT_BOX (17) name="TextBox 10"  pos=(3.47in,3.03in)  size=(0.44in,0.40in)
+      text: 16
+  [6] Shape type=TEXT_BOX (17) name="TextBox 11"  pos=(5.53in,3.03in)  size=(0.58in,0.40in)
+      text: 100
+  [7] Shape type=TEXT_BOX (17) name="TextBox 12"  pos=(7.81in,3.03in)  size=(0.60in,0.40in)
+      text: 140
+  [8] Shape type=TEXT_BOX (17) name="TextBox 13"  pos=(3.44in,4.42in)  size=(0.60in,0.40in)
+      text: 100
+  [9] Shape type=TEXT_BOX (17) name="TextBox 14"  pos=(7.76in,4.51in)  size=(0.56in,0.40in)
+      text: 175
+  [10] Shape type=TEXT_BOX (17) name="TextBox 15"  pos=(5.53in,4.47in)  size=(0.60in,0.40in)
+      text: 140
+  [11] Shape type=TEXT_BOX (17) name="TextBox 16"  pos=(3.36in,5.13in)  size=(0.66in,0.40in)
+      text: +50
+  [12] Shape type=TEXT_BOX (17) name="TextBox 17"  pos=(7.65in,5.13in)  size=(0.94in,0.40in)
+      text: -25
+  [13] Shape type=TEXT_BOX (17) name="TextBox 18"  pos=(5.52in,5.13in)  size=(0.61in,0.40in)
+      text: +10
+  [14] Shape type=TEXT_BOX (17) name="TextBox 19"  pos=(3.07in,3.70in)  size=(1.53in,0.44in)
+      text: 84    (<150)
+  [15] Shape type=TEXT_BOX (17) name="TextBox 20"  pos=(5.22in,3.72in)  size=(1.54in,0.44in)
+      text: 40    (<150)
+  [16] Shape type=TEXT_BOX (17) name="TextBox 21"  pos=(7.43in,3.69in)  size=(1.50in,0.44in)
+      text: 35    (<150)
+  [17] Shape type=TEXT_BOX (17) name="TextBox 22"  pos=(2.92in,5.77in)  size=(1.72in,0.40in)
+      text: Make the film!
+  [18] Shape type=TEXT_BOX (17) name="TextBox 23"  pos=(5.14in,5.80in)  size=(1.72in,0.40in)
+      text: Make the film!
+  [19] Shape type=TEXT_BOX (17) name="TextBox 24"  pos=(7.32in,5.77in)  size=(1.72in,0.40in)
+      text: Make the film!
+  [20] GroupShape type=GROUP (6) name="Group 25"  pos=(3.30in,2.22in)  size=(4.89in,3.31in)
+  [21] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [22] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [23] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [24] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [25] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [26] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 46
+  NOTES: The decision tree behind the Waterworld decision. Walk through the numbers: release-anyway revenue exceeds the marginal cost of release. So they released. Sunk costs are sunk.
+
+--- Slide 47 ---
+TITLE: 
+  [0] Shape type=AUTO_SHAPE (1) name="Rectangle 1"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [1] Shape type=TEXT_BOX (17) name="TextBox 2"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3 · PART 2 · COSTS
+  [2] Shape type=TEXT_BOX (17) name="TextBox 3"  pos=(0.28in,0.55in)  size=(12.78in,0.70in)
+      text: Modern sunk cost: Meta's Reality Labs has lost $50B+ since 2020
+  [3] Shape type=AUTO_SHAPE (1) name="Rectangle 4"  pos=(0.28in,1.25in)  size=(12.78in,0.02in)
+  [4] Shape type=AUTO_SHAPE (1) name="Rectangle 5"  pos=(0.28in,1.24in)  size=(2.20in,0.05in)
+  [5] Picture type=PICTURE (13) name="Picture 6"  pos=(9.50in,1.95in)  size=(3.00in,4.00in)
+  [6] Shape type=TEXT_BOX (17) name="TextBox 7"  pos=(9.50in,6.00in)  size=(3.00in,0.35in)
+      text: Meta Quest 3 (CC BY-SA, Wikimedia)
+  [7] Shape type=TEXT_BOX (17) name="TextBox 8"  pos=(0.28in,1.95in)  size=(8.90in,4.50in)
+      text: Meta has poured ~$50B into Reality Labs (Metaverse, VR, AR) since 2020
+      text: Wall Street keeps asking when it pays off – Zuckerberg keeps investing
+      text: Past losses are sunk – ignore them when deciding what to do next
+      text: Right question: does the next $10B have positive expected value?
+      text: Same lesson as Waterworld – classic sunk-cost discipline, 2020s edition
+  [8] Shape type=AUTO_SHAPE (1) name="Rectangle 9"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [9] Shape type=AUTO_SHAPE (1) name="Rectangle 10"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [10] Shape type=TEXT_BOX (17) name="TextBox 11"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [11] Shape type=TEXT_BOX (17) name="TextBox 12"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 47
+
+--- Slide 48 ---
+TITLE: 
+  [0] Shape type=AUTO_SHAPE (1) name="Rectangle 1"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [1] Shape type=TEXT_BOX (17) name="TextBox 2"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3 · PART 2 · COSTS
+  [2] Shape type=TEXT_BOX (17) name="TextBox 3"  pos=(0.28in,0.55in)  size=(12.78in,0.70in)
+      text: Opportunity cost is a real cost: Apple's canceled Apple Car
+  [3] Shape type=AUTO_SHAPE (1) name="Rectangle 4"  pos=(0.28in,1.25in)  size=(12.78in,0.02in)
+  [4] Shape type=AUTO_SHAPE (1) name="Rectangle 5"  pos=(0.28in,1.24in)  size=(2.20in,0.05in)
+  [5] Picture type=PICTURE (13) name="Picture 6"  pos=(7.40in,2.20in)  size=(5.60in,3.01in)
+  [6] Shape type=TEXT_BOX (17) name="TextBox 7"  pos=(7.40in,5.30in)  size=(5.60in,0.45in)
+      text: Vanarama Apple Car concept (fair use, © Vanarama)
+  [7] Shape type=TEXT_BOX (17) name="TextBox 8"  pos=(0.28in,1.95in)  size=(6.90in,4.50in)
+      text: Apple killed Project Titan in 2024 after ~10 years and ~$10B spent
+      text: Sunk costs ≠ a reason to keep going
+      text: Real reason to stop: opportunity cost of capital + ~2,000 engineers
+      text: Reallocated → AI / Apple Intelligence (the higher-MPL use)
+  [8] Shape type=AUTO_SHAPE (1) name="Rectangle 9"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [9] Shape type=AUTO_SHAPE (1) name="Rectangle 10"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [10] Shape type=TEXT_BOX (17) name="TextBox 11"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [11] Shape type=TEXT_BOX (17) name="TextBox 12"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 48
+  NOTES: The flip side of sunk costs is opportunity cost. Apple killed Project Titan in 2024 after roughly a decade and $10B spent. The sunk costs were sunk. What killed the project was opportunity cost: those engineers and that capital had a higher-MPL use in Apple Intelligence and AI.
+
+--- Slide 49 ---
+TITLE: Dictionary of costs
+  [0] Shape type=AUTO_SHAPE (1) name="Rectangle 3"  pos=(0.20in,6.22in)  size=(3.14in,1.17in)
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.14in)  size=(9.00in,1.25in)
+      text: Dictionary of costs
+  [2] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 49
+  [3] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [4] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [6] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [7] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [8] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 49
+  NOTES: Quick reference: fixed, variable, sunk, marginal, average, opportunity. A cheat sheet you'll refer to for the rest of the module. Make sure you can give a one-sentence example of each.
+
+--- Slide 50 ---
+TITLE: Relationship to Accounting: Ross Stores annual report
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.14in)  size=(9.00in,1.25in)
+      text: Relationship to Accounting: Ross Stores annual report
+  [1] GroupShape type=GROUP (6) name="Group 8"  pos=(0.18in,1.68in)  size=(9.64in,4.40in)
+  [2] Shape type=TEXT_BOX (17) name="TextBox 11"  pos=(3.45in,5.07in)  size=(1.45in,0.44in)
+      text: Part of FC
+  [3] Shape type=TEXT_BOX (17) name="TextBox 12"  pos=(3.77in,4.57in)  size=(1.98in,0.44in)
+      text: Mix FC & VC
+  [4] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [5] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [6] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [7] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [8] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [9] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 50
+  NOTES: Cost concepts in the real world – a page from Ross Stores' annual report. Have students classify each line as fixed or variable. The point is to ground the abstract concepts in something they'll see in a 10-K.
+
+--- Slide 51 ---
+TITLE: Marginal Cost in Action:What's the MC of adding a 2nd user to ChatGPT?
+  [0] Shape type=AUTO_SHAPE (1) name="Rectangle 10"  pos=(0.70in,3.52in)  size=(8.50in,1.17in)
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Rectangle 2"  pos=(0.50in,0.14in)  size=(9.00in,1.25in)
+      text: Marginal Cost in Action:What's the MC of adding a 2nd user to ChatGPT?
+  [2] Shape type=AUTO_SHAPE (1) name="Rectangle 9"  pos=(0.74in,4.96in)  size=(8.50in,4.50in)
+  [3] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 51
+  [4] PlaceholderPicture type=PLACEHOLDER (14) name="Content Placeholder 9"  pos=(1.39in,1.29in)  size=(7.22in,5.92in)
+  [5] Shape type=TEXT_BOX (17) name="Rectangle 3"  pos=(1.49in,5.43in)  size=(6.60in,1.51in)
+      text: OPENAI TIERS
+      text: PLUS: $20 / user / month
+      text: TEAM: $25 / user / month, 2 users min.
+      text: Subscribe
+  [6] Shape type=AUTO_SHAPE (1) name="Oval 15"  pos=(3.42in,5.29in)  size=(2.98in,1.51in)
+  [7] Shape type=AUTO_SHAPE (1) name="Parallelogram 16"  pos=(6.21in,6.49in)  size=(4.23in,0.99in)
+      text: Poll Everywhere break
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [9] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [10] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [11] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [12] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [13] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 51
+  [14] Shape type=AUTO_SHAPE (1) name="Chrome106"  pos=(0.00in,0.34in)  size=(13.33in,0.70in)
+  [15] Shape type=TEXT_BOX (17) name="ChromeText107"  pos=(0.28in,0.40in)  size=(12.78in,0.65in)
+      text: Marginal cost ≠ average cost: ChatGPT subscription tiers
+  [16] Shape type=AUTO_SHAPE (1) name="Chrome108"  pos=(0.28in,1.06in)  size=(12.78in,0.02in)
+  [17] Shape type=AUTO_SHAPE (1) name="Chrome109"  pos=(0.28in,1.04in)  size=(2.20in,0.05in)
+  [18] Picture type=PICTURE (13) name="ExampleImage"  pos=(10.10in,2.80in)  size=(2.80in,3.50in)
+  [19] Shape type=TEXT_BOX (17) name="AttrText"  pos=(10.10in,6.35in)  size=(2.80in,0.30in)
+      text: ChatGPT on iPhone (CC BY-SA, Wikimedia)
+  NOTES: A pricing case students will recognize from their own subscriptions. ChatGPT Plus costs $20/user/month; ChatGPT Team costs $25/user/month but requires a 2-user minimum. If you have one user on Plus and want to add a second, what's the marginal cost of that second user? Hint: it's not just $25.
+
+--- Slide 52 ---
+TITLE: 
+  [0] Picture type=PICTURE (13) name="Picture 2"  pos=(0.21in,0.21in)  size=(9.58in,7.08in)
+  [1] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [2] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [3] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [4] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [5] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [6] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 52
+  NOTES: PollEv – compute MC of adding the second user. Watch for them assuming MC = the Team rate of $25.
+
+--- Slide 53 ---
+TITLE: Solution: MC = $30/user · month
+  [0] Shape type=AUTO_SHAPE (1) name="Rectangle 10"  pos=(0.70in,3.52in)  size=(8.50in,1.17in)
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Rectangle 2"  pos=(0.50in,0.14in)  size=(9.00in,1.25in)
+      text: Solution: MC = $30/user · month
+  [2] SlidePlaceholder type=PLACEHOLDER (14) name="Content Placeholder 1"  pos=(0.50in,1.31in)  size=(9.00in,5.37in)
+      text: TC of 2 users on Team: 2 × $25 = $50/month
+      text: TC of 1 user on Plus: 1 × $20 = $20/month
+      text: So the 2nd user costs $50 − $20 = $30/month – more than Team's $25 sticker.
+      text: MC > AC: subscription tiers can hide a higher marginal cost.
+      text: Intuition: you re-price the existing user ($20 → $25) and add a new one ($25).
+  [3] Shape type=AUTO_SHAPE (1) name="Rectangle 9"  pos=(0.74in,4.96in)  size=(8.50in,4.50in)
+  [4] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 53
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [6] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [7] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [9] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [10] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 53
+  NOTES: Reveal: MC = $30/user-month for the second user (you go from $20 to $50 total). The lesson: tiered subscription pricing can hide a marginal cost that's HIGHER than the average rate. The opposite of the classic 'volume discount' story – and increasingly common in SaaS.
+
+--- Slide 54 ---
+TITLE: Marginal Cost Example
+  [0] Shape type=AUTO_SHAPE (1) name="Rectangle 10"  pos=(0.70in,3.52in)  size=(8.50in,1.17in)
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Rectangle 2"  pos=(0.50in,0.14in)  size=(9.00in,1.25in)
+      text: Marginal Cost Example
+  [2] SlidePlaceholder type=PLACEHOLDER (14) name="Content Placeholder 1"  pos=(0.50in,1.31in)  size=(9.00in,5.37in)
+      text: Two options for a personal loan:
+      text: 100k at 5% annual interest
+      text: 110k at 6% annual interest
+      text: What is the marginal interest rate charged for the additional 10k?
+      text: Additional interest payment: 6,600-5,000 = 1,600
+      text: Additional loan amount: 10,000
+      text: Interest on extra 10k: 1,600/10,000 = 16%
+  [3] Shape type=AUTO_SHAPE (1) name="Rectangle 9"  pos=(0.74in,4.96in)  size=(8.50in,4.50in)
+  [4] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 54
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [6] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [7] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [9] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [10] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 54
+  [11] Shape type=AUTO_SHAPE (1) name="Chrome106"  pos=(0.00in,0.34in)  size=(13.33in,0.70in)
+  [12] Shape type=TEXT_BOX (17) name="ChromeText107"  pos=(0.28in,0.40in)  size=(12.78in,0.65in)
+      text: Marginal cost in finance: the true rate on a bigger loan
+  [13] Shape type=AUTO_SHAPE (1) name="Chrome108"  pos=(0.28in,1.06in)  size=(12.78in,0.02in)
+  [14] Shape type=AUTO_SHAPE (1) name="Chrome109"  pos=(0.28in,1.04in)  size=(2.20in,0.05in)
+  NOTES: Same concept applied to finance: when a bigger loan comes with a worse rate, the marginal cost of the extra dollars is higher than the average rate the loan was quoted at. This is a very common executive trap when comparing financing options.
+
+--- Slide 55 ---
+TITLE: Rivian's Georgia plant – weekly Cost
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Content Placeholder 1"  pos=(0.50in,1.28in)  size=(9.31in,1.08in)
+      text: Collect data on total cost at different output levels (Q)
+      text: Estimate the cost function
+  [1] Picture type=PICTURE (13) name="Picture 4"  pos=(1.28in,2.93in)  size=(7.44in,4.22in)
+  [2] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.14in)  size=(9.31in,1.25in)
+      text: Rivian's Georgia plant – weekly Cost
+  [3] Connector type=LINE (9) name="Straight Arrow Connector 37"  pos=(2.27in,1.11in)  size=(0.16in,0.33in)
+  [4] Shape type=TEXT_BOX (17) name="TextBox 36"  pos=(3.65in,2.49in)  size=(5.36in,0.44in)
+      text: Total Cost= 10,000,000+30,000*Q+40*Q2
+  [5] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 55
+  [6] Picture type=PICTURE (13) name="Picture 5"  pos=(1.28in,2.89in)  size=(7.44in,4.22in)
+  [7] GroupShape type=GROUP (6) name="Group 22"  pos=(2.74in,6.13in)  size=(3.44in,0.47in)
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [9] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [10] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [11] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [12] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [13] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 55
+  NOTES: Now back to Rivian. The Georgia plant's weekly total cost function – how total cost varies with output Q.
+
+--- Slide 56 ---
+TITLE: Rivian's Georgia plant – Cost Components
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.14in)  size=(9.31in,1.25in)
+      text: Rivian's Georgia plant – Cost Components
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 56
+  [2] Picture type=PICTURE (13) name="Picture 4"  pos=(1.16in,1.85in)  size=(7.67in,4.36in)
+  [3] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [4] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [6] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [7] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [8] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 56
+  NOTES: Decompose total cost into its components: fixed plus variable, broken into sub-categories. Visual.
+
+--- Slide 57 ---
+TITLE: Rivian's Georgia plant – Per-Unit Costs
+  [0] Picture type=PICTURE (13) name="Picture 4"  pos=(1.02in,2.55in)  size=(7.96in,4.03in)
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.14in)  size=(9.31in,1.25in)
+      text: Rivian's Georgia plant – Per-Unit Costs
+  [2] GroupShape type=GROUP (6) name="Group 23"  pos=(0.92in,1.42in)  size=(2.92in,2.06in)
+  [3] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 57
+  [4] GroupShape type=GROUP (6) name="Group 24"  pos=(3.96in,1.61in)  size=(2.92in,2.45in)
+  [5] GroupShape type=GROUP (6) name="Group 29"  pos=(7.01in,1.40in)  size=(2.92in,2.43in)
+  [6] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [7] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [9] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [10] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [11] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 57
+  NOTES: Same Rivian data, but expressed per vehicle: average cost, average variable cost, and marginal cost. Three curves on one chart; make sure you can read each.
+
+--- Slide 58 ---
+TITLE: Cost Estimation
+  [0] Shape type=AUTO_SHAPE (1) name="Rectangle 10"  pos=(0.70in,3.52in)  size=(8.50in,1.17in)
+  [1] SlidePlaceholder type=PLACEHOLDER (14) name="Rectangle 2"  pos=(0.50in,0.14in)  size=(9.00in,1.17in)
+      text: Cost Estimation
+  [2] Shape type=AUTO_SHAPE (1) name="Rectangle 9"  pos=(0.74in,4.96in)  size=(8.50in,4.50in)
+  [3] Shape type=TEXT_BOX (17) name="Content Placeholder 1"  pos=(0.88in,1.14in)  size=(8.21in,4.77in)
+      text: Without Internet Access!
+      text: What is the average variable cost of producing a current-generation iPhone?
+      text: Provide a numerical guess
+      text: Split this (roughly) into components:
+      text: Processor
+      text: Other material inputs
+      text: Labor
+  [4] Shape type=AUTO_SHAPE (1) name="Parallelogram 5"  pos=(4.05in,6.31in)  size=(5.95in,1.17in)
+      text: Discussion break
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [6] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [7] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [9] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [10] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 58
+  NOTES: iPhone manufacturing teardowns – what do the parts and assembly actually cost for the current-gen iPhone 17? Discuss what's included (components, labor, assembly) and what's not (R&D, marketing, retail).
+
+--- Slide 59 ---
+TITLE: 
+  [0] Picture type=PICTURE (13) name="Picture 2"  pos=(0.21in,0.21in)  size=(9.58in,7.08in)
+  [1] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [2] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [3] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [4] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [5] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [6] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 59
+  NOTES: PollEv – estimate AVC of an iPhone 17 given the teardown data.
+
+--- Slide 60 ---
+TITLE: cost estimation: AVC of iphone 17
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Rectangle 2"  pos=(0.00in,-0.10in)  size=(9.92in,1.25in)
+      text: cost estimation: AVC of iphone 17
+  [1] Shape type=AUTO_SHAPE (1) name="Rectangle 9"  pos=(0.74in,4.96in)  size=(8.50in,4.50in)
+  [2] SlidePlaceholder type=PLACEHOLDER (14) name="Content Placeholder 1"  pos=(6.40in,1.48in)  size=(3.27in,5.75in)
+      text: Retail price: $1,199
+      text: TVC: ~$580
+      text: Some missing components
+      text: Shipping & Handling
+      text: Customer service
+      text: Warranty costs
+  [3] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 1"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 60
+  [4] Picture type=PICTURE (13) name="Picture 2"  pos=(0.13in,0.82in)  size=(5.53in,6.67in)
+  [5] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [6] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [7] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [8] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [9] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [10] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 60
+  NOTES: Reveal: AVC ≈ $580 for iPhone 17 (vs ~$1,199 retail). About half of retail. The rest – fixed-cost recovery, gross margin – funds Apple's R&D, retail, and ecosystem.
+
+--- Slide 61 ---
+TITLE: iphone: “Naïve Cost Function”
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.04in)  size=(9.00in,1.25in)
+      text: iphone: “Naïve Cost Function”
+  [1] Connector type=LINE (9) name="Straight Connector 5"  pos=(1.17in,1.48in)  size=(0.00in,4.77in)
+  [2] Connector type=LINE (9) name="Straight Connector 6"  pos=(1.17in,6.25in)  size=(7.81in,0.00in)
+  [3] Shape type=TEXT_BOX (17) name="TextBox 9"  pos=(-0.07in,1.46in)  size=(1.08in,0.44in)
+      text: $
+  [4] Shape type=TEXT_BOX (17) name="TextBox 10"  pos=(6.16in,6.35in)  size=(3.18in,0.44in)
+      text: Q (Quantity Produced)
+  [5] GroupShape type=GROUP (6) name="Group 42"  pos=(1.42in,5.66in)  size=(2.69in,0.45in)
+  [6] Connector type=LINE (9) name="Straight Arrow Connector 7"  pos=(1.21in,5.20in)  size=(0.87in,0.67in)
+  [7] Shape type=TEXT_BOX (17) name="TextBox 36"  pos=(4.96in,1.90in)  size=(4.49in,0.44in)
+      text: Total Cost =TFC + 500*Q
+  [8] Connector type=LINE (9) name="Straight Connector 4"  pos=(1.17in,1.90in)  size=(7.81in,3.30in)
+  [9] GroupShape type=GROUP (6) name="Group 15"  pos=(2.27in,2.80in)  size=(2.69in,0.47in)
+  [10] Connector type=LINE (9) name="Straight Arrow Connector 19"  pos=(3.69in,3.25in)  size=(0.42in,0.63in)
+  [11] Shape type=AUTO_SHAPE (1) name="Rectangle 8"  pos=(0.53in,5.00in)  size=(0.63in,0.40in)
+      text: TFC
+  [12] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 61
+  [13] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [14] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [15] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [16] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [17] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [18] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 61
+  NOTES: iPhone naïve cost function – total cost as output rises. Linear: a fixed cost plus a constant marginal cost.
+
+--- Slide 62 ---
+TITLE: iphone: “Naïve Cost Function”
+  [0] SlidePlaceholder type=PLACEHOLDER (14) name="Title 1"  pos=(0.50in,0.04in)  size=(9.00in,1.25in)
+      text: iphone: “Naïve Cost Function”
+  [1] Connector type=LINE (9) name="Straight Connector 5"  pos=(1.17in,1.48in)  size=(0.00in,4.77in)
+  [2] Connector type=LINE (9) name="Straight Connector 6"  pos=(1.17in,6.25in)  size=(7.81in,0.00in)
+  [3] Shape type=TEXT_BOX (17) name="TextBox 9"  pos=(-0.07in,1.46in)  size=(1.08in,0.77in)
+      text: $ per unit
+  [4] Shape type=TEXT_BOX (17) name="TextBox 10"  pos=(6.16in,6.35in)  size=(3.18in,0.44in)
+      text: Q (Quantity Produced)
+  [5] GroupShape type=GROUP (6) name="Group 15"  pos=(2.37in,4.05in)  size=(3.61in,0.47in)
+  [6] Connector type=LINE (9) name="Straight Arrow Connector 19"  pos=(3.97in,4.51in)  size=(0.42in,0.63in)
+  [7] Shape type=AUTO_SHAPE (1) name="Rectangle 8"  pos=(0.53in,5.00in)  size=(0.68in,0.40in)
+      text: 500
+  [8] SlidePlaceholder type=PLACEHOLDER (14) name="Slide Number Placeholder 2"  pos=(7.35in,7.10in)  size=(2.33in,0.40in)
+      text: 62
+  [9] GroupShape type=GROUP (6) name="Group 13"  pos=(1.21in,4.76in)  size=(8.79in,0.47in)
+  [10] Shape type=TEXT_BOX (17) name="TextBox 25"  pos=(5.31in,5.28in)  size=(4.53in,0.44in)
+      text: When MC  is constant, it equals AVC
+  [11] Shape type=AUTO_SHAPE (1) name="Chrome100"  pos=(0.00in,0.00in)  size=(13.33in,0.34in)
+  [12] Shape type=TEXT_BOX (17) name="ChromeText101"  pos=(0.28in,0.00in)  size=(12.00in,0.34in)
+      text: MODULE 3  ·  PRODUCTION AND COSTS
+  [13] Shape type=AUTO_SHAPE (1) name="Chrome102"  pos=(0.00in,7.15in)  size=(13.33in,0.02in)
+  [14] Shape type=AUTO_SHAPE (1) name="Chrome103"  pos=(0.28in,7.13in)  size=(2.20in,0.05in)
+  [15] Shape type=TEXT_BOX (17) name="ChromeText104"  pos=(0.28in,7.22in)  size=(11.00in,0.30in)
+      text: Management 405  ·  Module 3  ·  Production and Costs
+  [16] Shape type=TEXT_BOX (17) name="ChromeText105"  pos=(12.60in,7.22in)  size=(0.50in,0.30in)
+      text: 62
+  NOTES: Same data per unit. Note the constant MC and declining AC – the classic shape when fixed costs spread over more units.

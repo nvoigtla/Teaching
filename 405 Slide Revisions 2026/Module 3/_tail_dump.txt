@@ -1,0 +1,219 @@
+=== POSITION 68  (slides/slide68.xml) ===
+TEXTS (11):
+   • More
+   • COmplex
+   • Cost
+   • FUnctions
+   • 68
+   • Give rise to non-linear marginal cost (MC)
+   • E.g., in the textbook:
+   • We will only use these if absolutely necessary for the concept
+   • Whenever possible, we will use the simpler linear MC
+   • MC higher
+   • at low output volumes
+IMAGES: ['../media/image55.jpg', '../media/image56.jpg']
+NOTES: 68
+
+=== POSITION 69  (slides/slide69.xml) ===
+TEXTS (32):
+   • OUTLINE OF Module 3
+   • Production
+   • Production
+   • functions
+   • Short run vs. long run
+   • Short-run production
+   • decisions
+   • Diminishing
+   • marginal
+   • returns
+   • Optimal
+   • hiring
+   • decisions
+   • Wage
+   • searchers
+   • Long-run production
+   • decisions
+   • Optimal mix of inputs
+   • Costs
+   • Fixed
+   • ,
+   • sunk
+   • , variable
+   • costs
+   • Marginal
+   • costs
+   • Long-run
+   • costs
+   • and
+   • economies
+   • of
+   • scale
+IMAGES: []
+NOTES: 69
+
+=== POSITION 70  (slides/slide70.xml) ===
+TEXTS (9):
+   • Short-run v. long-run costs
+   • Distinction between short- and long-run costs
+   • Short run: cost of producing different quantities when capital is fixed (while labor is flexible)
+   • Long run: cost of producing different quantities when both capital and labor can adjust
+   • In general, total and average costs in the
+   • short run
+   • are equal to or larger than total average costs in the
+   • long run
+   • 70
+IMAGES: []
+NOTES: 70
+
+=== POSITION 71  (slides/slide71.xml) ===
+TEXTS (16):
+   • SAC medium plant
+   • Long-Run
+   • Average Cost is the lower Envelope of
+   • Short-Run
+   • Average Cost Curves
+   • $/
+   • q
+   • SAC  large plant
+   • q
+   • 1
+   • SAC small plant
+   • q
+   • This example illustrates economies of scale (decreasing LAC).
+   • q
+   • 2
+   • 71
+IMAGES: []
+NOTES: 71
+
+=== POSITION 72  (slides/slide72.xml) ===
+TEXTS (24):
+   • Economies of Scale
+   • What happens to
+   • long-run
+   • average costs (LAC) as output increases?
+   • Economies of scale:
+   • LAC falls with output
+   • Constant economies of scale:
+   • LAC is the same for different output levels
+   • Diseconomies of scale:
+   • LAC rises with output
+   • Economies of scale may result from:
+   • Falling
+   • input
+   • prices
+   • as output
+   • grows
+   • Technological
+   • reasons
+   • («
+   • Returns
+   • to
+   • scale
+   • »)
+   • 72
+IMAGES: []
+NOTES: 72 Economies of scale  refer to the impact of a higher rate of output on  long run  average costs. cost elasticity  wrt  to output > 1 if diseconomies of scale cost elasticity  wrt  to output < 1 if economies of scale   So economies of scale is a cost-elasticity concept. Increasing returns to scale are a technological concept – relating quantity of output to quantity of inputs. Increasing returns to scale are a factor in bringing about economies of scale, but it’s not the only factor. You could have constant returns to scale and still have economies of scale if the cost of factors falls as you purchase more factors – for instance by buying materials in bulk quantities, at a discount. You could have constant returns to scale and diseconomies of scale if you have to pay more for more inputs – technologically you have CRS (or even IRS) but you may suffer diseconomies of scale if your demand for labor and capital shifts up the price of capital and labor (you are not a price taker). Summary: Economies of scale are not the same as increasing returns to scale.  E(dis) conomies  of scale may exist because input prices change with the output produced. Returns to scale is a  technological  concept. Economies of scale is a  cost concept .   Economies of scope  refer to the ability of a single firm to produce a portfolio of related products cheaper than if each product were produced by separate, independent firms.   Example : Boeing is probably better at producing each of the 737, 747, 7
+
+=== POSITION 73  (slides/slide73.xml) ===
+TEXTS (7):
+   • Technological Reasons For Economies of Scale
+   • Specialization and division of labor
+   • Lumpiness and indivisibilities of some expenditures (e.g., network infrastructure, R&D)
+   • Arithmetical: Storage volume/passenger room increases at higher rate than input material
+   • E.g., Airplane or cargo ship bodies
+   • Appropriate technology changes with scale
+   • 73
+IMAGES: []
+NOTES: Example for arithmetical relationship: A cylinder (airplane body):  Circumference is proportional to radius r: c=2 π r; Surface = 2 π r∙height Volume is proportional to the square of the radius: V= π r 2 ∙height 73
+
+=== POSITION 74  (slides/slide74.xml) ===
+TEXTS (13):
+   • Economies of Scale: technology
+   • Embraer ERJ-145
+   • $20M
+   • 40 passengers
+   • Total Cost per flight hour: $1,300
+   • TC per passenger-hour:
+   • $32.50
+   • Boeing 787
+   • $190 million
+   • 300 passengers
+   • Total Cost per flight hour: $8,200
+   • TC per passenger-hour: $27.30
+   • 74
+IMAGES: ['../media/image57.png', '../media/image58.jpg']
+NOTES: Source for costs: https://www.faa.gov/regulations_policies/policy_guidance/benefit_cost/media/econ-value-section-4-op-costs.pdf  (Table 4-6) 74
+
+=== POSITION 75  (slides/slide75.xml) ===
+TEXTS (7):
+   • Reasons
+   • for Dis-Economies of
+   • Scale
+   • Coordination, communication and control become more difficult at a larger scale
+   • Disproportionately harder to manage/monitor a larger work force
+   • Disproportionate requirement for more staff functions
+   • Accounting, human resources…
+IMAGES: []
+NOTES: 
+
+=== POSITION 76  (slides/slide76.xml) ===
+TEXTS (12):
+   • Economies of scope
+   • Produce
+   • two or more products
+   •  A
+   • vg. cost goes down
+   • Ability of a firm to produce a portfolio of related products cheaper than if each product were produced by separate, independent firms
+   • Benefit from sharing capabilities across products:
+   • Input production
+   • Engineering know-how
+   • R&D
+   • Marketing
+   • Example: Airbus A380 and A318
+IMAGES: ['../media/image59.jpg']
+NOTES: 
+
+=== POSITION 77  (slides/slide77.xml) ===
+TEXTS (2):
+   • Amazon: Economies of Scale / Scope / or both?
+   • 77
+IMAGES: ['../media/media2.mp4', '../media/image60.png']
+NOTES: 77
+
+=== POSITION 78  (slides/slide78.xml) ===
+TEXTS (13):
+   • Costs Mini-case: shark tank
+   • 78
+   • Group Discussion
+   • Watch first:
+   • https://vimeo.com/236977187
+   • What is the volume sold last year, and expected volume this year?
+   • What is the average cost per can at these volumes?
+   • PollEV
+   • 1: Are there economies of scale?
+   • PollEV
+   • 2: Which deal would you choose?
+   • $100k for royalty of 25c per can sold
+   • $75k for 15% equity
+IMAGES: []
+NOTES: 78 Watch the rest here: https://vimeo.com/236977187 Important part on sales and costs: 4:50-5:40
+
+=== POSITION 79  (slides/slide79.xml) ===
+TEXTS (13):
+   • Numbers / Calculations
+   • Sales last year: 135k; expected this year: 300k
+   • Avg. cost last year: $1.30; expected avg. cost this year: $1.10
+   • Thus, there are economies of scale
+   • Price charged to distribution: $2.69
+   • Profit per can: roughly $1.50
+   • ($2.69-$1.10)
+   • Comparison of Deals
+   • :
+   • Deal A: 25 cents per can is about 16.6% of profits
+   • Deal B: 15% equity
+   •  quite similar
+   • 79
+IMAGES: []
+NOTES: 79
+
