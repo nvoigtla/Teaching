@@ -677,7 +677,7 @@ def _add_teaching_note(slide, text, *, top=Inches(6.6), width=None,
 
 
 def _add_discussion_break(slide, *, top=Inches(6.6), width=Inches(4.8),
-                           text="Discussion break"):
+                           text="Discussion Break"):
     """Rounded-parallelogram 'discussion break' badge (bottom-right).
 
     Custom-geometry shape: top and bottom edges are horizontal; the left
@@ -772,19 +772,31 @@ def _add_discussion_break(slide, *, top=Inches(6.6), width=Inches(4.8),
     alpha = ET.SubElement(rgb, qn('a:alpha'))
     alpha.set('val', '50000')
 
-    # Text – with custGeom's <a:rect> set to the inscribed rectangle,
-    # PowerPoint already constrains text to the safe area; we only need
-    # small lIns/rIns for visual padding.
-    tf = shp.text_frame
+    # Text — render as a SEPARATE textbox overlaid on top of the
+    # parallelogram, positioned exactly inside the inscribed rectangle.
+    # This decouples text placement from the shape geometry and avoids
+    # PowerPoint rendering the run past the slanted edges (which can
+    # happen with the in-shape text frame on some PowerPoint versions
+    # even with <a:rect> set inside custGeom).
+    # In real EMU, the skew equals the shape height (45° slant), so the
+    # inscribed rectangle spans (left + height) → (left + width - height).
+    skew_emu = height
+    ins_left = left + skew_emu
+    ins_top = top
+    ins_w = width - 2 * skew_emu
+    ins_h = height
+    txt = slide.shapes.add_textbox(int(ins_left), int(ins_top),
+                                     int(ins_w), int(ins_h))
+    tf = txt.text_frame
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
-    tf.margin_left = Inches(0.05)
-    tf.margin_right = Inches(0.05)
+    tf.margin_left = Inches(0.05); tf.margin_right = Inches(0.05)
+    tf.margin_top = Inches(0.02); tf.margin_bottom = Inches(0.02)
     p = tf.paragraphs[0]
     p.alignment = PP_ALIGN.CENTER
     run = p.add_run()
     run.text = text
     run.font.name = "Calibri"
-    run.font.size = Pt(18)
+    run.font.size = Pt(20)
     run.font.bold = True
     run.font.color.rgb = NAVY
     return shp
@@ -1011,7 +1023,8 @@ def _make_simple_line_chart(slide, x, y, w, h, categories, values, *,
         smooth = ET.SubElement(ser_xml, qn('c:smooth'))
         smooth.set('val', '0')
 
-    # Axes
+    # Axes – axis titles in BOLD ITALIC navy (per course CLAUDE.md);
+    # tick labels in regular Calibri navy.
     cat = chart.category_axis
     cat.tick_labels.font.name = "Calibri"
     cat.tick_labels.font.size = Pt(10)
@@ -1020,7 +1033,8 @@ def _make_simple_line_chart(slide, x, y, w, h, categories, values, *,
     cat.axis_title.text_frame.text = x_title
     ar = cat.axis_title.text_frame.paragraphs[0].runs[0]
     ar.font.name = "Calibri"; ar.font.size = Pt(12)
-    ar.font.bold = True; ar.font.color.rgb = NAVY
+    ar.font.bold = True; ar.font.italic = True
+    ar.font.color.rgb = NAVY
 
     val = chart.value_axis
     val.tick_labels.font.name = "Calibri"
@@ -1030,7 +1044,8 @@ def _make_simple_line_chart(slide, x, y, w, h, categories, values, *,
     val.axis_title.text_frame.text = y_title
     ar = val.axis_title.text_frame.paragraphs[0].runs[0]
     ar.font.name = "Calibri"; ar.font.size = Pt(12)
-    ar.font.bold = True; ar.font.color.rgb = NAVY
+    ar.font.bold = True; ar.font.italic = True
+    ar.font.color.rgb = NAVY
     if y_max is not None:
         val.minimum_scale = y_min
         val.maximum_scale = y_max
@@ -1039,6 +1054,118 @@ def _make_simple_line_chart(slide, x, y, w, h, categories, values, *,
 
     _add_dashed_gridlines(cat._element)
     _add_dashed_gridlines(val._element)
+    return chart_shape
+
+
+def _make_multi_line_chart(slide, x, y, w, h, categories, series, *,
+                             x_title, y_title,
+                             y_min=0, y_max=None, y_unit=None,
+                             legend=True, legend_pos=('0.08', '0.10', '0.20', '0.20')):
+    """Multi-series line+markers chart with the deck's standard styling.
+
+    series: list of (name, values, color: RGBColor, marker: str) tuples.
+    legend_pos: (x, y, w, h) in chart-fraction units (str) – top-left default.
+    """
+    _add_graphicframe_shadow(slide, x, y, w, h)
+    cd = CategoryChartData()
+    cd.categories = list(categories)
+    for name, values, _color, _marker in series:
+        cd.add_series(name, values)
+    chart_shape = slide.shapes.add_chart(
+        XL_CHART_TYPE.LINE,
+        int(x), int(y), int(w), int(h), cd,
+    )
+    chart = chart_shape.chart
+    chart.has_title = False
+    chart.has_legend = legend
+
+    # Per-series styling: line color + marker
+    for idx, ser in enumerate(chart.series):
+        name, values, color, marker = series[idx]
+        line = ser.format.line
+        line.color.rgb = color
+        line.width = Pt(2.5)
+        ser_xml = ser._element
+        clr_hex = f'{color[0]:02X}{color[1]:02X}{color[2]:02X}'
+        for old in ser_xml.findall(qn('c:marker')):
+            ser_xml.remove(old)
+        m = ET.SubElement(ser_xml, qn('c:marker'))
+        sym = ET.SubElement(m, qn('c:symbol')); sym.set('val', marker)
+        sz_el = ET.SubElement(m, qn('c:size')); sz_el.set('val', '7')
+        sp = ET.SubElement(m, qn('c:spPr'))
+        fl = ET.SubElement(sp, qn('a:solidFill'))
+        rg = ET.SubElement(fl, qn('a:srgbClr')); rg.set('val', clr_hex)
+        ln = ET.SubElement(sp, qn('a:ln'))
+        lf = ET.SubElement(ln, qn('a:solidFill'))
+        lr = ET.SubElement(lf, qn('a:srgbClr')); lr.set('val', clr_hex)
+        for sm in ser_xml.findall(qn('c:smooth')):
+            ser_xml.remove(sm)
+        smooth = ET.SubElement(ser_xml, qn('c:smooth'))
+        smooth.set('val', '0')
+
+    # Axes – bold italic navy titles per course style
+    cat = chart.category_axis
+    cat.tick_labels.font.name = "Calibri"
+    cat.tick_labels.font.size = Pt(10)
+    cat.tick_labels.font.color.rgb = NAVY
+    cat.has_title = True
+    cat.axis_title.text_frame.text = x_title
+    ar = cat.axis_title.text_frame.paragraphs[0].runs[0]
+    ar.font.name = "Calibri"; ar.font.size = Pt(12)
+    ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
+
+    val = chart.value_axis
+    val.tick_labels.font.name = "Calibri"
+    val.tick_labels.font.size = Pt(10)
+    val.tick_labels.font.color.rgb = NAVY
+    val.has_title = True
+    val.axis_title.text_frame.text = y_title
+    ar = val.axis_title.text_frame.paragraphs[0].runs[0]
+    ar.font.name = "Calibri"; ar.font.size = Pt(12)
+    ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
+    if y_max is not None:
+        val.minimum_scale = y_min
+        val.maximum_scale = y_max
+    if y_unit is not None:
+        val.major_unit = y_unit
+
+    _add_dashed_gridlines(cat._element)
+    _add_dashed_gridlines(val._element)
+
+    # Legend top-left inside plot with white fill
+    if legend:
+        leg_el = chart.legend._element
+        chart.legend.font.name = "Calibri"
+        chart.legend.font.size = Pt(11)
+        chart.legend.font.color.rgb = NAVY
+        chart.legend.include_in_layout = False
+        # Strip default legendPos / layout, replace
+        for old in leg_el.findall(qn('c:layout')):
+            leg_el.remove(old)
+        for old in leg_el.findall(qn('c:legendPos')):
+            leg_el.remove(old)
+        pos = ET.SubElement(leg_el, qn('c:legendPos')); pos.set('val', 'tr')
+        leg_el.remove(pos); leg_el.insert(0, pos)
+        # manualLayout positions in chart-fraction units
+        layout = ET.Element(qn('c:layout'))
+        ml = ET.SubElement(layout, qn('c:manualLayout'))
+        ET.SubElement(ml, qn('c:xMode')).set('val', 'edge')
+        ET.SubElement(ml, qn('c:yMode')).set('val', 'edge')
+        ET.SubElement(ml, qn('c:x')).set('val', legend_pos[0])
+        ET.SubElement(ml, qn('c:y')).set('val', legend_pos[1])
+        ET.SubElement(ml, qn('c:w')).set('val', legend_pos[2])
+        ET.SubElement(ml, qn('c:h')).set('val', legend_pos[3])
+        pos.addnext(layout)
+        # White fill behind legend
+        for old in leg_el.findall(qn('c:spPr')):
+            leg_el.remove(old)
+        leg_spPr = ET.Element(qn('c:spPr'))
+        sf = ET.SubElement(leg_spPr, qn('a:solidFill'))
+        clr = ET.SubElement(sf, qn('a:srgbClr')); clr.set('val', 'FFFFFF')
+        ln = ET.SubElement(leg_spPr, qn('a:ln')); ln.set('w', '6350')
+        lf = ET.SubElement(ln, qn('a:solidFill'))
+        lc = ET.SubElement(lf, qn('a:srgbClr')); lc.set('val', '0B2B4E')
+        layout.addnext(leg_spPr)
     return chart_shape
 
 
@@ -1353,7 +1480,7 @@ def slide_3(prs):
         prs,
         page_num=3,
         section_tag="Module 3 · Recap",
-        title="Recap of Module 2: Demand and Revenue",
+        title="Last Week:  Demand Curves Set Revenue",
         bullets=bullets,
         size=32, sub_size=24,
         line_spacing_pts=10,
@@ -2039,6 +2166,25 @@ def slide_9(prs):
 # rounding had inadvertently produced increasing marginal returns).
 # --------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------
+# Rivian Georgia plant cost data (from Background Material/Module 3 - Make
+# vs Buy.xlsx).  Quadratic cost function:  TC = TFC + 200 · Q²,  TFC = $800K.
+# Q grid:  10, 20, …, 110 vehicles per week.  Drives the native cost charts
+# on slides 55, 56, 57 so all three are consistent and locked to one source.
+# --------------------------------------------------------------------------
+
+COST_TFC = 800_000
+COST_VAR_COEF = 200
+COST_Q_VALS = list(range(10, 111, 10))
+
+def _cost_tc(Q):  return COST_TFC + COST_VAR_COEF * Q * Q
+def _cost_tvc(Q): return COST_VAR_COEF * Q * Q
+def _cost_avc(Q): return COST_VAR_COEF * Q
+def _cost_atc(Q): return _cost_tc(Q) / Q
+def _cost_mc(Q, dQ=10):
+    return (_cost_tc(Q + dQ) - _cost_tc(Q)) / dQ
+
+
 PF_A, PF_ALPHA, PF_BETA = 0.5, 0.5, 0.5
 PF_K_VALS = [100, 200, 300, 400]
 PF_L_VALS = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
@@ -2054,6 +2200,84 @@ def _pf_value(K, L):
 def _pf_table():
     """Full Q matrix indexed [row=L_index][col=K_index]."""
     return [[_pf_value(K, L) for K in PF_K_VALS] for L in PF_L_VALS]
+
+
+def _add_compact_pf_table(slide, *, tbl_left, tbl_top, col_w_label=Inches(0.72),
+                            col_w_data=Inches(0.55),
+                            tbl_h=Inches(3.70),
+                            font_size=11,
+                            caption="Production-function table  (slide 10)",
+                            with_axes=True):
+    """Insert the compact production-function table (same data as slide 10),
+    with a drop-shadow rect behind and optional K/L axis labels + caption.
+
+    Returns the table_shape so callers can position related elements.
+    """
+    Q_t = _pf_table()
+    header_row = [""] + [str(K) for K in PF_K_VALS]
+    rows_data = [header_row]
+    for ri, L in enumerate(PF_L_VALS):
+        rows_data.append([f"{L:,}"] + [str(v) for v in Q_t[ri]])
+
+    rows = len(rows_data); cols = len(rows_data[0])
+    tbl_w = col_w_label + col_w_data * 4
+
+    _add_graphicframe_shadow(slide, tbl_left, tbl_top, tbl_w, tbl_h)
+    tshape = slide.shapes.add_table(rows, cols, int(tbl_left), int(tbl_top),
+                                      int(tbl_w), int(tbl_h))
+    tbl = tshape.table
+    tbl.columns[0].width = col_w_label
+    for c in range(1, cols):
+        tbl.columns[c].width = col_w_data
+
+    for r, row in enumerate(rows_data):
+        for c, val in enumerate(row):
+            cell = tbl.cell(r, c)
+            cell.margin_left = Inches(0.06)
+            cell.margin_right = Inches(0.06)
+            cell.margin_top = Inches(0.01)
+            cell.margin_bottom = Inches(0.01)
+            cell.text = str(val)
+            for p in cell.text_frame.paragraphs:
+                p.alignment = PP_ALIGN.CENTER
+                for run in p.runs:
+                    run.font.name = "Calibri"
+                    run.font.size = Pt(font_size)
+                    if r == 0 or c == 0:
+                        run.font.bold = True
+                        run.font.color.rgb = WHITE
+                    else:
+                        run.font.color.rgb = NAVY
+            if r == 0 or c == 0:
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = NAVY
+            else:
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = WHITE
+
+    if caption:
+        _add_text(slide,
+                   tbl_left, tbl_top + tbl_h + Inches(0.08),
+                   tbl_w, Inches(0.25),
+                   caption,
+                   size=11, italic=True, color=GRAY,
+                   align=PP_ALIGN.CENTER, font="Calibri")
+
+    if with_axes:
+        _add_text(slide,
+                   tbl_left + col_w_label, tbl_top - Inches(0.30),
+                   col_w_data * 4, Inches(0.25),
+                   "K  (robots)",
+                   size=10, italic=True, color=NAVY,
+                   align=PP_ALIGN.CENTER, font="Calibri")
+        _add_text(slide,
+                   tbl_left - Inches(0.75), tbl_top + tbl_h / 2 - Inches(0.15),
+                   Inches(0.70), Inches(0.30),
+                   "L  (workers)",
+                   size=10, italic=True, color=NAVY,
+                   align=PP_ALIGN.RIGHT,
+                   anchor=MSO_ANCHOR.MIDDLE, font="Calibri")
+    return tshape
 
 
 # --------------------------------------------------------------------------
@@ -2377,7 +2601,7 @@ def slide_11(prs):
         cat.axis_title.text_frame.text = "Number of Workers"
         ar = cat.axis_title.text_frame.paragraphs[0].runs[0]
         ar.font.name = "Calibri"; ar.font.size = Pt(14)
-        ar.font.bold = True; ar.font.color.rgb = NAVY
+        ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
 
         # Light-grey dashed vertical gridlines at each category tick
         # (1,000 / 2,000 / … / 10,000 workers). Schema order: majorGridlines
@@ -2409,7 +2633,7 @@ def slide_11(prs):
         val.axis_title.text_frame.text = "Cars per Week"
         ar = val.axis_title.text_frame.paragraphs[0].runs[0]
         ar.font.name = "Calibri"; ar.font.size = Pt(14)
-        ar.font.bold = True; ar.font.color.rgb = NAVY
+        ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
 
         # Light-grey dashed horizontal gridlines at each value tick
         # (100, 200, … 1000 cars per week).
@@ -3154,12 +3378,17 @@ def slide_16(prs):
         htf.margin_left = Inches(0.15); htf.margin_right = Inches(0.15)
         htf.margin_top = Inches(0.05);  htf.margin_bottom = Inches(0.05)
         htf.word_wrap = True
+        # Concept-accent blue for the concept name (per course CLAUDE.md);
+        # remaining text white bold.
+        CONCEPT_ACCENT = RGBColor(0x9E, 0xC5, 0xF7)   # soft light-blue
         p1 = htf.paragraphs[0]
         p1.alignment = PP_ALIGN.CENTER
-        r = p1.add_run()
-        r.text = "MRPL  =  Marginal Revenue Product of Labor"
-        r.font.name = "Calibri"; r.font.size = Pt(28); r.font.bold = True
-        r.font.color.rgb = WHITE
+        r0 = p1.add_run(); r0.text = "MRPL  =  "
+        r0.font.name = "Calibri"; r0.font.size = Pt(28); r0.font.bold = True
+        r0.font.color.rgb = WHITE
+        r1 = p1.add_run(); r1.text = "Marginal Revenue Product of Labor"
+        r1.font.name = "Calibri"; r1.font.size = Pt(28); r1.font.bold = True
+        r1.font.color.rgb = CONCEPT_ACCENT
         p2 = htf.add_paragraph()
         p2.alignment = PP_ALIGN.CENTER
         p2.space_before = Pt(4)
@@ -3229,21 +3458,20 @@ def slide_16(prs):
         rb.text = "      Even at constant price, each additional worker is worth less"
         rb.font.name = "Calibri"; rb.font.size = Pt(13); rb.font.italic = True
         rb.font.color.rgb = NAVY
-        # Bullet 2
+        # Bullet 2 (trimmed for 5–10 word target)
         pb2 = dtf.add_paragraph()
         pb2.alignment = PP_ALIGN.LEFT
         pb2.space_before = Pt(6)
         rb = pb2.add_run()
-        rb.text = ("•  Decreasing MPL  ⇒  As you hire more workers at a given "
-                    "capital K, the economic value of a marginal hire shrinks")
+        rb.text = "•  Decreasing MPL  ⇒  each marginal hire is worth less"
         rb.font.name = "Calibri"; rb.font.size = Pt(15); rb.font.bold = True
         rb.font.color.rgb = NAVY
-        # Bullet 3 — price-taker simplification
+        # Bullet 3 — price-taker simplification (trimmed)
         pb3 = dtf.add_paragraph()
         pb3.alignment = PP_ALIGN.LEFT
         pb3.space_before = Pt(6)
         rb = pb3.add_run()
-        rb.text = ("•  For price takers, MR = P,  and thus  MRPL = P × MPL")
+        rb.text = "•  Price-taker case:  MR = P,  so  MRPL = P × MPL"
         rb.font.name = "Calibri"; rb.font.size = Pt(15); rb.font.bold = True
         rb.font.color.rgb = NAVY
 
@@ -3359,8 +3587,8 @@ def slide_18(prs):
     """
     def draw(slide):
         bullets = [
-            "Rivian currently has 100 robots and 6,000 employees in its Normal, IL plant",
-            "Current price is $80k, and you may assume that P is approximately constant in quantity",
+            "Rivian:  100 robots and 6,000 employees in its Normal, IL plant",
+            "Price ~$80k per R1T,  approximately constant in quantity",
             ("What is MRPL?  (in $ per worker, per week)", 0),
             ("Hint:", 0),
             ("MRPL  =  MR × MPL  ≈  P × MPL", 1),
@@ -3374,84 +3602,11 @@ def slide_18(prs):
             size=22, sub_size=18, line_spacing_pts=10,
         )
 
-        # ---- Compact production-function table (re-use of slide 10 data) ----
-        # Same Q values as slide 10, but smaller font + tighter columns so
-        # it fits the right-hand pane.
-        Q_t = _pf_table()
-        header_row = [""] + [str(K) for K in PF_K_VALS]
-        rows_data = [header_row]
-        for ri, L in enumerate(PF_L_VALS):
-            rows_data.append([f"{L:,}"] + [str(v) for v in Q_t[ri]])
+        # ---- Compact production-function table (same data as slide 10) ----
+        _add_compact_pf_table(slide,
+                               tbl_left=Inches(9.55), tbl_top=Inches(2.30))
 
-        rows = len(rows_data); cols = len(rows_data[0])
-        col_w_label = Inches(0.72)
-        col_w_data  = Inches(0.55)
-        tbl_w = col_w_label + col_w_data * 4         # 2.92"
-        tbl_h = Inches(3.70)
-        tbl_top = Inches(2.30)
-        tbl_left = Inches(9.55)                      # right-aligned column
-
-        # Soft drop-shadow rectangle behind the table.
-        _add_graphicframe_shadow(slide, tbl_left, tbl_top, tbl_w, tbl_h)
-
-        tshape = slide.shapes.add_table(rows, cols, int(tbl_left), int(tbl_top),
-                                          int(tbl_w), int(tbl_h))
-        tbl = tshape.table
-        tbl.columns[0].width = col_w_label
-        for c in range(1, cols):
-            tbl.columns[c].width = col_w_data
-
-        for r, row in enumerate(rows_data):
-            for c, val in enumerate(row):
-                cell = tbl.cell(r, c)
-                cell.margin_left = Inches(0.06)
-                cell.margin_right = Inches(0.06)
-                cell.margin_top = Inches(0.01)
-                cell.margin_bottom = Inches(0.01)
-                cell.text = str(val)
-                for p in cell.text_frame.paragraphs:
-                    p.alignment = PP_ALIGN.CENTER
-                    for run in p.runs:
-                        run.font.name = "Calibri"
-                        run.font.size = Pt(11)
-                        if r == 0 or c == 0:
-                            run.font.bold = True
-                            run.font.color.rgb = WHITE
-                        else:
-                            run.font.color.rgb = NAVY
-                if r == 0 or c == 0:
-                    cell.fill.solid()
-                    cell.fill.fore_color.rgb = NAVY
-                else:
-                    cell.fill.solid()
-                    cell.fill.fore_color.rgb = WHITE
-        # Tiny caption above the table
-        # Caption now sits BELOW the table (was above).
-        _add_text(slide,
-                   tbl_left, tbl_top + tbl_h + Inches(0.08),
-                   tbl_w, Inches(0.25),
-                   "Production-function table  (slide 10)",
-                   size=11, italic=True, color=GRAY,
-                   align=PP_ALIGN.CENTER, font="Calibri")
-        # K-axis label (small) just above the data columns
-        _add_text(slide,
-                   tbl_left + col_w_label, tbl_top - Inches(0.30),
-                   col_w_data * 4, Inches(0.25),
-                   "K  (robots)",
-                   size=10, italic=True, color=NAVY,
-                   align=PP_ALIGN.CENTER, font="Calibri")
-        # L-axis label (small) – rotated would be ideal, but a small label to
-        # the left of the table works for an EMBA audience.
-        _add_text(slide,
-                   tbl_left - Inches(0.75), tbl_top + tbl_h / 2 - Inches(0.15),
-                   Inches(0.70), Inches(0.30),
-                   "L  (workers)",
-                   size=10, italic=True, color=NAVY,
-                   align=PP_ALIGN.RIGHT,
-                   anchor=MSO_ANCHOR.MIDDLE, font="Calibri")
-
-        # "Discussion break" badge (bottom-right) — now uses the redesigned
-        # rounded shape with shadow and navy text.
+        # Discussion-break badge (rounded-parallelogram, bottom-right)
         _add_discussion_break(slide, top=Inches(6.55), width=Inches(4.8))
 
     s = make_diagram_slide(
@@ -3561,51 +3716,63 @@ def slide_21(prs):
 
 
 def slide_22(prs):
-    """The optimal hiring rule: MRPL = w.
+    """The optimal hiring rule: MRPL = w   (merged with old slide 21).
 
-    Layout: bullets on the left, MRPL/wage graph on the right with a
-    "Revenue per car" annotation callout pointing at the MRPL curve.
+    Bullets on the left walk through the marginal-analysis logic;
+    the chart on the right shows MRPL declining with L, the wage as
+    a horizontal line, and the intersection at L*.
     """
+    import math
     def draw(slide):
-        # Bullets on the left
+        # ---- Bullets (merged from slides 21 + 22) ----
         bullets = [
-            ("Compute MRPL as a function of L", 0),
-            ("Use the MPL function above:  MRPL = MPL × $80k", 1),
-            ("Plot the wage line  (constant at  w )", 0),
-            ("Optimum: hire L*  where  MRPL = w", 0),
+            ("Should Rivian hire more workers?", 0),
+            ("Suppose the weekly wage is $1,400 per worker", 1),
+            ("Hiring one more worker:", 0),
+            ("Revenue rises by MRPL", 1),
+            ("Wage bill rises by w", 1),
+            ("Profit rises whenever MRPL > w", 1),
+            ("Optimum:  hire L*  where  MRPL = w", 0),
         ]
         _add_hierarchical_bullets(
             slide,
-            left=MARGIN, top=Inches(2.0),
-            width=Inches(6.0), height=Inches(4.0),
+            left=MARGIN, top=Inches(1.85),
+            width=Inches(6.0), height=Inches(4.30),
             items=bullets,
-            size=22, sub_size=18, line_spacing_pts=14,
+            size=20, sub_size=16, line_spacing_pts=8,
         )
 
-        # MRPL / wage graph on the right
-        _add_source_image(slide, 22, "rId4",
-                           left=Inches(6.6), top=Inches(2.0),
-                           width=Inches(6.4))
+        # ---- Native MRPL / wage chart on the right ----
+        # Continuous MPL formula for K = 100:  MPL = 0.25·√K / √L  =  2.5/√L
+        # MRPL = $80,000 × MPL = $200,000 / √L  (in dollars / worker / week).
+        # L grid: 1k, 3k, 5k, …, 25k → 13 points.  Wage $1,400 constant.
+        L_vals = list(range(1000, 25001, 2000))
+        K_FIX = 100
+        mrpl_vals = [int(round(80000 * 0.25 * math.sqrt(K_FIX) / math.sqrt(L)))
+                      for L in L_vals]
+        wage_vals = [1400] * len(L_vals)
+        cats = [f"{L//1000}k" for L in L_vals]
 
-        # "Revenue per car (sale price)" callout pointing at the MRPL curve
-        _add_callout_box(slide,
-                          left=Inches(10.5), top=Inches(2.1),
-                          width=Inches(2.5), height=Inches(0.7),
-                          text="Revenue per car\n(sale price ~$80k)",
-                          fill=GOLD, text_color=NAVY,
-                          size=11, bold=True)
-        _add_arrow(slide,
-                    start_xy=(Inches(11.4), Inches(2.8)),
-                    end_xy=(Inches(10.6), Inches(3.4)),
-                    color=GOLD, weight_pt=1.5, head=True)
+        _make_multi_line_chart(
+            slide,
+            Inches(6.55), Inches(1.85),
+            Inches(6.50), Inches(4.30),
+            categories=cats,
+            series=[
+                ("MRPL", mrpl_vals, NAVY, 'circle'),
+                ("Wage (w)", wage_vals, GOLD, 'square'),
+            ],
+            x_title="L   (workers)",
+            y_title="$ per worker per week",
+            y_min=0, y_max=7000, y_unit=1000,
+            legend_pos=('0.74', '0.06', '0.22', '0.20'),
+        )
 
-        # Bottom anchor: MB = MC star next to the rule statement.
-        # Same star pattern as the concept map – this rule IS the labor
-        # case of MB = MC, and the visual recurs across the deck.
+        # ---- Bottom: MB = MC anchor + rule statement ----
         star_w = Inches(1.6)
         star_h = Inches(1.05)
         star_x = MARGIN
-        star_y = Inches(6.20)
+        star_y = Inches(6.30)
         _add_anchor_burst(
             slide, star_x, star_y, star_w, star_h,
             top_text="MB = MC",
@@ -3616,17 +3783,17 @@ def slide_22(prs):
         bar_x = star_x + star_w + Inches(0.25)
         bar_w = Inches(10.6)
         _add_filled_box(
-            slide, bar_x, Inches(6.45), bar_w, Inches(0.55),
+            slide, bar_x, Inches(6.50), bar_w, Inches(0.55),
             "Optimum:  L*  where  MRPL  =  w",
             fill=NAVY, text_color=WHITE, size=20, bold=True,
         )
         _add_arrow(slide,
                     (star_x + star_w, star_y + star_h // 2),
-                    (bar_x, Inches(6.45) + Inches(0.275)),
+                    (bar_x, Inches(6.50) + Inches(0.275)),
                     color=GOLD, weight_pt=2.0, head=True)
 
     s = make_diagram_slide(
-        prs, page_num=22,
+        prs, page_num=21,
         section_tag=SECTION_TAG_P1,
         title="The Optimal Hiring Rule:  MRPL = w",
         draw_diagram=draw,
@@ -3658,7 +3825,7 @@ def slide_23(prs):
         ("Term:  the firm is a wage searcher  (not a wage taker)", 0),
     ]
     s = make_content_bulleted(
-        prs, page_num=23,
+        prs, page_num=22,
         section_tag=SECTION_TAG_WAGE,
         title="Caution:  Wages Are Not Always Constant",
         bullets=bullets,
@@ -3688,7 +3855,7 @@ def slide_24(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(10.5))
 
     s = make_content_bulleted(
-        prs, page_num=24,
+        prs, page_num=23,
         section_tag=SECTION_TAG_WAGE,
         title="Big Employers Bid Their Own Wages Up",
         bullets=bullets,
@@ -3716,7 +3883,7 @@ def slide_25(prs):
                    align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=25,
+        prs, page_num=24,
         section_tag=SECTION_TAG_WAGE,
         title="Salary Comparisons across Firm Size",
         draw_diagram=draw,
@@ -3762,7 +3929,7 @@ def slide_26(prs):
                            width=Inches(10.0))
 
     s = make_diagram_slide(
-        prs, page_num=26,
+        prs, page_num=25,
         section_tag=SECTION_TAG_WAGE,
         title="Example:  The Full Cost of Poaching an AI Researcher",
         draw_diagram=draw,
@@ -3788,7 +3955,7 @@ def slide_27(prs):
                    align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=27,
+        prs, page_num=26,
         section_tag=SECTION_TAG_WAGE,
         title="What Is the Full Marginal Cost of the New Researcher?",
         draw_diagram=draw,
@@ -3831,7 +3998,7 @@ def slide_28(prs):
                            width=Inches(11.0))
 
     s = make_diagram_slide(
-        prs, page_num=28,
+        prs, page_num=27,
         section_tag=SECTION_TAG_WAGE,
         title="Solution:  Marginal Cost of the 3rd Researcher = $8M",
         draw_diagram=draw,
@@ -3863,7 +4030,7 @@ def slide_29(prs):
                          size=18, bold=True)
 
     s = make_diagram_slide(
-        prs, page_num=29,
+        prs, page_num=28,
         section_tag=SECTION_TAG_WAGE,
         title="Are Real-World Wages = MRPL?",
         draw_diagram=draw,
@@ -3883,7 +4050,7 @@ def slide_30(prs):
     with an action title signalling the sub-section transition.
     """
     s = make_section_agenda(
-        prs, page_num=30,
+        prs, page_num=29,
         current_part_idx=0,
         section_tag=SECTION_TAG_DIV,
         title="Part 1.2:  Long Run – Choosing the Right Input Mix",
@@ -3930,9 +4097,9 @@ def slide_31(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(10.0))
 
     s = make_diagram_slide(
-        prs, page_num=31,
+        prs, page_num=30,
         section_tag=SECTION_TAG_LR,
-        title="Now:  Long Run – Rivian Builds a New Georgia Plant",
+        title="Long Run:  Rivian Builds a New Georgia Plant",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -3978,7 +4145,7 @@ def slide_32(prs):
                             top=Inches(6.5), width=Inches(7.5))
 
     s = make_diagram_slide(
-        prs, page_num=32,
+        prs, page_num=31,
         section_tag=SECTION_TAG_LR,
         title="Optimal Combination of Inputs",
         draw_diagram=draw,
@@ -4028,7 +4195,7 @@ def slide_33(prs):
                            width=Inches(11.5), size=18)
 
     s = make_diagram_slide(
-        prs, page_num=33,
+        prs, page_num=32,
         section_tag=SECTION_TAG_LR,
         title="The 'Bang for the Buck' Rule:  Equalize MP per Dollar",
         draw_diagram=draw,
@@ -4176,7 +4343,7 @@ def slide_34(prs):
                             top=Inches(6.5), width=Inches(6.5))
 
     s = make_diagram_slide(
-        prs, page_num=34,
+        prs, page_num=33,
         section_tag=SECTION_TAG_LR,
         title="Applying the Rule – Recipe for Exams",
         draw_diagram=draw,
@@ -4230,46 +4397,58 @@ def slide_35(prs):
                            width=Inches(10.5))
 
     s = make_diagram_slide(
-        prs, page_num=35,
+        prs, page_num=34,
         section_tag=SECTION_TAG_LR,
         title="Example:  Rivian's New Georgia Plant",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Real data from Rivian's Georgia plant project. We'll apply the "
-        "bang-for-the-buck rule to actual numbers and see whether the "
-        "current mix is optimal."
+        "Rivian announced a second US assembly plant in Social Circle, "
+        "Georgia, in late 2022 – a ~$5B project meant to add ~400,000 "
+        "vehicles per year of capacity once it ramps.  We'll apply the "
+        "bang-for-the-buck rule to a stylised version of those plans:  "
+        "robots vs. workers,  given each input's price and marginal "
+        "product.  The numbers I'll use are illustrative, calibrated to "
+        "give a clean teaching example;  the strategic point is what to "
+        "do when the two MP/price ratios are not yet equal."
     ))
 
 
 def slide_36(prs):
-    """Is Rivian's current plan optimal? (production function)."""
+    """Is Rivian's current plan optimal? (production function).
+
+    Uses the SAME compact production-function table as slide 18, so all
+    downstream calculations (MPL, MPK, the bang-for-the-buck ratio on
+    slide 39) read off one consistent data source.  At K = 200, L = 5,000
+    the table gives Q = 500 vehicles/week – matching the slide narrative.
+    """
     def draw(slide):
         bullets = [
             ("The production function at Rivian's new plant:", 0),
-            ("Current mix to produce 500 vehicles per week:  200 robots, 5,000 workers", 0),
+            ("Current mix to produce 500 vehicles/week:  200 robots, 5,000 workers", 0),
+            ("Read Q at K = 200, L = 5,000 in the table  →  Q = 500", 1),
             ("Other input mixes are possible — which is best?", 0),
         ]
         _add_hierarchical_bullets(
             slide,
             left=MARGIN, top=Inches(1.85),
-            width=Inches(6.5), height=Inches(3.0),
+            width=Inches(7.0), height=Inches(3.5),
             items=bullets,
             size=20, sub_size=18, line_spacing_pts=10,
         )
 
-        # Production function picture on the right
-        _add_source_image(slide, 36, "rId4",
-                           left=Inches(7.5), top=Inches(1.9),
-                           width=Inches(5.5))
+        # Same compact production-function table as slide 18 — locks the
+        # downstream calculations to the slide-10 data.
+        _add_compact_pf_table(slide,
+                               tbl_left=Inches(9.55), tbl_top=Inches(2.30))
 
-        # Bottom takeaway
         _add_takeaway_bar(slide,
                            "Compare MP per dollar across inputs at the current mix",
-                           top=Inches(6.5), fill=NAVY, width=Inches(10.0))
+                           top=Inches(6.55), fill=NAVY, text_color=WHITE,
+                           width=Inches(11.0))
 
     s = make_diagram_slide(
-        prs, page_num=36,
+        prs, page_num=35,
         section_tag=SECTION_TAG_LR,
         title="Is Rivian's Current Plan Optimal?  (Production Function)",
         draw_diagram=draw,
@@ -4325,7 +4504,7 @@ def slide_37(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(10.0))
 
     s = make_diagram_slide(
-        prs, page_num=37,
+        prs, page_num=36,
         section_tag=SECTION_TAG_LR,
         title="Is Rivian's Current Plan Optimal?  (Analysis)",
         draw_diagram=draw,
@@ -4349,15 +4528,19 @@ def slide_38(prs):
                    align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=38,
+        prs, page_num=37,
         section_tag=SECTION_TAG_LR,
         title="Is Rivian's Input Mix Optimal?",
         draw_diagram=draw,
     )
     _draw_poll_pill(s)
     _set_notes(s, (
-        "PollEv – vote on whether Rivian's current mix is optimal. Some "
-        "will say yes, some no. Reveal in the next slide."
+        "Quick PollEv.  Looking at the numbers on the previous slide – "
+        "200 robots and 5,000 workers producing 500 R1Ts/week, with the "
+        "MP values given – is the current mix optimal?  Give them 30 "
+        "seconds to think through the bang-for-the-buck ratios.  Some "
+        "will say yes, some no;  reveal in the next slide.  The point "
+        "isn't the vote count, it's the active calculation."
     ))
 
 
@@ -4428,7 +4611,7 @@ def slide_39(prs):
                            width=Inches(9.5))
 
     s = make_diagram_slide(
-        prs, page_num=39,
+        prs, page_num=38,
         section_tag=SECTION_TAG_LR,
         title="Solution:  The Optimal Input Mix",
         draw_diagram=draw,
@@ -4528,7 +4711,7 @@ def slide_40(prs):
                            width=Inches(12.0), size=18)
 
     s = make_diagram_slide(
-        prs, page_num=40,
+        prs, page_num=39,
         section_tag=SECTION_TAG_LR,
         title="When Prices Change, the Input Mix Shifts:  Robot Tax & Union Wages",
         draw_diagram=draw,
@@ -4574,7 +4757,7 @@ def slide_41(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(9.0))
 
     s = make_diagram_slide(
-        prs, page_num=41,
+        prs, page_num=40,
         section_tag=SECTION_TAG_LR,
         title="'Bang for the Buck' in Grocery Shopping",
         draw_diagram=draw,
@@ -4590,7 +4773,7 @@ def slide_41(prs):
 def slide_42(prs):
     """Section divider – Part 2: Costs."""
     s = make_section_agenda(
-        prs, page_num=42,
+        prs, page_num=41,
         current_part_idx=1,        # Part 2 now active
         section_tag=SECTION_TAG_DIV,
         title="Part 2:  Costs – Producing at the Lowest Price",
@@ -4655,9 +4838,9 @@ def slide_43(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=43,
+        prs, page_num=42,
         section_tag=SECTION_TAG_P2,
-        title="Cost Types:  Fixed,  Sunk,  Variable",
+        title="Three Cost Types,  Three Different Decision Rules",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -4694,10 +4877,12 @@ def slide_44(prs):
             size=20, bold=True, line_w=1.5,
         )
 
-        # Cost breakdown for own car
-        _add_text(slide, MARGIN, Inches(4.05), RULE_W, Inches(0.4),
+        # Cost breakdown — 4 cost boxes positioned UNDER the "Your own car"
+        # option (per-mile costs only apply to that scenario, not to the
+        # company-car alternative).
+        _add_text(slide, start_x, Inches(4.05), opt_w, Inches(0.35),
                   "Costs associated with your car  (per mile driven):",
-                  size=18, italic=True, color=GRAY, font="Calibri",
+                  size=14, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
         costs = [
             ("20¢", "insurance"),
@@ -4705,21 +4890,21 @@ def slide_44(prs):
             ("15¢", "electricity"),
             ("45¢", "lease on the vehicle"),
         ]
-        cost_w = Inches(2.85)
-        cost_h = Inches(1.1)
-        gap2 = Inches(0.1)
-        total_cw = cost_w * 4 + gap2 * 3
-        cx0 = (SLIDE_W - total_cw) // 2
+        # 2 × 2 grid under the LEFT option box (Your own car)
+        cost_w = (opt_w - Inches(0.10)) // 2
+        cost_h = Inches(0.75)
         for i, (amt, lbl) in enumerate(costs):
-            cx = cx0 + (cost_w + gap2) * i
+            row, col = divmod(i, 2)
+            cx = start_x + col * (cost_w + Inches(0.10))
+            cy = Inches(4.45) + row * (cost_h + Inches(0.10))
             _add_filled_box(
-                slide, cx, Inches(4.55), cost_w, cost_h,
-                f"{amt}\n{lbl}",
+                slide, cx, cy, cost_w, cost_h,
+                f"{amt}   {lbl}",
                 fill=NAVY, text_color=WHITE,
-                size=18, bold=True,
+                size=15, bold=True,
             )
 
-        # Question + Discussion break
+        # Question + Discussion-break badge in the corner
         _add_text(slide, MARGIN, Inches(5.95), RULE_W, Inches(0.45),
                   "Should you use your own car or the company car?",
                   size=22, bold=True, color=NAVY, font="Calibri",
@@ -4727,7 +4912,7 @@ def slide_44(prs):
         _add_discussion_break(slide, top=Inches(6.55), width=Inches(4.8))
 
     s = make_diagram_slide(
-        prs, page_num=44,
+        prs, page_num=43,
         section_tag=SECTION_TAG_P2,
         title="Group Work:  Your Car or the Company Car?",
         draw_diagram=draw,
@@ -4759,7 +4944,7 @@ def slide_45(prs):
                   align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=45,
+        prs, page_num=44,
         section_tag=SECTION_TAG_P2,
         title="Why Studios Finish Movies They Know Will Flop:  Waterworld",
         draw_diagram=draw,
@@ -4781,62 +4966,81 @@ def slide_46(prs):
     cleaner 3-column matrix.
     """
     def draw(slide):
-        # Three scenarios: Optimistic / Neutral / Pessimistic
+        # Three decision points during Waterworld's production – using the
+        # original-deck data (sunk vs. expected-additional cost at each
+        # point, with $150M expected revenue throughout).
+        # Header (date) | Sunk | Additional | Overall | Revenue | Profit | Decision
         scenarios = [
-            ("Optimistic",  150, 16,  100, "+50", "Make the film!"),
-            ("Neutral",     150, 100, 140, "+10", "Make the film!"),
-            ("Pessimistic", 150, 140, 175, "−25", "Make the film!"),
+            ("June 1994",       16,  84, 100, 150, "+50", "Make!"),
+            ("September 1994", 100,  40, 140, 150, "+10", "Make!"),
+            ("December 1994",  140,  35, 175, 150, "−25", "Make!"),
         ]
         col_w = Inches(3.9)
         col_gap = Inches(0.2)
         col_x0 = (SLIDE_W - col_w * 3 - col_gap * 2) // 2
 
-        # Row headers down the left
-        labels = [
-            "Scenario",
-            "Sunk cost  (already spent, $M)",
-            "Extra cost to release  ($M)",
-            "Expected revenue if released  ($M)",
-            "Net  (release vs. shelve)",
+        # Small row-label column on the LEFT (outside the 3-column grid)
+        row_labels = [
+            "",
+            "Sunk cost  ($M)",
+            "Expected additional cost  ($M)",
+            "Overall cost incl. sunk  ($M)",
+            "Expected revenue  ($M)",
+            "Expected profit  ($M)",
             "Decision",
         ]
+        # The 3-column scenario block fits; row labels appear as a faint
+        # caption strip running down between the divider and the leftmost
+        # column.  Display them as italic gray text positioned to the left.
+        label_w = Inches(0.05)   # not used – we render labels at the leftmost
+        row_y = [Inches(1.85), Inches(2.40), Inches(3.10),
+                  Inches(3.80), Inches(4.50), Inches(5.20),
+                  Inches(5.90)]
+
+        # Render the 3-column data
         for j, sc in enumerate(scenarios):
             x = col_x0 + (col_w + col_gap) * j
-            # Header row (band)
+            # Column header (date band)
             _add_filled_box(
-                slide, x, Inches(1.85), col_w, Inches(0.55),
+                slide, x, row_y[0], col_w, Inches(0.50),
                 sc[0], fill=NAVY, text_color=WHITE,
                 size=20, bold=True,
             )
-            # 4 number rows
-            vals = [
-                f"{sc[1]}",           # sunk
-                f"{sc[3]}",           # extra cost to release
-                f"{sc[2]} (vs. {sc[1]})" if False else f"{sc[2]}",  # revenue
-                sc[4],                # net
-            ]
-            for i, v in enumerate(vals):
+            # 5 number rows
+            cells = [str(sc[1]), str(sc[2]), str(sc[3]), str(sc[4]), sc[5]]
+            for i, v in enumerate(cells):
                 _add_outlined_box(
-                    slide, x, Inches(2.4 + i * 0.7), col_w, Inches(0.6),
+                    slide, x, row_y[i + 1], col_w, Inches(0.60),
                     v, fill=WHITE, line=NAVY, text_color=NAVY,
-                    size=20, bold=False, line_w=1.0,
+                    size=18, bold=False, line_w=1.0,
                 )
-            # Decision band
+            # Decision band (gold)
             _add_filled_box(
-                slide, x, Inches(5.25), col_w, Inches(0.65),
-                sc[5], fill=GOLD, text_color=NAVY,
+                slide, x, row_y[6], col_w, Inches(0.55),
+                sc[6], fill=GOLD, text_color=NAVY,
                 size=20, bold=True,
             )
+
+        # Row-label captions on the left (width is already in EMU)
+        label_w = col_x0 - MARGIN - Inches(0.10)
+        for i, lbl in enumerate(row_labels):
+            if not lbl: continue
+            _add_text(slide, MARGIN, row_y[i], label_w,
+                       Inches(0.60),
+                       lbl, size=12, italic=True, color=GRAY,
+                       align=PP_ALIGN.RIGHT,
+                       anchor=MSO_ANCHOR.MIDDLE, font="Calibri")
 
         # Bottom takeaway
         _add_takeaway_bar(
             slide,
-            "Sunk costs are sunk  —  release whenever  revenue  >  marginal release cost",
-            top=Inches(6.45), fill=NAVY, width=Inches(11.5),
+            "Sunk costs are sunk  —  continue whenever  revenue  >  additional cost",
+            top=Inches(6.60), fill=NAVY, text_color=WHITE,
+            width=Inches(11.5), size=18,
         )
 
     s = make_diagram_slide(
-        prs, page_num=46,
+        prs, page_num=45,
         section_tag=SECTION_TAG_P2,
         title="Waterworld:  Three Scenarios,  Same Decision",
         draw_diagram=draw,
@@ -4888,7 +5092,7 @@ def slide_47(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=47,
+        prs, page_num=46,
         section_tag=SECTION_TAG_P2,
         title="Modern Sunk Cost:  Meta's Reality Labs Has Lost $50B+ Since 2020",
         draw_diagram=draw,
@@ -4937,7 +5141,7 @@ def slide_48(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=48,
+        prs, page_num=47,
         section_tag=SECTION_TAG_P2,
         title="Opportunity Cost Is a Real Cost:  Apple's Canceled Apple Car",
         draw_diagram=draw,
@@ -4952,21 +5156,100 @@ def slide_48(prs):
 
 
 def slide_49(prs):
-    """Dictionary of costs – the cheat-sheet taxonomy."""
-    def draw(slide):
-        # Use the source taxonomy image; it's a clean diagram of all 6 cost
-        # types organized hierarchically.
-        _add_source_image(slide, 49, "rId3",
-                          left=Inches(2.0), top=Inches(1.85),
-                          width=Inches(9.3))
+    """Dictionary of costs – native three-card cheat sheet.
 
-        _add_text(slide, MARGIN, Inches(6.55), RULE_W, Inches(0.4),
-                  "Cheat-sheet to refer back to for the rest of the module",
-                  size=18, italic=True, color=GRAY, font="Calibri",
+    Same formulas and labels as the source image, restyled to the deck's
+    NAVY/GOLD palette with OMML rendering for each headline formula.
+    """
+    def draw(slide):
+        # Three-card row: Total / Average / Marginal cost.
+        col_w = Inches(4.05)
+        col_gap = Inches(0.15)
+        col_x0 = (SLIDE_W - col_w * 3 - col_gap * 2) // 2
+        hdr_y = Inches(1.85)
+        hdr_h = Inches(0.55)
+        formula_y = hdr_y + hdr_h + Inches(0.10)
+        formula_h = Inches(0.95)
+        subs_y = formula_y + formula_h + Inches(0.15)
+
+        # Card 1 — Total Cost
+        x = col_x0
+        _add_filled_box(slide, x, hdr_y, col_w, hdr_h,
+                        "Total Cost", fill=NAVY, text_color=WHITE,
+                        size=22, bold=True)
+        _add_math_equation(
+            slide, x, formula_y, col_w, formula_h,
+            _omml_text('TC = TFC + TVC'),
+            size_pt=22, color=NAVY, fill=RGBColor(0xFD, 0xF6, 0xE6),
+            line=NAVY,
+        )
+        _add_hierarchical_bullets(
+            slide,
+            left=x + Inches(0.15), top=subs_y,
+            width=col_w - Inches(0.30), height=Inches(2.80),
+            items=[
+                ("TFC = Total Fixed Cost", 0),
+                ("(ignore sunk costs)", 1),
+                ("TVC = Total Variable Cost", 0),
+            ],
+            size=15, sub_size=12, line_spacing_pts=8,
+        )
+
+        # Card 2 — Average Cost
+        x = col_x0 + col_w + col_gap
+        _add_filled_box(slide, x, hdr_y, col_w, hdr_h,
+                        "Average Cost", fill=NAVY, text_color=WHITE,
+                        size=22, bold=True)
+        _add_math_equation(
+            slide, x, formula_y, col_w, formula_h,
+            _omml_text('ATC = ') + _omml_frac(_omml_text('TC'), _omml_text('Q')),
+            size_pt=22, color=NAVY, fill=RGBColor(0xFD, 0xF6, 0xE6),
+            line=NAVY,
+        )
+        _add_hierarchical_bullets(
+            slide,
+            left=x + Inches(0.15), top=subs_y,
+            width=col_w - Inches(0.30), height=Inches(2.80),
+            items=[
+                ("AFC = TFC / Q", 0),
+                ("AVC = TVC / Q", 0),
+                ("ATC = AFC + AVC", 0),
+            ],
+            size=15, sub_size=12, line_spacing_pts=8,
+        )
+
+        # Card 3 — Marginal Cost
+        x = col_x0 + 2 * (col_w + col_gap)
+        _add_filled_box(slide, x, hdr_y, col_w, hdr_h,
+                        "Marginal Cost", fill=NAVY, text_color=WHITE,
+                        size=22, bold=True)
+        _add_math_equation(
+            slide, x, formula_y, col_w, formula_h,
+            _omml_text('MC = ') + _omml_frac(_omml_text('Δ') + _omml_text('TC'),
+                                                _omml_text('Δ') + _omml_text('Q')),
+            size_pt=22, color=NAVY, fill=RGBColor(0xFD, 0xF6, 0xE6),
+            line=NAVY,
+        )
+        _add_hierarchical_bullets(
+            slide,
+            left=x + Inches(0.15), top=subs_y,
+            width=col_w - Inches(0.30), height=Inches(2.80),
+            items=[
+                ("= ΔTVC / ΔQ  (TFC is constant)", 0),
+                ("Derivative form:", 0),
+                ("MC = dTC / dQ", 1),
+                ("    = dTVC / dQ", 1),
+            ],
+            size=15, sub_size=12, line_spacing_pts=8,
+        )
+
+        _add_text(slide, MARGIN, Inches(6.60), RULE_W, Inches(0.4),
+                  "Cheat sheet to refer back to for the rest of the module",
+                  size=14, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=49,
+        prs, page_num=48,
         section_tag=SECTION_TAG_P2,
         title="Dictionary of Costs",
         draw_diagram=draw,
@@ -4981,47 +5264,87 @@ def slide_49(prs):
 def slide_50(prs):
     """Ross Stores annual report – grounding cost concepts in a real 10-K."""
     def draw(slide):
-        # Main image: a page from Ross Stores' annual report
+        # Reconstruct the original 10-K snippet layout: a row-label column
+        # (rId3), a 2022 numbers column (rId4), a 2021 numbers column (rId5),
+        # and two red "≈ TVC" / "≈ TC" overlay annotations (rId6 / rId7).
+        labels_x = Inches(0.6)
+        labels_y = Inches(1.90)
+        labels_w = Inches(3.40)             # row labels
+        labels_h = Inches(2.20)
+        # Match piece-to-piece native aspect: image43 235×152 (~1.55:1)
         _add_source_image(slide, 50, "rId3",
-                          left=Inches(0.5), top=Inches(1.85),
-                          height=Inches(4.6))
+                           left=labels_x, top=labels_y,
+                           width=labels_w, height=labels_h,
+                           shadow=False)
 
-        # Labels on the right — categorize lines as FC / VC
-        _add_text(slide, Inches(10.0), Inches(2.4), Inches(3.0), Inches(0.45),
-                  "Mostly Fixed", size=20, bold=True, color=NAVY,
+        # 2022 numbers column (image44, 173×489 ≈ 0.354:1)
+        col_w = Inches(1.75)
+        col_h = Inches(4.40)
+        col22_x = labels_x + labels_w + Inches(0.10)
+        _add_source_image(slide, 50, "rId4",
+                           left=col22_x, top=labels_y,
+                           width=col_w, height=col_h,
+                           shadow=False)
+
+        # 2021 numbers column (image45, 141×201 ≈ 0.70:1)
+        col21_x = col22_x + col_w + Inches(0.05)
+        col21_w = Inches(1.70)
+        col21_h = Inches(1.85)
+        _add_source_image(slide, 50, "rId5",
+                           left=col21_x, top=labels_y,
+                           width=col21_w, height=col21_h,
+                           shadow=False)
+
+        # "≈ TVC" red overlay near the COGS line (image230, rId6)
+        _add_source_image(slide, 50, "rId6",
+                           left=labels_x + Inches(0.30),
+                           top=labels_y + Inches(0.95),
+                           width=Inches(1.50), height=Inches(0.45),
+                           shadow=False)
+        # "≈ TC" red overlay near the Total-costs line (image240, rId7)
+        _add_source_image(slide, 50, "rId7",
+                           left=labels_x + Inches(0.30),
+                           top=labels_y + Inches(1.80),
+                           width=Inches(1.40), height=Inches(0.40),
+                           shadow=False)
+
+        # Right-side commentary — fixed vs variable mapping
+        _add_text(slide, Inches(9.20), Inches(1.95), Inches(3.90), Inches(0.40),
+                  "Mapping to textbook concepts",
+                  size=18, italic=True, bold=True, color=NAVY,
                   font="Calibri")
         _add_filled_box(
-            slide, Inches(10.0), Inches(2.85), Inches(3.0), Inches(0.7),
-            "Rent, depreciation,\noccupancy",
-            fill=NAVY, text_color=WHITE, size=14, bold=False,
+            slide, Inches(9.20), Inches(2.45), Inches(3.90), Inches(0.65),
+            "Cost of goods sold  ≈  TVC",
+            fill=NAVY, text_color=WHITE, size=15, bold=True,
         )
-        _add_text(slide, Inches(10.0), Inches(3.85), Inches(3.0), Inches(0.45),
-                  "Mostly Variable", size=20, bold=True, color=NAVY,
-                  font="Calibri")
         _add_filled_box(
-            slide, Inches(10.0), Inches(4.3), Inches(3.0), Inches(0.7),
-            "Cost of goods sold,\nfreight, payment fees",
-            fill=GOLD, text_color=NAVY, size=14, bold=False,
+            slide, Inches(9.20), Inches(3.20), Inches(3.90), Inches(0.65),
+            "Total costs and expenses  ≈  TC",
+            fill=NAVY, text_color=WHITE, size=15, bold=True,
         )
-        _add_text(slide, Inches(10.0), Inches(5.3), Inches(3.0), Inches(0.45),
-                  "Mix", size=20, bold=True, color=NAVY,
-                  font="Calibri")
         _add_outlined_box(
-            slide, Inches(10.0), Inches(5.75), Inches(3.0), Inches(0.7),
-            "Wages,\nstore operations",
-            fill=WHITE, line=NAVY, text_color=NAVY, size=14, bold=False,
-            line_w=1.5,
+            slide, Inches(9.20), Inches(3.95), Inches(3.90), Inches(0.70),
+            "SG&A  ≈  Mix of fixed (rent, depreciation) and variable (wages)",
+            fill=WHITE, line=NAVY, text_color=NAVY, size=12, bold=False,
+            line_w=1.0,
+        )
+        _add_outlined_box(
+            slide, Inches(9.20), Inches(4.75), Inches(3.90), Inches(0.70),
+            "Interest expense  ≈  Fixed (long-term debt service)",
+            fill=WHITE, line=NAVY, text_color=NAVY, size=12, bold=False,
+            line_w=1.0,
         )
 
         _add_takeaway_bar(
             slide,
             "Every 10-K can be read as a fixed-vs-variable split",
             top=Inches(6.55), fill=GOLD, text_color=NAVY,
-            width=Inches(9.5),
+            width=Inches(10.5),
         )
 
     s = make_diagram_slide(
-        prs, page_num=50,
+        prs, page_num=49,
         section_tag=SECTION_TAG_P2,
         title="Cost Concepts in the Real World:  Ross Stores Annual Report",
         draw_diagram=draw,
@@ -5069,14 +5392,24 @@ def slide_51(prs):
             size=22, bold=False, line_w=1.5,
         )
 
-        # ChatGPT phone image on the right
-        _add_source_image(slide, 51, "rId5",
-                          left=Inches(9.6), top=Inches(2.0),
-                          height=Inches(3.5))
-        _add_text(slide, Inches(9.6), Inches(5.55), Inches(3.2), Inches(0.3),
-                  "ChatGPT on iPhone  (CC BY-SA, Wikimedia)",
-                  size=11, italic=True, color=GRAY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
+        # Clean ChatGPT logo on the right (replaces the busy phone-and-laptop
+        # photo).  Logo from Wikimedia Commons (PD-ineligible-trademark).
+        chatgpt = OUT_DIR / "_chatgpt_logo.png"
+        if chatgpt.exists():
+            pic = slide.shapes.add_picture(
+                str(chatgpt),
+                int(Inches(9.85)), int(Inches(2.40)),
+                width=int(Inches(3.00)), height=int(Inches(1.70)),
+            )
+            # Logo: flat, no shadow / rounding (per CLAUDE.md exceptions)
+        else:
+            _add_source_image(slide, 51, "rId5",
+                               left=Inches(9.6), top=Inches(2.0),
+                               height=Inches(3.5))
+        _add_text(slide, Inches(9.6), Inches(4.25), Inches(3.5), Inches(0.30),
+                   "ChatGPT logo  (OpenAI;  PD on Wikimedia)",
+                   size=10, italic=True, color=GRAY,
+                   align=PP_ALIGN.CENTER, font="Calibri")
 
         # Question
         _add_text(slide, MARGIN, Inches(5.0), Inches(8.6), Inches(0.55),
@@ -5096,7 +5429,7 @@ def slide_51(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=51,
+        prs, page_num=50,
         section_tag=SECTION_TAG_P2,
         title="Marginal Cost ≠ Average Cost:  ChatGPT Subscription Tiers",
         draw_diagram=draw,
@@ -5125,15 +5458,20 @@ def slide_52(prs):
                   align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=52,
+        prs, page_num=51,
         section_tag=SECTION_TAG_P2,
         title="What's the MC of Adding the 2nd User?",
         draw_diagram=draw,
     )
     _draw_poll_pill(s)
     _set_notes(s, (
-        "PollEv – compute MC of adding the second user. Watch for them "
-        "assuming MC = the Team rate of $25."
+        "Quick PollEv.  Compute the marginal cost of adding the second "
+        "user to a ChatGPT Team plan.  The common trap: students see "
+        "the $25 Team rate and answer $25.  But the FIRST user gets "
+        "re-priced from $20 to $25 when they switch plans — so the true "
+        "MC of the 2nd user is $5 (the re-pricing) + $25 (the new fee) = "
+        "$30.  This is the canonical example for MC ≠ AC.  Give them 30 "
+        "seconds, then reveal the solution on the next slide."
     ))
 
 
@@ -5195,7 +5533,7 @@ def slide_53(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=53,
+        prs, page_num=52,
         section_tag=SECTION_TAG_P2,
         title="Solution:  MC = $30 / user · month",
         draw_diagram=draw,
@@ -5260,7 +5598,7 @@ def slide_54(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=54,
+        prs, page_num=53,
         section_tag=SECTION_TAG_P2,
         title="Marginal Cost in Finance:  The True Rate on a Bigger Loan",
         draw_diagram=draw,
@@ -5287,41 +5625,45 @@ def slide_55(prs):
                   "→  Estimate the cost function",
                   size=22, italic=True, color=GRAY, font="Calibri")
 
-        # Cost function (OMML / Cambria Math, with real Q² superscript).
-        # TC = 10,000,000 + 30,000 · Q + 40 · Q²
+        # Cost function (OMML).  Quadratic form fit to the Excel data:
+        # TC = 800,000 + 200 · Q²  (Q in vehicles/week, TC in $).
         eq_xml = (
             _omml_text('TC') +
             _omml_text(' = ') +
-            _omml_text('10,000,000') +
+            _omml_text('800,000') +
             _omml_text(' + ') +
-            _omml_text('30,000') +
-            _omml_text(' · ') +
-            _omml_run('Q') +
-            _omml_text(' + ') +
-            _omml_text('40') +
+            _omml_text('200') +
             _omml_text(' · ') +
             _omml_sup(_omml_run('Q'), _omml_text('2'))
         )
         _add_math_equation(
-            slide, (SLIDE_W - Inches(9.0)) // 2, Inches(2.95),
-            Inches(9.0), Inches(0.85),
-            eq_xml, size_pt=26, color=WHITE, fill=NAVY,
+            slide, (SLIDE_W - Inches(9.0)) // 2, Inches(2.85),
+            Inches(9.0), Inches(0.70),
+            eq_xml, size_pt=24, color=WHITE, fill=NAVY,
         )
 
-        # Cost-curve image from source
-        _add_source_image(slide, 55, "rId4",
-                          left=Inches(3.0), top=Inches(4.0),
-                          height=Inches(2.5))
+        # Native TC curve.  Y-axis in $K so labels stay clean (10–3,220).
+        cats = [str(q) for q in COST_Q_VALS]
+        tc_vals_K = [_cost_tc(q) / 1000 for q in COST_Q_VALS]
+        _make_simple_line_chart(
+            slide, Inches(2.50), Inches(3.75),
+            Inches(8.30), Inches(2.65),
+            categories=cats, values=tc_vals_K,
+            line_color=NAVY,
+            x_title="Q   (vehicles per week)",
+            y_title="TC   ($K)",
+            y_min=0, y_max=3500, y_unit=500,
+        )
 
         _add_takeaway_bar(
             slide,
-            "Fixed plus variable, with a convex quadratic term as scale rises",
+            "Fixed plus a convex quadratic term — cost rises faster than output",
             top=Inches(6.55), fill=GOLD, text_color=NAVY,
             width=Inches(10.5),
         )
 
     s = make_diagram_slide(
-        prs, page_num=55,
+        prs, page_num=54,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Weekly Cost",
         draw_diagram=draw,
@@ -5336,21 +5678,41 @@ def slide_55(prs):
 
 
 def slide_56(prs):
-    """Rivian's Georgia plant – Cost Components (the decomposition chart)."""
+    """Rivian's Georgia plant – Cost Components (TC = TFC + TVC).
+
+    Native python-pptx chart with three series, driven by the same data
+    as slides 55 and 57 (TC = 800k + 200·Q²).
+    """
     def draw(slide):
-        # The cost-components stacked-area chart from the source
-        _add_source_image(slide, 56, "rId3",
-                          left=Inches(2.5), top=Inches(1.85),
-                          height=Inches(4.4))
+        cats = [str(q) for q in COST_Q_VALS]
+        tc_vals  = [_cost_tc(q)  / 1000 for q in COST_Q_VALS]
+        tfc_vals = [COST_TFC     / 1000 for _ in COST_Q_VALS]
+        tvc_vals = [_cost_tvc(q) / 1000 for q in COST_Q_VALS]
+
+        _make_multi_line_chart(
+            slide, Inches(0.50), Inches(1.85),
+            Inches(12.30), Inches(4.55),
+            categories=cats,
+            series=[
+                ("TC",  tc_vals,  NAVY,                        'circle'),
+                ("TFC", tfc_vals, GOLD,                        'square'),
+                ("TVC", tvc_vals, RGBColor(0xC0, 0x50, 0x4D),  'triangle'),  # warm red — distinct from TC
+            ],
+            x_title="Q   (vehicles per week)",
+            y_title="Cost   ($K)",
+            y_min=0, y_max=3500, y_unit=500,
+            legend_pos=('0.10', '0.08', '0.18', '0.22'),
+        )
 
         _add_takeaway_bar(
             slide,
-            "Fixed costs dominate at low Q;  variable rises linearly,  quadratic kicks in late",
-            top=Inches(6.5), fill=NAVY, width=Inches(11.5),
+            "Fixed costs dominate at low Q;  the quadratic TVC overtakes at scale",
+            top=Inches(6.55), fill=NAVY, text_color=WHITE,
+            width=Inches(11.5), size=18,
         )
 
     s = make_diagram_slide(
-        prs, page_num=56,
+        prs, page_num=55,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Cost Components",
         draw_diagram=draw,
@@ -5364,37 +5726,43 @@ def slide_56(prs):
 
 
 def slide_57(prs):
-    """Rivian's Georgia plant – Per-Unit Costs (AC, AVC, MC)."""
-    def draw(slide):
-        # Per-unit cost chart from the source
-        _add_source_image(slide, 57, "rId3",
-                          left=Inches(2.3), top=Inches(1.85),
-                          height=Inches(4.5))
+    """Rivian's Georgia plant – Per-Unit Costs (ATC, AVC, MC).
 
-        # Legend labels (3 curves)
-        legend_w = Inches(2.0)
-        ly = Inches(2.0)
-        _add_filled_box(slide, Inches(10.5), ly, legend_w, Inches(0.5),
-                         "AC", fill=NAVY, text_color=WHITE,
-                         size=20, bold=True)
-        _add_filled_box(slide, Inches(10.5), ly + Inches(0.6),
-                         legend_w, Inches(0.5),
-                         "AVC", fill=GOLD, text_color=NAVY,
-                         size=20, bold=True)
-        _add_filled_box(slide, Inches(10.5), ly + Inches(1.2),
-                         legend_w, Inches(0.5),
-                         "MC", fill=GRAY, text_color=WHITE,
-                         size=20, bold=True)
+    Native chart, three series, same Excel data (TC = 800k + 200·Q²).
+    Demonstrates: MC = 400Q − 200·dQ; AVC = 200·Q (linear rising);
+    ATC = TFC/Q + 200·Q (U-shape).  MC crosses ATC at the ATC minimum.
+    """
+    def draw(slide):
+        cats = [str(q) for q in COST_Q_VALS]
+        # Per-unit values in $K so the y axis stays readable.
+        atc_vals = [_cost_atc(q) / 1000 for q in COST_Q_VALS]
+        avc_vals = [_cost_avc(q) / 1000 for q in COST_Q_VALS]
+        mc_vals  = [_cost_mc(q)  / 1000 for q in COST_Q_VALS]
+
+        _make_multi_line_chart(
+            slide, Inches(0.50), Inches(1.85),
+            Inches(12.30), Inches(4.55),
+            categories=cats,
+            series=[
+                ("ATC", atc_vals, NAVY,                        'circle'),
+                ("AVC", avc_vals, GOLD,                        'square'),
+                ("MC",  mc_vals,  RGBColor(0xC0, 0x50, 0x4D),  'triangle'),  # warm red — distinct from ATC/AVC
+            ],
+            x_title="Q   (vehicles per week)",
+            y_title="Per-unit cost   ($K)",
+            y_min=0, y_max=90, y_unit=10,
+            legend_pos=('0.78', '0.08', '0.18', '0.22'),
+        )
 
         _add_takeaway_bar(
             slide,
-            "MC crosses AVC and AC at their minima  —  the textbook U-shape",
-            top=Inches(6.5), fill=GOLD, text_color=NAVY,
+            "MC crosses ATC at the ATC minimum  —  the textbook U-shape",
+            top=Inches(6.55), fill=GOLD, text_color=NAVY,
             width=Inches(11.0),
         )
 
     s = make_diagram_slide(
-        prs, page_num=57,
+        prs, page_num=56,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Per-Unit Costs",
         draw_diagram=draw,
@@ -5450,7 +5818,7 @@ def slide_58(prs):
         _add_discussion_break(slide, top=Inches(6.45), width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=58,
+        prs, page_num=57,
         section_tag=SECTION_TAG_P2,
         title="Cost Estimation:  What Does an iPhone Cost to Make?",
         draw_diagram=draw,
@@ -5479,15 +5847,20 @@ def slide_59(prs):
                   align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=59,
+        prs, page_num=58,
         section_tag=SECTION_TAG_P2,
         title="What's the AVC of an iPhone 17?",
         draw_diagram=draw,
     )
     _draw_poll_pill(s)
     _set_notes(s, (
-        "PollEv – estimate AVC of an iPhone 17 given the teardown data. "
-        "Most students will overestimate."
+        "Quick PollEv.  Given the iPhone 17 teardown numbers (display, "
+        "logic board, chips, battery, casing, labour & assembly), what "
+        "is the AVC of one unit?  Most students overestimate because "
+        "they confuse retail price with marginal cost.  The teardown "
+        "estimates put it around $580 — roughly half the retail price "
+        "of ~$1,200.  That gap (price minus MC) is the contribution "
+        "margin Apple keeps on each handset.  Reveal the answer next."
     ))
 
 
@@ -5531,7 +5904,7 @@ def slide_60(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=60,
+        prs, page_num=59,
         section_tag=SECTION_TAG_P2,
         title="AVC of iPhone 17  ≈  $580",
         draw_diagram=draw,
@@ -5623,9 +5996,9 @@ def slide_61(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=61,
+        prs, page_num=60,
         section_tag=SECTION_TAG_P2,
-        title="iPhone:  Naïve Cost Function (Total Cost)",
+        title="Naïve Linear Cost Function:  Total Cost View",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -5714,9 +6087,9 @@ def slide_62(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=62,
+        prs, page_num=61,
         section_tag=SECTION_TAG_P2,
-        title="iPhone:  Naïve Cost Function (Per-Unit)",
+        title="Naïve Linear Cost Function:  Per-Unit View",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -5765,7 +6138,7 @@ def slide_63(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=63,
+        prs, page_num=62,
         section_tag=SECTION_TAG_P2,
         title="More Complex Cost Functions:  When MC Isn't Linear",
         draw_diagram=draw,
@@ -5787,7 +6160,7 @@ def slide_64(prs):
     """Section divider – Part 2.2: Long-Run Costs & Economies of Scale.
     Mirror of slide_30 (Part 1.2) using the Part-2 highlight."""
     s = make_section_agenda(
-        prs, page_num=64,
+        prs, page_num=63,
         current_part_idx=1,
         section_tag=SECTION_TAG_DIV,
         title="Part 2.2:  Long-Run Costs & Economies of Scale",
@@ -5864,7 +6237,7 @@ def slide_65(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=65,
+        prs, page_num=64,
         section_tag=SECTION_TAG_P2_LR,
         title="Short-Run vs. Long-Run Costs",
         draw_diagram=draw,
@@ -5910,26 +6283,87 @@ def slide_66(prs):
                   "$ / unit", size=14, italic=True, color=GRAY,
                   font="Calibri", align=PP_ALIGN.RIGHT)
 
-        # Three plant-size U-shape bands (drawn as inverted parabolas via
-        # MSO_SHAPE.ARC won't be ideal — use 3 mini schematic U's drawn
-        # with 3 short navy lines per plant: descending-flat-ascending).
+        # Three plant-size U-shape SAC bands.  Each is drawn as a smooth
+        # custGeom curve (two cubic Béziers meeting at the minimum) so the
+        # parabolic feel of the original deck comes through, rather than
+        # piecewise straight segments.
         def draw_sac(label, x_min, x_max, y_min, y_left, y_right,
                       color=GRAY):
-            # left descending segment
-            _add_arrow(slide, (x_min, y_left), (x_min + (x_max - x_min) // 3,
-                       y_min), color=color, weight_pt=1.5, head=False)
-            # right ascending segment
-            _add_arrow(slide, (x_max - (x_max - x_min) // 3, y_min),
-                       (x_max, y_right),
-                       color=color, weight_pt=1.5, head=False)
-            # flat bottom
-            _add_arrow(slide,
-                        (x_min + (x_max - x_min) // 3, y_min),
-                        (x_max - (x_max - x_min) // 3, y_min),
-                        color=color, weight_pt=1.5, head=False)
-            # label above min
+            x_mid = (x_min + x_max) // 2
+            bb_left = x_min
+            bb_top = min(y_left, y_right)
+            bb_right = x_max
+            bb_bottom = y_min
+            bb_w = bb_right - bb_left
+            bb_h = bb_bottom - bb_top
+            if bb_w <= 0 or bb_h <= 0:
+                return
+            # Convert to path-coord space (100000 × 100000)
+            def px(real_x):
+                return int(100000 * (real_x - bb_left) / bb_w)
+            def py(real_y):
+                return int(100000 * (real_y - bb_top) / bb_h)
+
+            # Cubic-Bezier control points for a smooth U:
+            #   - tangent at the endpoints is steeply VERTICAL (down on the
+            #     left side, up on the right side) — produces the
+            #     parabolic descent into / out of the trough;
+            #   - tangent at the minimum is HORIZONTAL — flat bottom of U.
+            # Previous placement (CP1 horizontal from P0) collapsed the
+            # curve to an L-shape; this placement gives a proper U.
+            P0L = (px(x_min),  py(y_left))
+            PMD = (px(x_mid),  py(y_min))
+            P3R = (px(x_max),  py(y_right))
+            seg1_cp1 = (P0L[0] + (PMD[0] - P0L[0]) // 10,
+                         P0L[1] + (PMD[1] - P0L[1]) * 7 // 10)
+            seg1_cp2 = (PMD[0] - (PMD[0] - P0L[0]) * 3 // 10, PMD[1])
+            seg2_cp1 = (PMD[0] + (P3R[0] - PMD[0]) * 3 // 10, PMD[1])
+            seg2_cp2 = (P3R[0] - (P3R[0] - PMD[0]) // 10,
+                         P3R[1] + (PMD[1] - P3R[1]) * 7 // 10)
+
+            r_hex = f'{color[0]:02X}{color[1]:02X}{color[2]:02X}'
+            custgeom_xml = (
+                f'<a:custGeom xmlns:a="{A_NS}">'
+                f'<a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/>'
+                f'<a:rect l="0" t="0" r="100000" b="100000"/>'
+                f'<a:pathLst>'
+                f'<a:path w="100000" h="100000" fill="none" stroke="1">'
+                f'<a:moveTo><a:pt x="{px(x_min)}" y="{py(y_left)}"/></a:moveTo>'
+                f'<a:cubicBezTo>'
+                f'<a:pt x="{seg1_cp1[0]}" y="{seg1_cp1[1]}"/>'
+                f'<a:pt x="{seg1_cp2[0]}" y="{seg1_cp2[1]}"/>'
+                f'<a:pt x="{px(x_mid)}" y="{py(y_min)}"/>'
+                f'</a:cubicBezTo>'
+                f'<a:cubicBezTo>'
+                f'<a:pt x="{seg2_cp1[0]}" y="{seg2_cp1[1]}"/>'
+                f'<a:pt x="{seg2_cp2[0]}" y="{seg2_cp2[1]}"/>'
+                f'<a:pt x="{px(x_max)}" y="{py(y_right)}"/>'
+                f'</a:cubicBezTo>'
+                f'</a:path></a:pathLst>'
+                f'</a:custGeom>'
+            )
+
+            shp = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                int(bb_left), int(bb_top), int(bb_w), int(bb_h),
+            )
+            shp.fill.background()
+            shp.line.color.rgb = color
+            shp.line.width = Pt(2.25)
+            shp.shadow.inherit = False
+            spPr = shp._element.spPr
+            for old in spPr.findall(qn('a:prstGeom')):
+                spPr.remove(old)
+            custgeom = ET.fromstring(custgeom_xml)
+            xfrm = spPr.find(qn('a:xfrm'))
+            if xfrm is not None:
+                xfrm.addnext(custgeom)
+            else:
+                spPr.insert(0, custgeom)
+
+            # Label above the minimum
             _add_text(slide,
-                       (x_min + x_max) // 2 - Inches(0.9),
+                       x_mid - Inches(0.9),
                        y_min - Inches(0.45),
                        Inches(1.8), Inches(0.3),
                        label, size=12, italic=True, color=color,
@@ -5959,10 +6393,20 @@ def slide_66(prs):
         draw_sac("SAC  (large plant)", b3_x_min, b3_x_max,
                   b3_y_min, b3_y_left, b3_y_right)
 
-        # Lower-envelope LAC – piecewise across the three minima
+        # Lower-envelope LAC — passes EXACTLY through each SAC minimum
+        # so the three U-curves visibly touch the envelope at their lowest
+        # point.  Two straight segments connect the three (mid_x, y_min)
+        # points;  pedagogically this is the textbook envelope rendering.
+        b1_x_mid = (b1_x_min + b1_x_max) // 2
+        b2_x_mid = (b2_x_min + b2_x_max) // 2
+        b3_x_mid = (b3_x_min + b3_x_max) // 2
         _add_arrow(slide,
-                    (b1_x_min, b1_y_min - Inches(0.05)),
-                    (b3_x_max, b3_y_min - Inches(0.05)),
+                    (b1_x_mid, b1_y_min),
+                    (b2_x_mid, b2_y_min),
+                    color=GOLD, weight_pt=3.0, head=False)
+        _add_arrow(slide,
+                    (b2_x_mid, b2_y_min),
+                    (b3_x_mid, b3_y_min),
                     color=GOLD, weight_pt=3.0, head=False)
         _add_text(slide, AX_R - Inches(2.6), b3_y_min - Inches(0.55),
                   Inches(2.5), Inches(0.3),
@@ -5978,7 +6422,7 @@ def slide_66(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=66,
+        prs, page_num=65,
         section_tag=SECTION_TAG_P2_LR,
         title="LR Average Cost is the Lower Envelope of SR Curves",
         draw_diagram=draw,
@@ -6041,7 +6485,7 @@ def slide_67(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=67,
+        prs, page_num=66,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scale:  Three Possible Patterns",
         draw_diagram=draw,
@@ -6074,7 +6518,7 @@ def slide_68(prs):
         ("Big firms can run dedicated lines, automation, AI/data infra", 1),
     ]
     s = make_content_bulleted(
-        prs, page_num=68,
+        prs, page_num=67,
         section_tag=SECTION_TAG_P2_LR,
         title="Technological Reasons for Economies of Scale",
         bullets=bullets,
@@ -6159,7 +6603,7 @@ def slide_69(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=69,
+        prs, page_num=68,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scale in Aviation:  ERJ-145 vs. 787",
         draw_diagram=draw,
@@ -6190,7 +6634,7 @@ def slide_70(prs):
         ("Big-tech reorgs to break ranks into smaller, accountable units", 1),
     ]
     s = make_content_bulleted(
-        prs, page_num=70,
+        prs, page_num=69,
         section_tag=SECTION_TAG_P2_LR,
         title="Reasons for Diseconomies of Scale",
         bullets=bullets,
@@ -6257,7 +6701,7 @@ def slide_71(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=71,
+        prs, page_num=70,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scope:  Cheaper Together than Apart",
         draw_diagram=draw,
@@ -6326,7 +6770,7 @@ def slide_72(prs):
         _add_discussion_break(slide, top=Inches(6.55), width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=72,
+        prs, page_num=71,
         section_tag=SECTION_TAG_P2_LR,
         title="Amazon:  Economies of Scale,  Scope,  or Both?",
         draw_diagram=draw,
@@ -6384,7 +6828,7 @@ def slide_73(prs):
         _add_discussion_break(slide, top=Inches(6.55), width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=73,
+        prs, page_num=72,
         section_tag=SECTION_TAG_P2_LR,
         title="Mini-Case:  Shark Tank Pitch — Group Discussion",
         draw_diagram=draw,
@@ -6460,7 +6904,7 @@ def slide_74(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=74,
+        prs, page_num=73,
         section_tag=SECTION_TAG_P2_LR,
         title="Shark Tank Solution:  Scale + Deal Comparison",
         draw_diagram=draw,
@@ -6600,7 +7044,7 @@ def build_deck(output_name="Module 3_clean.pptx"):
     slide_18(prs)
     slide_19(prs)
     slide_20(prs)
-    slide_21(prs)
+    # slide_21(prs)  — MERGED into slide_22; function kept for reference
     slide_22(prs)
 
     # Part 1 §1.1b Wage Searchers
