@@ -45,6 +45,13 @@ Where this file is silent, fall back to the higher layers.
   heavy.
 - **Flat exceptions** are fine when a picture is functionally a logo
   (e.g., a brand mark) – there, drop the shadow and don't round.
+- **Shadow opt-outs (explicit list):**
+  - Logos and brand marks (e.g., Zoom, Anthropic) – flat, no shadow.
+  - Book covers, posters, screenshots with their own visible border or
+    background – no shadow.
+  - Source images that already include a built-in shadow or frame –
+    no shadow.
+  - Set the image-helper's shadow flag to `False` in these cases.
 - **Caption below every picture, small italic gray, centered.** If
   there's a license or photographer, include the attribution in the
   same caption.
@@ -84,6 +91,17 @@ Where this file is silent, fall back to the higher layers.
   more than ~20% of a slide is accent-colored, prune.
 - **Backgrounds stay white.** Filled boxes are how I create visual
   weight, not background tints.
+- **Reserved pedagogical accents** (off-limits for structural use; for
+  concept-introduction slides only):
+  - Blue `#0070C0` for the **concept name** being formally introduced
+    (e.g., "Marginal Product of Labor" inside an "Important Concept"
+    line).
+  - Dark yellow `#B8860B` italic for the **emphasised word** in a
+    definition (e.g., the word "change" in "change in output due to a
+    change in labor input").
+  - These two colors are not part of the structural primary / accent /
+    neutral palette. Do not use them for chrome, structural boxes, or
+    on slides that aren't formally introducing a new concept.
 
 ## Visual hierarchy: boxes, arrows, bridges
 - **Filled boxes = primary content nodes** (e.g., a key concept, a rule,
@@ -91,6 +109,17 @@ Where this file is silent, fall back to the higher layers.
 - **Outlined boxes = annotations, bridges, "see also" notes.** White
   fill, accent-colored border, primary-color text. Lighter visual
   weight than the filled boxes.
+- **Three-level box rhythm on concept slides.** Concept-introduction
+  slides naturally settle into a vertical stack of three boxes:
+  1. **Hero**: primary-color filled box (white bold) carrying the
+     headline definition – "X = Y" or "X = the … from …".
+  2. **Elaboration**: cream-fill / primary-color thin-border rounded
+     rect holding the formal decomposition, glossary of terms, and
+     2–3 bullets that expand the definition.
+  3. **Action**: accent-color filled box (primary-color bold) holding
+     the actionable rule or one-line takeaway.
+  Primary → secondary → action. Slides 12 and 17 in Module 3 are
+  worked examples of this pattern.
 - **Arrows carry meaning.** Primary-color arrows for structural flow
   (parent → child, step 1 → step 2). Accent-color arrows for
   "this leads to that" cause-and-effect or "remember this here"
@@ -133,6 +162,13 @@ Where this file is silent, fall back to the higher layers.
   primary-color bold italic text, centered. The one-line punchline.
 - **Discussion-break badge** for group-discussion cues. A distinctive
   slanted parallelogram shape, accent-colored, bottom-right corner.
+- **Convention callout box.** A small cream-fill rounded rect with a
+  thin primary-color border, slight rounding (~6%), soft drop shadow,
+  holding a bold primary-color "Convention:" prefix and a single line
+  of explanatory text or OMML formula (14–15 pt). Use this to record
+  a notational or computational convention adopted in the deck – e.g.,
+  "Compute ΔQ and ΔL relative to the initial point." Sits to the
+  right of a table or below a hero definition.
 - **Concept maps as section anchors.** A network-graph-style overview
   slide at the start of each major section, returned to at transitions.
 
@@ -153,6 +189,30 @@ Where this file is silent, fall back to the higher layers.
   edits reflect real visual preferences – preserve them in the build
   script so the next rebuild doesn't undo them. Treat manual edits as
   signal, not noise.
+- **Build → side-path → diff → overwrite.** When rebuilding a deck
+  that has hand-edits or live content in it:
+  1. Build to a side path first (`<deck>_test.pptx`), not the canonical
+     file.
+  2. Verify shape positions, page numbers, and key text via a
+     python-pptx readback before overwriting.
+  3. Only `mv -f` over the canonical deck once the diff is clean.
+- **Capture each hand-tweak with a one-line comment.** When porting
+  a manual edit into the build script, annotate it with the prior
+  value and date – e.g., `tbl_top = Inches(2.45)  # hand-tweaked from
+  2.85 on 2026-05-12`. Saves the next reviewer from wondering why a
+  value is "odd".
+
+## Faithful-to-source rebuilding
+- When rebuilding a slide that already exists in a prior version of
+  the deck, **mirror the source's pedagogical structure** – text
+  order, accent colors, callout shapes, definition wording – rather
+  than reinventing. The source deck reflects classroom-tested choices.
+- The default mode is "stay as close to the original as possible."
+  Deviate only when I explicitly flag a slide for redesign.
+- When the source's illustrative numbers (e.g., Q values, MPL values)
+  differ slightly from what the build script computes, prefer the
+  script's values for cross-slide consistency, and flag the
+  discrepancy in either the speaker notes or the session notes.
 
 ## Things to avoid on every slide
 - Walls of text. If a bullet runs past two lines, split or trim.
