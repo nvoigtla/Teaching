@@ -1,5 +1,102 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-13 – §1.1 polish: Tesla→Rivian, $80k price, native charts, design refresh
+
+**One-line summary.** Heavy iteration session on §1.1 Short Run (slides 9-22):
+swept Tesla → Rivian everywhere; dropped materials cost from the MRPL
+framing (option A) to keep `MRPL = MR × MPL` clean for an EMBA audience;
+rebuilt slide 12 to mirror the source deck's original slide 16, inserted
+a new slide 13 mirroring original slide 17 (MPL-data table + "initial
+point" Convention callout); merged old slides 17+18 into a single
+"Hiring in the Short Run: An Important Concept" hero slide; replaced
+several static images with native python-pptx charts; introduced a
+deck-wide drop-shadow refresh for figures, tables and charts; redesigned
+the Discussion-break badge as a custom-geometry rounded parallelogram with
+45° slanted sides. **Deck is now 74 slides.**
+
+### Final deck state
+
+- [Module 3/Module 3_clean.pptx](Module 3/Module 3_clean.pptx) – **74 slides** (was 75 yesterday; slides 17 + 18 merged), 10.05 MB, audit clean (0 broken rels, 0 missing parts, 0 non-integer EMU, 0 duplicate effectLst).
+- §1.1 Short-Run flow (slides 7-22):
+  - 9 – Rivian Normal IL plant photo (CC BY-SA, Wikimedia) replaces the Tesla factory floor; pictures shifted up by 1 cm, rounded corners + drop shadow.
+  - 10 – Production-function table at K = {100, 200, 300, 400} × L = {0, 1k, … 10k}; arrows + axis labels + Group annotation preserved; shadow rect behind.
+  - 11 – Native 4-series line chart; legend in top-left with white fill + 70% line spacing; takeaway banner BELOW the chart; dashed light-grey gridlines on both axes.
+  - 12 – **Rebuilt** to mirror original slide 16: "Short Run: Marginal Product of Labor" with K-bar OMML, L italic, "Important Concept" emphasis, big centred `MPL = ΔQ / ΔL` formula. Accent colours: blue (#0070C0) for concept name, dark-yellow (#B8860B) italic for "change".
+  - 13 – **NEW**: `slide_mpl_data()` — "Example for MPL Calculation"; 6-column table (L | K | Q | ΔL | ΔQ | MPL) with K=100 fixed, L grid {0, 500, 1k, 2k, 3k}; cream-fill Convention callout on the right using the exact wording from original slide 17.
+  - 14 – Native python-pptx line charts (Q vs L, MPL vs L) for K=100, blue; shadow rect behind each.
+  - 15 – Diminishing MPL bullets + Black Death image kept.
+  - 16 – Rivian Hiring Scenario: ~$80k R1T, fixed K. Single Rivian R1T photo on the right (rounded + shadow). Materials cost **removed** from title/bullets.
+  - 17 – **Merged old 17 + 18** into "Hiring in the Short Run: An Important Concept". Hero NAVY box: "MRPL = Marginal Revenue Product of Labor" / "the extra revenue from one more worker". Cream Decomposition box with header `MRPL = MR × MPL`, MR & MPL one-line definitions, and three bullets (When MPL falls → MRPL falls; Decreasing MPL ⇒ value of marginal hire shrinks; For price takers, MR = P, so MRPL = P × MPL). Gold Decision-rule box at bottom: "If MRPL > w (wage), hire more workers".
+  - 18 – Static image replaced with **native compact production-function table** (re-uses slide 10 data, smaller font/columns); bullet about price being approximately constant added; caption "Production-function table (slide 10)" moved below the table; redesigned Discussion-break badge.
+  - 19 – Poll slide (PollEv screenshot) unchanged in structure; title "What Is Rivian's MRPL at 6,000 Employees?".
+  - 20 – **Rewritten** to use ACTUAL table values per slide 13's "initial-point" convention: Q(6k)=387, Q(7k)=418, MPL = 31/1,000 = 0.031, MRPL = 0.031 × $80k ≈ $2,480 per worker per week.
+  - 21, 22 – Existing bullets cleaned of materials-cost references; MRPL = MPL × $80k.
+- §1.1b, §1.2, §2.1, §2.2 (slides 23-74): untouched except for the deck-wide page_num shift and the discussion-break redesign on the 5 slides that use it (18, 44, 58, 72, 73).
+
+### Decisions made this session
+
+1. **Materials cost: dropped from MRPL framing (Option A).** Original deck mislabelled the materials-cost term as `MC` ("Marginal Cost"), which is conceptually wrong — MC is the cost of producing one more unit, not the per-unit materials cost. To avoid confusing EMBAs, materials are now ignored on the production side; they'll be reintroduced cleanly on the cost side of the module. All references to $40k materials / $50k net-revenue removed from slides 16, 18, 20, 21, 22. Formula on slide 17 is the textbook `MRPL = MR × MPL ≈ P × MPL` (price-taker assumption).
+2. **R1T price normalised to ~$80k** everywhere (was $90k). Reflects realistic R1T average transaction price for 2025-26 mid-trim.
+3. **Slide 12 rebuilt** to be much closer to original slide 16 — more pedagogical, less "summary of MPL". Uses original-deck accent colours (blue + dark yellow) for visual fidelity; this is the one place in the deck where we deviate from the strict NAVY/GOLD palette.
+4. **One slide added (page 13: MPL data) AND two merged (old 17 + 18 → new 17).** Net: 75 - 1 = 74 slides. Page-num bumps applied via regex (62 +1 first, then 57 −1 after the merge).
+5. **Shadow treatment, deck-wide.**  Pictures: `_add_source_image()` adds an outerShdw by default (35 of 36 pictures shadowed; Zoom logo on slide 2 left alone; Karl Marx book on slide 8 set `shadow=False` per request).  Tables (slides 10, 13, 18) and charts (slides 11, 14): a white backing rectangle with an outerShdw effect (not blur-offset grey — that bled through transparent chart backgrounds and made the figures look grey).
+6. **Discussion-break badge: custom-geometry rounded parallelogram.**  Top + bottom edges horizontal; left + right edges slanted at 45° in real space (skew = box height in path units); 4 lightly-rounded corners via cubic-Bezier transitions. Gold fill, navy bold text, drop shadow. The custGeom's `<a:rect>` defines the TEXT bounding rectangle as the parallelogram's inscribed rectangle (TL → BR vertices), so PowerPoint cannot render text past the slanted edges. Applied automatically on all 5 slides that use the helper.
+
+### Files added / modified this session
+
+| File | Status | Notes |
+|---|---|---|
+| [Module 3/_build_clean_deck.py](Module 3/_build_clean_deck.py) | Heavy edit | ~600 net lines added. New helpers: `_omml_acc_overline`, `_add_mixed_textbox`, `_make_simple_line_chart`, `_add_drop_shadow`, `_add_graphicframe_shadow`, `_apply_picture_style` extended use, `_inject_raw_xml`. `_add_discussion_break` rewritten with custGeom. `slide_12()` rewritten. `slide_mpl_data()` added. `slide_16()` rewritten (merged old 16+17). Many bullet edits in slides 13/15/18/20/21/22. |
+| [Module 3/Module 3_clean.pptx](Module 3/Module 3_clean.pptx) | Rebuilt | 74 slides, 10.05 MB. |
+| [Module 3/_rivian_plant.jpg](Module 3/_rivian_plant.jpg) | New | 3.87 MB — Rivian Normal IL plant floor (CC BY-SA, Wikimedia). Used on slide 9. |
+
+### Gotchas (carry forward)
+
+1. **`<a:effectLst>` must be UNIQUE inside an `<p:spPr>`.**  python-pptx's `add_shape` leaves an empty `<a:effectLst/>` in spPr by default.  If you append another effectLst (for shadow / blur / soft edge), PowerPoint will refuse to open the file ("file is corrupt, repair?"), but python-pptx is lenient and roundtrips fine — so the audit script can't catch this. ALWAYS `for old in spPr.findall(qn('a:effectLst')): spPr.remove(old)` before adding a new one.  Repro / debug: scan `<p:spPr>...</p:spPr>` blocks per slide and count `<a:effectLst` substrings — should be ≤ 1 per spPr.
+
+2. **graphicFrames (tables, charts) cannot host `<a:effectLst>` directly.**  Workaround: paint a thin white rectangle with `outerShdw` BEHIND the table/chart. The chart's transparent plot area shows the white through; the shadow projects outside the rect. The helper `_add_graphicframe_shadow(slide, left, top, w, h)` does this — call it BEFORE adding the table/chart so z-order is correct.
+
+3. **Chart backgrounds are transparent.**  An earlier attempt used a translucent-grey blur rectangle as the table/chart shadow; for tables (opaque cells) that looked fine, but for charts the grey bled through the transparent plot area and tinted the whole figure grey. Always use a WHITE backing rect with an outerShdw effect — not a blurred-offset grey rect.
+
+4. **Custom-geometry rounded parallelogram.**  The asymmetric Discussion-break badge uses `<a:custGeom>`, not a preset.  The text bounding rect is set via `<a:rect l="{skew}" t="0" r="{100000-skew}" b="100000"/>` — that's the INSCRIBED rectangle, not the full bounding box. Without that explicit rect, PowerPoint happily renders text past the slanted edges of the parallelogram (margins on the text body are insufficient).  Skew is computed dynamically as `100000 × height_emu / width_emu` so the slant angle stays 45° regardless of the badge's actual size.
+
+5. **Page-num renumbering is mechanical but error-prone.**  Today's session inserted a slide AND merged two — required two regex passes (`page_num >= 13` +1, then `>= 19` −1).  If you ever need to do this again, capture the bump as a one-off Python script and verify with `for i, s in enumerate(prs.slides): ... read footer page_num text ...` that index+1 == page_num for every slide.
+
+6. **MRPL convention chosen for the lecture.**  `MRPL = MR × MPL` (cleanly).  For the example computation (slide 20), `MPL` uses the slide-13 "initial-point" convention: MPL "at L = n" is `(Q(n) − Q(n−1)) / (L(n) − L(n−1))`.  So slide 20's MPL at L=6,000 is actually computed across the L = 6,000 → 7,000 step using table values Q(6k)=387, Q(7k)=418, giving MPL = 31/1000 = 0.031 and MRPL ≈ $2,480/worker/week.  The user's verbal hint had a typo ("from 7k to 7k") which we interpreted as the 6k→7k interval.
+
+### Pending — pick up next session
+
+- [ ] **Cost side of Module 3 (§2.1, §2.2):** materials cost was dropped on the production side; introduce it cleanly when we hit cost concepts (slide 43+). The narrative should be: "now we add materials and other variable costs back in — and they affect the optimal scale of production differently from labour."
+- [ ] **Slide 20 MPL number:** user's expected Q values were 391 and 423; the table actually produces 387 and 418 (Cobb-Douglas Q = 0.5·√(K·L)). The 4-5 unit discrepancy probably comes from a slightly different multiplier the user has in mind. If they want exact 391/423, change `PF_A` from 0.5 to ≈ 0.505 and rebuild — but that affects slides 10, 11, 13, 14 too.
+- [ ] **Animations.**  None of the click-to-reveal animations from the source deck are preserved. After visual review, re-add Appear/Fade-on-click in PowerPoint for: slide 13 "Note: MPL is declining" (reveal after numbers), slide 17 Decomposition box (reveal after the hero box), slide 17 Decision-rule box (reveal last), slide 18 production-function table (reveal in two stages?), slide 22 callout.
+- [ ] **Slides 19, 27, 38 (Poll slides):** still use the source PollEv screenshot — consider switching to the cleaner Layout-5 design (A/B/C/D auto-numbered + POLL pill) for visual consistency with the rest of the deck.
+- [ ] **Stale Tesla images in §2.1 (slides 53-57):** session-2 notes flagged this; needs a sweep similar to today's §1.1 sweep.
+
+### Useful commands
+
+```powershell
+# Rebuild the deck (close PowerPoint first!)
+cd "h:/Claude Code/Teaching/405 Slide Revisions 2026/Module 3"
+$env:PYTHONIOENCODING = "utf-8"
+python _build_clean_deck.py                         # writes Module 3_clean.pptx
+python _build_clean_deck.py "Module 3_clean_test.pptx"   # write to side-path
+
+# Audit + duplicate-effectLst + non-integer-EMU
+python _audit_package.py "Module 3_clean.pptx"
+python -c "import zipfile,re; z=zipfile.ZipFile('Module 3_clean.pptx'); dups=0
+for n in z.namelist():
+    if not(n.startswith('ppt/slides/') and n.endswith('.xml')): continue
+    x=z.read(n).decode('utf-8')
+    for m in re.finditer(r'<p:spPr>(.*?)</p:spPr>', x, re.DOTALL):
+        if m.group(1).count('<a:effectLst')>1: dups+=1
+print('Duplicate effectLst:', dups)"
+
+# Round-trip test (python-pptx will load the deck and report any errors)
+python -c "from pptx import Presentation; p=Presentation('Module 3_clean.pptx'); print(len(p.slides))"
+```
+
+---
+
 ## 2026-05-12 (session 2) – Tail import, sweep, slide 10/11 rebuild
 
 **One-line summary.** Finished the back half of Module 3 (12 new slides for §2.2 Long-Run Costs & Economies of Scale), restructured the deck (dropped textual outline at slide 6, promoted concept-map to slide 6, renumbered everything), applied slide-7 lessons across the deck (MB=MC anchor on slide 22, Unicode-subscript cleanups), and rebuilt slides 10 and 11 around a clean Cobb-Douglas production function with strict diminishing MPL **and** MPK. Deck is now **74 slides**. Slide 10 still to refine tomorrow from the office computer.
