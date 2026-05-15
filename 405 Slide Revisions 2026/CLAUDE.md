@@ -52,9 +52,10 @@ Where this file is silent, fall back to the higher layers.
   - Source images that already include a built-in shadow or frame –
     no shadow.
   - Set the image-helper's shadow flag to `False` in these cases.
-- **Caption below every picture, small italic gray, centered.** If
-  there's a license or photographer, include the attribution in the
-  same caption.
+- **Caption ABOVE the picture, small italic-bold navy, centered.**
+  Source attribution / licence (when needed) goes below the picture
+  in smaller italic gray. The "title-on-top, attribution-on-bottom"
+  split mirrors the way figures are labelled in printed reports.
 - **Prefer real photographs over logos** when the slide is illustrating
   a real-world example. A photo of the product or the place beats a
   brand mark every time.
@@ -91,6 +92,14 @@ Where this file is silent, fall back to the higher layers.
   more than ~20% of a slide is accent-colored, prune.
 - **Backgrounds stay white.** Filled boxes are how I create visual
   weight, not background tints.
+- **Pair related visualisations by accent color.** When two charts or
+  shapes represent the same underlying concept (e.g., a tangent slope
+  drawn on the production-function chart and the value of that slope
+  plotted on a second MPL chart), use the SAME single accent color
+  across both so the eye links them automatically. Worked example:
+  Module 3 slide 15 uses gold tangents on the Q-vs-L chart and a gold
+  MPL curve on the right-hand chart — students read "slope here ↔
+  value there" without any extra annotation.
 - **Reserved pedagogical accents** (off-limits for structural use; for
   concept-introduction slides only):
   - Blue `#0070C0` for the **concept name** being formally introduced
@@ -189,13 +198,39 @@ Where this file is silent, fall back to the higher layers.
   edits reflect real visual preferences – preserve them in the build
   script so the next rebuild doesn't undo them. Treat manual edits as
   signal, not noise.
-- **Build → side-path → diff → overwrite.** When rebuilding a deck
-  that has hand-edits or live content in it:
-  1. Build to a side path first (`<deck>_test.pptx`), not the canonical
-     file.
-  2. Verify shape positions, page numbers, and key text via a
-     python-pptx readback before overwriting.
-  3. Only `mv -f` over the canonical deck once the diff is clean.
+- **Default: rebuild the canonical deck in place, no verification.**
+  The build script is the source of truth and the start-of-day Git
+  snapshot is the safety net, so the normal flow is to write straight
+  to the canonical filename (e.g., `Module 3_clean.pptx`) and stop.
+  Do **not** run a python-pptx readback, footer-page-number check,
+  or duplicate-`<a:effectLst>` audit by default — these add latency
+  and noise without changing the outcome.
+- **Opt-in verification when I report a problem.** Only run the
+  readback / audit when I tell you something looks wrong (e.g., "the
+  page numbers are off", "PowerPoint refuses to open the file",
+  "shape X disappeared"). At that point, use the readback to diagnose,
+  fix the script, and rebuild again.
+- **Opt-in side-path pattern when I signal hand-edits.** If – and only
+  if – I tell you in the prompt that I have made hand-edits in
+  PowerPoint to the canonical deck (e.g., "I tweaked slide 12 by
+  hand", "incorporate my manual edits"), switch to the safe
+  round-trip:
+  1. Build to a side path first (`<deck>_test.pptx`), not the
+     canonical file.
+  2. Diff against the canonical file (shape positions, page numbers,
+     key text via a python-pptx readback) to surface the hand-edits
+     and port them back into the build script.
+  3. Re-run the build to the side path, verify, then `mv -f` the side
+     path over the canonical deck.
+  Do **not** invoke this flow on your own – wait for my explicit
+  signal that hand-edits exist.
+- **Exceptions require confirmation.** If a situation seems to call
+  for a workflow outside the two opt-in cases above (verification on
+  reported problems; side-path on signalled hand-edits), stop and ask
+  me in plain text before acting. Do not invent ad-hoc safety
+  mechanisms on your own – extra files (`_test`, `_temp`, `_v2`,
+  `_new`), forced moves (`mv -f`, `Move-Item -Force`), parallel
+  scripts, or hidden readbacks – without my explicit go-ahead.
 - **Capture each hand-tweak with a one-line comment.** When porting
   a manual edit into the build script, annotate it with the prior
   value and date – e.g., `tbl_top = Inches(2.45)  # hand-tweaked from

@@ -58,6 +58,36 @@ For work in this folder, you are assisting with **teaching materials**
 - **Consistency matters.** Match colors, fonts, and layout patterns
   across slides in a deck. Do not introduce new visual styles unless
   asked.
+- **Sub-bullet sizing — err on the side of LARGER.** Claude has a
+  recurring tendency to make sub-bullet text too small for EMBA
+  readability. Default to sub-bullets only **~4 pt smaller** than the
+  main bullet, NOT 8 – 10 pt smaller. Typical pairs: 28 pt main / 24 –
+  26 pt sub; 24 pt main / 20 – 22 pt sub. If a sub-bullet looks
+  proportionally legible on a 13-inch laptop screen viewed at slide-
+  preview size, it is probably the right size. Sub-bullets at 18 pt or
+  below are almost always too small for this audience.
+
+## Concept-explanation textboxes (preferred format)
+- When a slide needs a short, visually-distinct callout to **explain a
+  concept**, define a notational **convention**, or record any other
+  brief conceptual aside that sits alongside the main slide content,
+  use the **cream-fill rounded-rect "Convention" callout** pattern.
+- Style:
+  - Rounded rectangle, ~12 % corner radius (slight rounding).
+  - Cream / soft-yellow fill (e.g., `#FDF6E6`).
+  - Thin primary-color border (~1 pt, navy).
+  - Primary-color text – bold for any prefix/header (e.g.,
+    `Convention:`), regular for the rest.
+  - One or two short lines of body text, 14 – 16 pt, left- or
+    center-aligned depending on slide context.
+- Usage examples:
+  - "Convention:  Compute ΔQ and ΔL relative to the initial point."
+  - "A production function transforms inputs into outputs. The more
+    efficient this process, the higher is productivity."
+- Reuse the same visual style across all such callouts in a deck so
+  students recognise the box on sight as "this is a concept
+  clarification". Course-layer `CLAUDE.md` files can override
+  colors / sizes if a course uses a different palette.
 
 ## Working with .pptx Files
 - PowerPoint files are **binary**, so VS Code visual diffs do not

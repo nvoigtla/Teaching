@@ -1,5 +1,119 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-15 – Front-half rebuild: Announcements + slides 5–15 mirror source deck
+
+**One-line summary.** Long iterative session reworking the front half of
+the deck (slides 1 – 15) so it tracks the original deck more faithfully:
+restored the Announcements slide (page 3, with placeholder dates),
+brought back original titles and box wording on slides 5 / 6 / 10 / 14,
+overhauled the slide-14 MPL-calculation table with per-column colors +
+floating between-row annotations + a curved arc anchoring it to the
+Convention box, and rebuilt slide 15 as a tangent-illustration that
+visually links a gold-tangent left chart to a gold MPL right chart.
+Two real bug fixes in the helper layer plus a substantial broadening
+of the workflow rules in the course-layer `CLAUDE.md`. **Deck stays at
+74 slides.**
+
+### Final deck state
+
+- [Module 3/Module 3_clean.pptx](Module 3/Module 3_clean.pptx) – **74 slides**, audit-clean (0 broken rels, 0 duplicate `<a:effectLst>`, all footer page-numbers match their position).
+- New page 3 = **Announcements** (midterm logistics with `{{MIDTERM_WINDOW}}` / `{{TA_WINDOW}}` placeholders so the actual 2026 dates can be filled in later in PowerPoint). All subsequent page-num footers bumped +1.
+- Slides 5 – 15 redesigned in sequence; details below.
+
+### Slide-by-slide changes this session
+
+| Slide | What landed |
+|---|---|
+| 3 (NEW) | `Announcements` — midterm logistics, 3.5-hour at-home window, TA availability window, material covered (Modules 1 + 2 + PS 1+2), review sessions. Placeholders for actual 2026 dates. |
+| 4 | Title reverted to original `Recap of Module 2` (descriptive instead of action-titled). |
+| 5 | Agenda flowchart: all 4 module boxes now `_add_rounded_filled_box` (rounded + drop shadow). Gold "we are here" up-arrow moved BELOW box 3 with horizontal shift ≈ 0.55". Connector weights bumped 1.5/2.0 → 3.0/3.5 pt. |
+| 6 | Title: `Big Picture of Module 3` (was action title). All 4 boxes rounded + shadowed. Box wording restored to original slide 8 (`Production Functions`, `Costs`, `Demand`, `Output Decisions` — no sub-parens). Font 24/26 → 36. Arrow weights 2.0/1.5 → 3.5/3.0 pt. "Tonight: …" legend removed. |
+| 7 | Concept-map arrow weights bumped modestly (2.0 → 2.5 navy, 2.5 → 3.0 gold). MB=MC star anchor now carries the deck-wide drop shadow (added inside `_add_anchor_burst`). |
+| 9 | Title `The Production Function`. Big equation `Q = f (K, L, etc)`. Third sub-bullet rewritten as `"etc" can be raw materials, energy…`. Bottom navy takeaway bar **replaced** with a Concept-explanation Convention-style callout (cream-fill rounded rect, 20 pt navy). |
+| 10 | Title `Short vs. Long Run: A Critical Distinction` (original slide 11). Picture captions moved ABOVE the pictures with original-deck wording (`Capital fixed in short run` / `Labor (ophthalmologists) fixed in short run`). Right-image caption confirmed to match the ophthalmologist photo. Speaker notes rewritten. |
+| 11 | Bottom italic-gray caption replaced with Concept-explanation callout (17 pt navy bold, 2 lines). Table + top arrow + axis label shifted up 0.25" to make room. |
+| 12 | In-plot legend bumped (font 12 → 13 pt; bbox `w=0.13 → 0.17`, `h=0.18 → 0.24`; `y=0.10 → 0.05`). `plotArea/manualLayout` added (inner 88 % × 82 % of frame) so the plot fills the chart tightly. Bottom banner converted to Convention-style box, tighter padding (`pad_h=0.15, pad_v=0.04`). Drop `;`, capitalise `The` on line 2. |
+| 13 | Bullets now lead with `▪` / `–` glyphs. Sub-bullet font bumped 24 → 26 pt. |
+| 14 | Title `Marginal Product of Labor (MPL): Calculation`. Caption + sub-caption replaced with a bullet + sub-bullet structure. Per-column data-cell colors: L/Q black, K red, ΔQ/ΔL green (darker `#1B5E20`), MPL accent blue + bold. Δ-columns + MPL **cells blanked**, values float as overlay textboxes at row boundaries (visual representation of the "compute relative to the initial point" convention). MPL floats have cream `MPL_FILL` rounded chrome; ΔL/ΔQ floats are transparent. 4 green down-arrows between Q rows (shifted ~5 mm right of column centre, then 2 mm left; weight 3.0 pt). 4 wavy green connector lines from each arrow to the corresponding ΔQ first digit (sine polyline, 36 segments, amplitude 0.02"). Convention box widened 5.20" → 4.20" → 5.80" through iterations; font 15 → 17 → 19 pt; ΔL / ΔQ rendered in green via OMML; added an `Interpretation:` second paragraph (`Between 0 and 500 workers, MPL is approximately 0.224`). Blue arrow from MPL column bottom to the Note; Note now lives in its own Convention-style cream box (8.20" × 0.75", centred); `declining` switched from red to ACCENT_BLUE. Smooth inverted-U green arc from the first Q-arrow to the Convention box, apex inside the L=0 empty band (`y=3.35`). |
+| 15 | Title `Diminishing Marginal Product of Labor`, 4 bullets matching original slide 18 (3rd and 4th are sub-bullets). Both charts now use `smooth=1` at chart AND series level; `plotArea/manualLayout` pinned at `(0.15, 0.04, 0.80, 0.78)`. Right-chart MPL series switched to GOLD so it links visually with the gold tangents on the left chart. Two dashed gold tangents on the left chart with **hand-edited coordinates** ported into the script (steep: `(1.471, 5.666) → (2.536, 4.692)`; flat: `(4.464, 4.141) → (6.103, 3.750)` — after the 0.18" downward chart shift). Captions moved ABOVE the charts (`y=3.25, h=0.30`); chart frames shifted down to `y=3.58`; takeaway bar moved to `y=6.55`. "plot the slope" callout enlarged ~30 % (1.04" × 0.72" box + 0.72" × 0.39" block arrow) with drop shadow, shifted 0.32" (~8 mm) left of the gap midpoint. Bullets moved up to `bullets_top=Inches(1.53)`. Sub-bullet space-before set to 0 pt via new `sub_line_spacing_pts` parameter on `make_content_bulleted`. |
+
+### Helpers added / extended
+
+- `_add_convention_box(...)` — cream-fill rounded-rect callout, navy border, 12 % corner; supports `prefix + body` or `runs=[(text, opts), …]` form; optional `pad_h` / `pad_v` overrides for tighter chrome.
+- `_add_rounded_filled_box(...)` — rounded variant of `_add_filled_box` with auto drop shadow (used on slides 5 and 6).
+- `_add_wavy_line(...)` — sine-polyline via custGeom (used for the 4 ΔQ connector lines on slide 14).
+- `_omml_run` / `_omml_text` now accept an optional `color=` kwarg (used for green ΔL / ΔQ in slide-14 Convention box).
+- `_add_arrow` extended with `dash=` (used for the dashed tangent lines on slide 15) and `_add_arrow_shape` extended with `direction="up"` / `"down"` (used for slide-5 "we are here" up-arrow).
+- `_add_anchor_burst` now adds a drop shadow to the 12-point star automatically.
+- `make_content_bulleted` accepts `bullets_top` and `sub_line_spacing_pts` overrides.
+
+### Bug fixes
+
+1. **`_add_mixed_textbox` was clobbering OMML run colors.** Post-processing loop unconditionally stripped any `<a:solidFill>` from each OMML run's `a:rPr` and replaced it with `default_color`. Now only adds the default fill when the run doesn't already have one — lets `_omml_run('L', color=GREEN_NUM)` actually render in green.
+2. **Chart-level `<c:smooth val="0">` overrides series-level `<c:smooth val="1">`.** python-pptx writes both; setting smooth=1 only on `<c:ser>` is silently ignored by PowerPoint. The chart-helper post-processor now updates BOTH the chart-level smooth (inside `<c:lineChart>`) and the per-series smooth. Without this, slide 15's "smooth" curve rendered piecewise-linear and the analytical tangents looked like secants.
+
+### CLAUDE.md changes
+
+- **Universal** ([Claude Code/CLAUDE.md](../../CLAUDE.md)): untouched this session.
+- **Teaching** ([Teaching/CLAUDE.md](../CLAUDE.md)):
+  - New `Concept-explanation textboxes (preferred format)` section: cream-fill rounded rect / thin navy border / slight rounding / bold-prefix + body. Documented as the canonical pattern for concept explanations and notational conventions across all teaching decks.
+  - New `Sub-bullet sizing — err on the side of LARGER` bullet under Slide Design Principles: typical pairs 28 / 24–26 or 24 / 20–22; sub-bullets at 18 pt or below are almost always too small for EMBA viewing.
+- **Course** ([Teaching/405 Slide Revisions 2026/CLAUDE.md](CLAUDE.md)):
+  - `When manual tweaks beat the build` rewritten with three-mode workflow:
+    1. **Default**: rebuild in place, no verification (no `_test.pptx`, no `mv -f`).
+    2. **Opt-in side-path**: only when user says they've made hand-edits → build to side path → diff → port to script → `mv -f` over canonical.
+    3. **Opt-in verification**: only when user reports a problem → readback / audit to diagnose.
+  - Added `Exceptions require confirmation`: ban ad-hoc `_test` / `_temp` / `_v2` / `_new` files, forced moves, parallel scripts, hidden readbacks without explicit go-ahead.
+  - Pictures section: caption position **flipped from below to ABOVE** (mirrors print-figure convention). Source attribution stays below in smaller italic gray.
+  - Color discipline: new `Pair related visualisations by accent color` bullet, with slide-15 gold tangents ↔ gold MPL curve as the worked example.
+
+### Decisions made this session
+
+1. **Faithful-to-source rebuilding takes priority over action-title style** for chrome / structural slides. Slides 4, 6, 10, 14 reverted from action titles to original descriptive titles. The action-title rule still applies to content slides where the title carries the takeaway.
+2. **Between-row floating annotations** are the right visualisation for transition / Δ values. Pattern: blank the table cell, float the value as an overlay textbox at the boundary between the two rows. MPL floats get the cream chrome (since they're the "headline" value); ΔL / ΔQ are transparent.
+3. **Single-color anchoring across paired visualisations** — adopted as a canonical pattern (now in CLAUDE.md). Gold tangents on the Q-vs-L chart linked to a gold MPL curve on the right chart visually says "slope here = value there" without any extra annotation.
+4. **Hand-edited coordinates are canonical** when the analytical computation doesn't match the rendered slide. Slide 15's tangent positions came from PowerPoint hand-tuning against the smooth-spline-rendered curve (which differs slightly from `Q = 5·√L`). Replaced the analytical `_draw_tangent` helper calls with hardcoded coordinates.
+5. **Rebuild-in-place is the default**; the side-path + `mv -f` pattern is now opt-in only on user signal of hand-edits. Saves ~5 prompts per iteration.
+6. **Verification (python-pptx readback / XML audit) is opt-in too** — only fires when the user reports a problem. Don't run by default.
+
+### Gotchas (carry forward)
+
+1. **PowerPoint chart smoothing is set at TWO levels.** Setting `<c:smooth val="1"/>` on `<c:ser>` is necessary but not sufficient — the chart-level `<c:smooth>` inside `<c:lineChart>` is honored over the series setting. Update both.
+2. **OMML runs need color baked into `<a:rPr>/<a:solidFill>`.** The `_add_mixed_textbox` helper's default-color-application is now color-aware: it only adds the default fill when no fill is present.
+3. **`_add_callout_box` returns the shape, but `_add_arrow_shape` had been returning None implicitly.** Both helpers now return the shape so the caller can apply a drop shadow / further styling.
+4. **Inner-plot coordinates of a chart are unpredictable without `manualLayout`.** Default PowerPoint chart layout leaves variable margins for axis labels / titles. For ANY overlay (tangent lines, annotation arrows) that needs to land on a specific chart point, pin the inner-plot bounding box via `plotArea/manualLayout` so the overlay math works from known coordinates.
+5. **Chart curves rendered with smooth=1 are spline-interpolated**, not exactly the underlying function. A tangent computed from `f'(x)` may visually "cut across" the rendered curve even though the math is correct. Hand-tune endpoints in PowerPoint and port back into the script.
+
+### Pending – pick up next session
+
+Carried over from 2026-05-14 (no progress this session):
+
+- [ ] **A5 – picture captions + attributions** still missing on slides 29, 36, 41, 56, 57, 69. Now caption-on-top per the new course-CLAUDE.md rule; attribution below in italic gray.
+- [ ] **B1 – OMML rendering for hero formulas** on slides 17, 18, 20, 22.
+- [ ] **B3 – Layout-5 poll redesign** on slides 19, 27, 38, 52, 59, 73. Still source PollEv screenshots.
+- [ ] **D1 – verify slide 28 ($8M) and slide 39 (illustrative MP values)** against the classroom material.
+- [ ] **D2 – §2.1 stale Tesla content sweep** (slides 53–57).
+- [ ] **D3 – animations.** Re-add Appear/Fade on click in PowerPoint after the deck is structurally settled.
+
+### Useful commands
+
+```powershell
+# Rebuild the canonical deck in place (default — no verification).
+# Close PowerPoint first if the deck is open.
+$env:PYTHONIOENCODING = "utf-8"
+python "h:/Claude Code/Teaching/405 Slide Revisions 2026/Module 3/_build_clean_deck.py"
+
+# Opt-in: side-path build (only when user signals hand-edits).
+python "h:/Claude Code/Teaching/405 Slide Revisions 2026/Module 3/_build_clean_deck.py" "Module 3_clean_test.pptx"
+# … diff, port edits, then:
+mv -f "Module 3_clean_test.pptx" "Module 3_clean.pptx"
+
+# Opt-in: verification readback (only when user reports a problem).
+python -c "from pptx import Presentation; p=Presentation(r'h:/Claude Code/Teaching/405 Slide Revisions 2026/Module 3/Module 3_clean.pptx'); print(len(p.slides))"
+```
+
+---
+
 ## 2026-05-14 – Full deck audit against course-layer CLAUDE.md + targeted re-implementations
 
 **One-line summary.** Started the session by pulling the new course-layer
