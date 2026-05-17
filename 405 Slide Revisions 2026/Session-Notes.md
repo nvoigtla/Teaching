@@ -1,5 +1,117 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-16 – Slides 16–19 deep polish + discussion-break deck-wide cleanup
+
+**One-line summary.** Polished slides 16–19 in detail (Black Death, Hiring
+Decisions Context/Concepts, MRPL example), aligned slide titles with the
+original source deck, added the MB=MC star anchor to slide 18, lifted the
+discussion-break box font to 28 pt and dropped it cleanly above the gray
+rule across all five instances, and codified the "reformatting an existing
+deck vs. creating new content" workflow rule in the Teaching CLAUDE.md.
+
+### Decisions and edits
+
+1. **Title-alignment sweep, clean 16–25 against original 19–28.**
+   Per a clarifying exchange, we agreed the offset is "−3" but with our
+   customizations preserved (fewer dividers, our newer examples, MB=MC
+   stars wherever the MR=MC concept appears). Titles updated to match
+   the originals where ours diverged unnecessarily:
+   - 16: "Black Death and the Return to Labor" → **"Famous Example for
+     Diminishing Marginal Returns"**.
+   - 17: "Rivian Hiring Scenario" → **"Hiring Decisions in the Short
+     Run — Context & Scenario"**.
+   - 18: "Hiring in the Short Run: An Important Concept" → **"Hiring
+     Decisions in the Short Run — Concepts"**. Also added the MB=MC
+     star anchor at the bottom (original 21 explicitly invokes
+     "Recall: MB=MC").
+   - 24: "Big Employers Bid Their Own Wages Up" → **"The Case of Wage
+     Searchers"**.
+   - 34: "Applying the Rule – Recipe for Exams" → **"Applying the
+     'Bang for the Buck' Rule"**.
+
+2. **Slide 16 (Black Death) full polish.**
+   - Top bullets bumped to 26 pt main / 24 pt sub (per CLAUDE.md
+     "sub-bullets ≥ 20 pt" convention).
+   - Left text box: rectangle → **rounded rectangle** (~8 % corner),
+     fonts to 24 / 26 pt, the question line now **navy** with a
+     leading "→ " prefix.
+   - Two label-arrows on the chart: **Population** label/arrow in
+     dark grey, **Return to labor** label/arrow in black (so they
+     visually match the curves they point at).
+   - Captured manual moves: image at (6.653, 2.918), labels and
+     arrows repositioned to land on the curves.
+
+3. **Slide 17 (Hiring Context & Scenario).**
+   - Bullets bumped to 26 / 22 pt.
+   - Bottom takeaway: replaced rectangle takeaway bar with a
+     **rounded narrower (8.5") box** with drop shadow; question
+     prefixed with "→ ".
+
+4. **Slide 18 (Concepts) layout flip + font bumps.**
+   - Captured manual reflow: hero/decomp boxes tightened in size and
+     pulled up; **MB=MC star moved to the right side**, decision-rule
+     bar centred/left, arrow points leftward (star → bar).
+   - Bumped Decomposition-box fonts: definitions 13 → 14 pt, three
+     bullets 15 → 16 pt, "Even at constant price…" sub-bullet 13 → 14.
+
+5. **Slide 19 (MRPL example) re-laid out.**
+   - Compact PF table moved to (9.550, 2.013); helper called with
+     `with_axes=False` so we manage axis labels directly.
+   - **K (robots)** label: 16 pt navy italic, wider span, position
+     (9.374, 1.689).
+   - **L (workers)** label: 16 pt navy italic, **rotated 270°** so it
+     reads bottom-up like a real row-axis label.
+
+6. **Discussion-break box, deck-wide cleanup.**
+   - Helper default `top` lifted **6.6 → 6.25** so the box sits
+     cleanly above the gold/grey footer rule at y = 7.135.
+   - Font bumped **20 → 28 pt** in the overlay text box.
+   - All five call sites (slides 19, 44, 58, 72, 73) stripped of
+     their per-call `top=…` so they inherit the new default;
+     verified by audit that every box now sits at top 6.25, bottom
+     6.97 (clear of the 7.135 rule by ~0.165").
+   - Geometry unchanged — the helper was already generating the
+     custom-geometry slanted parallelogram with rounded corners that
+     user had hand-edited on slide 19.
+
+7. **Teaching CLAUDE.md workflow rule codified.** New "Reformatting an
+   existing deck vs. creating new content" subsection under "When
+   working on PowerPoint slides…":
+   - Reformatting = formatting only, NOT rewriting; preserve original
+     titles, bullet wording, structural framing, pedagogical examples.
+   - Three allowed deviations: refreshed examples (e.g., Tesla →
+     Rivian); numerical updates to today's currency / wages; documented
+     corrections.
+   - Customizations already in the new deck stay (concept map, MB=MC
+     anchors, merged hero-concept slides, …).
+   - Speaker notes: preserve substantive originals; rewrite only when
+     sparse, missing, or contradicted by the slide.
+   - Section dividers: prefer our consolidated dividers over the
+     original's recurring outline checkpoints.
+
+### Files modified this session
+
+| File | Status | Notes |
+|---|---|---|
+| [Module 3/_build_clean_deck.py](Module 3/_build_clean_deck.py) | Heavy edit | Slide 16, 17, 18, 19 builders rewritten; discussion-break helper default top lifted + font bumped; 4 call sites cleaned up. |
+| [Module 3/Module 3_clean.pptx](Module 3/Module 3_clean.pptx) | Rebuilt | Audit clean. |
+| [../CLAUDE.md](../CLAUDE.md) | Edit | New "Reformatting an existing deck vs. creating new content" subsection. |
+
+### Pending — pick up tomorrow
+
+- Continue slide-by-slide polish from slide 20 onward (per user's
+  "we can polish one-by-one" plan).
+- Spot-check slide 19's rotated L label in a few PowerPoint versions —
+  rotation rendering can shift the text-box centre slightly.
+
+### Carry-forward gotchas (no new ones today)
+
+- PowerPoint file lock on every rebuild — already in the gotchas list.
+- 28 pt "Discussion Break" fits comfortably in the 4.8"-wide inscribed
+  rectangle of the rounded-parallelogram badge (no clipping).
+
+---
+
 ## 2026-05-15 – Front-half rebuild: Announcements + slides 5–15 mirror source deck
 
 **One-line summary.** Long iterative session reworking the front half of

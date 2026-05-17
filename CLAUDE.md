@@ -184,6 +184,39 @@ For work in this folder, you are assisting with **teaching materials**
   the whole deck. Multiple layouts invite drift and make consistent
   rebuilds harder.
 
+### Reformatting an existing deck vs. creating new content
+- **When I supply an existing deck to "rebuild in the new format",
+  the job is formatting, NOT rewriting.** Preserve the original's
+  slide titles, bullet wording, structural framing, and pedagogical
+  examples verbatim where possible. Apply only the new visual layer:
+  palette, layout primitives, OMML for math, drop shadows, section-tag
+  hierarchy, etc.
+- **Three allowed kinds of deviation from the original:**
+  - **Refreshed examples** I have explicitly retired (e.g., Tesla →
+    Rivian, iPhone 11 → 17, Burn60 → ChatGPT). Don't sweep examples on
+    your own initiative; confirm, or follow established prior choices
+    for that deck.
+  - **Numerical updates** — currency, wages, prices brought to today.
+    Same rule: established prior choices propagate; don't invent new
+    ones.
+  - **Documented corrections** I have flagged in the source (e.g., a
+    CORRECTION slide noting a math error).
+- **Customizations already in the new deck stay.** Concept-map slides,
+  MB=MC anchor patterns, merged hero-concept slides, or any element
+  that doesn't exist in the source but has been added in our work —
+  preserve through subsequent rebuild passes.
+- **When in doubt about wording, lean toward the original.** The new
+  deck is a reformat of my own pedagogical material; rewriting prose
+  is not the goal and risks introducing subtle changes I may not want.
+- **Speaker notes:** preserve substantive notes from the original
+  verbatim; only rewrite when the original notes are sparse, missing,
+  or contradicted by the slide content (per the existing
+  source-vs-notes conflict rule).
+- **Section dividers:** the new deck uses fewer dividers than the
+  original deck's recurring "outline" checkpoints. Prefer the new
+  deck's consolidated dividers over reinstating every original
+  outline-of-module slide.
+
 ### Iteration is the norm
 - **Expect 2 – 3 rounds of "too cluttered → simplify"** on any
   diagram slide. Don't try to land it in one shot. Propose a layout,

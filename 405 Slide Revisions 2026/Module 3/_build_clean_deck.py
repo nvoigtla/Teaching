@@ -19,7 +19,7 @@ from pathlib import Path
 
 from lxml import etree as ET
 from pptx import Presentation
-from pptx.chart.data import CategoryChartData
+from pptx.chart.data import CategoryChartData, XyChartData
 from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.enum.shapes import MSO_SHAPE
@@ -164,7 +164,8 @@ def _add_convention_box(slide, left, top, width, height, *,
                           prefix=None, body=None, runs=None,
                           fill_rgb=None, border=None, line_w=1.0,
                           corner_pct=0.12, size=15, align=PP_ALIGN.LEFT,
-                          font="Calibri", pad_h=None, pad_v=None):
+                          font="Calibri", pad_h=None, pad_v=None,
+                          line_spacing_pct=None):
     """Cream-fill / navy-border rounded-rect explanation callout.
 
     The "Convention" textbox pattern from slide 14 generalised — use it
@@ -245,6 +246,16 @@ def _add_convention_box(slide, left, top, width, height, *,
         if body:
             r2 = p.add_run(); r2.text = body
             _style_run(r2, {'color': NAVY, 'size': size})
+
+    if line_spacing_pct is not None:
+        for p_obj in tf.paragraphs:
+            pPr = p_obj._p.get_or_add_pPr()
+            for old in pPr.findall(qn('a:lnSpc')):
+                pPr.remove(old)
+            lnSpc = ET.Element(qn('a:lnSpc'))
+            spcPct = ET.SubElement(lnSpc, qn('a:spcPct'))
+            spcPct.set('val', str(int(line_spacing_pct * 1000)))
+            pPr.insert(0, lnSpc)
     return shp
 
 
@@ -921,7 +932,7 @@ def _add_teaching_note(slide, text, *, top=Inches(6.6), width=None,
     return card
 
 
-def _add_discussion_break(slide, *, top=Inches(6.6), width=Inches(4.8),
+def _add_discussion_break(slide, *, top=Inches(6.25), width=Inches(4.8),
                            text="Discussion Break"):
     """Rounded-parallelogram 'discussion break' badge (bottom-right).
 
@@ -1041,7 +1052,7 @@ def _add_discussion_break(slide, *, top=Inches(6.6), width=Inches(4.8),
     run = p.add_run()
     run.text = text
     run.font.name = "Calibri"
-    run.font.size = Pt(20)
+    run.font.size = Pt(28)         # bumped 20 → 28 on 2026-05-16
     run.font.bold = True
     run.font.color.rgb = NAVY
     return shp
@@ -1244,6 +1255,25 @@ def _add_dashed_gridlines(axis_el):
         axpos.addnext(gl)
 
 
+def _align_x_labels_with_ticks(value_axis):
+    """Set <c:crossBetween val="midCat"/> on a value axis so the category
+    labels and tick marks align (default for line charts in OOXML is
+    "between", which leaves labels visually between adjacent ticks).
+    """
+    val_el = value_axis._element
+    for old in val_el.findall(qn('c:crossBetween')):
+        val_el.remove(old)
+    cb = ET.Element(qn('c:crossBetween'))
+    cb.set('val', 'midCat')
+    # Schema position: c:crossBetween follows c:crosses(At) and precedes
+    # c:majorUnit.  Insert before c:majorUnit if present; else append.
+    mu_el = val_el.find(qn('c:majorUnit'))
+    if mu_el is not None:
+        mu_el.addprevious(cb)
+    else:
+        val_el.append(cb)
+
+
 def _make_simple_line_chart(slide, x, y, w, h, categories, values, *,
                               line_color, x_title, y_title,
                               y_min=0, y_max=None, y_unit=None,
@@ -1318,6 +1348,10 @@ def _make_simple_line_chart(slide, x, y, w, h, categories, values, *,
         val.maximum_scale = y_max
     if y_unit is not None:
         val.major_unit = y_unit
+
+    # Align X-axis category labels with tick marks (default OOXML places
+    # them in the gaps between ticks).
+    _align_x_labels_with_ticks(val)
 
     _add_dashed_gridlines(cat._element)
     _add_dashed_gridlines(val._element)
@@ -1396,6 +1430,9 @@ def _make_multi_line_chart(slide, x, y, w, h, categories, series, *,
     if y_unit is not None:
         val.major_unit = y_unit
 
+    # Align X-axis category labels with tick marks.
+    _align_x_labels_with_ticks(val)
+
     _add_dashed_gridlines(cat._element)
     _add_dashed_gridlines(val._element)
 
@@ -1433,6 +1470,131 @@ def _make_multi_line_chart(slide, x, y, w, h, categories, series, *,
         lf = ET.SubElement(ln, qn('a:solidFill'))
         lc = ET.SubElement(lf, qn('a:srgbClr')); lc.set('val', '0B2B4E')
         layout.addnext(leg_spPr)
+    return chart_shape
+
+
+def _make_xy_line_chart(slide, x, y, w, h, *, series, x_title, y_title,
+                          x_min=0, x_max=None, x_unit=None,
+                          y_min=0, y_max=None, y_unit=None,
+                          legend=False, legend_pos=None, smooth=False):
+    """XY-scatter line+markers chart with the deck's standard styling.
+
+    Use when you need data points to sit at arbitrary X-positions (e.g.,
+    plotting MPL at the midpoint of each L-interval) while keeping tick
+    marks at standard L-values.  Both axes are numeric value axes.
+
+    series: list of ``(name, [(x, y), ...], color: RGBColor, marker: str)``.
+    smooth: True for XY_SCATTER_SMOOTH (cubic spline through points),
+            False for XY_SCATTER_LINES (straight segments).
+    """
+    _add_graphicframe_shadow(slide, x, y, w, h)
+    cd = XyChartData()
+    for name, points, _color, _marker in series:
+        s = cd.add_series(name)
+        for px, py in points:
+            s.add_data_point(px, py)
+    chart_type = (XL_CHART_TYPE.XY_SCATTER_SMOOTH if smooth
+                  else XL_CHART_TYPE.XY_SCATTER_LINES)
+    chart_shape = slide.shapes.add_chart(
+        chart_type,
+        int(x), int(y), int(w), int(h), cd,
+    )
+    chart = chart_shape.chart
+    chart.has_title = False
+    chart.has_legend = legend
+
+    # Per-series styling
+    for idx, ser in enumerate(chart.series):
+        name, points, color, marker = series[idx]
+        line = ser.format.line
+        line.color.rgb = color
+        line.width = Pt(2.5)
+        ser_xml = ser._element
+        clr_hex = f'{color[0]:02X}{color[1]:02X}{color[2]:02X}'
+        for old in ser_xml.findall(qn('c:marker')):
+            ser_xml.remove(old)
+        m = ET.SubElement(ser_xml, qn('c:marker'))
+        sym = ET.SubElement(m, qn('c:symbol')); sym.set('val', marker)
+        sz_el = ET.SubElement(m, qn('c:size')); sz_el.set('val', '7')
+        sp = ET.SubElement(m, qn('c:spPr'))
+        fl = ET.SubElement(sp, qn('a:solidFill'))
+        rg = ET.SubElement(fl, qn('a:srgbClr')); rg.set('val', clr_hex)
+        ln = ET.SubElement(sp, qn('a:ln'))
+        lf = ET.SubElement(ln, qn('a:solidFill'))
+        lr = ET.SubElement(lf, qn('a:srgbClr')); lr.set('val', clr_hex)
+        for sm in ser_xml.findall(qn('c:smooth')):
+            ser_xml.remove(sm)
+        smooth = ET.SubElement(ser_xml, qn('c:smooth'))
+        smooth.set('val', '0')
+
+    # Both axes are value axes in XY scatter; python-pptx returns the
+    # X axis through .category_axis (wrapped as a ValueAxis since
+    # catAx_lst is empty) and the Y axis through .value_axis.
+    x_ax = chart.category_axis
+    x_ax.tick_labels.font.name = "Calibri"
+    x_ax.tick_labels.font.size = Pt(10)
+    x_ax.tick_labels.font.color.rgb = NAVY
+    if x_max is not None:
+        x_ax.minimum_scale = x_min
+        x_ax.maximum_scale = x_max
+    if x_unit is not None:
+        x_ax.major_unit = x_unit
+    x_ax.has_title = True
+    x_ax.axis_title.text_frame.text = x_title
+    ar = x_ax.axis_title.text_frame.paragraphs[0].runs[0]
+    ar.font.name = "Calibri"; ar.font.size = Pt(12)
+    ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
+
+    y_ax = chart.value_axis
+    y_ax.tick_labels.font.name = "Calibri"
+    y_ax.tick_labels.font.size = Pt(10)
+    y_ax.tick_labels.font.color.rgb = NAVY
+    if y_max is not None:
+        y_ax.minimum_scale = y_min
+        y_ax.maximum_scale = y_max
+    if y_unit is not None:
+        y_ax.major_unit = y_unit
+    y_ax.has_title = True
+    y_ax.axis_title.text_frame.text = y_title
+    ar = y_ax.axis_title.text_frame.paragraphs[0].runs[0]
+    ar.font.name = "Calibri"; ar.font.size = Pt(12)
+    ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
+
+    _add_dashed_gridlines(x_ax._element)
+    _add_dashed_gridlines(y_ax._element)
+
+    # Legend
+    if legend and legend_pos is not None:
+        leg_el = chart.legend._element
+        chart.legend.font.name = "Calibri"
+        chart.legend.font.size = Pt(11)
+        chart.legend.font.color.rgb = NAVY
+        chart.legend.include_in_layout = False
+        for old in leg_el.findall(qn('c:layout')):
+            leg_el.remove(old)
+        for old in leg_el.findall(qn('c:legendPos')):
+            leg_el.remove(old)
+        pos = ET.SubElement(leg_el, qn('c:legendPos')); pos.set('val', 'tr')
+        leg_el.remove(pos); leg_el.insert(0, pos)
+        layout = ET.Element(qn('c:layout'))
+        ml = ET.SubElement(layout, qn('c:manualLayout'))
+        ET.SubElement(ml, qn('c:xMode')).set('val', 'edge')
+        ET.SubElement(ml, qn('c:yMode')).set('val', 'edge')
+        ET.SubElement(ml, qn('c:x')).set('val', legend_pos[0])
+        ET.SubElement(ml, qn('c:y')).set('val', legend_pos[1])
+        ET.SubElement(ml, qn('c:w')).set('val', legend_pos[2])
+        ET.SubElement(ml, qn('c:h')).set('val', legend_pos[3])
+        pos.addnext(layout)
+        for old in leg_el.findall(qn('c:spPr')):
+            leg_el.remove(old)
+        leg_spPr = ET.Element(qn('c:spPr'))
+        sf = ET.SubElement(leg_spPr, qn('a:solidFill'))
+        clr = ET.SubElement(sf, qn('a:srgbClr')); clr.set('val', 'FFFFFF')
+        ln = ET.SubElement(leg_spPr, qn('a:ln')); ln.set('w', '6350')
+        lf = ET.SubElement(ln, qn('a:solidFill'))
+        lc = ET.SubElement(lf, qn('a:srgbClr')); lc.set('val', '0B2B4E')
+        layout.addnext(leg_spPr)
+
     return chart_shape
 
 
@@ -2520,9 +2682,22 @@ def _cost_mc(Q, dQ=10):
     return (_cost_tc(Q + dQ) - _cost_tc(Q)) / dQ
 
 
-PF_A, PF_ALPHA, PF_BETA = 0.5, 0.5, 0.5
+PF_A, PF_ALPHA, PF_BETA = 3.155, 0.5, 0.3
 PF_K_VALS = [100, 200, 300, 400]
-PF_L_VALS = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+# Table grid (TWELVE rows): extra L=250 step at the start surfaces the
+# very steep early MPL (0→250 interval) without doubling the row count.
+PF_L_VALS = [0, 250, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
+# Chart grid (ELEVEN rows): uniform 500-step so the line-chart's
+# categorical X-axis isn't visually distorted by the half-step at L=250.
+# The L=250 point lives only in the TABLE; charts plot the smooth curve
+# at uniform L intervals.
+PF_L_VALS_CHART = [L for L in PF_L_VALS if L != 250]
+# 2026-05-16: revised three times on the same day.
+#   First pass:  β 0.5 → 0.4, A 0.5 → 1.25, L grid 0..10 000 step 1 000.
+#   Second pass: β 0.4 → 0.3, A 1.25 → 3.155, L grid 0..5 000 step 500.
+#   Third pass:  add intermittent L=250 row to table (per-worker MPL
+#                strictly decreasing at every interval, including the
+#                half-step from 0→250).  Q(400, 5 000) = 812.
 
 
 def _pf_value(K, L):
@@ -2651,7 +2826,7 @@ def _inject_raw_xml(slide, xml_str):
 
 
 def slide_10(prs):
-    """Rivian's production function: weekly output of the Normal, IL plant.
+    """Rivian's production function: weekly output of the R1 line.
 
     A 2D table showing weekly output as a function of (workers, robots).
     Values come from Cobb-Douglas Q = 4 · K^0.3 · L^0.5 – chosen so that
@@ -2797,17 +2972,18 @@ def slide_10(prs):
     s = make_diagram_slide(
         prs, page_num=11,
         section_tag=SECTION_TAG_P1,
-        title="Rivian's Production Function:  Weekly Plant Output",
+        title="Rivian's Production Function:  R1 Line Weekly Output",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Rivian's weekly plant output as a function of workers (L) and "
-        "robots (K).  Built from the Cobb-Douglas Q = 0.5 · √(K · L) – "
-        "constant returns to scale overall, but strictly diminishing in "
-        "each input individually.  Look down a column: MPL falls as you "
-        "add labor with capital fixed.  Look along a row: MPK falls as "
-        "you add robots with labor fixed.  Strict diminishing returns in "
-        "both directions – the textbook story."
+        "Rivian's R1 line weekly output as a function of workers (L) and "
+        "robots (K).  Built from the Cobb-Douglas Q = 3.155 · √K · L^0.3 – "
+        "strictly diminishing in each input individually.  Look down a "
+        "column: MPL falls as you add labor with capital fixed.  Look "
+        "along a row: MPK falls as you add robots with labor fixed.  "
+        "Strict diminishing returns in both directions – the textbook "
+        "story.  Per-worker MPL is also strictly diminishing across the "
+        "non-uniform L grid (extra L=250 step at the start)."
     ))
 
 
@@ -2829,6 +3005,10 @@ def slide_11(prs):
 
     def draw(slide):
         chart_data = CategoryChartData()
+        # 2026-05-16 (third pass): use PF_L_VALS (with L=250) — per user
+        # request, all illustrations carry the extra half-step at the
+        # start, even though the categorical X-axis spaces it equally with
+        # the other intervals.
         chart_data.categories = [f"{L:,}" for L in PF_L_VALS]
         for K in PF_K_VALS:
             series_vals = [_pf_value(K, L) for L in PF_L_VALS]
@@ -3005,13 +3185,17 @@ def slide_11(prs):
         val.tick_labels.font.size = Pt(11)
         val.tick_labels.font.color.rgb = NAVY
         val.minimum_scale = 0
-        val.maximum_scale = 1000
+        val.maximum_scale = 800
         val.major_unit = 100
         val.has_title = True
         val.axis_title.text_frame.text = "Cars per Week"
         ar = val.axis_title.text_frame.paragraphs[0].runs[0]
         ar.font.name = "Calibri"; ar.font.size = Pt(14)
         ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
+
+        # Align X-axis category labels (and data points) with the tick
+        # marks rather than placing them in the gaps between ticks.
+        _align_x_labels_with_ticks(val)
 
         # Light-grey dashed horizontal gridlines at each value tick
         # (100, 200, … 1000 cars per week).
@@ -3100,7 +3284,7 @@ def slide_11(prs):
     s = make_diagram_slide(
         prs, page_num=12,
         section_tag=SECTION_TAG_P1,
-        title="Plotting Total Output:  Q vs. L for Four Plant Sizes",
+        title="Plotting Total Output:  Q vs. L on the R1 Line",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -3261,7 +3445,10 @@ def slide_mpl_data(prs):
     COL_COLORS = [BLACK_NUM, RED_NUM, BLACK_NUM, GREEN_NUM, GREEN_NUM, BLUE_NUM]
 
     K_FIX = 100
-    L_GRID = [0, 500, 1000, 2000, 3000]
+    # Match slide 11's L grid: extra L=250 step at the start surfaces
+    # the very steep first MPL interval before settling into the wider
+    # 500- and 1 000-worker steps.
+    L_GRID = [0, 250, 500, 1000, 2000, 3000]
 
     def draw(slide):
         # Main bullet — replaces the old centred italic captions with a
@@ -3594,8 +3781,8 @@ def slide_mpl_data(prs):
                                 ('text', "Interpretation:  ",
                                  {'size': 19, 'bold': True, 'color': NAVY}),
                                 ('text',
-                                 "Between 0 and 500 workers, MPL is "
-                                 "approximately 0.224",
+                                 "Between 0 and 250 workers, MPL is "
+                                 "approximately 0.660",
                                  {'size': 19, 'color': NAVY}),
                             ],
                             align=PP_ALIGN.LEFT,
@@ -3639,7 +3826,7 @@ def slide_mpl_data(prs):
         "Same Cobb-Douglas function we used on slides 10 and 11, now with "
         "K = 100 robots fixed and L walked through {0, 500, 1000, 2000, "
         "3000} workers.  L grid is denser at the start so the diminishing-"
-        "MPL effect shows up cleanly: MPL falls from 0.224 cars/worker "
+        "MPL effect shows up cleanly: MPL falls from 0.660 cars/worker "
         "(going from 0 to 500 workers) down to 0.050 cars/worker (going "
         "from 2,000 to 3,000 workers).  Convention: ΔL and ΔQ are step-"
         "by-step changes (current row minus previous row), NOT changes "
@@ -3668,11 +3855,17 @@ def slide_13(prs):
     DASH_COLOR = GOLD                    # tangent lines (= MPL series color)
 
     def draw_pictures(slide):
-        # Compute Q and MPL from the same Cobb-Douglas (Q = 0.5·√(K·L))
-        # we use on slides 10 and 11.  Fix K = 100 robots.
-        L_vals = PF_L_VALS                     # 0, 1000, 2000, …, 10000
+        # Compute Q and MPL from the same Cobb-Douglas (Q = 3.155·√K·L^0.3)
+        # we use on slides 11 and 12.  Fix K = 100 robots.  Use the full
+        # PF_L_VALS (including the extra L=250 step) so this chart matches
+        # the table on slide 11 exactly.
+        L_vals = PF_L_VALS                     # 0, 250, 500, 1000, …, 5000
         Q_vals = [_pf_value(K_FIX, L) for L in L_vals]
-        MPL_L = L_vals[1:]                     # MPL evaluated for L ≥ 1000
+        # MPL is the average slope over each interval.  Plot it at the
+        # MIDPOINT of the interval (e.g., the MPL between L=250 and
+        # L=500 — value 0.156 — appears on the chart at L=375).  This is
+        # the convention used on slide 22 as well.
+        MPL_L = [(L_vals[i-1] + L_vals[i]) // 2 for i in range(1, len(L_vals))]
         MPL_vals = [
             (Q_vals[i] - Q_vals[i-1]) / (L_vals[i] - L_vals[i-1])
             for i in range(1, len(L_vals))
@@ -3702,19 +3895,23 @@ def slide_13(prs):
             line_color=BLUE,
             x_title="Workers (L)",
             y_title="Output (Q)",
-            y_max=550, y_unit=50,
+            y_max=450, y_unit=50,
         )
-        # RIGHT chart: MPL vs L — gold series so the curve visually
-        # matches the gold tangent lines drawn on the left chart.
-        right_chart_shape = _make_simple_line_chart(
+        # RIGHT chart: MPL vs L — XY scatter so each data point sits at
+        # the MIDPOINT of its interval (125, 375, 750, 1 250, …) while the
+        # X-axis tick marks stay at the standard round-number positions
+        # (0, 500, 1 000, …, 5 000).  Gold series colour matches the gold
+        # tangent lines drawn on the left chart.
+        right_chart_shape = _make_xy_line_chart(
             slide, right_chart_x, right_chart_y,
             right_chart_w, right_chart_h,
-            categories=[f"{L:,}" for L in MPL_L],
-            values=MPL_vals,
-            line_color=DASH_COLOR,
+            series=[("MPL", list(zip(MPL_L, MPL_vals)),
+                     DASH_COLOR, 'circle')],
             x_title="Workers (L)",
             y_title="MPL  (cars per worker)",
-            y_max=0.18, y_unit=0.02,
+            x_min=0, x_max=5000, x_unit=500,
+            y_min=0, y_max=0.45, y_unit=0.05,
+            smooth=True,
         )
 
         # ---- Smooth both curves + pin the inner plot area to a known
@@ -3766,29 +3963,61 @@ def slide_13(prs):
         #   chart_y = 3.40" (hand-edit baseline) → 3.58" (current, shift +0.18)
         # User hand-edit starts: 5.486, 4.512, 3.961, 3.570  (at chart_y=3.40)
         # → +0.18 shift gives: 5.666, 4.692, 4.141, 3.750
-        # Steep / early tangent (≈ L = 1500 region):
+        # Tangent endpoints – hand-tweaked in PowerPoint on 2026-05-16
+        # against the rendered curve so each line visibly kisses the
+        # production function at one point.  Keep these exact endpoints;
+        # re-deriving them analytically loses the visual match.
+        t1_start = (Inches(1.275), Inches(5.783))
+        t1_end   = (Inches(2.290), Inches(3.996))
+        t2_start = (Inches(4.396), Inches(4.122))
+        t2_end   = (Inches(5.896), Inches(3.870))
+        # Steep / early tangent (≈ L = 1 000 region):
         _add_arrow(slide,
-                    start_xy=(Inches(1.471), Inches(5.666)),
-                    end_xy=(Inches(2.536), Inches(4.692)),
+                    start_xy=t1_start, end_xy=t1_end,
                     color=DASH_COLOR, weight_pt=2.0,
                     head=False, dash='dash')
-        # Flat / late tangent (≈ L = 8000 region):
+        # Flat / late tangent (≈ L = 4 000 region):
         _add_arrow(slide,
-                    start_xy=(Inches(4.464), Inches(4.141)),
-                    end_xy=(Inches(6.103), Inches(3.750)),
+                    start_xy=t2_start, end_xy=t2_end,
                     color=DASH_COLOR, weight_pt=2.0,
                     head=False, dash='dash')
 
-        # Captions ABOVE each chart (moved on 2026-05-15 from below the
-        # chart to here; chart frames shifted down by 0.33" to make room).
+        # Caption ABOVE the LEFT chart — bold navy (not italic).
         _add_text(slide, left_chart_x, cap_y, left_chart_w, cap_h,
                    "Total output  (rising, flattening)",
-                   size=13, italic=True, bold=True, color=NAVY,
+                   size=13, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
+        # Caption ABOVE the RIGHT chart — same format as the left.
         _add_text(slide, right_chart_x, cap_y, right_chart_w, cap_h,
-                   "Slope = MPL  (falling)",
-                   size=13, italic=True, bold=True, color=NAVY,
+                   "Marginal Product of Labor  (declining)",
+                   size=13, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
+        # Cream Convention callout — names the midpoint plotting
+        # convention (data at L=125, 375, 750, …).  Position hand-
+        # tweaked on 2026-05-16: box now sits INSIDE the upper-right of
+        # the MPL chart (rather than above the chart frame), with a
+        # short diagonal leader pointing at the L=750 data point on the
+        # curve.  Same wording reused on slide 22.
+        conv_w = Inches(3.50)
+        conv_h = Inches(0.55)
+        conv_x = Inches(8.997)
+        conv_y = Inches(4.061)
+        _add_convention_box(
+            slide, conv_x, conv_y, conv_w, conv_h,
+            prefix="Note:  ",
+            body="MPL is plotted at the middle of each interval  (per our convention)",
+            align=PP_ALIGN.CENTER, size=12,
+            pad_v=Inches(0.04),
+            line_spacing_pct=80,
+        )
+
+        # Short gold leader from below the Convention box's left edge
+        # down-left to the L=750 data point on the MPL curve.  Endpoints
+        # hand-tweaked in PowerPoint.
+        _add_arrow(slide,
+                    start_xy=(Inches(9.063), Inches(4.615)),
+                    end_xy=(Inches(8.685), Inches(5.335)),
+                    color=GOLD, weight_pt=1.5, head=True)
 
         # ---- "plot the slope" callout BETWEEN the two charts -------------
         # Combined (box + block arrow) centred horizontally on the gap
@@ -3803,14 +4032,14 @@ def slide_13(prs):
         # per user requests on 2026-05-15.
         cb_x = gap_mid_x - (cb_w + arr_w) // 2 - Inches(0.32)
         cb_y = left_chart_y + (left_chart_h - cb_h) // 2     # vert. centred
-        cb_shape = _add_callout_box(slide,
-                                      left=cb_x, top=cb_y,
-                                      width=cb_w, height=cb_h,
-                                      text="plot the slope",
-                                      fill=GOLD, text_color=NAVY,
-                                      size=13, bold=True)
-        if cb_shape is not None:
-            _add_drop_shadow(cb_shape)
+        cb_shape = _add_rounded_filled_box(
+            slide, left=cb_x, top=cb_y,
+            width=cb_w, height=cb_h,
+            label="plot the slope",
+            fill=GOLD, text_color=NAVY,
+            size=13, bold=True,
+            corner_pct=0.18,
+        )
         # Block right-arrow (MSO_SHAPE.RIGHT_ARROW) — much more visible
         # than a thin line connector.
         arr_shape = _add_arrow_shape(slide,
@@ -3820,6 +4049,20 @@ def slide_13(prs):
                                        direction="right", fill=GOLD)
         if arr_shape is not None:
             _add_drop_shadow(arr_shape)
+
+        # Thin gold leader lines from the "plot the slope" callout to
+        # each tangent.  Endpoints hand-tweaked on 2026-05-16 to land on
+        # a visible point along each tangent (not the tangent's far end).
+        # Connector to the EARLY (steep) tangent.
+        _add_arrow(slide,
+                    start_xy=(cb_x, cb_y + int(cb_h * 0.55)),
+                    end_xy=(Inches(1.540), Inches(5.395)),
+                    color=DASH_COLOR, weight_pt=1.0, head=False)
+        # Connector to the LATE (flat) tangent.
+        _add_arrow(slide,
+                    start_xy=(cb_x + int(cb_w * 0.65), cb_y),
+                    end_xy=(Inches(5.370), Inches(3.996)),
+                    color=DASH_COLOR, weight_pt=1.0, head=False)
 
         # Bottom takeaway bar — nudged from 6.40 → 6.55 since the chart
         # frames are now ~0.33" taller (captions moved above).  Bar
@@ -3858,7 +4101,9 @@ def slide_14(prs):
     pre-1800 economy + 1348 question), wage-and-population chart on the right.
     """
     def draw(slide):
-        # Top setup (full-width row 1) – context bullets
+        # Top setup (full-width row 1) – context bullets.
+        # 2026-05-16: bumped to size=26 main / sub=24; left/top fine-
+        # tuned to (0.318, 1.668) per manual edit.
         top_bullets = [
             ("The (agriculture-based) economy before 1800:", 0),
             ("Land was the fixed factor; labor was variable", 1),
@@ -3866,18 +4111,25 @@ def slide_14(prs):
         ]
         _add_hierarchical_bullets(
             slide,
-            left=MARGIN, top=Inches(1.85),
-            width=RULE_W, height=Inches(1.55),
+            left=Inches(0.318), top=Inches(1.668),
+            width=RULE_W, height=Inches(1.550),
             items=top_bullets,
-            size=22, sub_size=18, line_spacing_pts=8,
+            size=26, sub_size=24, line_spacing_pts=8,
         )
 
-        # Half-page setup textbox on the LEFT (the question framing)
+        # Half-page setup textbox on the LEFT — rounded edges per the
+        # Convention-callout style; larger fonts; the question on the
+        # second line is in NAVY (dark blue) with a leading right-arrow.
+        # Height trimmed from 3.0 → 2.407 on 2026-05-16 per manual edit.
         left_box = slide.shapes.add_shape(
-            MSO_SHAPE.RECTANGLE,
+            MSO_SHAPE.ROUNDED_RECTANGLE,
             int(MARGIN), int(Inches(3.6)),
-            int(Inches(5.8)), int(Inches(3.0)),
+            int(Inches(5.800)), int(Inches(2.407)),
         )
+        try:
+            left_box.adjustments[0] = 0.08          # ~8 % corner radius
+        except Exception:
+            pass
         left_box.fill.solid()
         left_box.fill.fore_color.rgb = RGBColor(0xF4, 0xF1, 0xEA)  # warm parchment cream
         left_box.line.color.rgb = NAVY
@@ -3895,33 +4147,64 @@ def slide_14(prs):
         r1 = p1.add_run()
         r1.text = "In 1348, the Black Death killed almost half the population (labor)."
         r1.font.name = "Calibri"
-        r1.font.size = Pt(20)
+        r1.font.size = Pt(24)
         r1.font.color.rgb = NAVY
         # Blank line
         p_blank = tf.add_paragraph()
-        # Highlighted question
+        # Highlighted question — leading right-arrow, navy bold
         p2 = tf.add_paragraph()
         p2.alignment = PP_ALIGN.LEFT
         r2 = p2.add_run()
-        r2.text = "What happened to the return to labor?"
+        r2.text = "→  What happened to the return to labor?"
         r2.font.name = "Calibri"
-        r2.font.size = Pt(22)
+        r2.font.size = Pt(26)
         r2.font.bold = True
-        r2.font.color.rgb = GOLD
+        r2.font.color.rgb = NAVY
 
-        # Wages-and-population picture on the RIGHT
+        # Wages-and-population picture on the RIGHT — positions
+        # hand-tweaked in PowerPoint on 2026-05-16: image moved up,
+        # caption now sits AT THE TOP of the image (header-style)
+        # instead of below.
         _add_source_image(slide, 14, "rId3",
-                           left=Inches(6.7), top=Inches(3.5),
-                           width=Inches(6.3))
-        _add_text(slide, Inches(6.7), Inches(6.55), Inches(6.3), Inches(0.25),
+                           left=Inches(6.653), top=Inches(2.918),
+                           width=Inches(6.300))
+        _add_text(slide, Inches(6.700), Inches(2.950), Inches(6.300), Inches(0.250),
                    "Wages and population, England 1300-1500",
                    size=13, italic=True, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
 
+        # ---- Two label-arrows on the chart (Population, Return to labor) ----
+        # Positions hand-tweaked in PowerPoint on 2026-05-16.  Colors
+        # differentiated per user request: Population in dark grey,
+        # Return-to-labor in black — so each label/arrow visually matches
+        # the chart curve it points at.
+        DARK_GRAY = RGBColor(0x40, 0x40, 0x40)
+        BLACK = RGBColor(0x00, 0x00, 0x00)
+        # "Population" label + up-left arrow into the population curve.
+        _add_text(slide, Inches(9.803), Inches(5.362),
+                   Inches(0.950), Inches(0.300),
+                   "Population",
+                   size=12, bold=True, italic=True, color=DARK_GRAY,
+                   align=PP_ALIGN.CENTER, font="Calibri")
+        _add_arrow(slide,
+                    start_xy=(Inches(9.850), Inches(5.425)),
+                    end_xy=(Inches(9.463), Inches(5.020)),
+                    color=DARK_GRAY, weight_pt=2.0, head=True)
+        # "Return to labor" label + up-left arrow into the wage curve.
+        _add_text(slide, Inches(8.978), Inches(5.707),
+                   Inches(1.300), Inches(0.300),
+                   "Return to labor",
+                   size=12, bold=True, italic=True, color=BLACK,
+                   align=PP_ALIGN.CENTER, font="Calibri")
+        _add_arrow(slide,
+                    start_xy=(Inches(9.000), Inches(5.770)),
+                    end_xy=(Inches(8.620), Inches(5.223)),
+                    color=BLACK, weight_pt=2.0, head=True)
+
     s = make_diagram_slide(
         prs, page_num=16,
         section_tag=SECTION_TAG_P1,
-        title="The Black Death and the Return to Labor",
+        title="Famous Example for Diminishing Marginal Returns",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -3944,6 +4227,8 @@ def slide_15(prs):
     def draw(slide):
         # Bullets on the LEFT  (materials cost dropped per user decision —
         # we'll handle materials separately in the cost-side of the module).
+        # 2026-05-16: bumped to size=26 / sub=22 per user feedback (EMBA
+        # readability — sub-bullets at 18pt were too small).
         bullets = [
             ("Demand and output price are given", 0),
             ("Large number of R1T ordered at price of ~$80k", 1),
@@ -3956,7 +4241,7 @@ def slide_15(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(8.0), height=Inches(4.4),
             items=bullets,
-            size=22, sub_size=18, line_spacing_pts=8,
+            size=26, sub_size=22, line_spacing_pts=8,
         )
 
         # Rivian R1T picture on the RIGHT (replaces the Tesla car carrier).
@@ -3975,16 +4260,25 @@ def slide_15(prs):
                        size=9, italic=True, color=GRAY,
                        align=PP_ALIGN.CENTER, font="Calibri")
 
-        # Gold takeaway bar at the bottom – the key question
-        _add_takeaway_bar(slide,
-                           "How many workers should Rivian optimally hire?",
-                           top=Inches(6.45), fill=GOLD, text_color=NAVY,
-                           width=Inches(10.5))
+        # Bottom: rounded gold question box with drop shadow.  Narrower
+        # than a full takeaway bar; leading "→ " arrow prefix anchors
+        # the visual emphasis at the start of the sentence.
+        box_w = Inches(8.5)
+        box_h = Inches(0.65)
+        box_x = (SLIDE_W - box_w) // 2
+        box_y = Inches(6.45)
+        _add_rounded_filled_box(
+            slide, box_x, box_y, box_w, box_h,
+            label="→  How many workers should Rivian optimally hire?",
+            fill=GOLD, text_color=NAVY,
+            size=20, bold=True,
+            corner_pct=0.20, shadow=True,
+        )
 
     s = make_diagram_slide(
         prs, page_num=17,
         section_tag=SECTION_TAG_P1,
-        title="Rivian Hiring Scenario:  ~$80k R1T, Fixed K",
+        title="Hiring Decisions in the Short Run —  Context & Scenario",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -4072,15 +4366,17 @@ def slide_16(prs):
         a.set('val', str(int(alpha)))
 
     def draw(slide):
-        # Short-run framing (italic navy) — sets the scope
-        _add_text(slide, MARGIN, Inches(1.85), RULE_W, Inches(0.35),
+        # Short-run framing (italic navy) — sets the scope.
+        # 2026-05-16: top moved up from 1.85 → 1.579 per manual edit.
+        _add_text(slide, MARGIN, Inches(1.579), RULE_W, Inches(0.35),
                    "In the short run  (capital K fixed):",
                    size=18, italic=True, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
 
         # ---- HERO box (two-line): name on top, plain-English below ----
-        hero_x = Inches(1.0); hero_y = Inches(2.25)
-        hero_w = Inches(11.3); hero_h = Inches(1.30)
+        # Position + height tightened on 2026-05-16 per manual edit.
+        hero_x = Inches(0.976); hero_y = Inches(1.990)
+        hero_w = Inches(11.300); hero_h = Inches(1.110)
         hero = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
                                         int(hero_x), int(hero_y),
                                         int(hero_w), int(hero_h))
@@ -4117,8 +4413,9 @@ def slide_16(prs):
 
         # ---- DECOMPOSITION box right below the HERO ----
         # Header → MR/MPL definitions → three bullets, all inside one box.
-        dec_x = Inches(1.0); dec_y = Inches(3.70)
-        dec_w = Inches(11.3); dec_h = Inches(2.85)
+        # Position + dimensions tightened on 2026-05-16 per manual edit.
+        dec_x = Inches(1.000); dec_y = Inches(3.410)
+        dec_w = Inches(11.200); dec_h = Inches(2.379)
         dec = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
                                        int(dec_x), int(dec_y),
                                        int(dec_w), int(dec_h))
@@ -4147,7 +4444,7 @@ def slide_16(prs):
         pmr.space_before = Pt(4)
         rmr = pmr.add_run()
         rmr.text = "MR:  marginal revenue from selling an extra item"
-        rmr.font.name = "Calibri"; rmr.font.size = Pt(13)
+        rmr.font.name = "Calibri"; rmr.font.size = Pt(14)
         rmr.font.italic = True
         rmr.font.color.rgb = NAVY
         # MPL definition (centred)
@@ -4156,7 +4453,7 @@ def slide_16(prs):
         pmpl.space_before = Pt(2)
         rmpl = pmpl.add_run()
         rmpl.text = "MPL:  extra output (marginal product) from hiring one more worker"
-        rmpl.font.name = "Calibri"; rmpl.font.size = Pt(13)
+        rmpl.font.name = "Calibri"; rmpl.font.size = Pt(14)
         rmpl.font.italic = True
         rmpl.font.color.rgb = NAVY
         # Bullet 1
@@ -4165,7 +4462,7 @@ def slide_16(prs):
         pb1.space_before = Pt(10)
         rb = pb1.add_run()
         rb.text = "•  When MPL falls, MRPL falls"
-        rb.font.name = "Calibri"; rb.font.size = Pt(15); rb.font.bold = True
+        rb.font.name = "Calibri"; rb.font.size = Pt(16); rb.font.bold = True
         rb.font.color.rgb = NAVY
         # Sub of bullet 1
         pb1s = dtf.add_paragraph()
@@ -4173,7 +4470,7 @@ def slide_16(prs):
         pb1s.space_before = Pt(2)
         rb = pb1s.add_run()
         rb.text = "      Even at constant price, each additional worker is worth less"
-        rb.font.name = "Calibri"; rb.font.size = Pt(13); rb.font.italic = True
+        rb.font.name = "Calibri"; rb.font.size = Pt(14); rb.font.italic = True
         rb.font.color.rgb = NAVY
         # Bullet 2 (trimmed for 5–10 word target)
         pb2 = dtf.add_paragraph()
@@ -4181,7 +4478,7 @@ def slide_16(prs):
         pb2.space_before = Pt(6)
         rb = pb2.add_run()
         rb.text = "•  Decreasing MPL  ⇒  each marginal hire is worth less"
-        rb.font.name = "Calibri"; rb.font.size = Pt(15); rb.font.bold = True
+        rb.font.name = "Calibri"; rb.font.size = Pt(16); rb.font.bold = True
         rb.font.color.rgb = NAVY
         # Bullet 3 — price-taker simplification (trimmed)
         pb3 = dtf.add_paragraph()
@@ -4189,12 +4486,28 @@ def slide_16(prs):
         pb3.space_before = Pt(6)
         rb = pb3.add_run()
         rb.text = "•  Price-taker case:  MR = P,  so  MRPL = P × MPL"
-        rb.font.name = "Calibri"; rb.font.size = Pt(15); rb.font.bold = True
+        rb.font.name = "Calibri"; rb.font.size = Pt(16); rb.font.bold = True
         rb.font.color.rgb = NAVY
 
-        # ---- DECISION RULE box at the bottom (GOLD) ----
-        dr_x = Inches(1.0); dr_y = Inches(6.65)
-        dr_w = Inches(11.3); dr_h = Inches(0.45)
+        # ---- MB = MC anchor + DECISION RULE bar at the bottom ----
+        # 2026-05-16: layout flipped per manual edit — star now sits on
+        # the RIGHT side of the slide, decision-rule bar centered/left.
+        # Arrow points from star → rule bar (i.e., LEFTWARD).
+        star_w = Inches(1.600)
+        star_h = Inches(1.050)
+        star_x = Inches(11.006)
+        star_y = Inches(5.910)
+        _add_anchor_burst(
+            slide, star_x, star_y, star_w, star_h,
+            top_text="MB = MC",
+            bottom_text="(of labor)",
+            top_size=14, bottom_size=11,
+        )
+
+        # Gold decision-rule bar centered/left of the star.
+        dr_x = Inches(3.018)
+        dr_y = Inches(6.285)
+        dr_w = Inches(7.216); dr_h = Inches(0.550)
         dr = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
                                       int(dr_x), int(dr_y),
                                       int(dr_w), int(dr_h))
@@ -4213,13 +4526,20 @@ def slide_16(prs):
         pdr.alignment = PP_ALIGN.CENTER
         rdr = pdr.add_run()
         rdr.text = "Decision rule:   If  MRPL > w (wage),   hire more workers"
-        rdr.font.name = "Calibri"; rdr.font.size = Pt(22); rdr.font.bold = True
+        rdr.font.name = "Calibri"; rdr.font.size = Pt(20); rdr.font.bold = True
         rdr.font.color.rgb = NAVY
+
+        # Arrow points FROM the star's left edge TO the rule bar's right
+        # edge — leftward, ~horizontal.  Endpoints hand-tweaked.
+        _add_arrow(slide,
+                    start_xy=(Inches(11.026), Inches(6.465)),
+                    end_xy=(Inches(10.233), Inches(6.560)),
+                    color=GOLD, weight_pt=2.0, head=True)
 
     s = make_diagram_slide(
         prs, page_num=18,
         section_tag=SECTION_TAG_P1,
-        title="Hiring in the Short Run:  An Important Concept",
+        title="Hiring Decisions in the Short Run —  Concepts",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -4297,14 +4617,14 @@ def slide_17(prs):
 
 
 def slide_18(prs):
-    """Example: MRPL at 6,000 employees and 100 robots.
+    """Example: MRPL at 4,000 employees and 100 robots.
 
     Source had: title + bullets + small image (group with picture & oval) +
     'Discussion break' parallelogram badge at bottom-right.
     """
     def draw(slide):
         bullets = [
-            "Rivian:  100 robots and 6,000 employees in its Normal, IL plant",
+            "Rivian:  100 robots and 4,000 employees on the R1 line  (Normal, IL)",
             "Price ~$80k per R1T,  approximately constant in quantity",
             ("What is MRPL?  (in $ per worker, per week)", 0),
             ("Hint:", 0),
@@ -4320,27 +4640,46 @@ def slide_18(prs):
         )
 
         # ---- Compact production-function table (same data as slide 10) ----
+        # 2026-05-16: table moved RIGHT and slightly down per manual edit.
+        # Axis labels disabled (with_axes=False) so we can place a larger
+        # K (robots) header and a 90°-rotated L (workers) row-axis label.
         _add_compact_pf_table(slide,
-                               tbl_left=Inches(9.55), tbl_top=Inches(2.30))
+                               tbl_left=Inches(9.550), tbl_top=Inches(2.013),
+                               with_axes=False)
+        # K axis label — wider than the default; navy italic, 16 pt
+        _add_text(slide, Inches(9.374), Inches(1.689),
+                   Inches(3.426), Inches(0.269),
+                   "K  (robots)",
+                   size=16, italic=True, color=NAVY,
+                   align=PP_ALIGN.CENTER, font="Calibri")
+        # L axis label — rotated 90° so it reads bottom-up like a real
+        # row-axis label.
+        l_box = _add_text(slide, Inches(8.720), Inches(3.728),
+                           Inches(1.090), Inches(0.269),
+                           "L  (workers)",
+                           size=16, italic=True, color=NAVY,
+                           align=PP_ALIGN.CENTER, font="Calibri")
+        l_box.rotation = 270
 
-        # Discussion-break badge (rounded-parallelogram, bottom-right)
-        _add_discussion_break(slide, top=Inches(6.55), width=Inches(4.8))
+        # Discussion-break badge — uses the helper's default top now
+        # (6.25"), which sits ABOVE the gray rule at the slide bottom.
+        _add_discussion_break(slide, width=Inches(4.8))
 
     s = make_diagram_slide(
         prs, page_num=19,
         section_tag=SECTION_TAG_P1,
-        title="Example:  Calculate MRPL at 6,000 Employees and 100 Robots",
+        title="Example:  Calculate MRPL at 4,000 Employees and 100 Robots",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "A specific number to anchor the concept. Walk through it: at 6,000 "
+        "A specific number to anchor the concept. Walk through it: at 4,000 "
         "workers and 100 robots, find MPL from the production-function "
         "table, then multiply by the sale price (~$80K per R1T)."
     ))
 
 
 def slide_19(prs):
-    """Poll: MRPL at 6,000 employees?
+    """Poll: MRPL at 4,000 employees?
 
     Source slide is a full-bleed PollEv screenshot (single picture).  Keep
     that picture so the on-screen poll content matches what students see.
@@ -4360,12 +4699,12 @@ def slide_19(prs):
     s = make_diagram_slide(
         prs, page_num=20,
         section_tag=SECTION_TAG_P1,
-        title="What Is Rivian's MRPL at 6,000 Employees?",
+        title="What Is Rivian's MRPL at 4,000 Employees?",
         draw_diagram=draw,
     )
     _draw_poll_pill(s)
     _set_notes(s, (
-        "Quick PollEv – compute the MRPL at 6,000 employees and submit. "
+        "Quick PollEv – compute the MRPL at 4,000 employees and submit. "
         "Give them 30 seconds. The point isn't to get the number perfectly, "
         "it's to make sure everyone is doing the calculation in their head."
     ))
@@ -4375,17 +4714,17 @@ def slide_20(prs):
     """Solution: MRPL of Rivian — uses actual values from slide 10's table.
 
     Applies slide 13's "initial-point" convention: ΔQ and ΔL are computed
-    relative to the previous row of the L grid.  Currently at L = 6,000
-    workers; the next 1,000-worker step takes us to L = 7,000.
+    relative to the previous row of the L grid.  Currently at L = 4,000
+    workers; the next 500-worker step takes us to L = 4,500.
     """
     bullets = [
-        ("Currently at L = 6,000 workers (K = 100 robots)", 0),
+        ("Currently at L = 4,000 workers (K = 100 robots)", 0),
         ("From the production-function table on slide 10:", 0),
-        ("Q (6,000)  =  387 R1T per week", 1),
-        ("Q (7,000)  =  418 R1T per week", 1),
+        ("Q (4,000)  =  380 R1T per week", 1),
+        ("Q (4,500)  =  394 R1T per week", 1),
         ("Per the slide-13 convention:  MPL  =  ΔQ / ΔL", 0),
-        ("MPL  =  (418 − 387) / 1,000  =  0.031 cars per worker per week", 1),
-        ("MRPL  =  MPL × P  ≈  0.031 × $80,000  ≈  $2,480 per worker per week", 0),
+        ("MPL  =  (394 − 380) / 500  =  0.028 cars per worker per week", 1),
+        ("MRPL  =  MPL × P  ≈  0.028 × $80,000  ≈  $2,240 per worker per week", 0),
         ("Compare to the weekly wage of ONE additional worker — not the whole workforce", 1),
     ]
     s = make_content_bulleted(
@@ -4396,11 +4735,11 @@ def slide_20(prs):
         size=20, sub_size=18, line_spacing_pts=8,
     )
     _set_notes(s, (
-        "Reveal the answer.  Pull Q(6,000) = 387 and Q(7,000) = 418 from "
+        "Reveal the answer.  Pull Q(4,000) = 380 and Q(4,500) = 394 from "
         "slide 10's production-function table (K = 100 robots).  Apply "
-        "the slide-13 convention: ΔQ = 31, ΔL = 1,000, so MPL ≈ 0.031 "
+        "the slide-13 convention: ΔQ = 14, ΔL = 500, so MPL ≈ 0.028 "
         "cars per worker per week.  At a sale price of ~$80K per R1T, "
-        "that gives MRPL ≈ $2,480 per worker per week.  The most common "
+        "that gives MRPL ≈ $2,240 per worker per week.  The most common "
         "slip in this calculation is comparing MRPL to the TOTAL wage "
         "bill instead of the weekly wage of ONE more worker."
     ))
@@ -4439,12 +4778,11 @@ def slide_22(prs):
     the chart on the right shows MRPL declining with L, the wage as
     a horizontal line, and the intersection at L*.
     """
-    import math
     def draw(slide):
         # ---- Bullets (merged from slides 21 + 22) ----
         bullets = [
             ("Should Rivian hire more workers?", 0),
-            ("Suppose the weekly wage is $1,400 per worker", 1),
+            ("Suppose the weekly wage  (incl. benefits)  is $2,000 per worker", 1),
             ("Hiring one more worker:", 0),
             ("Revenue rises by MRPL", 1),
             ("Wage bill rises by w", 1),
@@ -4460,29 +4798,42 @@ def slide_22(prs):
         )
 
         # ---- Native MRPL / wage chart on the right ----
-        # Continuous MPL formula for K = 100:  MPL = 0.25·√K / √L  =  2.5/√L
-        # MRPL = $80,000 × MPL = $200,000 / √L  (in dollars / worker / week).
-        # L grid: 1k, 3k, 5k, …, 25k → 13 points.  Wage $1,400 constant.
-        L_vals = list(range(1000, 25001, 2000))
+        # MRPL = $80 000 × MPL, where MPL is the average slope over each
+        # interval of PF_L_VALS at K = 100.  Plotted as an XY scatter so
+        # each MRPL point sits at the MIDPOINT of its interval (same
+        # convention as slide 15's MPL chart), while the X-axis tick
+        # marks stay at standard L values (0, 500, 1 000, …, 5 000).
+        # Skip the first two intervals (0→250 and 250→500) since their
+        # MRPL ($52 800, $12 480) is off-chart; the optimal-hiring
+        # intersection lives near L ≈ 4 500.
         K_FIX = 100
-        mrpl_vals = [int(round(80000 * 0.25 * math.sqrt(K_FIX) / math.sqrt(L)))
-                      for L in L_vals]
-        wage_vals = [1400] * len(L_vals)
-        cats = [f"{L//1000}k" for L in L_vals]
+        L_grid = PF_L_VALS
+        Q_grid = [_pf_value(K_FIX, L) for L in L_grid]
+        all_mid = [(L_grid[i-1] + L_grid[i]) // 2 for i in range(1, len(L_grid))]
+        all_mpl = [(Q_grid[i] - Q_grid[i-1]) / (L_grid[i] - L_grid[i-1])
+                    for i in range(1, len(L_grid))]
+        SKIP = 2
+        mids = all_mid[SKIP:]
+        mrpl_pts = [(m, int(round(80000 * mpl)))
+                    for m, mpl in zip(mids, all_mpl[SKIP:])]
+        WAGE = 2000
+        wage_pts = [(0, WAGE), (5000, WAGE)]   # flat line across the chart
 
-        _make_multi_line_chart(
+        _make_xy_line_chart(
             slide,
             Inches(6.55), Inches(1.85),
             Inches(6.50), Inches(4.30),
-            categories=cats,
             series=[
-                ("MRPL", mrpl_vals, NAVY, 'circle'),
-                ("Wage (w)", wage_vals, GOLD, 'square'),
+                ("MRPL", mrpl_pts, NAVY, 'circle'),
+                ("Wage (w)", wage_pts, GOLD, 'square'),
             ],
-            x_title="L   (workers)",
+            x_title="L   (workers, midpoint of interval)",
             y_title="$ per worker per week",
-            y_min=0, y_max=7000, y_unit=1000,
+            x_min=0, x_max=5000, x_unit=500,
+            y_min=0, y_max=8000, y_unit=1000,
+            legend=True,
             legend_pos=('0.74', '0.06', '0.22', '0.20'),
+            smooth=True,
         )
 
         # ---- Bottom: MB = MC anchor + rule statement ----
@@ -4574,7 +4925,7 @@ def slide_24(prs):
     s = make_content_bulleted(
         prs, page_num=24,
         section_tag=SECTION_TAG_WAGE,
-        title="Big Employers Bid Their Own Wages Up",
+        title="The Case of Wage Searchers",
         bullets=bullets,
         size=26, sub_size=22, line_spacing_pts=12,
         extras=draw_extras,
@@ -5062,7 +5413,7 @@ def slide_34(prs):
     s = make_diagram_slide(
         prs, page_num=34,
         section_tag=SECTION_TAG_LR,
-        title="Applying the Rule – Recipe for Exams",
+        title="Applying the 'Bang for the Buck' Rule",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -5079,10 +5430,10 @@ def slide_35(prs):
             ("Rivian is building a new plant in Stanton Springs, Georgia", 0),
             ("They ask for your advice on the optimal mix of robots and workers", 0),
             ("You know:", 0),
-            ("Planned output:  500 vehicles per week", 1),
+            ("Current plan:  200 robots and 5,000 workers", 1),
+            ("→ produces ≈ 574 vehicles per week", 1),
             ("Weekly wage for suitable workers:  w = $1,200", 1),
             ("Cost of one robot (per week):  pₖ = $20,000", 1),
-            ("Current plan:  200 robots and 5,000 workers", 1),
         ]
         _add_hierarchical_bullets(
             slide,
@@ -5142,8 +5493,8 @@ def slide_36(prs):
     def draw(slide):
         bullets = [
             ("The production function at Rivian's new plant:", 0),
-            ("Current mix to produce 500 vehicles/week:  200 robots, 5,000 workers", 0),
-            ("Read Q at K = 200, L = 5,000 in the table  →  Q = 500", 1),
+            ("Current mix:  200 robots, 5,000 workers", 0),
+            ("Read Q at K = 200, L = 5,000 in the table  →  Q = 574", 1),
             ("Other input mixes are possible — which is best?", 0),
         ]
         _add_hierarchical_bullets(
@@ -5253,8 +5604,8 @@ def slide_38(prs):
     _draw_poll_pill(s)
     _set_notes(s, (
         "Quick PollEv.  Looking at the numbers on the previous slide – "
-        "200 robots and 5,000 workers producing 500 R1Ts/week, with the "
-        "MP values given – is the current mix optimal?  Give them 30 "
+        "200 robots and 5,000 workers producing ~574 R1Ts/week, with "
+        "the MP values given – is the current mix optimal?  Give them 30 "
         "seconds to think through the bang-for-the-buck ratios.  Some "
         "will say yes, some no;  reveal in the next slide.  The point "
         "isn't the vote count, it's the active calculation."
@@ -5626,7 +5977,7 @@ def slide_44(prs):
                   "Should you use your own car or the company car?",
                   size=22, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
-        _add_discussion_break(slide, top=Inches(6.55), width=Inches(4.8))
+        _add_discussion_break(slide, width=Inches(4.8))
 
     s = make_diagram_slide(
         prs, page_num=44,
@@ -6532,7 +6883,7 @@ def slide_58(prs):
                   size=20, italic=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
-        _add_discussion_break(slide, top=Inches(6.45), width=Inches(5.0))
+        _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
         prs, page_num=58,
@@ -7484,7 +7835,7 @@ def slide_72(prs):
                       "•  " + r,
                       size=17, color=NAVY, font="Calibri")
 
-        _add_discussion_break(slide, top=Inches(6.55), width=Inches(5.0))
+        _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
         prs, page_num=72,
@@ -7542,7 +7893,7 @@ def slide_73(prs):
                   size=18, italic=True, color=GRAY,
                   font="Calibri", align=PP_ALIGN.CENTER)
 
-        _add_discussion_break(slide, top=Inches(6.55), width=Inches(5.0))
+        _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
         prs, page_num=73,
