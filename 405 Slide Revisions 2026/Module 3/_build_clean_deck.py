@@ -25,7 +25,7 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.enum.shapes import MSO_SHAPE
-from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Inches, Pt
 
@@ -3642,10 +3642,28 @@ def slide_mpl_data(prs):
     COL_COLORS = [BLACK_NUM, RED_NUM, BLACK_NUM, GREEN_NUM, GREEN_NUM, BLUE_NUM]
 
     K_FIX = 100
-    # Match slide 11's L grid: extra L=250 step at the start surfaces
-    # the very steep first MPL interval before settling into the wider
-    # 500- and 1 000-worker steps.
-    L_GRID = [0, 250, 500, 1000, 2000, 3000]
+    # 2026-05-18: extended L_GRID to match slide 11's worker steps up to
+    # L = 2,500 (was [0, 250, 500, 1000, 2000, 3000] — top of grid moved
+    # from 3,000 to 2,500 and intermediate stops 1,500 / 2,000 added so
+    # every step is a clean 500 after the initial 250-worker steps).
+    L_GRID = [0, 250, 500, 1000, 1500, 2000, 2500]
+
+    # 2026-05-18 (manual): per-interval Y centres for ΔQ / ΔL / MPL
+    # floats and their accompanying down-arrows and wavy connectors.
+    # The user dragged each row's float spacing by hand in PowerPoint
+    # so the floats sit visually at the midpoints between adjacent Q
+    # cells.  Raw row XML still reports 0.3375"/row, but PowerPoint
+    # renders the (resized) 2.8575" table by stretching rows — these
+    # Y values were sampled directly from the canonical deck.
+    FLOAT_CENTER_Y = [
+        None,             # i=0 placeholder (no float between header and L=0 row)
+        Inches(3.525),    # i=1: between L=0 and L=250    (= mathematical boundary)
+        Inches(3.893),    # i=2: between L=250 and L=500  (+0.031" vs grid)
+        Inches(4.250),    # i=3: between L=500 and L=1000 (+0.050" vs grid)
+        Inches(4.598),    # i=4: between L=1000 and L=1500 (+0.061" vs grid)
+        Inches(4.965),    # i=5: between L=1500 and L=2000 (+0.090" vs grid)
+        Inches(5.332),    # i=6: between L=2000 and L=2500 (+0.119" vs grid)
+    ]
 
     def draw(slide):
         # Main bullet — replaces the old centred italic captions with a
@@ -3711,7 +3729,14 @@ def slide_mpl_data(prs):
                        Inches(0.80), Inches(0.85),
                        Inches(0.75), Inches(0.95)]
         tbl_w = sum(col_widths)
-        tbl_h = Inches(2.55)
+        # 2026-05-18: bumped tbl_h from 2.55" → 2.70" to accommodate one
+        # extra L-row (now 8 rows incl. header) while keeping row_h close
+        # to the original (~0.338" vs. old ~0.364").
+        # 2026-05-18 (later, manual): user resized the table in PowerPoint
+        # to 2.8575" (rows still 0.3375" in XML, ~0.358" rendered).
+        # Matching that here so floats positioned by FLOAT_CENTER_Y sit
+        # on the rendered row boundaries.
+        tbl_h = Inches(2.8575)
         tbl_top = Inches(2.85)
         # Table no longer centred – keep it on the LEFT so a Convention
         # callout fits to its right.
@@ -3731,6 +3756,13 @@ def slide_mpl_data(prs):
                 cell.margin_right = cell_pad_h
                 cell.margin_top = Inches(0.03)
                 cell.margin_bottom = Inches(0.03)
+                # 2026-05-18: anchor MIDDLE so cell text is vertically
+                # centred in each row.  Without this, PowerPoint's default
+                # TOP anchor placed "1,500" near the top of its row and
+                # "2,000" near the top of the next row, so the ΔQ/ΔL/MPL
+                # float (geometrically centred on the row BOUNDARY) sat
+                # visibly below the midpoint between the two values.
+                cell.vertical_anchor = MSO_ANCHOR.MIDDLE
                 cell.text = str(val)
                 for p in cell.text_frame.paragraphs:
                     p.alignment = PP_ALIGN.CENTER
@@ -3770,8 +3802,11 @@ def slide_mpl_data(prs):
         def _float_value(text, c, i, *, color, bold=False, fill_rgb=None,
                           border=None, line_w=0.5):
             """Place ``text`` in column c at the boundary above row i+1."""
-            r = i + 1
-            boundary_y = tbl_top + r * row_h
+            # 2026-05-18 (manual): per-interval Y override (hand-tuned in
+            # PowerPoint).  Falls back to the mathematical row boundary
+            # if no override is provided for this interval.
+            boundary_y = FLOAT_CENTER_Y[i] if FLOAT_CENTER_Y[i] is not None \
+                          else (tbl_top + (i + 1) * row_h)
             cell_x = col_left[c]
             cell_w = col_widths[c]
             top_y = int(boundary_y - float_h / 2)
@@ -3799,6 +3834,14 @@ def slide_mpl_data(prs):
                 int(cell_x), top_y, int(cell_w), int(float_h),
             )
             ttf = tb.text_frame
+            # 2026-05-18: disable autofit — by default python-pptx writes
+            # <a:spAutoFit/> on add_textbox, which causes PowerPoint to
+            # shrink the textbox to its content height on render.  The
+            # shrink anchors at the top, so the visible text drifts
+            # upward by ~0.035" relative to the boundary line we placed
+            # the box on, breaking vertical alignment with the cell text
+            # in the rows above and below.
+            ttf.auto_size = MSO_AUTO_SIZE.NONE
             ttf.word_wrap = True
             ttf.margin_left = Inches(0.02); ttf.margin_right = Inches(0.02)
             ttf.margin_top = Inches(0); ttf.margin_bottom = Inches(0)
@@ -3835,9 +3878,11 @@ def slide_mpl_data(prs):
         # x-position of the FIRST digit inside a centred ΔQ value).
         char_w = Inches(0.105)
         for i in range(1, len(L_GRID)):
-            # Boundary y between row i and row i+1
-            r = i + 1
-            boundary_y = tbl_top + r * row_h
+            # Boundary y between row i and row i+1 — pulls the hand-tuned
+            # value when available so the down-arrow and wavy connector
+            # line up with the floats above.
+            boundary_y = FLOAT_CENTER_Y[i] if FLOAT_CENTER_Y[i] is not None \
+                          else (tbl_top + (i + 1) * row_h)
             _add_arrow(slide,
                         (q_arrow_x, int(boundary_y - arrow_h / 2)),
                         (q_arrow_x, int(boundary_y + arrow_h / 2)),
@@ -3864,7 +3909,7 @@ def slide_mpl_data(prs):
         # arching over the whole table.  Stops ~0.05" before the
         # Convention box's left edge.
         arc_x_start = q_arrow_x
-        arc_y_start = tbl_top + 2 * row_h                   # middle of first arrow
+        arc_y_start = FLOAT_CENTER_Y[1]                     # middle of first arrow
         arc_x_end = Inches(6.10)                            # 0.05" left of conv
         arc_y_end = Inches(3.50)                            # inside the empty band
         arc_apex_y = Inches(3.35)                           # apex inside L = 0 row
@@ -3985,6 +4030,62 @@ def slide_mpl_data(prs):
                             align=PP_ALIGN.LEFT,
                             default_size=19, default_color=NAVY)
 
+        # ---- MPL = ΔQ / ΔL formula in a cream-fill rounded-rect frame ----
+        # 2026-05-18 (manual): user placed the MPL formula in PowerPoint,
+        # in the empty band above the table.  Frame uses the same cream
+        # FDF6E6 + navy-border styling as the Convention callout to the
+        # right of the table.  Frame is drawn FIRST so the formula
+        # textbox sits on top.
+        # 2026-05-18 (later, manual): user nudged the formula right and
+        # slightly up — from (5.876, 2.485) to (6.230, 2.393) — so it
+        # sits roughly above the L=250 row of the table.
+        formula_left = Inches(6.230)
+        formula_top  = Inches(2.393)
+        formula_w    = Inches(2.144)
+        formula_h    = Inches(0.857)
+        frame_pad_h  = Inches(0.10)
+        frame_pad_v  = Inches(0.05)
+        frame_box = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(formula_left - frame_pad_h),
+            int(formula_top - frame_pad_v),
+            int(formula_w + 2 * frame_pad_h),
+            int(formula_h + 2 * frame_pad_v),
+        )
+        frame_box.fill.solid()
+        frame_box.fill.fore_color.rgb = CONV_FILL
+        frame_box.line.color.rgb = NAVY
+        frame_box.line.width = Pt(1.0)
+        frame_box.shadow.inherit = False
+        try: frame_box.adjustments[0] = 0.12
+        except Exception: pass
+        # OMML — match slide 13's MP_L style (sSub) for cross-deck
+        # consistency.
+        mpl_sub = _omml_sub(_omml_run('MP'), _omml_run('L'))
+        delta_q = _omml_text('Δ') + _omml_run('Q')
+        delta_l = _omml_text('Δ') + _omml_run('L')
+        omml_full = mpl_sub + _omml_text(' = ') + _omml_frac(delta_q, delta_l)
+        _add_math_equation(slide,
+                           left=formula_left, top=formula_top,
+                           width=formula_w, height=formula_h,
+                           omml_content=omml_full,
+                           size_pt=24, color=ACCENT_BLUE)
+
+        # ---- Blue connector: "0.660" cell → MPL = ΔQ/ΔL formula ----
+        # 2026-05-18 (manual request): visually links the first MPL value
+        # in the table to the MPL = ΔQ/ΔL formula above it.  Same
+        # ACCENT_BLUE as the MPL column values and the formula text.
+        # 2026-05-18 (later, manual): user nudged both endpoints — start
+        # moved from cell-centre (5.125, 3.525) to a point 0.345" right
+        # of centre; end moved from formula-centre (7.302, 2.821) to the
+        # lower-left corner area of the formula box (6.330, 2.980).
+        # The line is shorter and "points at" the formula rather than
+        # going to its centre.
+        _add_arrow(slide,
+                    (Inches(5.470), Inches(3.525)),
+                    (Inches(6.330), Inches(2.980)),
+                    color=ACCENT_BLUE, weight_pt=1.5, head=False)
+
         # ---- "MPL is declining as we add workers" — Convention-style box ----
         # 2026-05-15: the Note now lives inside the same cream Convention
         # callout chrome used elsewhere on the slide.  Centred horizontally
@@ -4021,11 +4122,13 @@ def slide_mpl_data(prs):
     )
     _set_notes(s, (
         "Same Cobb-Douglas function we used on slides 10 and 11, now with "
-        "K = 100 robots fixed and L walked through {0, 500, 1000, 2000, "
-        "3000} workers.  L grid is denser at the start so the diminishing-"
-        "MPL effect shows up cleanly: MPL falls from 0.660 cars/worker "
-        "(going from 0 to 500 workers) down to 0.050 cars/worker (going "
-        "from 2,000 to 3,000 workers).  Convention: ΔL and ΔQ are step-"
+        "K = 100 robots fixed and L walked through {0, 250, 500, 1000, "
+        "1500, 2000, 2500} workers.  L grid is denser at the start (two "
+        "250-worker steps) so the steep first interval is visible before "
+        "the 500-worker steps take over.  MPL falls from 0.660 cars/worker "
+        "(going from 0 to 250 workers) down to 0.042 cars/worker (going "
+        "from 2,000 to 2,500 workers) — that's the diminishing-marginal-"
+        "product story in one column.  Convention: ΔL and ΔQ are step-"
         "by-step changes (current row minus previous row), NOT changes "
         "relative to L = 0.  This is the textbook MPL and it's what "
         "makes \"diminishing marginal product\" show up numerically."
@@ -4824,10 +4927,10 @@ def slide_17(prs):
 
 
 def slide_18(prs):
-    """Example: MRPL at 4,200 employees and 100 robots.
+    """Example: MRPL at 2,300 employees and 100 robots.
 
-    L = 4,200 is chosen deliberately so students must identify which
-    table interval contains it (4,000 → 4,500) before computing MPL —
+    L = 2,300 is chosen deliberately so students must identify which
+    table interval contains it (2,000 → 2,500) before computing MPL —
     consistent with the slide-14 MPL convention (always compute ΔQ/ΔL
     over a full table interval).
     """
@@ -4838,13 +4941,17 @@ def slide_18(prs):
         # 2026-05-17 (later): user hand-edited slide 19 to (a) bump
         # employee count 4,000 → 4,200 so students must locate the
         # interval, and (b) reframe per-car return as Net Revenue
-        # ~$30k (Price $80k − ~$50k material cost), not gross Price.
+        # (Price $80k − material cost), not gross Price.
+        # 2026-05-18: material cost tightened from ~$50k → ~$35k for
+        # realism, so Net Revenue per car ~$45k (was ~$30k).
+        # 2026-05-18 (later): current workforce moved 4,200 → 2,300 so
+        # students locate the 2,000→2,500 interval (was 4,000→4,500).
         bullets = [
-            ("Currently 100 robots and 4,200 employees on the R1 line", 0),
-            ("Price ~$80k per R1, of which ~$50k is material cost", 0),
+            ("Currently 100 robots and 2,300 employees on the R1 line", 0),
+            ("Price ~$80k per R1, of which ~$35k is material cost", 0),
             # 2026-05-17 (manual): "→" arrow paragraph pulled in to
             # marL=457200 (between main and L1 indents) — visual "leads to".
-            ("→ (Net) Revenue per car ~$30k", 1,
+            ("→ (Net) Revenue per car ~$45k", 1,
              {'bullet_style': 'arrow', 'mar_l': 457200}),
             ("Assume that this is approx. constant", 1),
             ("", 0),  # 2026-05-17 (manual): spacer paragraph
@@ -4889,24 +4996,24 @@ def slide_18(prs):
     s = make_diagram_slide(
         prs, page_num=19,
         section_tag=SECTION_TAG_P1,
-        title="Example:  Calculate MRPL at 4,200 Employees and 100 Robots",
+        title="Example:  Calculate MRPL at 2,300 Employees and 100 Robots",
         draw_diagram=draw,
     )
     # Hyperlink the "(link)" anchor in the compact-table caption to slide 11.
     _add_slide_link_in_slide(s, "link", SLIDE_IDX_PF_TABLE, prs=prs)
     _set_notes(s, (
-        "Anchor the concept with a concrete scenario. At 4,200 workers and "
+        "Anchor the concept with a concrete scenario. At 2,300 workers and "
         "100 robots, ask students first to find which interval in the "
-        "production-function table contains L = 4,200 — that's 4,000 → 4,500 "
+        "production-function table contains L = 2,300 — that's 2,000 → 2,500 "
         "per our MPL convention.  Then reframe the per-car return: of the "
-        "$80k price, about $50k is material cost, so the net revenue per "
-        "car is roughly $30k.  Assume this is approximately constant across "
+        "$80k price, about $35k is material cost, so the net revenue per "
+        "car is roughly $45k.  Assume this is approximately constant across "
         "quantity, so MRPL  ≈  (Net Revenue) × MPL."
     ))
 
 
 def slide_19(prs):
-    """Poll: MRPL at 4,000 employees?
+    """Poll: MRPL at 2,300 employees?
 
     Source slide is a full-bleed PollEv screenshot (single picture).  Keep
     that picture so the on-screen poll content matches what students see.
@@ -4926,14 +5033,14 @@ def slide_19(prs):
     s = make_diagram_slide(
         prs, page_num=20,
         section_tag=SECTION_TAG_P1,
-        title="What Is Rivian's MRPL at 4,200 Employees?",
+        title="What Is Rivian's MRPL at 2,300 Employees?",
         draw_diagram=draw,
     )
     _draw_poll_pill(s)
     _set_notes(s, (
-        "Quick PollEv – compute the MRPL at 4,200 employees and submit. "
+        "Quick PollEv – compute the MRPL at 2,300 employees and submit. "
         "Give them 30 seconds. The point isn't the exact number; it's to "
-        "make sure everyone identifies the right interval (4,000 → 4,500) "
+        "make sure everyone identifies the right interval (2,000 → 2,500) "
         "and does the calculation in their head."
     ))
 
@@ -4943,35 +5050,50 @@ def slide_20(prs):
     function table.
 
     Applies our MPL convention: ΔQ and ΔL are computed relative to the
-    previous row of the L grid.  Currently at L = 4,000 workers; the
-    next 500-worker step takes us to L = 4,500.
+    previous row of the L grid.  Currently at L = 2,300 workers; the
+    relevant 500-worker interval is 2,000 → 2,500.
     """
     # 2026-05-17 (manual): user restructured the solution into four
     # main-level "steps" with their derivations as sub-bullets, dropped
     # the MPL-convention hyperlink, switched the final calculation to
     # use MR (net of material cost) ≈ $30k per car → MRPL ≈ $840 per
-    # worker per week (consistent with slide-19 framing).  The punchline
-    # paragraph uses a Wingdings  arrow + underlined "$840 ".
+    # worker per week (consistent with slide-19 framing).
+    # 2026-05-18 (manual): emphasised the punchline line — added a
+    # bold + underlined "Solution:" prefix, bolded "MRPL  =  ", and
+    # changed "$840" from plain-underlined to bold + underlined.
+    # (Previously: no "Solution" prefix; "MRPL  =  " plain; "$840 "
+    # only underlined.)
+    # 2026-05-18 (later): refreshed all numerics to match the new
+    # scenario — current workforce L = 2,300 (was 4,200), interval
+    # 2,000 → 2,500 (was 4,000 → 4,500), Q(2,000)=309 / Q(2,500)=330
+    # (was 380 / 394), MPL = 0.042 (was 0.028), MR = $45k (was $30k),
+    # final MRPL = $1,890 per worker per week (was $840).
     bullets = [
-        ("Check which interval contains the current workforce  (L = 4,200)", 0),
-        ("→  use the 4,000 → 4,500 step", 1,
+        ("Check which interval contains the current workforce  (L = 2,300)", 0),
+        ("→  use the 2,000 → 2,500 step", 1,
          {'bullet_style': 'arrow', 'mar_l': 457200}),
         ("From the production-function table  (link):", 0),
-        ("Q (4,000)  =  380 R1 per week", 1),
-        ("Q (4,500)  =  394 R1 per week", 1),
+        ("Q (2,000)  =  309 R1 per week", 1),
+        ("Q (2,500)  =  330 R1 per week", 1),
         ("Compute MPL  =  ΔQ / ΔL", 0),
-        ("MPL  =  (394 − 380) / 500  =  0.028 cars per worker per week", 1),
+        ("MPL  =  (330 − 309) / 500  =  0.042 cars per worker per week", 1),
         ("MRPL  =  MPL × MR", 0),
-        ("MR per car (net of material costs) is ≈ $30,000 ", 1),
-        # Punchline: Wingdings arrow + Calibri body + underlined "$840 ".
+        ("MR per car (net of material costs) is ≈ $45,000 ", 1),
+        # Punchline: Wingdings arrow + Calibri body, with bold-underlined
+        # "Solution:" prefix, bold "MRPL  =  ", and bold-underlined "$1,890".
         ([
             ('', {'wingdings': True, 'size': 20,
                          'bold': False, 'italic': False}),
-            ('  MRPL  =  0.028 × $30,000  =  ',
+            ('  ', {'size': 20, 'bold': False, 'italic': False}),
+            ('Solution', {'size': 20, 'bold': True, 'italic': False,
+                          'underline': True}),
+            (': ', {'size': 20, 'bold': False, 'italic': False}),
+            ('MRPL  =  ', {'size': 20, 'bold': True, 'italic': False}),
+            ('0.042 × $45,000  =  ',
              {'size': 20, 'bold': False, 'italic': False}),
-            ('$840 ', {'size': 20, 'bold': False, 'italic': False,
+            ('$1,890', {'size': 20, 'bold': True, 'italic': False,
                         'underline': True}),
-            ('per worker per week',
+            (' per worker per week',
              {'size': 20, 'bold': False, 'italic': False}),
         ], 1, {'bullet_style': 'arrow', 'mar_l': 457200,
                'space_before_pts': 12}),
@@ -4987,14 +5109,14 @@ def slide_20(prs):
     _add_slide_link_in_slide(s, "link", SLIDE_IDX_PF_TABLE, prs=prs)
     _set_notes(s, (
         "Reveal the answer step by step.  Step 1: ask which interval "
-        "contains L = 4,200 — answer 4,000 → 4,500, because our MPL "
+        "contains L = 2,300 — answer 2,000 → 2,500, because our MPL "
         "convention always computes ΔQ / ΔL over a full table interval.  "
-        "Step 2: pull Q(4,000) = 380 and Q(4,500) = 394 from the "
+        "Step 2: pull Q(2,000) = 309 and Q(2,500) = 330 from the "
         "production-function table at K = 100 robots.  Step 3: apply the "
-        "convention — ΔQ = 14, ΔL = 500, so MPL ≈ 0.028 cars per worker "
+        "convention — ΔQ = 21, ΔL = 500, so MPL ≈ 0.042 cars per worker "
         "per week.  Step 4: MRPL  =  MPL × MR.  MR per car is the net "
-        "revenue after material cost (~$80k price − ~$50k materials = "
-        "~$30k), so MRPL  ≈  0.028 × $30,000  ≈  $840 per worker per week. "
+        "revenue after material cost (~$80k price − ~$35k materials = "
+        "~$45k), so MRPL  ≈  0.042 × $45,000  ≈  $1,890 per worker per week. "
         "The most common slip is comparing MRPL to the TOTAL wage bill "
         "instead of the weekly wage of ONE more worker."
     ))
@@ -5027,17 +5149,29 @@ def slide_21(prs):
 
 
 def slide_22(prs):
-    """The optimal hiring rule: MRPL = w   (merged with old slide 21).
+    """The optimal hiring rule in the short run (merged with old slide 21).
 
     Bullets on the left walk through the marginal-analysis logic;
     the chart on the right shows MRPL declining with L, the wage as
-    a horizontal line, and the intersection at L*.
+    a horizontal line, and a dashed vertical L* line at the optimal
+    hiring level (L = 3,250).
     """
+    # 2026-05-18 (manual): user reworked the right-hand side of the
+    # slide.  Title text shortened.  Chart shrunk and shifted right
+    # (was 6.5x4.3 at (6.55,1.85); now 5.23x3.36 at (7.496,1.95)) so
+    # the chart's plot area expands via a manual layout (12.3%/5.8%
+    # margins, 82.6%×80.1% inner area) and the legend font bumps from
+    # 11pt to 14pt at a new x,y of (0.691, 0.092).  The bottom MB=MC
+    # anchor + navy "Optimal Number of Workers" bar both moved up
+    # (~0.5") and right (~1.3") so the bar is shorter and the burst
+    # sits closer to the bar.  Bar text changed from "Optimum:" to
+    # "Optimal Number of Workers:".  New dashed L* line at L=3,250
+    # (added on user request).
     def draw(slide):
         # ---- Bullets (merged from slides 21 + 22) ----
         bullets = [
             ("Should Rivian hire more workers?", 0),
-            ("Suppose the weekly wage  (incl. benefits)  is $2,000 per worker", 1),
+            ("Suppose the weekly wage  (incl. benefits)  is $1,500 per worker", 1),
             ("Hiring one more worker:", 0),
             ("Revenue rises by MRPL", 1),
             ("Wage bill rises by w", 1),
@@ -5053,14 +5187,23 @@ def slide_22(prs):
         )
 
         # ---- Native MRPL / wage chart on the right ----
-        # MRPL = $80 000 × MPL, where MPL is the average slope over each
+        # 2026-05-18 (morning): switched MRPL multiplier from $80 000 (gross
+        # R1 price) to $30 000 (initial net-revenue framing); wage dropped
+        # from $2 000 to $1 500.
+        # 2026-05-18 (later): material cost tightened to ~$35k → net revenue
+        # per car ~$45k.  Multiplier now $45 000; y-axis bumped to 0–$5 000
+        # in steps of $500 so the top visible MRPL ($4 230 at L=750) sits
+        # comfortably under the ceiling and the $1 500 wage line lands on
+        # a tick.
+        # MRPL = $45 000 × MPL, where MPL is the average slope over each
         # interval of PF_L_VALS at K = 100.  Plotted as an XY scatter so
         # each MRPL point sits at the MIDPOINT of its interval (same
         # convention as slide 15's MPL chart), while the X-axis tick
         # marks stay at standard L values (0, 500, 1 000, …, 5 000).
         # Skip the first two intervals (0→250 and 250→500) since their
-        # MRPL ($52 800, $12 480) is off-chart; the optimal-hiring
-        # intersection lives near L ≈ 4 500.
+        # MRPL ($29 700, $7 020) is off-chart; the optimal-hiring
+        # intersection now lives near L ≈ 3 330 (between L=3 250/$1 530
+        # and L=3 750/$1 350).
         K_FIX = 100
         L_grid = PF_L_VALS
         Q_grid = [_pf_value(K_FIX, L) for L in L_grid]
@@ -5069,15 +5212,18 @@ def slide_22(prs):
                     for i in range(1, len(L_grid))]
         SKIP = 2
         mids = all_mid[SKIP:]
-        mrpl_pts = [(m, int(round(80000 * mpl)))
+        mrpl_pts = [(m, int(round(45000 * mpl)))
                     for m, mpl in zip(mids, all_mpl[SKIP:])]
-        WAGE = 2000
+        WAGE = 1500
         wage_pts = [(0, WAGE), (5000, WAGE)]   # flat line across the chart
 
-        _make_xy_line_chart(
+        chart_x = Inches(7.496)
+        chart_y = Inches(1.950)
+        chart_w = Inches(5.230)
+        chart_h = Inches(3.360)
+        chart_shape = _make_xy_line_chart(
             slide,
-            Inches(6.55), Inches(1.85),
-            Inches(6.50), Inches(4.30),
+            chart_x, chart_y, chart_w, chart_h,
             series=[
                 ("MRPL", mrpl_pts, NAVY, 'circle'),
                 ("Wage (w)", wage_pts, GOLD, 'square'),
@@ -5085,17 +5231,84 @@ def slide_22(prs):
             x_title="L   (workers, midpoint of interval)",
             y_title="$ per worker per week",
             x_min=0, x_max=5000, x_unit=500,
-            y_min=0, y_max=8000, y_unit=1000,
+            y_min=0, y_max=5000, y_unit=500,
             legend=True,
-            legend_pos=('0.74', '0.06', '0.22', '0.20'),
+            legend_pos=('0.6888', '0.1830', '0.22', '0.20'),
             smooth=True,
         )
+        # 2026-05-18 (manual): post-modify the chart to (a) bump legend
+        # font to 14 pt (helper hardcodes 11 pt) and (b) add a manual
+        # inner-plot-area layout so the plot fills more of the chart
+        # shape.  Both values sampled from the hand-edited canonical.
+        chart = chart_shape.chart
+        chart.legend.font.size = Pt(14)
+        plot_area = chart._chartSpace.find(qn('c:chart') + '/' + qn('c:plotArea'))
+        # Remove existing <c:layout/> (auto) and insert a manualLayout
+        for old in plot_area.findall(qn('c:layout')):
+            plot_area.remove(old)
+        layout = ET.Element(qn('c:layout'))
+        ml = ET.SubElement(layout, qn('c:manualLayout'))
+        ET.SubElement(ml, qn('c:layoutTarget')).set('val', 'inner')
+        ET.SubElement(ml, qn('c:xMode')).set('val', 'edge')
+        ET.SubElement(ml, qn('c:yMode')).set('val', 'edge')
+        ET.SubElement(ml, qn('c:x')).set('val', '0.1233')
+        ET.SubElement(ml, qn('c:y')).set('val', '0.0579')
+        ET.SubElement(ml, qn('c:w')).set('val', '0.8264')
+        ET.SubElement(ml, qn('c:h')).set('val', '0.8009')
+        plot_area.insert(0, layout)
+
+        # ---- L* dashed vertical line + label inside the chart ----
+        # 2026-05-18 (manual request): add a dashed navy vertical line
+        # at L = 3,250 (the optimal-hiring point — between data points
+        # L=3,250/MRPL=$1,530 and L=3,750/MRPL=$1,350, where MRPL just
+        # exceeds the $1,500 wage), with an "L*" label beside it.
+        # 2026-05-18 (later, manual): user shortened the line so it
+        # only spans from the wage line ($1,500) DOWN to the X-axis
+        # (textbook "drop a vertical from the intersection" style),
+        # and moved the L* label up to sit beside the lower portion
+        # of the line at 16pt instead of below the X-axis at 14pt.
+        L_STAR = 3250
+        X_MAX  = 5000
+        Y_MAX  = 5000
+        WAGE_Y = 1500
+        plot_x = chart_x + Inches(0.1233 * 5.230)   # left of inner plot area
+        plot_y = chart_y + Inches(0.0579 * 3.360)   # top of inner plot area
+        plot_w = Inches(0.8264 * 5.230)
+        plot_h = Inches(0.8009 * 3.360)
+        lstar_x = plot_x + int(plot_w * (L_STAR / X_MAX))
+        # Line top = where the wage line crosses (= height of wage value
+        # on the chart's Y-axis).  Line bottom = X-axis (plot bottom).
+        wage_y_slide = plot_y + int(plot_h * (1 - WAGE_Y / Y_MAX))
+        _add_arrow(slide,
+                    (lstar_x, wage_y_slide),
+                    (lstar_x, plot_y + plot_h),
+                    color=NAVY, weight_pt=1.5, head=False, dash='dash')
+        # "L*" label: navy bold italic, 16 pt, hand-positioned just to
+        # the right of the line at ~75 % down its length (sampled from
+        # the canonical deck).
+        label_tb = slide.shapes.add_textbox(
+            Inches(10.926), Inches(4.536),
+            Inches(0.383), Inches(0.269),
+        )
+        ltf = label_tb.text_frame
+        ltf.margin_left = ltf.margin_right = Inches(0)
+        ltf.margin_top  = ltf.margin_bottom = Inches(0)
+        ltf.word_wrap   = False
+        lp = ltf.paragraphs[0]
+        lp.alignment = PP_ALIGN.CENTER
+        lrr = lp.add_run()
+        lrr.text = "L*"
+        lrr.font.name = "Calibri"
+        lrr.font.size = Pt(16)
+        lrr.font.bold = True
+        lrr.font.italic = True
+        lrr.font.color.rgb = NAVY
 
         # ---- Bottom: MB = MC anchor + rule statement ----
         star_w = Inches(1.6)
         star_h = Inches(1.05)
-        star_x = MARGIN
-        star_y = Inches(6.30)
+        star_x = Inches(1.583)
+        star_y = Inches(5.789)
         _add_anchor_burst(
             slide, star_x, star_y, star_w, star_h,
             top_text="MB = MC",
@@ -5103,22 +5316,54 @@ def slide_22(prs):
             top_size=14, bottom_size=11,
         )
 
+        # 2026-05-18 (manual request): the "Optimal Number of Workers"
+        # bar gets rounded corners + a soft drop shadow.  Text has two
+        # runs: the prefix at 22 pt and the rule "MRPL = w" at 24 pt
+        # so the rule itself reads louder.  A colon was added after
+        # "where".  Width bumped from 6.906" → 7.843" to fit the
+        # larger MRPL=w portion without wrapping.
         bar_x = star_x + star_w + Inches(0.25)
-        bar_w = Inches(10.6)
-        _add_filled_box(
-            slide, bar_x, Inches(6.50), bar_w, Inches(0.55),
-            "Optimum:  L*  where  MRPL  =  w",
-            fill=NAVY, text_color=WHITE, size=20, bold=True,
+        bar_y = Inches(5.975)
+        bar_w = Inches(7.843)
+        bar_h = Inches(0.55)
+        bar_shp = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(bar_x), int(bar_y), int(bar_w), int(bar_h),
         )
+        bar_shp.fill.solid()
+        bar_shp.fill.fore_color.rgb = NAVY
+        bar_shp.line.fill.background()
+        try: bar_shp.adjustments[0] = 0.30
+        except Exception: pass
+        _add_drop_shadow(bar_shp)
+        btf = bar_shp.text_frame
+        btf.word_wrap = True
+        btf.margin_left = btf.margin_right = Inches(0.1)
+        btf.margin_top  = btf.margin_bottom = Inches(0.05)
+        btf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        bp = btf.paragraphs[0]
+        bp.alignment = PP_ALIGN.CENTER
+        bp_r1 = bp.add_run()
+        bp_r1.text = "Optimal Number of Workers:  L*  where:  "
+        bp_r1.font.name = "Calibri"
+        bp_r1.font.size = Pt(22)
+        bp_r1.font.bold = True
+        bp_r1.font.color.rgb = WHITE
+        bp_r2 = bp.add_run()
+        bp_r2.text = "MRPL  =  w"
+        bp_r2.font.name = "Calibri"
+        bp_r2.font.size = Pt(24)
+        bp_r2.font.bold = True
+        bp_r2.font.color.rgb = WHITE
         _add_arrow(slide,
                     (star_x + star_w, star_y + star_h // 2),
-                    (bar_x, Inches(6.50) + Inches(0.275)),
+                    (bar_x, bar_y + bar_h // 2),
                     color=GOLD, weight_pt=2.0, head=True)
 
     s = make_diagram_slide(
         prs, page_num=22,
         section_tag=SECTION_TAG_P1,
-        title="The Optimal Hiring Rule:  MRPL = w",
+        title="The Optimal Hiring Rule in the Short Run",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -5139,31 +5384,83 @@ SECTION_TAG_DIV  = "Module 3 · Agenda"
 
 
 def slide_23(prs):
-    """Caution: wages are not always constant."""
+    """Wage searchers — merged from old slides 23 + 24.
+
+    2026-05-18 (manual): user merged slide 24's content INTO slide 23.
+    Old slide 24 ("The Case of Wage Searchers") is now this slide; the
+    earlier "Caution" framing was folded into the first two bullets.
+    The "wage rate is upward-sloping" line is now a sub-bullet under
+    the wage-searcher Term definition.
+    """
     bullets = [
         ("So far, we've assumed wages are constant", 0),
         ("Realistic for a small firm hiring at the market wage", 1),
-        ("Reality check: for a big enough employer, hiring more workers can push the wage up", 0),
+        ("For a large firm (relative to the local labor market), hiring more workers can push the wage up", 0),
+        ("Example: a local hospital hiring highly specialized surgeons", 1),
         ("Example: a frontier AI lab adding 100 senior researchers in one year", 1),
         ("Term:  the firm is a wage searcher  (not a wage taker)", 0),
+        ("the wage rate is upward-sloping in employment", 1),
     ]
+
+    def draw_extras(slide):
+        # 2026-05-18 (manual request): rounded-rect + drop shadow on the
+        # navy takeaway bar.  Position sampled from canonical: (2.120",
+        # 6.341") sz=(9.606", 0.591").
+        bar_left = Inches(2.120)
+        bar_top  = Inches(6.341)
+        bar_w    = Inches(9.606)
+        bar_h    = Inches(0.591)
+        shp = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(bar_left), int(bar_top), int(bar_w), int(bar_h),
+        )
+        shp.fill.solid()
+        shp.fill.fore_color.rgb = NAVY
+        shp.line.fill.background()
+        try: shp.adjustments[0] = 0.30
+        except Exception: pass
+        _add_drop_shadow(shp)
+        btf = shp.text_frame
+        btf.word_wrap = True
+        btf.margin_left = btf.margin_right = Inches(0.1)
+        btf.margin_top = btf.margin_bottom = Inches(0.05)
+        btf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        bp = btf.paragraphs[0]
+        bp.alignment = PP_ALIGN.CENTER
+        br = bp.add_run()
+        br.text = "The true marginal cost of labor includes the wage-bid-up effect"
+        br.font.name = "Calibri"
+        br.font.size = Pt(20)
+        br.font.bold = True
+        br.font.color.rgb = WHITE
+
     s = make_content_bulleted(
         prs, page_num=23,
         section_tag=SECTION_TAG_WAGE,
-        title="Caution:  Wages Are Not Always Constant",
+        title="The Case of Wage Searchers",
         bullets=bullets,
-        size=26, sub_size=22, line_spacing_pts=14,
+        size=28, sub_size=24, line_spacing_pts=12,
+        extras=draw_extras,
     )
     _set_notes(s, (
-        "We've been assuming wages are constant. Reality check: for big "
-        "enough employers, hiring more workers can push the wage up. A "
-        "frontier AI lab can't just pay the market wage when it adds 100 "
-        "senior researchers in one year."
+        "We've been assuming wages are constant — fine for a small firm "
+        "hiring at the market wage.  But a large employer (relative to the "
+        "local labor market) hiring many workers pushes the wage up.  Two "
+        "concrete examples: a regional hospital hiring specialized surgeons "
+        "can't just pay the market wage when it adds 20 of them; a frontier "
+        "AI lab adding 100 senior researchers in one year drives up the "
+        "going rate.  The technical term is monopsony, but you don't need "
+        "the word — the intuition is enough.  Call such a firm a wage "
+        "searcher (not a wage taker): the wage rate is upward-sloping in "
+        "employment.  Punchline at the bottom: the TRUE marginal cost of "
+        "labor includes the wage-bid-up effect — when you hire one more, "
+        "you typically have to bump everyone else's wage too."
     ))
 
 
 def slide_24(prs):
-    """Big employers bid their own wages up."""
+    """OLD slide 24 (merged into slide_23 on 2026-05-18) — kept for
+    reference; not called from build_deck()."""
     bullets = [
         ("Large firm  (relative to the labor market)", 0),
         ("To recruit more labor, the firm must increase the wage", 0),
@@ -5206,7 +5503,7 @@ def slide_25(prs):
                    align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=25,
+        prs, page_num=24,
         section_tag=SECTION_TAG_WAGE,
         title="Salary Comparisons across Firm Size",
         draw_diagram=draw,
@@ -5252,7 +5549,7 @@ def slide_26(prs):
                            width=Inches(10.0))
 
     s = make_diagram_slide(
-        prs, page_num=26,
+        prs, page_num=25,
         section_tag=SECTION_TAG_WAGE,
         title="Example:  The Full Cost of Poaching an AI Researcher",
         draw_diagram=draw,
@@ -5278,7 +5575,7 @@ def slide_27(prs):
                    align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=27,
+        prs, page_num=26,
         section_tag=SECTION_TAG_WAGE,
         title="What Is the Full Marginal Cost of the New Researcher?",
         draw_diagram=draw,
@@ -5321,7 +5618,7 @@ def slide_28(prs):
                            width=Inches(11.0))
 
     s = make_diagram_slide(
-        prs, page_num=28,
+        prs, page_num=27,
         section_tag=SECTION_TAG_WAGE,
         title="Solution:  Marginal Cost of the 3rd Researcher = $8M",
         draw_diagram=draw,
@@ -5353,7 +5650,7 @@ def slide_29(prs):
                          size=18, bold=True)
 
     s = make_diagram_slide(
-        prs, page_num=29,
+        prs, page_num=28,
         section_tag=SECTION_TAG_WAGE,
         title="Are Real-World Wages = MRPL?",
         draw_diagram=draw,
@@ -5373,7 +5670,7 @@ def slide_30(prs):
     with an action title signalling the sub-section transition.
     """
     s = make_section_agenda(
-        prs, page_num=30,
+        prs, page_num=29,
         current_part_idx=0,
         section_tag=SECTION_TAG_DIV,
         title="Part 1.2:  Long Run – Choosing the Right Input Mix",
@@ -5420,7 +5717,7 @@ def slide_31(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(10.0))
 
     s = make_diagram_slide(
-        prs, page_num=31,
+        prs, page_num=30,
         section_tag=SECTION_TAG_LR,
         title="Long Run:  Rivian Builds a New Georgia Plant",
         draw_diagram=draw,
@@ -5468,7 +5765,7 @@ def slide_32(prs):
                             top=Inches(6.5), width=Inches(7.5))
 
     s = make_diagram_slide(
-        prs, page_num=32,
+        prs, page_num=31,
         section_tag=SECTION_TAG_LR,
         title="Optimal Combination of Inputs",
         draw_diagram=draw,
@@ -5518,7 +5815,7 @@ def slide_33(prs):
                            width=Inches(11.5), size=18)
 
     s = make_diagram_slide(
-        prs, page_num=33,
+        prs, page_num=32,
         section_tag=SECTION_TAG_LR,
         title="The 'Bang for the Buck' Rule:  Equalize MP per Dollar",
         draw_diagram=draw,
@@ -5666,7 +5963,7 @@ def slide_34(prs):
                             top=Inches(6.5), width=Inches(6.5))
 
     s = make_diagram_slide(
-        prs, page_num=34,
+        prs, page_num=33,
         section_tag=SECTION_TAG_LR,
         title="Applying the 'Bang for the Buck' Rule",
         draw_diagram=draw,
@@ -5720,7 +6017,7 @@ def slide_35(prs):
                            width=Inches(10.5))
 
     s = make_diagram_slide(
-        prs, page_num=35,
+        prs, page_num=34,
         section_tag=SECTION_TAG_LR,
         title="Example:  Rivian's New Georgia Plant",
         draw_diagram=draw,
@@ -5771,7 +6068,7 @@ def slide_36(prs):
                            width=Inches(11.0))
 
     s = make_diagram_slide(
-        prs, page_num=36,
+        prs, page_num=35,
         section_tag=SECTION_TAG_LR,
         title="Is Rivian's Current Plan Optimal?  (Production Function)",
         draw_diagram=draw,
@@ -5829,7 +6126,7 @@ def slide_37(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(10.0))
 
     s = make_diagram_slide(
-        prs, page_num=37,
+        prs, page_num=36,
         section_tag=SECTION_TAG_LR,
         title="Is Rivian's Current Plan Optimal?  (Analysis)",
         draw_diagram=draw,
@@ -5853,7 +6150,7 @@ def slide_38(prs):
                    align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=38,
+        prs, page_num=37,
         section_tag=SECTION_TAG_LR,
         title="Is Rivian's Input Mix Optimal?",
         draw_diagram=draw,
@@ -5936,7 +6233,7 @@ def slide_39(prs):
                            width=Inches(9.5))
 
     s = make_diagram_slide(
-        prs, page_num=39,
+        prs, page_num=38,
         section_tag=SECTION_TAG_LR,
         title="Solution:  The Optimal Input Mix",
         draw_diagram=draw,
@@ -6036,7 +6333,7 @@ def slide_40(prs):
                            width=Inches(12.0), size=18)
 
     s = make_diagram_slide(
-        prs, page_num=40,
+        prs, page_num=39,
         section_tag=SECTION_TAG_LR,
         title="When Prices Change, the Input Mix Shifts:  Robot Tax & Union Wages",
         draw_diagram=draw,
@@ -6082,7 +6379,7 @@ def slide_41(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(9.0))
 
     s = make_diagram_slide(
-        prs, page_num=41,
+        prs, page_num=40,
         section_tag=SECTION_TAG_LR,
         title="'Bang for the Buck' in Grocery Shopping",
         draw_diagram=draw,
@@ -6098,7 +6395,7 @@ def slide_41(prs):
 def slide_42(prs):
     """Section divider – Part 2: Costs."""
     s = make_section_agenda(
-        prs, page_num=42,
+        prs, page_num=41,
         current_part_idx=1,        # Part 2 now active
         section_tag=SECTION_TAG_DIV,
         title="Part 2:  Costs – Producing at the Lowest Price",
@@ -6163,7 +6460,7 @@ def slide_43(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=43,
+        prs, page_num=42,
         section_tag=SECTION_TAG_P2,
         title="Three Cost Types,  Three Different Decision Rules",
         draw_diagram=draw,
@@ -6237,7 +6534,7 @@ def slide_44(prs):
         _add_discussion_break(slide, width=Inches(4.8))
 
     s = make_diagram_slide(
-        prs, page_num=44,
+        prs, page_num=43,
         section_tag=SECTION_TAG_P2,
         title="Group Work:  Your Car or the Company Car?",
         draw_diagram=draw,
@@ -6269,7 +6566,7 @@ def slide_45(prs):
                   align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=45,
+        prs, page_num=44,
         section_tag=SECTION_TAG_P2,
         title="Why Studios Finish Movies They Know Will Flop:  Waterworld",
         draw_diagram=draw,
@@ -6365,7 +6662,7 @@ def slide_46(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=46,
+        prs, page_num=45,
         section_tag=SECTION_TAG_P2,
         title="Waterworld:  Three Scenarios,  Same Decision",
         draw_diagram=draw,
@@ -6417,7 +6714,7 @@ def slide_47(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=47,
+        prs, page_num=46,
         section_tag=SECTION_TAG_P2,
         title="Modern Sunk Cost:  Meta's Reality Labs Has Lost $50B+ Since 2020",
         draw_diagram=draw,
@@ -6466,7 +6763,7 @@ def slide_48(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=48,
+        prs, page_num=47,
         section_tag=SECTION_TAG_P2,
         title="Opportunity Cost Is a Real Cost:  Apple's Canceled Apple Car",
         draw_diagram=draw,
@@ -6574,7 +6871,7 @@ def slide_49(prs):
                   align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=49,
+        prs, page_num=48,
         section_tag=SECTION_TAG_P2,
         title="Dictionary of Costs",
         draw_diagram=draw,
@@ -6669,7 +6966,7 @@ def slide_50(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=50,
+        prs, page_num=49,
         section_tag=SECTION_TAG_P2,
         title="Cost Concepts in the Real World:  Ross Stores Annual Report",
         draw_diagram=draw,
@@ -6754,7 +7051,7 @@ def slide_51(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=51,
+        prs, page_num=50,
         section_tag=SECTION_TAG_P2,
         title="Marginal Cost ≠ Average Cost:  ChatGPT Subscription Tiers",
         draw_diagram=draw,
@@ -6783,7 +7080,7 @@ def slide_52(prs):
                   align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=52,
+        prs, page_num=51,
         section_tag=SECTION_TAG_P2,
         title="What's the MC of Adding the 2nd User?",
         draw_diagram=draw,
@@ -6858,7 +7155,7 @@ def slide_53(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=53,
+        prs, page_num=52,
         section_tag=SECTION_TAG_P2,
         title="Solution:  MC = $30 / user · month",
         draw_diagram=draw,
@@ -6923,7 +7220,7 @@ def slide_54(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=54,
+        prs, page_num=53,
         section_tag=SECTION_TAG_P2,
         title="Marginal Cost in Finance:  The True Rate on a Bigger Loan",
         draw_diagram=draw,
@@ -6988,7 +7285,7 @@ def slide_55(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=55,
+        prs, page_num=54,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Weekly Cost",
         draw_diagram=draw,
@@ -7037,7 +7334,7 @@ def slide_56(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=56,
+        prs, page_num=55,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Cost Components",
         draw_diagram=draw,
@@ -7087,7 +7384,7 @@ def slide_57(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=57,
+        prs, page_num=56,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Per-Unit Costs",
         draw_diagram=draw,
@@ -7143,7 +7440,7 @@ def slide_58(prs):
         _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=58,
+        prs, page_num=57,
         section_tag=SECTION_TAG_P2,
         title="Cost Estimation:  What Does an iPhone Cost to Make?",
         draw_diagram=draw,
@@ -7172,7 +7469,7 @@ def slide_59(prs):
                   align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=59,
+        prs, page_num=58,
         section_tag=SECTION_TAG_P2,
         title="What's the AVC of an iPhone 17?",
         draw_diagram=draw,
@@ -7229,7 +7526,7 @@ def slide_60(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=60,
+        prs, page_num=59,
         section_tag=SECTION_TAG_P2,
         title="AVC of iPhone 17  ≈  $580",
         draw_diagram=draw,
@@ -7321,7 +7618,7 @@ def slide_61(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=61,
+        prs, page_num=60,
         section_tag=SECTION_TAG_P2,
         title="Naïve Linear Cost Function:  Total Cost View",
         draw_diagram=draw,
@@ -7412,7 +7709,7 @@ def slide_62(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=62,
+        prs, page_num=61,
         section_tag=SECTION_TAG_P2,
         title="Naïve Linear Cost Function:  Per-Unit View",
         draw_diagram=draw,
@@ -7463,7 +7760,7 @@ def slide_63(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=63,
+        prs, page_num=62,
         section_tag=SECTION_TAG_P2,
         title="More Complex Cost Functions:  When MC Isn't Linear",
         draw_diagram=draw,
@@ -7485,7 +7782,7 @@ def slide_64(prs):
     """Section divider – Part 2.2: Long-Run Costs & Economies of Scale.
     Mirror of slide_30 (Part 1.2) using the Part-2 highlight."""
     s = make_section_agenda(
-        prs, page_num=64,
+        prs, page_num=63,
         current_part_idx=1,
         section_tag=SECTION_TAG_DIV,
         title="Part 2.2:  Long-Run Costs & Economies of Scale",
@@ -7562,7 +7859,7 @@ def slide_65(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=65,
+        prs, page_num=64,
         section_tag=SECTION_TAG_P2_LR,
         title="Short-Run vs. Long-Run Costs",
         draw_diagram=draw,
@@ -7747,7 +8044,7 @@ def slide_66(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=66,
+        prs, page_num=65,
         section_tag=SECTION_TAG_P2_LR,
         title="LR Average Cost is the Lower Envelope of SR Curves",
         draw_diagram=draw,
@@ -7810,7 +8107,7 @@ def slide_67(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=67,
+        prs, page_num=66,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scale:  Three Possible Patterns",
         draw_diagram=draw,
@@ -7843,7 +8140,7 @@ def slide_68(prs):
         ("Big firms can run dedicated lines, automation, AI/data infra", 1),
     ]
     s = make_content_bulleted(
-        prs, page_num=68,
+        prs, page_num=67,
         section_tag=SECTION_TAG_P2_LR,
         title="Technological Reasons for Economies of Scale",
         bullets=bullets,
@@ -7928,7 +8225,7 @@ def slide_69(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=69,
+        prs, page_num=68,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scale in Aviation:  ERJ-145 vs. 787",
         draw_diagram=draw,
@@ -7959,7 +8256,7 @@ def slide_70(prs):
         ("Big-tech reorgs to break ranks into smaller, accountable units", 1),
     ]
     s = make_content_bulleted(
-        prs, page_num=70,
+        prs, page_num=69,
         section_tag=SECTION_TAG_P2_LR,
         title="Reasons for Diseconomies of Scale",
         bullets=bullets,
@@ -8026,7 +8323,7 @@ def slide_71(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=71,
+        prs, page_num=70,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scope:  Cheaper Together than Apart",
         draw_diagram=draw,
@@ -8095,7 +8392,7 @@ def slide_72(prs):
         _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=72,
+        prs, page_num=71,
         section_tag=SECTION_TAG_P2_LR,
         title="Amazon:  Economies of Scale,  Scope,  or Both?",
         draw_diagram=draw,
@@ -8153,7 +8450,7 @@ def slide_73(prs):
         _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=73,
+        prs, page_num=72,
         section_tag=SECTION_TAG_P2_LR,
         title="Mini-Case:  Shark Tank Pitch — Group Discussion",
         draw_diagram=draw,
@@ -8229,7 +8526,7 @@ def slide_74(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=74,
+        prs, page_num=73,
         section_tag=SECTION_TAG_P2_LR,
         title="Shark Tank Solution:  Scale + Deal Comparison",
         draw_diagram=draw,
@@ -8375,7 +8672,7 @@ def build_deck(output_name="Module 3_clean.pptx"):
 
     # Part 1 §1.1b Wage Searchers
     slide_23(prs)
-    slide_24(prs)
+    # slide_24(prs)  — MERGED into slide_23 (2026-05-18); function kept for reference
     slide_25(prs)
     slide_26(prs)
     slide_27(prs)
