@@ -1,5 +1,119 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-17 – MRPL example reframed; bullet helper overhaul; cross-refs hyperlinked
+
+**One-line summary.** Slides 19/20/21 reworked around L = 4,200 (so students
+must locate the table interval) and switched to a net-revenue framing
+(MR = $30k per car, not P = $80k), yielding MRPL ≈ $840 per worker per week.
+Cross-references converted from natural-language hyperlinks to "(link)"
+anchor pattern. `_add_hierarchical_bullets` substantially extended.
+Global permission-rules file fixed (several rules were silently dead).
+
+### Decisions and edits
+
+1. **Cross-reference hyperlinks → "(link)" anchor pattern.**
+   Earlier in the session we used natural-language anchors: e.g.,
+   "From the production-function table" with "production-function table"
+   itself hyperlinked. User reverted that: now the prose stays clean and
+   a parenthesised "(link)" follows, with only the word "link" carrying
+   the hyperlink (blue + underlined). Applies on slides 19, 21, 36.
+   Helper `_add_slide_link_in_slide` skips already-hyperlinked runs, so
+   calling it twice on one slide picks the next un-linked "link" in
+   document order.
+
+2. **L = 4,200 anchor on slides 19/20/21.**
+   Previous example used L = 4,000 — too easy: students just read the
+   table at that exact row. L = 4,200 forces them to first identify
+   which production-function-table interval contains 4,200 (answer:
+   4,000 → 4,500), per the MPL convention codified on slide 14
+   (compute ΔQ/ΔL over a table interval).
+
+3. **Net-revenue framing for MRPL on slide 19.**
+   User hand-edited slide 19 to introduce the per-car contribution
+   correctly: of the ~$80k price, ~$50k is material cost, so
+   (Net) Revenue ≈ $30k per car. Assume approx. constant in quantity.
+   This reconciles slides 19 and 21: MRPL = MPL × MR = 0.028 × $30,000
+   ≈ $840 per worker per week (slide 21 now matches this — earlier draft
+   was still using $80k × 0.028 = $2,240, which I had flagged as
+   inconsistent; user accepted the reconciliation).
+
+4. **Slide 21 restructured into four-step solution.**
+   Main bullets (▪): "Check which interval contains the current workforce
+   (L = 4,200)" → "From the production-function table (link)" →
+   "Compute MPL = ΔQ / ΔL" → "MRPL = MPL × MR". Each followed by its
+   derivation as sub-bullet(s). Punchline as a final paragraph in
+   smaller (20 pt) font with Wingdings  arrow and underlined "$840 ".
+   The "MPL convention" hyperlink that earlier pointed to slide 14 was
+   removed — slide 21 no longer needs that pointer because the
+   computation reads directly off the table.
+
+5. **`_add_hierarchical_bullets` substantially extended.**
+   - Bullet tuples now accept 2-tuple `(text, level)` OR 3-tuple
+     `(text, level, opts)` with per-paragraph overrides.
+   - `text` can be a string OR a list of `(run_text, run_opts)` for
+     multi-run paragraphs (e.g., the punchline run with Wingdings
+     symbol + underline emphasis).
+   - New paragraph-level opts: `bullet_style` ('main' / 'sub' / 'arrow'
+     / 'none'), `mar_l`, `indent`, `space_before_pts`, `size`, `color`,
+     `bold`, `italic`.
+   - New run-level opts: `font_name`, `size`, `color`, `bold`,
+     `italic`, `underline`, `wingdings` (emits `<a:sym typeface="Wingdings"/>`
+     so private-use-area chars render as Wingdings glyphs).
+   - Empty paragraphs (`text=''`) produce visual spacers (no run).
+   - Each paragraph with `level > 0` now receives `lvl="N"` attribute
+     on its `<a:pPr>` — minimum-viable fix for PowerPoint's
+     Tab / Shift-Tab outline navigation. **Open question:** whether
+     this alone is enough, or whether `<a:lstStyle>` must also be
+     populated with `lvl1pPr`/`lvl2pPr` definitions. **User to test.**
+
+6. **24/22 sub-bullet sizing rule codified in Teaching CLAUDE.md** and
+   propagated to all bullet slides from page 22 onward (12 slide
+   builders updated). Slide 49 "Dictionary of Costs" deliberately left
+   at 15/12 — dense reference card, full sizing pass deferred.
+
+7. **R1T → R1 standardization.** "R1T" referred to the truck only;
+   we want the R1 line in general. ~15 occurrences swept; "R1Ts/week"
+   → "R1 vehicles / week".
+
+8. **Permission-rules audit — global settings.json had dead rules.**
+   Several entries were comma-joined into single strings with
+   descriptive suffixes, e.g.
+   `"Bash(ls *), Bash(cd *) — auto-approve navigation"` — which Claude
+   Code reads as one literal rule (`ls *), Bash(cd *) — …`) that never
+   matches. Fixed by splitting into proper individual rules. Added
+   chain rules for `cd * && PYTHONIOENCODING=* python -c:*` etc., but
+   the cleaner long-term pattern is unchained `python -c "..."` with
+   absolute paths inside the snippet (covered by `Bash(python -c:*)`).
+
+### Open items
+
+- **Test Tab / Shift-Tab in PowerPoint** on the new deck. If it still
+  doesn't promote/demote, populate `<a:lstStyle>` with `lvl1pPr` and
+  `lvl2pPr` entries in `_add_hierarchical_bullets` (one-time helper
+  change, touches every bullet slide).
+- **Slide 49 "Dictionary of Costs"** still at 15/12 fonts — sizing
+  pass deferred.
+- **Material-cost number on slide 19 (~$50k).** Web research suggests
+  Rivian's improved R1 BOM is in the mid-$50k–low-$60k range, of which
+  the battery alone is ~$15k. The $50k material-cost figure on
+  slide 19 is defensible but on the low end; ~$55k might be more
+  accurate. Not changed pending user decision.
+
+### Commands / workflows worth remembering
+
+- **Side-path build pattern when hand-edits are reported:**
+  `python _build_clean_deck.py "Module 3_clean_test.pptx"`
+  (the build script takes the output path as `argv[1]`); diff slides
+  via zipfile readback of `ppt/slides/slideN.xml`; then
+  `mv -f Module 3_clean_test.pptx Module 3_clean.pptx`.
+- **Hyperlink verification one-liner:** read each slide's `*.xml.rels`
+  and match each `r:id` referenced by an `hlinkClick` to its
+  `Target=` to confirm slide-jump destinations.
+- **Helper bullet override examples** documented in
+  `_add_hierarchical_bullets` docstring.
+
+---
+
 ## 2026-05-16 – Slides 16–19 deep polish + discussion-break deck-wide cleanup
 
 **One-line summary.** Polished slides 16–19 in detail (Black Death, Hiring

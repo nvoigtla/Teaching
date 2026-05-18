@@ -11,6 +11,7 @@ Build is by batches – front matter (1-6), then §1.1 Short Run (7-22), etc.
 Output: `Module 3_clean.pptx`
 """
 
+import copy
 import math
 import re
 import shutil
@@ -20,6 +21,7 @@ from pathlib import Path
 from lxml import etree as ET
 from pptx import Presentation
 from pptx.chart.data import CategoryChartData, XyChartData
+from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.enum.shapes import MSO_SHAPE
@@ -554,14 +556,35 @@ def make_content_bulleted(prs, page_num, section_tag, title, bullets, *,
 def _add_hierarchical_bullets(slide, left, top, width, height, items,
                               *, size=24, sub_size=None, line_spacing_pts=18,
                               sub_line_spacing_pts=None):
-    """Render bullets with indent levels (0 = top-level navy ▪,
-    1+ = sub-bullets smaller and grey with – marker).
+    """Render bullets with indent levels.
 
-    size: font size for level-0 bullets.
-    sub_size: font size for level-1+ bullets (default: size - 4).
-    sub_line_spacing_pts: ``spcBef`` (points) applied to sub-bullets.
-        Default ``None`` → ``max(6, line_spacing_pts - 8)`` (legacy
-        formula).  Pass 0 (or any non-negative int) to override.
+    Bullet item forms:
+        (text, level)                       — simple, defaults from level
+        (text, level, opts)                 — opts dict overrides
+        (runs_list, level, opts)            — multi-run paragraph
+
+    text:
+        - str  → a single run with text
+        - ''   → empty paragraph (visual spacer; no run)
+        - list → multi-run: list of ``(run_text, run_opts)`` tuples
+
+    Paragraph-level opts (all optional):
+        bullet_style: 'main' (▪ NAVY) | 'sub' (– GRAY) | 'arrow' (no bullet,
+            plain left-indent; the run text supplies the leader char like
+            "→" or Wingdings) | 'none'
+        mar_l, indent: bullet positioning (EMU)
+        space_before_pts: spcBef in pts (overrides legacy formula)
+        size, color, bold, italic: defaults applied to every run unless
+            the run_opts override them.
+
+    Run-level opts (run_opts in a runs_list tuple):
+        font_name (default 'Calibri'), size, color, bold, italic,
+        underline (bool), wingdings (bool — emits <a:sym typeface="Wingdings"/>
+        so a private-use-area character renders as its Wingdings glyph).
+
+    Each paragraph also receives a ``lvl="N"`` attribute when level > 0
+    so PowerPoint's Tab / Shift-Tab outline navigation can find an
+    explicit outline level.
     """
     if sub_size is None:
         sub_size = size - 4
@@ -574,36 +597,98 @@ def _add_hierarchical_bullets(slide, left, top, width, height, items,
     tf.margin_top = 0
     tf.margin_bottom = 0
 
-    for i, (text, level) in enumerate(items):
+    for i, item in enumerate(items):
+        if len(item) == 2:
+            text, level = item
+            opts = {}
+        else:
+            text, level, opts = item
+            opts = opts or {}
+
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.alignment = PP_ALIGN.LEFT
+        pPr = p._p.get_or_add_pPr()
+
+        # Space-before
         if i > 0:
-            pPr = p._p.get_or_add_pPr()
-            if level == 0:
-                sp = line_spacing_pts
-            elif sub_line_spacing_pts is not None:
-                sp = sub_line_spacing_pts
-            else:
-                sp = max(6, line_spacing_pts - 8)
+            sp = opts.get('space_before_pts')
+            if sp is None:
+                if level == 0:
+                    sp = line_spacing_pts
+                elif sub_line_spacing_pts is not None:
+                    sp = sub_line_spacing_pts
+                else:
+                    sp = max(6, line_spacing_pts - 8)
             spcBef = ET.SubElement(pPr, qn('a:spcBef'))
             pts = ET.SubElement(spcBef, qn('a:spcPts'))
             pts.set('val', str(sp * 100))
 
-        run = p.add_run()
-        run.text = text
-        run.font.name = 'Calibri'
-        if level == 0:
-            run.font.size = Pt(size)
-            run.font.bold = False
-            run.font.color.rgb = NAVY
+        # Outline-level attribute (enables PowerPoint Tab/Shift-Tab)
+        if level > 0:
+            pPr.set('lvl', str(level))
+
+        # Bullet styling
+        style = opts.get('bullet_style', 'main' if level == 0 else 'sub')
+        if style == 'main':
             _set_bullet_char(p, char='▪', color=NAVY,
-                              mar_l=342900, indent=-342900, size_pct=100)
-        else:
-            run.font.size = Pt(sub_size)
-            run.font.color.rgb = GRAY
-            mar = 342900 + level * 342900
+                              mar_l=opts.get('mar_l', 342900),
+                              indent=opts.get('indent', -342900),
+                              size_pct=100)
+        elif style == 'sub':
+            default_mar = 342900 + level * 342900
             _set_bullet_char(p, char='–', color=GRAY,
-                              mar_l=mar, indent=-228600, size_pct=100)
+                              mar_l=opts.get('mar_l', default_mar),
+                              indent=opts.get('indent', -228600),
+                              size_pct=100)
+        elif style == 'arrow':
+            # Plain left-indent, no bullet glyph; user text supplies leader.
+            pPr.set('marL', str(opts.get('mar_l', 457200)))
+            if 'indent' in opts:
+                pPr.set('indent', str(opts['indent']))
+        # 'none' → no marL, no bullet
+
+        # Empty paragraph (spacer) — no run
+        if text == '':
+            continue
+
+        # Normalize text to a runs list
+        if isinstance(text, str):
+            runs = [(text, {})]
+        else:
+            runs = text  # already a list of (run_text, run_opts) tuples
+
+        # Paragraph-level run defaults
+        default_size = opts.get('size', size if level == 0 else sub_size)
+        default_color = opts.get('color', NAVY if level == 0 else GRAY)
+        default_bold = opts.get('bold', False if level == 0 else None)
+        default_italic = opts.get('italic')
+
+        for run_text, run_opts in runs:
+            run_opts = run_opts or {}
+            run = p.add_run()
+            run.text = run_text
+            run.font.name = run_opts.get('font_name', 'Calibri')
+            run.font.size = Pt(run_opts.get('size', default_size))
+            run.font.color.rgb = run_opts.get('color', default_color)
+
+            b = run_opts.get('bold', default_bold)
+            if b is not None:
+                run.font.bold = b
+            it = run_opts.get('italic', default_italic)
+            if it is not None:
+                run.font.italic = it
+            if run_opts.get('underline'):
+                run.font.underline = True
+            if run_opts.get('wingdings'):
+                # Add <a:sym typeface="Wingdings"/> so private-use-area
+                # characters render as their Wingdings glyphs.
+                rPr = run._r.find(qn('a:rPr'))
+                if rPr is None:
+                    rPr = run._r.makeelement(qn('a:rPr'), {})
+                    run._r.insert(0, rPr)
+                sym = ET.SubElement(rPr, qn('a:sym'))
+                sym.set('typeface', 'Wingdings')
+
     return box
 
 
@@ -1068,7 +1153,7 @@ def _add_callout_box(slide, left, top, width, height, text, *,
 
 
 def _add_anchor_burst(slide, left, top, width, height,
-                       top_text, bottom_text=None,
+                       top_text, bottom_text=None, extra_text=None,
                        *, fill=GOLD, text_color=NAVY,
                        top_size=14, bottom_size=10):
     """12-point star background + a separate text-box overlay.
@@ -1127,6 +1212,16 @@ def _add_anchor_burst(slide, left, top, width, height,
         r2.font.italic = True
         r2.font.bold = True
         r2.font.color.rgb = text_color
+    if extra_text:
+        p3 = tf.add_paragraph()
+        p3.alignment = PP_ALIGN.CENTER
+        r3 = p3.add_run()
+        r3.text = extra_text
+        r3.font.name = 'Calibri'
+        r3.font.size = Pt(bottom_size)
+        r3.font.italic = True
+        r3.font.bold = True
+        r3.font.color.rgb = text_color
     return shp
 
 
@@ -2682,6 +2777,105 @@ def _cost_mc(Q, dQ=10):
     return (_cost_tc(Q + dQ) - _cost_tc(Q)) / dQ
 
 
+# --------------------------------------------------------------------------
+# Cross-reference anchors — 0-indexed positions in the built deck.
+# When the deck order changes, update these to match new positions; all
+# hyperlinks that target these anchors update automatically on rebuild.
+# --------------------------------------------------------------------------
+
+SLIDE_IDX_PF_TABLE = 10        # Slide 11: "Rivian's Production Function: R1 Line Weekly Output"
+SLIDE_IDX_MPL_CONVENTION = 13  # Slide 14: "Marginal Product of Labor (MPL): Calculation" (Convention callout)
+
+
+def _add_slide_link_in_slide(slide, search_text, target_slide_idx, *, prs):
+    """Post-process: find ``search_text`` in any text run on ``slide``,
+    split that run into three runs [before, link, after], and make the
+    middle (link) run a hyperlink that jumps to ``prs.slides[target_slide_idx]``
+    when clicked.
+
+    Skips runs that already carry an ``<a:hlinkClick>`` — this lets callers
+    invoke the helper repeatedly on a slide where the anchor word ("link")
+    appears more than once: each call converts the next un-linked
+    occurrence, in document order.
+
+    The link run is styled blue + underlined for visual distinction; all
+    other run styling (font, size, italic/bold) is preserved from the
+    surrounding text.
+    """
+    target_part = prs.slides[target_slide_idx].part
+    rId = slide.part.relate_to(target_part, RT.SLIDE)
+    for shape in slide.shapes:
+        if not shape.has_text_frame:
+            continue
+        for p in shape.text_frame.paragraphs:
+            for run in list(p.runs):
+                if search_text not in (run.text or ''):
+                    continue
+                # Skip runs that are ALREADY a hyperlink (so the next call
+                # naturally picks the next un-linked "link" occurrence).
+                existing_rPr = run._r.find(qn('a:rPr'))
+                if existing_rPr is not None and existing_rPr.find(qn('a:hlinkClick')) is not None:
+                    continue
+
+                full = run.text
+                idx = full.find(search_text)
+                before = full[:idx]
+                after = full[idx + len(search_text):]
+
+                orig_r = run._r
+                orig_rPr = orig_r.find(qn('a:rPr'))
+
+                # 1. Truncate current run to "before"
+                run.text = before
+
+                # 2. Build LINK run (carries the hyperlink)
+                link_r = ET.Element(qn('a:r'))
+                if orig_rPr is not None:
+                    link_rPr = copy.deepcopy(orig_rPr)
+                else:
+                    link_rPr = ET.SubElement(link_r, qn('a:rPr'))
+                # Strip any pre-existing hyperlink, solidFill, and underline
+                # from the cloned rPr so our hyperlink styling wins.
+                for tag in ('a:hlinkClick', 'a:solidFill'):
+                    for old in link_rPr.findall(qn(tag)):
+                        link_rPr.remove(old)
+                # Underline for visual hyperlink cue
+                link_rPr.set('u', 'sng')
+                # Blue hyperlink color (PowerPoint's classic hyperlink hue)
+                blue = ET.SubElement(link_rPr, qn('a:solidFill'))
+                srgb = ET.SubElement(blue, qn('a:srgbClr'))
+                srgb.set('val', '0563C1')
+                # Hyperlink relationship
+                hl = ET.SubElement(link_rPr, qn('a:hlinkClick'))
+                hl.set(qn('r:id'), rId)
+                hl.set('action', 'ppaction://hlinksldjump')
+                if link_rPr not in list(link_r):
+                    link_r.append(link_rPr)
+                else:
+                    # Ensure rPr comes first
+                    link_r.remove(link_rPr)
+                    link_r.insert(0, link_rPr)
+                link_t = ET.SubElement(link_r, qn('a:t'))
+                link_t.text = search_text
+
+                # 3. Build AFTER run (regular continuation, no link)
+                after_r = ET.Element(qn('a:r'))
+                if orig_rPr is not None:
+                    after_rPr = copy.deepcopy(orig_rPr)
+                    for old in after_rPr.findall(qn('a:hlinkClick')):
+                        after_rPr.remove(old)
+                    after_r.append(after_rPr)
+                after_t = ET.SubElement(after_r, qn('a:t'))
+                after_t.text = after
+
+                # 4. Insert link_r then after_r right after the original run
+                orig_r.addnext(after_r)
+                orig_r.addnext(link_r)
+                return  # only first match
+    # Not found — caller may want to know
+    raise ValueError(f"search_text {search_text!r} not found in slide for hyperlinking")
+
+
 PF_A, PF_ALPHA, PF_BETA = 3.155, 0.5, 0.3
 PF_K_VALS = [100, 200, 300, 400]
 # Table grid (TWELVE rows): extra L=250 step at the start surfaces the
@@ -2716,7 +2910,7 @@ def _add_compact_pf_table(slide, *, tbl_left, tbl_top, col_w_label=Inches(0.72),
                             col_w_data=Inches(0.55),
                             tbl_h=Inches(3.70),
                             font_size=11,
-                            caption="Production-function table  (slide 10)",
+                            caption="Production-function table  (link)",
                             with_axes=True):
     """Insert the compact production-function table (same data as slide 10),
     with a drop-shadow rect behind and optional K/L axis labels + caption.
@@ -2899,9 +3093,10 @@ def slide_10(prs):
 
         # --- Direction-of-increase arrows (gold block arrows) ---
         # Right-arrow above the data columns – more robots →
+        # 2026-05-17: arrow y nudged 1.80 → 1.860 per manual edit.
         data_cols_left = tbl_left + col_w_label
         top_arrow_h = Inches(0.30)
-        top_arrow_top = tbl_top - top_arrow_h - Inches(0.10)
+        top_arrow_top = Inches(1.860)
         top_arrow = slide.shapes.add_shape(
             MSO_SHAPE.RIGHT_ARROW,
             int(data_cols_left), int(top_arrow_top),
@@ -2913,10 +3108,9 @@ def slide_10(prs):
         top_arrow.shadow.inherit = False
 
         # Down-arrow to the left of the data rows – more workers ↓
-        # Aligned with rows 1..N (skip the header row).
-        row_h_est = tbl_h / rows
-        data_rows_top = tbl_top + row_h_est
-        data_rows_h = tbl_h - row_h_est
+        # 2026-05-17: y and height hand-tweaked.
+        data_rows_top = Inches(2.508)
+        data_rows_h = Inches(3.692)
         left_arrow_w = Inches(0.30)
         left_arrow_left = tbl_left - left_arrow_w - Inches(0.12)
         left_arrow = slide.shapes.add_shape(
@@ -2930,8 +3124,10 @@ def slide_10(prs):
         left_arrow.shadow.inherit = False
 
         # --- Axis labels (above top arrow / left of down arrow) ---
+        # 2026-05-17: K label moved down to overlay the arrow header per
+        # manual edit (top 1.30 → 1.610).
         top_label_h = Inches(0.40)
-        top_label_y = top_arrow_top - top_label_h - Inches(0.10)
+        top_label_y = Inches(1.610)
         _add_text(slide, int(data_cols_left), int(top_label_y),
                    int(data_cols_w), int(top_label_h),
                    "Number of robots (K)",
@@ -2950,12 +3146,14 @@ def slide_10(prs):
                    align=PP_ALIGN.RIGHT, anchor=MSO_ANCHOR.MIDDLE,
                    font="Calibri")
         # Concept-explanation callout below the table — cream-fill rounded
-        # rect, replacing the small italic gray caption that previously sat
-        # here.  Two short lines, 17 pt navy bold.
-        cap_w = Inches(11.0)
-        cap_h = Inches(0.80)
-        cap_x = (SLIDE_W - cap_w) // 2
-        cap_y = Inches(6.30)
+        # rect.  Two short lines, 17 pt navy bold.
+        # 2026-05-17: narrowed and shifted right to clear the "Number of
+        # cars" annotation group (was width 11.0 centred; now 7.086 at
+        # x=3.359).
+        cap_w = Inches(7.086)
+        cap_h = Inches(0.665)
+        cap_x = Inches(3.359)
+        cap_y = Inches(6.320)
         _add_convention_box(
             slide, cap_x, cap_y, cap_w, cap_h,
             runs=[
@@ -3262,13 +3460,12 @@ def slide_11(prs):
             smooth.set('val', '0')
 
         # Concept-explanation callout below the chart — cream-fill rounded
-        # rect (the Convention-style format documented in the Teaching
-        # CLAUDE.md).  Tightened on 2026-05-15: shorter height + smaller
-        # internal padding so the cream chrome hugs the two text lines.
-        banner_w = Inches(10.0)
-        banner_h = Inches(0.78)
-        banner_x = (SLIDE_W - banner_w) // 2
-        banner_y = chart_top + chart_h + Inches(0.05)
+        # rect.  2026-05-17: width + x aligned with the chart's left edge
+        # and width so the callout reads as the chart's footer band.
+        banner_w = Inches(8.286)
+        banner_h = Inches(0.780)
+        banner_x = Inches(2.636)
+        banner_y = Inches(6.235)
         _add_convention_box(
             slide, banner_x, banner_y, banner_w, banner_h,
             runs=[
@@ -4217,10 +4414,10 @@ def slide_14(prs):
 
 
 def slide_15(prs):
-    """Rivian hiring scenario: ~$80k R1T, ~$40k materials, fixed K.
+    """Rivian hiring scenario: ~$80k R1, ~$40k materials, fixed K.
 
     Replaces the two Tesla photos (car carrier + Model 3 EMF) with a
-    single Rivian R1T photo at the right, bullets at the left.  Layout
+    single Rivian R1 photo at the right, bullets at the left.  Layout
     matches the rest of the deck: hero image on one side, narrative on
     the other, gold takeaway bar at the bottom.
     """
@@ -4231,7 +4428,7 @@ def slide_15(prs):
         # readability — sub-bullets at 18pt were too small).
         bullets = [
             ("Demand and output price are given", 0),
-            ("Large number of R1T ordered at price of ~$80k", 1),
+            ("Large number of R1 ordered at price of ~$80k", 1),
             ("(average transaction price, 2024–25)", 2),
             ("Short run:  capital (factory size, robots) is fixed", 0),
             ("The only way to expand production is to hire more workers", 0),
@@ -4244,7 +4441,7 @@ def slide_15(prs):
             size=26, sub_size=22, line_spacing_pts=8,
         )
 
-        # Rivian R1T picture on the RIGHT (replaces the Tesla car carrier).
+        # Rivian R1 picture on the RIGHT (replaces the Tesla car carrier).
         rivian = OUT_DIR / "_rivian.jpg"
         if rivian.exists():
             pic = slide.shapes.add_picture(
@@ -4256,7 +4453,7 @@ def slide_15(prs):
             # Small attribution
             _add_text(slide, Inches(8.55), Inches(5.05),
                        Inches(4.30), Inches(0.20),
-                       "Rivian R1T  (CC BY-SA, Wikimedia)",
+                       "Rivian R1  (CC BY-SA, Wikimedia)",
                        size=9, italic=True, color=GRAY,
                        align=PP_ALIGN.CENTER, font="Calibri")
 
@@ -4283,7 +4480,7 @@ def slide_15(prs):
     )
     _set_notes(s, (
         "Setup for the next several slides.  We'll derive Rivian's optimal "
-        "hiring level.  Given: Rivian R1T sells at ~$80K (average "
+        "hiring level.  Given: Rivian R1 sells at ~$80K (average "
         "transaction price reported by Rivian for 2024–25), and capital "
         "(the plant and robot count) is fixed in the short run.  Materials "
         "and other variable costs are deliberately set aside here – we "
@@ -4412,10 +4609,11 @@ def slide_16(prs):
         r.font.color.rgb = WHITE
 
         # ---- DECOMPOSITION box right below the HERO ----
-        # Header → MR/MPL definitions → three bullets, all inside one box.
-        # Position + dimensions tightened on 2026-05-16 per manual edit.
-        dec_x = Inches(1.000); dec_y = Inches(3.410)
-        dec_w = Inches(11.200); dec_h = Inches(2.379)
+        # Header → MR/MPL definitions → three bullets → italic note.
+        # 2026-05-17: moved up + made taller per manual edit so the new
+        # italic note at the bottom doesn't crowd the bullets.
+        dec_x = Inches(1.000); dec_y = Inches(3.289)
+        dec_w = Inches(11.200); dec_h = Inches(2.500)
         dec = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
                                        int(dec_x), int(dec_y),
                                        int(dec_w), int(dec_h))
@@ -4447,10 +4645,11 @@ def slide_16(prs):
         rmr.font.name = "Calibri"; rmr.font.size = Pt(14)
         rmr.font.italic = True
         rmr.font.color.rgb = NAVY
-        # MPL definition (centred)
+        # MPL definition (centred) — space_before 2 → 0 on 2026-05-17 to
+        # tighten the gap between MR: and MPL: lines.
         pmpl = dtf.add_paragraph()
         pmpl.alignment = PP_ALIGN.CENTER
-        pmpl.space_before = Pt(2)
+        pmpl.space_before = Pt(0)
         rmpl = pmpl.add_run()
         rmpl.text = "MPL:  extra output (marginal product) from hiring one more worker"
         rmpl.font.name = "Calibri"; rmpl.font.size = Pt(14)
@@ -4464,43 +4663,51 @@ def slide_16(prs):
         rb.text = "•  When MPL falls, MRPL falls"
         rb.font.name = "Calibri"; rb.font.size = Pt(16); rb.font.bold = True
         rb.font.color.rgb = NAVY
-        # Sub of bullet 1
-        pb1s = dtf.add_paragraph()
-        pb1s.alignment = PP_ALIGN.LEFT
-        pb1s.space_before = Pt(2)
-        rb = pb1s.add_run()
-        rb.text = "      Even at constant price, each additional worker is worth less"
-        rb.font.name = "Calibri"; rb.font.size = Pt(14); rb.font.italic = True
-        rb.font.color.rgb = NAVY
-        # Bullet 2 (trimmed for 5–10 word target)
+        # Bullet 2 — re-worded on 2026-05-17 to spell out the "less and
+        # less additional output" wording.
         pb2 = dtf.add_paragraph()
         pb2.alignment = PP_ALIGN.LEFT
-        pb2.space_before = Pt(6)
+        pb2.space_before = Pt(8)
         rb = pb2.add_run()
-        rb.text = "•  Decreasing MPL  ⇒  each marginal hire is worth less"
+        rb.text = ("•  Decreasing MPL  ⇒ marginal (additional) hires produce "
+                   "less and less additional output")
         rb.font.name = "Calibri"; rb.font.size = Pt(16); rb.font.bold = True
         rb.font.color.rgb = NAVY
         # Bullet 3 — price-taker simplification (trimmed)
         pb3 = dtf.add_paragraph()
         pb3.alignment = PP_ALIGN.LEFT
-        pb3.space_before = Pt(6)
+        pb3.space_before = Pt(8)
         rb = pb3.add_run()
         rb.text = "•  Price-taker case:  MR = P,  so  MRPL = P × MPL"
         rb.font.name = "Calibri"; rb.font.size = Pt(16); rb.font.bold = True
         rb.font.color.rgb = NAVY
+        # Italic note — added 2026-05-17.  Sits below the three bullets,
+        # in italic to read as a contextual aside.
+        # space_before 8 → 4 on 2026-05-17 (tighten gap to bullet 3).
+        pnote = dtf.add_paragraph()
+        pnote.alignment = PP_ALIGN.LEFT
+        pnote.space_before = Pt(4)
+        rb = pnote.add_run()
+        rb.text = ("     →  Even when holding MR (or price) constant, "
+                   "MRPL falls when labor is added, as a result of "
+                   "falling MPL")
+        rb.font.name = "Calibri"; rb.font.size = Pt(16); rb.font.italic = True
+        rb.font.color.rgb = NAVY
 
-        # ---- MB = MC anchor + DECISION RULE bar at the bottom ----
-        # 2026-05-16: layout flipped per manual edit — star now sits on
-        # the RIGHT side of the slide, decision-rule bar centered/left.
-        # Arrow points from star → rule bar (i.e., LEFTWARD).
-        star_w = Inches(1.600)
-        star_h = Inches(1.050)
-        star_x = Inches(11.006)
-        star_y = Inches(5.910)
+        # ---- MB > MC anchor + DECISION RULE bar at the bottom ----
+        # 2026-05-17: star bumped to (1.850 × 1.311) and shifted to
+        # (10.860, 5.804) so the third line "→ Hire more" fits inside
+        # the inscribed body.  Top text changed "=" → ">" — this is the
+        # CONDITION for hiring more, not the optimum-state equation.
+        star_w = Inches(1.850)
+        star_h = Inches(1.311)
+        star_x = Inches(10.860)
+        star_y = Inches(5.804)
         _add_anchor_burst(
             slide, star_x, star_y, star_w, star_h,
-            top_text="MB = MC",
+            top_text="MB > MC",
             bottom_text="(of labor)",
+            extra_text="→  Hire more",
             top_size=14, bottom_size=11,
         )
 
@@ -4539,7 +4746,7 @@ def slide_16(prs):
     s = make_diagram_slide(
         prs, page_num=18,
         section_tag=SECTION_TAG_P1,
-        title="Hiring Decisions in the Short Run —  Concepts",
+        title="Hiring Decisions in the Short Run —  Core Concept",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -4617,26 +4824,40 @@ def slide_17(prs):
 
 
 def slide_18(prs):
-    """Example: MRPL at 4,000 employees and 100 robots.
+    """Example: MRPL at 4,200 employees and 100 robots.
 
-    Source had: title + bullets + small image (group with picture & oval) +
-    'Discussion break' parallelogram badge at bottom-right.
+    L = 4,200 is chosen deliberately so students must identify which
+    table interval contains it (4,000 → 4,500) before computing MPL —
+    consistent with the slide-14 MPL convention (always compute ΔQ/ΔL
+    over a full table interval).
     """
     def draw(slide):
+        # 2026-05-17: bullet fonts bumped to 24 / 22; the formula line
+        # rewritten per manual edit — "MRPL = MR × MPL" sub-bullet
+        # removed; the price-taker line tightened.
+        # 2026-05-17 (later): user hand-edited slide 19 to (a) bump
+        # employee count 4,000 → 4,200 so students must locate the
+        # interval, and (b) reframe per-car return as Net Revenue
+        # ~$30k (Price $80k − ~$50k material cost), not gross Price.
         bullets = [
-            "Rivian:  100 robots and 4,000 employees on the R1 line  (Normal, IL)",
-            "Price ~$80k per R1T,  approximately constant in quantity",
-            ("What is MRPL?  (in $ per worker, per week)", 0),
-            ("Hint:", 0),
-            ("MRPL  =  MR × MPL  ≈  P × MPL", 1),
+            ("Currently 100 robots and 4,200 employees on the R1 line", 0),
+            ("Price ~$80k per R1, of which ~$50k is material cost", 0),
+            # 2026-05-17 (manual): "→" arrow paragraph pulled in to
+            # marL=457200 (between main and L1 indents) — visual "leads to".
+            ("→ (Net) Revenue per car ~$30k", 1,
+             {'bullet_style': 'arrow', 'mar_l': 457200}),
+            ("Assume that this is approx. constant", 1),
+            ("", 0),  # 2026-05-17 (manual): spacer paragraph
+            # 2026-05-17 (manual): bumped to 28 pt for emphasis.
+            ("What is MRPL?  (in $ per worker, per week)", 0,
+             {'size': 28}),
         ]
-        normalized = [(b, 0) if isinstance(b, str) else b for b in bullets]
         _add_hierarchical_bullets(
             slide,
             left=MARGIN, top=Inches(1.85),
             width=Inches(7.8), height=Inches(4.4),
-            items=normalized,
-            size=22, sub_size=18, line_spacing_pts=10,
+            items=bullets,
+            size=24, sub_size=22, line_spacing_pts=10,
         )
 
         # ---- Compact production-function table (same data as slide 10) ----
@@ -4668,13 +4889,19 @@ def slide_18(prs):
     s = make_diagram_slide(
         prs, page_num=19,
         section_tag=SECTION_TAG_P1,
-        title="Example:  Calculate MRPL at 4,000 Employees and 100 Robots",
+        title="Example:  Calculate MRPL at 4,200 Employees and 100 Robots",
         draw_diagram=draw,
     )
+    # Hyperlink the "(link)" anchor in the compact-table caption to slide 11.
+    _add_slide_link_in_slide(s, "link", SLIDE_IDX_PF_TABLE, prs=prs)
     _set_notes(s, (
-        "A specific number to anchor the concept. Walk through it: at 4,000 "
-        "workers and 100 robots, find MPL from the production-function "
-        "table, then multiply by the sale price (~$80K per R1T)."
+        "Anchor the concept with a concrete scenario. At 4,200 workers and "
+        "100 robots, ask students first to find which interval in the "
+        "production-function table contains L = 4,200 — that's 4,000 → 4,500 "
+        "per our MPL convention.  Then reframe the per-car return: of the "
+        "$80k price, about $50k is material cost, so the net revenue per "
+        "car is roughly $30k.  Assume this is approximately constant across "
+        "quantity, so MRPL  ≈  (Net Revenue) × MPL."
     ))
 
 
@@ -4699,49 +4926,77 @@ def slide_19(prs):
     s = make_diagram_slide(
         prs, page_num=20,
         section_tag=SECTION_TAG_P1,
-        title="What Is Rivian's MRPL at 4,000 Employees?",
+        title="What Is Rivian's MRPL at 4,200 Employees?",
         draw_diagram=draw,
     )
     _draw_poll_pill(s)
     _set_notes(s, (
-        "Quick PollEv – compute the MRPL at 4,000 employees and submit. "
-        "Give them 30 seconds. The point isn't to get the number perfectly, "
-        "it's to make sure everyone is doing the calculation in their head."
+        "Quick PollEv – compute the MRPL at 4,200 employees and submit. "
+        "Give them 30 seconds. The point isn't the exact number; it's to "
+        "make sure everyone identifies the right interval (4,000 → 4,500) "
+        "and does the calculation in their head."
     ))
 
 
 def slide_20(prs):
-    """Solution: MRPL of Rivian — uses actual values from slide 10's table.
+    """Solution: MRPL of Rivian — uses actual values from the production-
+    function table.
 
-    Applies slide 13's "initial-point" convention: ΔQ and ΔL are computed
-    relative to the previous row of the L grid.  Currently at L = 4,000
-    workers; the next 500-worker step takes us to L = 4,500.
+    Applies our MPL convention: ΔQ and ΔL are computed relative to the
+    previous row of the L grid.  Currently at L = 4,000 workers; the
+    next 500-worker step takes us to L = 4,500.
     """
+    # 2026-05-17 (manual): user restructured the solution into four
+    # main-level "steps" with their derivations as sub-bullets, dropped
+    # the MPL-convention hyperlink, switched the final calculation to
+    # use MR (net of material cost) ≈ $30k per car → MRPL ≈ $840 per
+    # worker per week (consistent with slide-19 framing).  The punchline
+    # paragraph uses a Wingdings  arrow + underlined "$840 ".
     bullets = [
-        ("Currently at L = 4,000 workers (K = 100 robots)", 0),
-        ("From the production-function table on slide 10:", 0),
-        ("Q (4,000)  =  380 R1T per week", 1),
-        ("Q (4,500)  =  394 R1T per week", 1),
-        ("Per the slide-13 convention:  MPL  =  ΔQ / ΔL", 0),
+        ("Check which interval contains the current workforce  (L = 4,200)", 0),
+        ("→  use the 4,000 → 4,500 step", 1,
+         {'bullet_style': 'arrow', 'mar_l': 457200}),
+        ("From the production-function table  (link):", 0),
+        ("Q (4,000)  =  380 R1 per week", 1),
+        ("Q (4,500)  =  394 R1 per week", 1),
+        ("Compute MPL  =  ΔQ / ΔL", 0),
         ("MPL  =  (394 − 380) / 500  =  0.028 cars per worker per week", 1),
-        ("MRPL  =  MPL × P  ≈  0.028 × $80,000  ≈  $2,240 per worker per week", 0),
-        ("Compare to the weekly wage of ONE additional worker — not the whole workforce", 1),
+        ("MRPL  =  MPL × MR", 0),
+        ("MR per car (net of material costs) is ≈ $30,000 ", 1),
+        # Punchline: Wingdings arrow + Calibri body + underlined "$840 ".
+        ([
+            ('', {'wingdings': True, 'size': 20,
+                         'bold': False, 'italic': False}),
+            ('  MRPL  =  0.028 × $30,000  =  ',
+             {'size': 20, 'bold': False, 'italic': False}),
+            ('$840 ', {'size': 20, 'bold': False, 'italic': False,
+                        'underline': True}),
+            ('per worker per week',
+             {'size': 20, 'bold': False, 'italic': False}),
+        ], 1, {'bullet_style': 'arrow', 'mar_l': 457200,
+               'space_before_pts': 12}),
     ]
     s = make_content_bulleted(
         prs, page_num=21,
         section_tag=SECTION_TAG_P1,
         title="Solution:  MRPL of Rivian",
         bullets=bullets,
-        size=20, sub_size=18, line_spacing_pts=8,
+        size=24, sub_size=22, line_spacing_pts=8,
     )
+    # Hyperlink the "(link)" anchor on the production-function table line.
+    _add_slide_link_in_slide(s, "link", SLIDE_IDX_PF_TABLE, prs=prs)
     _set_notes(s, (
-        "Reveal the answer.  Pull Q(4,000) = 380 and Q(4,500) = 394 from "
-        "slide 10's production-function table (K = 100 robots).  Apply "
-        "the slide-13 convention: ΔQ = 14, ΔL = 500, so MPL ≈ 0.028 "
-        "cars per worker per week.  At a sale price of ~$80K per R1T, "
-        "that gives MRPL ≈ $2,240 per worker per week.  The most common "
-        "slip in this calculation is comparing MRPL to the TOTAL wage "
-        "bill instead of the weekly wage of ONE more worker."
+        "Reveal the answer step by step.  Step 1: ask which interval "
+        "contains L = 4,200 — answer 4,000 → 4,500, because our MPL "
+        "convention always computes ΔQ / ΔL over a full table interval.  "
+        "Step 2: pull Q(4,000) = 380 and Q(4,500) = 394 from the "
+        "production-function table at K = 100 robots.  Step 3: apply the "
+        "convention — ΔQ = 14, ΔL = 500, so MPL ≈ 0.028 cars per worker "
+        "per week.  Step 4: MRPL  =  MPL × MR.  MR per car is the net "
+        "revenue after material cost (~$80k price − ~$50k materials = "
+        "~$30k), so MRPL  ≈  0.028 × $30,000  ≈  $840 per worker per week. "
+        "The most common slip is comparing MRPL to the TOTAL wage bill "
+        "instead of the weekly wage of ONE more worker."
     ))
 
 
@@ -4794,7 +5049,7 @@ def slide_22(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(6.0), height=Inches(4.30),
             items=bullets,
-            size=20, sub_size=16, line_spacing_pts=8,
+            size=24, sub_size=22, line_spacing_pts=8,
         )
 
         # ---- Native MRPL / wage chart on the right ----
@@ -4978,7 +5233,7 @@ def slide_26(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(9.0), height=Inches(4.0),
             items=bullets,
-            size=22, sub_size=18, line_spacing_pts=10,
+            size=24, sub_size=22, line_spacing_pts=10,
         )
 
         # Hassabis picture (the Wikimedia / Nobel 2024 photo) on the right
@@ -5147,15 +5402,15 @@ def slide_31(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(8.0), height=Inches(4.6),
             items=bullets,
-            size=22, sub_size=18, line_spacing_pts=10,
+            size=24, sub_size=22, line_spacing_pts=10,
         )
 
-        # Rivian R1T picture
+        # Rivian R1 picture
         _add_source_image(slide, 31, "rId3",
                            left=Inches(8.6), top=Inches(2.6),
                            width=Inches(4.4))
         _add_text(slide, Inches(8.6), Inches(5.55), Inches(4.4), Inches(0.25),
-                   "Rivian R1T  (CC BY-SA, Wikimedia)",
+                   "Rivian R1  (CC BY-SA, Wikimedia)",
                    size=12, italic=True, color=GRAY, font="Calibri",
                    align=PP_ALIGN.CENTER)
 
@@ -5253,7 +5508,7 @@ def slide_33(prs):
             left=MARGIN + Inches(0.5), top=Inches(4.2),
             width=RULE_W - Inches(1.0), height=Inches(2.2),
             items=bullets,
-            size=20, sub_size=18, line_spacing_pts=8,
+            size=24, sub_size=22, line_spacing_pts=8,
         )
 
         # Bottom takeaway
@@ -5440,10 +5695,10 @@ def slide_35(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(8.0), height=Inches(4.4),
             items=bullets,
-            size=20, sub_size=18, line_spacing_pts=8,
+            size=24, sub_size=22, line_spacing_pts=8,
         )
 
-        # Rivian R1T picture on the right (the source slide had a stale
+        # Rivian R1 picture on the right (the source slide had a stale
         # Tesla picture — use the proper Rivian image instead)
         rivian = OUT_DIR / "_rivian.jpg"
         if rivian.exists():
@@ -5454,7 +5709,7 @@ def slide_35(prs):
             )
             _add_drop_shadow(pic)
         _add_text(slide, Inches(8.7), Inches(5.6), Inches(4.3), Inches(0.25),
-                   "Rivian R1T  (CC BY-SA, Wikimedia)",
+                   "Rivian R1  (CC BY-SA, Wikimedia)",
                    size=12, italic=True, color=GRAY, font="Calibri",
                    align=PP_ALIGN.CENTER)
 
@@ -5502,7 +5757,7 @@ def slide_36(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(7.0), height=Inches(3.5),
             items=bullets,
-            size=20, sub_size=18, line_spacing_pts=10,
+            size=24, sub_size=22, line_spacing_pts=10,
         )
 
         # Same compact production-function table as slide 18 — locks the
@@ -5521,6 +5776,8 @@ def slide_36(prs):
         title="Is Rivian's Current Plan Optimal?  (Production Function)",
         draw_diagram=draw,
     )
+    # Hyperlink the "(link)" anchor in the compact-table caption to slide 11.
+    _add_slide_link_in_slide(s, "link", SLIDE_IDX_PF_TABLE, prs=prs)
     _set_notes(s, (
         "The production function for Georgia in numbers. Setup question: is "
         "Rivian's current K/L mix optimal? Don't answer yet – the next "
@@ -5543,7 +5800,7 @@ def slide_37(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(6.5), height=Inches(2.6),
             items=bullets,
-            size=20, sub_size=18, line_spacing_pts=10,
+            size=24, sub_size=22, line_spacing_pts=10,
         )
 
         # Analysis picture (annotated production function) on the right
@@ -5604,7 +5861,7 @@ def slide_38(prs):
     _draw_poll_pill(s)
     _set_notes(s, (
         "Quick PollEv.  Looking at the numbers on the previous slide – "
-        "200 robots and 5,000 workers producing ~574 R1Ts/week, with "
+        "200 robots and 5,000 workers producing ~574 R1 vehicles / week, with "
         "the MP values given – is the current mix optimal?  Give them 30 "
         "seconds to think through the bang-for-the-buck ratios.  Some "
         "will say yes, some no;  reveal in the next slide.  The point "
@@ -5808,7 +6065,7 @@ def slide_41(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(6.5), height=Inches(4.0),
             items=bullets,
-            size=22, sub_size=18, line_spacing_pts=12,
+            size=24, sub_size=22, line_spacing_pts=12,
         )
 
         # Two product pictures on the right – mirroring the source
@@ -6140,7 +6397,7 @@ def slide_47(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(8.7), height=Inches(4.5),
             items=bullets,
-            size=22, sub_size=18, line_spacing_pts=12,
+            size=24, sub_size=22, line_spacing_pts=12,
         )
 
         # Meta Quest 3 picture on the right
@@ -6190,7 +6447,7 @@ def slide_48(prs):
             left=MARGIN, top=Inches(1.85),
             width=Inches(7.0), height=Inches(4.5),
             items=bullets,
-            size=22, sub_size=18, line_spacing_pts=12,
+            size=24, sub_size=22, line_spacing_pts=12,
         )
 
         # Vanarama Apple Car concept render on the right
@@ -7590,7 +7847,7 @@ def slide_68(prs):
         section_tag=SECTION_TAG_P2_LR,
         title="Technological Reasons for Economies of Scale",
         bullets=bullets,
-        size=22, sub_size=17, line_spacing_pts=10,
+        size=24, sub_size=22, line_spacing_pts=10,
     )
     _set_notes(s, (
         "Why does technology often favour larger scale? Four classic "
@@ -7706,7 +7963,7 @@ def slide_70(prs):
         section_tag=SECTION_TAG_P2_LR,
         title="Reasons for Diseconomies of Scale",
         bullets=bullets,
-        size=22, sub_size=17, line_spacing_pts=10,
+        size=24, sub_size=22, line_spacing_pts=10,
     )
     _set_notes(s, (
         "Why bigger isn't always cheaper. Coordination costs explode "

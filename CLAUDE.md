@@ -60,12 +60,13 @@ For work in this folder, you are assisting with **teaching materials**
   asked.
 - **Sub-bullet sizing — err on the side of LARGER.** Claude has a
   recurring tendency to make sub-bullet text too small for EMBA
-  readability. Default to sub-bullets only **~4 pt smaller** than the
-  main bullet, NOT 8 – 10 pt smaller. Typical pairs: 28 pt main / 24 –
-  26 pt sub; 24 pt main / 20 – 22 pt sub. If a sub-bullet looks
-  proportionally legible on a 13-inch laptop screen viewed at slide-
-  preview size, it is probably the right size. Sub-bullets at 18 pt or
-  below are almost always too small for this audience.
+  readability. Default to sub-bullets only **~2 pt smaller** than the
+  main bullet, NOT 4 – 10 pt smaller.
+- **Default bullet sizing for EMBA decks: 24 pt main / 22 pt sub.**
+  This is the canonical pair for content-bulleted slides; only deviate
+  when a slide has unusually little or unusually much text. Other
+  acceptable pairs: 28 / 26, 26 / 24. Sub-bullets at 20 pt or below
+  are almost always too small for this audience.
 
 ## Concept-explanation textboxes (preferred format)
 - When a slide needs a short, visually-distinct callout to **explain a
