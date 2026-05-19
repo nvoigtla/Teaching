@@ -468,8 +468,18 @@ def make_title_slide(prs):
 # --------------------------------------------------------------------------
 
 def make_section_agenda(prs, page_num, *, current_part_idx=None,
+                        current_sub_idx=None,
                         section_tag="Module 3 · Agenda",
                         title="Agenda"):
+    """Render an agenda / section-divider slide.
+
+    ``current_part_idx`` makes that Part navy and fades the others.
+    ``current_sub_idx`` (optional, only meaningful with current_part_idx)
+    further restricts the navy highlight inside the current Part to a
+    single sub-bullet — the other subs render in faded gray, alongside
+    Part 2.  Used by intra-Part dividers (e.g., the new Short Run agenda
+    on page 13, or the Long Run agenda on page 31).
+    """
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, section_tag)
     _draw_action_title(slide, title)
@@ -485,6 +495,18 @@ def make_section_agenda(prs, page_num, *, current_part_idx=None,
         else:
             color = NAVY if idx == current_part_idx else FADED
 
+        # 2026-05-19: per-sub fade.  When this is the current Part AND a
+        # specific sub-index is highlighted, give every other sub the
+        # FADED color so the deck shows "you are HERE" within the Part.
+        if (current_part_idx is not None and idx == current_part_idx
+                and current_sub_idx is not None):
+            sub_colors = [
+                NAVY if i == current_sub_idx else FADED
+                for i in range(len(part["subs"]))
+            ]
+        else:
+            sub_colors = None
+
         _add_text(slide, MARGIN, y, RULE_W, part_title_h,
                   part["title"], size=30, bold=True, color=color,
                   font="Calibri")
@@ -498,8 +520,13 @@ def make_section_agenda(prs, page_num, *, current_part_idx=None,
             height=sub_list_h,
             items=part["subs"],
             size=24, color=color, bullet_color=color,
-            line_spacing_pts=10,
+            # 2026-05-19: sub-bullets tightened from 10 → 3 pt to match
+            # the deck-wide rhythm (sub-bullets cluster under their
+            # parent rather than breathing out).  Applied to both
+            # Parts on every agenda divider in the deck.
+            line_spacing_pts=3,
             autonum_scheme='alphaLcPeriod',
+            colors=sub_colors,
         )
         y += sub_list_h + block_gap
 
@@ -766,6 +793,47 @@ def _add_hierarchical_bullets(slide, left, top, width, height, items,
 
         for run_text, run_opts in runs:
             run_opts = run_opts or {}
+
+            # Inline OMML math zone — append <a14:m><m:oMath>...</m:oMath></a14:m>
+            # as a sibling of the regular <a:r> runs so the formula renders
+            # in-line with surrounding prose.  ``run_text`` is interpreted
+            # as raw OMML content (e.g., from `_formula_mp_ratio` or the
+            # `_omml_*` builders).
+            if run_opts.get('omml'):
+                om_sz = run_opts.get('size')
+                if om_sz is None:
+                    om_sz = para_size_override
+                if om_sz is None:
+                    om_sz = size if level == 0 else sub_size
+                om_clr = run_opts.get('color') or para_color_override
+                if om_clr is None:
+                    om_clr = NAVY if level == 0 else GRAY
+                sz_centi = int(om_sz * 100)
+                clr_hex = '{:02X}{:02X}{:02X}'.format(
+                    om_clr[0], om_clr[1], om_clr[2])
+                a14_xml = (
+                    f'<a14:m xmlns:a14="{A14_NS}" '
+                    f'xmlns:m="{M_NS}" xmlns:a="{A_NS}">'
+                    f'<m:oMath>{run_text}</m:oMath>'
+                    f'</a14:m>'
+                )
+                a14_elem = ET.fromstring(a14_xml)
+                for r_elem in a14_elem.iter(qn('m:r')):
+                    arPr = r_elem.find(qn('a:rPr'))
+                    if arPr is None:
+                        arPr = ET.Element(qn('a:rPr'))
+                        r_elem.insert(0, arPr)
+                    arPr.set('sz', str(sz_centi))
+                    if arPr.get('lang') is None:
+                        arPr.set('lang', 'en-US')
+                    for sf in arPr.findall(qn('a:solidFill')):
+                        arPr.remove(sf)
+                    sf = ET.SubElement(arPr, qn('a:solidFill'))
+                    srgb = ET.SubElement(sf, qn('a:srgbClr'))
+                    srgb.set('val', clr_hex)
+                p._p.append(a14_elem)
+                continue
+
             run = p.add_run()
             run.text = run_text
             run.font.name = run_opts.get('font_name', 'Calibri')
@@ -916,6 +984,60 @@ def make_poll_slide(prs, page_num, section_tag, title, options, *,
 
     _draw_footer(slide, FOOTER_TEXT, page_num)
     return slide
+
+
+# --------------------------------------------------------------------------
+# Slide-jump hyperlinks — make a run or shape clickable in slideshow
+# mode so it advances PowerPoint to a different slide.  python-pptx
+# doesn't expose this directly, so we manipulate the rPr / cNvPr XML
+# and register the slide relationship via the public OPC API.
+# --------------------------------------------------------------------------
+
+def _add_slide_jump_hyperlink_run(source_slide, run, target_slide,
+                                    *, lock_color=True, underline=True):
+    """Make ``run`` a clickable hyperlink that advances to ``target_slide``.
+
+    ``lock_color=True`` adds the Office hyperlinkcolor extension so the
+    run's explicit ``solidFill`` color is preserved at render time —
+    without it, PowerPoint repaints hyperlink text in the theme's
+    ``hlink`` color (a light blue) regardless of what the rPr says.
+
+    ``underline=True`` sets ``u="sng"`` so the hyperlink stays visibly
+    underlined even when the color-lock suppresses the theme styling.
+    """
+    rId = source_slide.part.relate_to(target_slide.part, RT.SLIDE)
+    rPr = run._r.get_or_add_rPr()
+    if underline:
+        rPr.set('u', 'sng')
+    for hl in rPr.findall(qn('a:hlinkClick')):
+        rPr.remove(hl)
+    hlinkClick = ET.SubElement(rPr, qn('a:hlinkClick'))
+    hlinkClick.set(qn('r:id'), rId)
+    hlinkClick.set('action', 'ppaction://hlinksldjump')
+    if lock_color:
+        AHYP_NS = 'http://schemas.microsoft.com/office/drawing/2018/hyperlinkcolor'
+        ext_xml = (
+            f'<a:extLst xmlns:a="{A_NS}">'
+            f'<a:ext uri="{{A12FA001-AC4F-418D-AE19-62706E023703}}">'
+            f'<ahyp:hlinkClr xmlns:ahyp="{AHYP_NS}" val="tx"/>'
+            f'</a:ext>'
+            f'</a:extLst>'
+        )
+        hlinkClick.append(ET.fromstring(ext_xml))
+
+
+def _add_slide_jump_hyperlink_shape(source_slide, shape, target_slide):
+    """Make ``shape`` clickable so the whole shape jumps to ``target_slide``."""
+    rId = source_slide.part.relate_to(target_slide.part, RT.SLIDE)
+    nvSpPr = shape._element.find(qn('p:nvSpPr'))
+    cNvPr = nvSpPr.find(qn('p:cNvPr')) if nvSpPr is not None else None
+    if cNvPr is None:
+        return
+    for hl in cNvPr.findall(qn('a:hlinkClick')):
+        cNvPr.remove(hl)
+    hlinkClick = ET.SubElement(cNvPr, qn('a:hlinkClick'))
+    hlinkClick.set(qn('r:id'), rId)
+    hlinkClick.set('action', 'ppaction://hlinksldjump')
 
 
 # --------------------------------------------------------------------------
@@ -1083,25 +1205,47 @@ def _add_takeaway_bar(slide, text, *, top=Inches(6.4), width=None,
 
 
 def _add_teaching_note(slide, text, *, top=Inches(6.6), width=None,
-                        height=Inches(0.6)):
+                        height=Inches(0.6), left=None,
+                        rounded=False, pdf_icon=False, label_color=GOLD,
+                        fill_rgb=None):
     """External-document reference card.
 
     Visually distinct from in-slide callouts: cream/parchment fill, navy
     DASHED border, italic navy text, with a small page-icon glyph on the
     left — clearly signals 'this links to an external Teaching Note doc'.
+
+    Optional styling for the slide-32 (page 33) treatment:
+      • ``left``       — pin to an absolute X (default: horizontally center)
+      • ``rounded``    — rounded corners + soft drop shadow (default flat)
+      • ``pdf_icon``   — render the page glyph as a white folded-corner
+                        with bold "PDF" text, sized to nearly fill the card
+                        (default: small navy folded-corner, no text)
+      • ``label_color``— color of the "SEE TEACHING NOTE →" prefix
+                        (default GOLD; pass NAVY for the page-33 look).
+      • ``fill_rgb``   — override the cream/parchment card fill
+                        (default RGBColor(0xF4, 0xF1, 0xEA)).
     """
     if width is None:
         width = Inches(8.0)
-    left = int((SLIDE_W - width) // 2)
-    top, width, height = int(top), int(width), int(height)
+    if left is None:
+        left = int((SLIDE_W - width) // 2)
+    left, top, width, height = int(left), int(top), int(width), int(height)
 
-    # Card: cream fill, dashed navy border
-    card = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left, top, width, height)
+    # Card: cream fill, dashed navy border.  ``rounded=True`` switches the
+    # base shape to ROUNDED_RECTANGLE and adds a soft drop shadow.
+    base_shape = MSO_SHAPE.ROUNDED_RECTANGLE if rounded else MSO_SHAPE.RECTANGLE
+    card = slide.shapes.add_shape(base_shape, left, top, width, height)
+    if rounded:
+        try: card.adjustments[0] = 0.20
+        except Exception: pass
     card.fill.solid()
-    card.fill.fore_color.rgb = RGBColor(0xF4, 0xF1, 0xEA)  # parchment cream
+    card.fill.fore_color.rgb = (fill_rgb if fill_rgb is not None
+                                  else RGBColor(0xF4, 0xF1, 0xEA))  # parchment cream default
     card.line.color.rgb = NAVY
     card.line.width = Pt(1.25)
     card.shadow.inherit = False
+    if rounded:
+        _add_drop_shadow(card)
     # Dashed line style
     ln = card.line._get_or_add_ln()
     # Remove any existing prstDash
@@ -1114,19 +1258,42 @@ def _add_teaching_note(slide, text, *, top=Inches(6.6), width=None,
     tf = card.text_frame
     tf.text = ""
 
-    # Small "page" icon on the left – a small navy rectangle with a folded
-    # corner, made from a folded-corner shape if available, else a styled
-    # mini-rectangle with a triangle.
-    icon_size = Inches(0.4)
+    # Small "page" icon on the left – a folded-corner shape.  In default
+    # mode it's a small filled-navy glyph (logo-ish); in pdf_icon mode it's
+    # a larger WHITE sheet with thin navy border + bold "PDF" text so it
+    # reads as a generic PDF document at a glance.
+    icon_size = Inches(0.5) if pdf_icon else Inches(0.4)
     icon_x = left + Inches(0.2)
     icon_y = top + (height - icon_size) // 2
     page = slide.shapes.add_shape(MSO_SHAPE.FOLDED_CORNER,
                                    int(icon_x), int(icon_y),
                                    int(icon_size), int(icon_size))
     page.fill.solid()
-    page.fill.fore_color.rgb = NAVY
-    page.line.fill.background()
+    if pdf_icon:
+        page.fill.fore_color.rgb = WHITE
+        page.line.color.rgb = NAVY
+        page.line.width = Pt(0.75)
+    else:
+        page.fill.fore_color.rgb = NAVY
+        page.line.fill.background()
     page.shadow.inherit = False
+    if pdf_icon:
+        # "PDF" label inside the white sheet.
+        ptf = page.text_frame
+        ptf.word_wrap = False
+        ptf.margin_left = 0
+        ptf.margin_right = 0
+        ptf.margin_top = 0
+        ptf.margin_bottom = 0
+        ptf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        pp = ptf.paragraphs[0]
+        pp.alignment = PP_ALIGN.CENTER
+        pr = pp.add_run()
+        pr.text = "PDF"
+        pr.font.name = "Calibri"
+        pr.font.size = Pt(11)
+        pr.font.bold = True
+        pr.font.color.rgb = NAVY
 
     # Label text (italic, navy) inside the card to the right of the icon
     txt_left = int(icon_x + icon_size + Inches(0.2))
@@ -1142,13 +1309,14 @@ def _add_teaching_note(slide, text, *, top=Inches(6.6), width=None,
     label_tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     p = label_tf.paragraphs[0]
     p.alignment = PP_ALIGN.LEFT
-    # First run: "See teaching note:" in smaller all-caps navy
+    # First run: "See teaching note:" prefix in caller-supplied color
+    # (GOLD by default; NAVY for the slide-33 treatment).
     r1 = p.add_run()
     r1.text = "SEE TEACHING NOTE  →  "
     r1.font.name = "Calibri"
     r1.font.size = Pt(12)
     r1.font.bold = True
-    r1.font.color.rgb = GOLD
+    r1.font.color.rgb = label_color
     # Second run: the title of the note, italic navy
     r2 = p.add_run()
     r2.text = text
@@ -3637,6 +3805,35 @@ def slide_11(prs):
     ))
 
 
+def slide_short_run_agenda(prs):
+    """Section divider – Part 1.b: Short Run (page 13).
+
+    2026-05-19: NEW slide inserted between the production-function
+    motivation (pages 9-12) and the short-run hiring mechanics
+    (page 14 onwards).  User signal that we've crossed from "what is
+    a production function" into "how to use it in the short run".
+
+    Same Layout 2 / agenda view as slide_7 (Part 1 navy, Part 2 faded)
+    but with the b sub of Part 1 as the only fully-navy bullet — subs
+    a (Production Function) and c (Long Run) render in faded gray to
+    make the "you are here" cue unambiguous.
+    """
+    s = make_section_agenda(
+        prs, page_num=13,
+        current_part_idx=0,
+        current_sub_idx=1,
+        section_tag=SECTION_TAG_DIV,
+        title="Part 1.b:  Short Run – Hiring Decisions",
+    )
+    _set_notes(s, (
+        "Quick orientation. We've established what a production function "
+        "is and how it behaves. Now we shift into the short run – capital "
+        "is fixed, labor is the lever – and ask the operating question: "
+        "how many workers should the firm hire? The next several slides "
+        "build the marginal-product machinery we'll use to answer that."
+    ))
+
+
 def slide_12(prs):
     """Short Run: Marginal Product of Labor — concept intro.
 
@@ -3744,7 +3941,7 @@ def slide_12(prs):
                             size_pt=36, color=ACCENT_BLUE)
 
     s = make_diagram_slide(
-        prs, page_num=13,
+        prs, page_num=14,
         section_tag=SECTION_TAG_P1,
         title="Short Run:  Marginal Product of Labor",
         draw_diagram=draw,
@@ -4258,7 +4455,7 @@ def slide_mpl_data(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=14,
+        prs, page_num=15,
         section_tag=SECTION_TAG_P1,
         title="Marginal Product of Labor (MPL):  Calculation",
         draw_diagram=draw,
@@ -4431,17 +4628,26 @@ def slide_13(prs):
                    size=13, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
         # Caption ABOVE the RIGHT chart — same format as the left.
-        _add_text(slide, right_chart_x, cap_y, right_chart_w, cap_h,
+        # 2026-05-19 (manual): solid WHITE fill so the caption sits on
+        # an opaque banner above the chart frame.
+        # 2026-05-19 (manual, later): caption position nudged right +
+        # down (was right_chart_x, cap_y = 7.00, 3.25) → (7.21, 3.40).
+        # Same size.
+        cap_right = _add_text(slide, Inches(7.21), Inches(3.40), right_chart_w, cap_h,
                    "Marginal Product of Labor  (declining)",
                    size=13, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
+        cap_right.fill.solid()
+        cap_right.fill.fore_color.rgb = WHITE
         # Cream Convention callout — names the midpoint plotting
         # convention (data at L=125, 375, 750, …).  Position hand-
         # tweaked on 2026-05-16: box now sits INSIDE the upper-right of
         # the MPL chart (rather than above the chart frame), with a
         # short diagonal leader pointing at the L=750 data point on the
         # curve.  Same wording reused on slide 22.
-        conv_w = Inches(3.50)
+        # 2026-05-19 (manual, later): callout narrowed from 3.50 → 2.786
+        # so it tucks tighter into the upper-right of the chart frame.
+        conv_w = Inches(2.786)
         conv_h = Inches(0.55)
         conv_x = Inches(8.997)
         conv_y = Inches(4.061)
@@ -4507,6 +4713,65 @@ def slide_13(prs):
                     end_xy=(Inches(5.370), Inches(3.996)),
                     color=DASH_COLOR, weight_pt=1.0, head=False)
 
+        # 2026-05-19 (manual, latest iteration):  the two right-side
+        # annotation labels are tighter and moved further right (now
+        # 2.26" wide, anchored at x=11.08), and their text is shortened
+        # to "Very high MPL image" / "Very low MPL image" — they read
+        # as clickable hyperlinks to the backup slides at the end of
+        # the deck.  Arrows are now NAVY DASHED with new endpoints to
+        # match the relocated labels.
+        # 2026-05-19 (manual, latest iteration): each annotation is now
+        # a two-run textbox — the leading "➤  " prefix is a plain navy
+        # run (no underline) and the actual label is a separate run
+        # that the post-build wiring pass tags with the slide-jump
+        # hyperlink + underline.  Underline therefore starts exactly
+        # at "Very", not on the arrow glyph.
+        link_box = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(Inches(11.00)), int(Inches(1.55)),
+            int(Inches(2.33)), int(Inches(0.90)),
+        )
+        link_box.fill.background()           # transparent
+        link_box.line.color.rgb = NAVY
+        link_box.line.width = Pt(1.25)
+        link_box.shadow.inherit = False
+        try: link_box.adjustments[0] = 0.15
+        except Exception: pass
+
+        def _annotation(top, label):
+            box = slide.shapes.add_textbox(
+                int(Inches(11.08)), int(top),
+                int(Inches(2.26)), int(Inches(0.40)),
+            )
+            tf = box.text_frame
+            tf.word_wrap = True
+            tf.margin_left = tf.margin_right = 0
+            tf.margin_top = tf.margin_bottom = 0
+            p = tf.paragraphs[0]
+            p.alignment = PP_ALIGN.LEFT
+            for text in ("➤  ", label):
+                r = p.add_run()
+                r.text = text
+                r.font.name = "Calibri"
+                r.font.size = Pt(14)
+                r.font.color.rgb = NAVY
+            return box
+        _annotation(Inches(1.64), "Very high MPL image")
+        _annotation(Inches(2.00), "Very low MPL image")
+
+        # 2026-05-19 (manual, later): Arrow-1 start nudged right
+        # (11.02 → 11.276) so it emerges from inside the new link box
+        # closer to the right edge.  Arrow-2 start lifted up
+        # (2.45 → 2.290) so it begins right at the link box's bottom.
+        _add_arrow(slide,
+                    start_xy=(Inches(11.276), Inches(1.870)),
+                    end_xy=(Inches(8.12),    Inches(3.76)),
+                    color=NAVY, weight_pt=1.5, head=True, dash='dash')
+        _add_arrow(slide,
+                    start_xy=(Inches(12.40), Inches(2.290)),
+                    end_xy=(Inches(12.40), Inches(5.68)),
+                    color=NAVY, weight_pt=1.5, head=True, dash='dash')
+
         # Bottom takeaway bar — nudged from 6.40 → 6.55 since the chart
         # frames are now ~0.33" taller (captions moved above).  Bar
         # bottom = 7.10, footer rule at 7.135 → clear by 0.035".
@@ -4516,7 +4781,7 @@ def slide_13(prs):
                            width=Inches(9.5), size=18)
 
     s = make_content_bulleted(
-        prs, page_num=15,
+        prs, page_num=16,
         section_tag=SECTION_TAG_P1,
         title="Diminishing Marginal Product of Labor",
         bullets=bullets,
@@ -4645,7 +4910,7 @@ def slide_14(prs):
                     color=BLACK, weight_pt=2.0, head=True)
 
     s = make_diagram_slide(
-        prs, page_num=16,
+        prs, page_num=17,
         section_tag=SECTION_TAG_P1,
         title="Famous Example for Diminishing Marginal Returns",
         draw_diagram=draw,
@@ -4727,7 +4992,7 @@ def slide_15(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=17,
+        prs, page_num=18,
         section_tag=SECTION_TAG_P1,
         title="Hiring Decisions in the Short Run —  Context & Scenario",
         draw_diagram=draw,
@@ -4998,7 +5263,7 @@ def slide_16(prs):
                     color=GOLD, weight_pt=2.0, head=True)
 
     s = make_diagram_slide(
-        prs, page_num=18,
+        prs, page_num=19,
         section_tag=SECTION_TAG_P1,
         title="Hiring Decisions in the Short Run —  Core Concept",
         draw_diagram=draw,
@@ -5063,7 +5328,7 @@ def slide_17(prs):
                            width=Inches(10.0))
 
     s = make_diagram_slide(
-        prs, page_num=19,
+        prs, page_num=20,
         section_tag=SECTION_TAG_P1,
         title="MRPL – Detail",
         draw_diagram=draw,
@@ -5149,7 +5414,7 @@ def slide_18(prs):
         _add_discussion_break(slide, width=Inches(4.8))
 
     s = make_diagram_slide(
-        prs, page_num=19,
+        prs, page_num=20,
         section_tag=SECTION_TAG_P1,
         title="Example:  Calculate MRPL at 2,300 Employees and 100 Robots",
         draw_diagram=draw,
@@ -5189,7 +5454,7 @@ def slide_19(prs):
                    align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=20,
+        prs, page_num=21,
         section_tag=SECTION_TAG_P1,
         title="What Is Rivian's MRPL at 2,300 Employees?",
         draw_diagram=draw,
@@ -5265,7 +5530,7 @@ def slide_20(prs):
                'space_before_pts': 12}),
     ]
     s = make_content_bulleted(
-        prs, page_num=21,
+        prs, page_num=22,
         section_tag=SECTION_TAG_P1,
         title="Solution:  MRPL of Rivian",
         bullets=bullets,
@@ -5300,7 +5565,7 @@ def slide_21(prs):
         ("Profit rises whenever MRPL > w", 1),
     ]
     s = make_content_bulleted(
-        prs, page_num=22,
+        prs, page_num=23,
         section_tag=SECTION_TAG_P1,
         title="Hire When MRPL > Wage;  Stop When MRPL = Wage",
         bullets=bullets,
@@ -5527,7 +5792,7 @@ def slide_22(prs):
                     color=GOLD, weight_pt=2.0, head=True)
 
     s = make_diagram_slide(
-        prs, page_num=22,
+        prs, page_num=23,
         section_tag=SECTION_TAG_P1,
         title="The Optimal Hiring Rule in the Short Run",
         draw_diagram=draw,
@@ -6002,7 +6267,7 @@ def slide_22b(prs):
                     color=GOLD, weight_pt=2.0, head=True)
 
     s = make_diagram_slide(
-        prs, page_num=23,
+        prs, page_num=24,
         section_tag=SECTION_TAG_P1,
         title="Optimal Hiring Rule in the Short Run:  Numerical Solution",
         draw_diagram=draw,
@@ -6071,7 +6336,7 @@ def slide_23(prs):
         br.font.color.rgb = WHITE
 
     s = make_content_bulleted(
-        prs, page_num=24,
+        prs, page_num=25,
         section_tag=SECTION_TAG_WAGE,
         title="The Case of Wage Searchers",
         bullets=bullets,
@@ -6111,7 +6376,7 @@ def slide_24(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(10.5))
 
     s = make_content_bulleted(
-        prs, page_num=25,
+        prs, page_num=26,
         section_tag=SECTION_TAG_WAGE,
         title="The Case of Wage Searchers",
         bullets=bullets,
@@ -6140,7 +6405,7 @@ def slide_25(prs):
         # to pay more...") removed — the new title carries the takeaway.
 
     s = make_diagram_slide(
-        prs, page_num=25,
+        prs, page_num=26,
         section_tag=SECTION_TAG_WAGE,
         title="Wage Searcher Caveat: Nobody likes being treated unequally…",
         draw_diagram=draw,
@@ -6208,7 +6473,7 @@ def slide_26(prs):
         _add_discussion_break(slide, width=Inches(4.8))
 
     s = make_diagram_slide(
-        prs, page_num=26,
+        prs, page_num=27,
         section_tag=SECTION_TAG_WAGE,
         title="Example:  The Full Cost of Poaching an AI Researcher",
         draw_diagram=draw,
@@ -6233,7 +6498,7 @@ def slide_27(prs):
         # standard placement) carries the PollEv signal on its own.
 
     s = make_diagram_slide(
-        prs, page_num=27,
+        prs, page_num=28,
         section_tag=SECTION_TAG_WAGE,
         title="What Is the Full Marginal Cost of the New Researcher?",
         draw_diagram=draw,
@@ -6261,11 +6526,17 @@ def slide_28(prs):
         # now four plain bullet points in the deck's standard "▪" style.
         # The fourth bullet is the punchline ($8M total) that the old
         # navy box used to carry on its own.
+        # 2026-05-19 (manual): last bullet relabeled "Full Marginal
+        # Cost" (the deck's name for this slide's quantity) and "$8M"
+        # bolded to hammer the punchline.
         bullets = [
             ("The star researcher herself is paid  $5M", 0),
             ("The two existing researchers each get a raise of  ($5M − $3.5M) = $1.5M", 0),
             ("Total extra wage bill:  $5M + 2 × $1.5M", 0),
-            ("Marginal cost of the 3rd researcher  =  $8M", 0),
+            ([
+                ("Full Marginal Cost of the 3rd researcher  =  ", {}),
+                ("$8M", {"bold": True}),
+            ], 0),
         ]
         _add_hierarchical_bullets(
             slide,
@@ -6280,18 +6551,22 @@ def slide_28(prs):
         # a rounded box with drop shadow — matches the slide-17 / 26
         # question-bar treatment.  Leading bold "Take-Away:" prefix
         # signals this is the punchline.
+        # 2026-05-19 (manual): nudged up again (top 5.85 → 5.28) and a
+        # touch right (left 1.811 → 1.881) so it sits cleaner under the
+        # bullet block.  Wording tightened: "move the market price" →
+        # "can affect wages".
         _add_rounded_filled_box(
             slide,
-            Inches(1.811), Inches(5.85),
+            Inches(1.881), Inches(5.28),
             Inches(9.711), Inches(0.55),
-            label="Take-Away:  Big buyers of scarce talent move the market price  —  factor it in",
+            label="Take-Away:  Big buyers of scarce talent can affect wages  —  factor it in",
             fill=GOLD, text_color=NAVY,
             size=20, bold=True,
             corner_pct=0.20, shadow=True,
         )
 
     s = make_diagram_slide(
-        prs, page_num=28,
+        prs, page_num=29,
         section_tag=SECTION_TAG_WAGE,
         title="Solution:  Marginal Cost of the 3rd Researcher = $8M",
         draw_diagram=draw,
@@ -6308,22 +6583,59 @@ def slide_28(prs):
 def slide_29(prs):
     """Are real-world wages = MRPL? (UC wage-search tool)"""
     def draw(slide):
-        # Source had two pictures stacked at the same position; use the
-        # second (rId5) as the final state.
+        # 2026-05-19 (manual): user reinstated the source deck's two
+        # stacked screenshots — rId4 (the raw UCLA salary list) behind,
+        # rId5 (the search-tool UI) on top.  Keep both: each conveys a
+        # different angle on "look at the real numbers".  The back image
+        # carries no shadow so the visible (top) image is the one that
+        # pops off the slide.
+        _add_source_image(slide, 29, "rId4",
+                           left=Inches(2.516), top=Inches(1.553),
+                           width=Inches(8.3), shadow=False)
         _add_source_image(slide, 29, "rId5",
-                           left=Inches(2.5), top=Inches(1.85),
+                           left=Inches(2.516), top=Inches(1.545),
                            width=Inches(8.3))
 
-        # The UC search tool URL box at the bottom (source's Rectangle 7)
-        _add_filled_box(slide,
-                         left=Inches(2.5), top=Inches(6.4),
-                         width=Inches(8.3), height=Inches(0.55),
-                         label="Search tool:  https://ucannualwage.ucop.edu/wage/",
-                         fill=NAVY, text_color=WHITE,
-                         size=18, bold=True)
+        # 2026-05-19 (manual): UC search-tool URL toned down from the
+        # deck-standard navy/white bold pill — now a plain transparent
+        # textbox with black 14 pt regular text.  The URL is useful as
+        # a pointer for students but doesn't need to dominate.
+        # Position preserved from hand-edit (left 2.5 → 5.034, top 6.4
+        # → 6.549) — the box hugs the right edge below the picture.
+        url_box = slide.shapes.add_textbox(
+            Inches(5.034), Inches(6.549),
+            Inches(8.3), Inches(0.55),
+        )
+        url_tf = url_box.text_frame
+        url_tf.word_wrap = True
+        url_tf.margin_left = Inches(0.1)
+        url_tf.margin_right = Inches(0.1)
+        url_tf.margin_top = Inches(0.05)
+        url_tf.margin_bottom = Inches(0.05)
+        url_tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        p = url_tf.paragraphs[0]
+        p.alignment = PP_ALIGN.CENTER
+        # "Search tool:  " label (plain black, no hyperlink).
+        r_label = p.add_run()
+        r_label.text = "Search tool:  "
+        r_label.font.name = "Calibri"
+        r_label.font.size = Pt(14)
+        r_label.font.bold = False
+        r_label.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+        # 2026-05-19 (manual): URL itself is now a clickable hyperlink.
+        # Keep the toned-down look (black, no underline) so the link
+        # doesn't shout — click-through still works in slideshow mode.
+        r_url = p.add_run()
+        r_url.text = "https://ucannualwage.ucop.edu/wage/"
+        r_url.font.name = "Calibri"
+        r_url.font.size = Pt(14)
+        r_url.font.bold = False
+        r_url.font.underline = False
+        r_url.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+        r_url.hyperlink.address = "https://ucannualwage.ucop.edu/wage/"
 
     s = make_diagram_slide(
-        prs, page_num=29,
+        prs, page_num=30,
         section_tag=SECTION_TAG_WAGE,
         title="Are Real-World Wages = MRPL?",
         draw_diagram=draw,
@@ -6337,16 +6649,23 @@ def slide_29(prs):
 
 
 def slide_30(prs):
-    """Section divider – Part 1.2: Long Run.
+    """Section divider – Part 1.c: Long Run.
 
     Same Layout 2 / agenda view as slide 7 (Part 1 navy, Part 2 faded), but
     with an action title signalling the sub-section transition.
     """
+    # 2026-05-19: renumbered from "Part 1.2" to "Part 1.c" — Part 1 now
+    # has three subsections (a Production Function, b Short Run, c Long
+    # Run) so this divider should match the alpha-labeled agenda.
+    # 2026-05-19 (later): fade subs a and b within Part 1; only sub c
+    # (Long Run) stays navy.  Matches the new Short Run agenda divider
+    # on page 13.
     s = make_section_agenda(
-        prs, page_num=30,
+        prs, page_num=31,
         current_part_idx=0,
+        current_sub_idx=2,
         section_tag=SECTION_TAG_DIV,
-        title="Part 1.2:  Long Run – Choosing the Right Input Mix",
+        title="Part 1.c:  Long Run – Choosing the Right Input Mix",
     )
     _set_notes(s, (
         "Switching gears now from short run to long run. In the long run, "
@@ -6367,30 +6686,55 @@ def slide_31(prs):
             ("Use marginal analysis", 1),
             ("Learn a simple rule for the optimal combination of inputs", 1),
         ]
+        # 2026-05-19 (manual): narrowed bullets from Inches(8.0) → Inches(6.8)
+        # so the new (wider, further-left) Rivian Georgia plant photo
+        # has room on the right.
         _add_hierarchical_bullets(
             slide,
             left=MARGIN, top=Inches(1.85),
-            width=Inches(8.0), height=Inches(4.6),
+            width=Inches(6.8), height=Inches(4.6),
             items=bullets,
             size=24, sub_size=22, line_spacing_pts=10,
         )
 
-        # Rivian R1 picture
-        _add_source_image(slide, 31, "rId3",
-                           left=Inches(8.6), top=Inches(2.6),
-                           width=Inches(4.4))
-        _add_text(slide, Inches(8.6), Inches(5.55), Inches(4.4), Inches(0.25),
-                   "Rivian R1  (CC BY-SA, Wikimedia)",
-                   size=12, italic=True, color=GRAY, font="Calibri",
+        # 2026-05-19 (manual): user swapped the old Wikimedia "Rivian R1"
+        # source-deck image for this Brian Cassella / Tribune photo of
+        # the Normal, IL plant assembly line — image23.jpeg in the
+        # canonical deck, persisted to _rivian_georgia.jpg in this folder.
+        # Rectangular crop kept; soft drop shadow lifts it off the slide.
+        rivian = OUT_DIR / "_rivian_georgia.jpg"
+        if rivian.exists():
+            pic = slide.shapes.add_picture(
+                str(rivian),
+                int(Inches(7.234)), int(Inches(1.619)),
+                width=int(Inches(5.825)), height=int(Inches(3.276)),
+            )
+            _add_drop_shadow(pic)
+
+        # Attribution caption — italic gray, sits just below the photo.
+        _add_text(slide, Inches(8.171), Inches(4.989),
+                   Inches(4.398), Inches(0.20),
+                   "Brian Cassella  |  Tribune News Service  |  Getty Images",
+                   size=10.5, italic=True, color=GRAY, font="Calibri",
                    align=PP_ALIGN.CENTER)
 
-        # Bottom takeaway
-        _add_takeaway_bar(slide,
-                           "Long run  ⇒  pick the right K-and-L mix from scratch",
-                           top=Inches(6.5), fill=NAVY, width=Inches(10.0))
+        # 2026-05-19 (manual): the old flat full-width takeaway bar is
+        # now a rounded navy box sized to match the photo's width and
+        # aligned under it.  Text tightened to "optimal K-and-L mix"
+        # (was "the right K-and-L mix from scratch").  Rounded corners +
+        # soft drop shadow — same treatment as the slide-28 take-away.
+        _add_rounded_filled_box(
+            slide,
+            Inches(3.754), Inches(6.123),
+            Inches(5.825), Inches(0.497),
+            label="Long run  ⇒  pick the optimal K-and-L mix",
+            fill=NAVY, text_color=WHITE,
+            size=20, bold=True,
+            corner_pct=0.20, shadow=True,
+        )
 
     s = make_diagram_slide(
-        prs, page_num=31,
+        prs, page_num=32,
         section_tag=SECTION_TAG_LR,
         title="Long Run:  Rivian Builds a New Georgia Plant",
         draw_diagram=draw,
@@ -6404,41 +6748,181 @@ def slide_31(prs):
 
 
 def slide_32(prs):
-    """Optimal combination of inputs (concept introduction)."""
-    def draw(slide):
-        # Major-concept callout box centered upper half
-        _add_filled_box(slide,
-                         left=Inches(2.5), top=Inches(2.1),
-                         width=Inches(8.3), height=Inches(0.85),
-                         label="Optimal Input Mix  →  How much K and how much L?",
-                         fill=GOLD, text_color=NAVY,
-                         size=24, bold=True)
+    """Optimal combination of inputs (concept introduction).
 
-        _add_text(slide, MARGIN, Inches(3.4), RULE_W, Inches(0.5),
-                   "Decision rule for the long run",
-                   size=24, italic=True, color=GRAY,
+    2026-05-19 (manual, late): user consolidated the old "Bang for the
+    Buck Rule" chart slide (deleted slide_33) into this page — the rule
+    name now lives in a rounded NAVY anchor below the formula, the
+    three "when it holds" sub-bullets moved here as a bottom-left
+    cluster, and a right-side legend defines the symbols.
+    """
+    def draw(slide):
+        # 2026-05-19 (manual): top bullet pulled UP from y=1.85 to y=1.44
+        # to start the body content closer to the title rule.  Size 32 pt.
+        _add_hierarchical_bullets(
+            slide,
+            left=MARGIN, top=Inches(1.435),
+            width=RULE_W, height=Inches(0.55),
+            items=[("Optimal Input Mix:  How much K and how much L?", 0)],
+            size=32, line_spacing_pts=0,
+        )
+
+        # 2026-05-19 (manual): "Decision rule for the long run:" — same
+        # 28-pt size, but pulled UP to y=2.265 (was 2.85) along with
+        # the bullet above and the formula below.
+        _add_text(slide, MARGIN, Inches(2.265), RULE_W, Inches(0.5),
+                   "Decision rule for the long run:",
+                   size=28, italic=False, color=GRAY,
                    align=PP_ALIGN.CENTER, font="Calibri")
 
-        # Lead-in to the rule – the actual stacked-fraction formula
+        # 2026-05-19 (manual): formula pulled UP to y=2.955 (was 3.54).
         _add_math_equation(
             slide,
-            left=Inches(2.5), top=Inches(4.1),
+            left=Inches(2.5), top=Inches(2.955),
             width=Inches(8.3), height=Inches(1.5),
             omml_content=_formula_bang_for_buck(),
             size_pt=44, color=NAVY,
         )
-        _add_text(slide, MARGIN, Inches(5.85), RULE_W, Inches(0.4),
-                   "—  i.e.,  the  'bang for the buck'  rule",
-                   size=20, italic=True, color=GRAY,
-                   align=PP_ALIGN.CENTER, font="Calibri")
 
-        # External-document reference (Teaching Note)
-        _add_teaching_note(slide,
-                            "Bang-for-the-Buck Rule",
-                            top=Inches(6.5), width=Inches(7.5))
+        # 2026-05-19 (manual, late): navy "Bang for the Buck Rule"
+        # anchor RESHAPED — no longer centered-and-full-width.  Now a
+        # smaller pill sitting in the middle of the slide between the
+        # formula and the rescued sub-bullets, leaving room on the right
+        # for the symbol legend.  Position (4.369, 4.759), size
+        # 4.788 × 0.618".  Same NAVY/white + adj=30000 + shadow style.
+        bar_x = Inches(4.369)
+        bar_y = Inches(4.759)
+        bar_w = Inches(4.788)
+        bar_h = Inches(0.618)
+        bar_shp = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(bar_x), int(bar_y), int(bar_w), int(bar_h),
+        )
+        bar_shp.fill.solid()
+        bar_shp.fill.fore_color.rgb = NAVY
+        bar_shp.line.fill.background()
+        try: bar_shp.adjustments[0] = 0.30
+        except Exception: pass
+        _add_drop_shadow(bar_shp)
+        btf = bar_shp.text_frame
+        btf.word_wrap = True
+        btf.margin_left = btf.margin_right = Inches(0.1)
+        btf.margin_top  = btf.margin_bottom = Inches(0.05)
+        btf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        bp = btf.paragraphs[0]
+        bp.alignment = PP_ALIGN.CENTER
+        bp_r = bp.add_run()
+        bp_r.text = "Bang for the Buck Rule"
+        bp_r.font.name = "Calibri"
+        bp_r.font.size = Pt(28)
+        bp_r.font.bold = True
+        bp_r.font.color.rgb = WHITE
+
+        # 2026-05-19 (manual, late): legend container REPOSITIONED +
+        # RECOLORED — was cream-fill convention-style at (10.75, 3.45);
+        # now a white rounded box at (9.44, 3.12) sized 3.57 × 1.29.
+        # The "Where:" header was removed (the four entries speak for
+        # themselves), and MP_K / MP_L now use proper baseline-shifted
+        # subscripts (italic-bold K/L) rather than Unicode ₖ ₗ.
+        leg_x = Inches(9.440)
+        leg_y = Inches(3.124)
+        leg_w = Inches(3.568)
+        leg_h = Inches(1.290)
+        leg = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(leg_x), int(leg_y), int(leg_w), int(leg_h),
+        )
+        leg.fill.solid()
+        leg.fill.fore_color.rgb = WHITE
+        leg.line.color.rgb = NAVY
+        leg.line.width = Pt(1.0)
+        leg.shadow.inherit = False
+        try: leg.adjustments[0] = 0.10
+        except Exception: pass
+
+        # Inner textbox with 4 legend lines.
+        pad_h = Inches(0.08)
+        pad_v = Inches(0.025)
+        ltb = slide.shapes.add_textbox(
+            int(leg_x + pad_h), int(leg_y + pad_v),
+            int(leg_w - 2 * pad_h), int(leg_h - 2 * pad_v),
+        )
+        ltf = ltb.text_frame
+        ltf.word_wrap = True
+        ltf.margin_left = Inches(0.05); ltf.margin_right = Inches(0.05)
+        ltf.margin_top = 0; ltf.margin_bottom = 0
+        ltf.vertical_anchor = MSO_ANCHOR.MIDDLE
+
+        def _legend_line(idx, runs_spec):
+            """Add a paragraph with mixed-style runs.  Each run is
+            (text, opts) where opts may include bold, italic, size,
+            and 'subscript' (sets baseline=-25000 on the rPr)."""
+            p = ltf.paragraphs[0] if idx == 0 else ltf.add_paragraph()
+            p.alignment = PP_ALIGN.LEFT
+            for text, opts in runs_spec:
+                r = p.add_run()
+                r.text = text
+                r.font.name = 'Calibri'
+                if 'size' in opts:
+                    r.font.size = Pt(opts['size'])
+                r.font.bold = opts.get('bold', False)
+                r.font.italic = opts.get('italic', False)
+                r.font.color.rgb = NAVY
+                if opts.get('subscript'):
+                    r._r.get_or_add_rPr().set('baseline', '-25000')
+
+        VAR = 18   # default body-text size; visible in legend
+        DEF = 16   # definition text size, slightly smaller
+        _legend_line(0, [
+            ('MP', {'bold': True, 'size': VAR}),
+            ('K',  {'bold': True, 'size': VAR, 'subscript': True}),
+            ('  :  Marginal Product of Capital', {'size': DEF}),
+        ])
+        _legend_line(1, [
+            ('MP', {'bold': True, 'size': VAR}),
+            ('L',  {'bold': True, 'size': VAR, 'subscript': True}),
+            ('  :  Marginal Product of Labor', {'size': DEF}),
+        ])
+        _legend_line(2, [
+            ('p',  {'bold': True, 'italic': True, 'size': VAR}),
+            ('ₖ',  {'bold': True, 'size': VAR}),
+            ('  :  Price of Capital', {'size': DEF}),
+        ])
+        _legend_line(3, [
+            ('w',  {'bold': True, 'italic': True, 'size': VAR}),
+            ('  :  Wage', {'size': DEF}),
+        ])
+
+        # 2026-05-19 (manual, late): three sub-bullets rescued from the
+        # deleted slide_33 — they explain the conditions under which
+        # the bang-for-the-buck rule holds.  Bottom-left, sub-level
+        # (gray "–" markers) so they read as fine print under the
+        # navy rule anchor above them.
+        _add_hierarchical_bullets(
+            slide,
+            left=Inches(0.233), top=Inches(5.795),
+            width=Inches(6.433), height=Inches(1.195),
+            items=[
+                ("Holds when both L and K are flexible", 1),
+                ("Refers to a given output quantity Q", 1),
+                ("Assumes input prices w and pₖ are constant", 1),
+            ],
+            size=24, sub_size=22, line_spacing_pts=8,
+        )
+
+        # 2026-05-19 (manual): teaching-note card, peach fill.  Slight
+        # right-shift of x position (8.207 → 8.374) per the hand-edit.
+        _add_teaching_note(
+            slide,
+            "Bang-for-the-Buck Rule",
+            left=Inches(8.374), top=Inches(6.415),
+            width=Inches(4.889), height=Inches(0.6),
+            rounded=True, pdf_icon=True, label_color=NAVY,
+            fill_rgb=RGBColor(0xFA, 0xC0, 0x90),
+        )
 
     s = make_diagram_slide(
-        prs, page_num=32,
+        prs, page_num=33,
         section_tag=SECTION_TAG_LR,
         title="Optimal Combination of Inputs",
         draw_diagram=draw,
@@ -6446,194 +6930,115 @@ def slide_32(prs):
     _set_notes(s, (
         "The general framework: we need a decision rule for combining "
         "inputs when both are variable. The rule will look familiar – it's "
-        "the same logic as the short-run hiring rule, generalized."
+        "the same logic as the short-run hiring rule, generalized. Three "
+        "conditions under the rule: both inputs flexible, output Q held "
+        "fixed, input prices w and p_K constant. Spend each additional "
+        "dollar on whichever input gives the most extra output per dollar."
     ))
 
 
-def slide_33(prs):
-    """The "bang for the buck" rule: equalize MP per dollar."""
-    def draw(slide):
-        # Headline rule – proper stacked-fraction OMML equation
-        _add_math_equation(
-            slide,
-            left=Inches(2.5), top=Inches(1.95),
-            width=Inches(8.3), height=Inches(1.6),
-            omml_content=_formula_bang_for_buck(),
-            size_pt=54, color=NAVY,
-        )
-        _add_text(slide, MARGIN, Inches(3.65), RULE_W, Inches(0.4),
-                   "—  equalize  'bang for the buck'  across all inputs",
-                   size=20, italic=True, color=GRAY,
-                   align=PP_ALIGN.CENTER, font="Calibri")
-
-        # Conditions / fine print as bullets
-        bullets = [
-            ("Simple rule for the optimal use of inputs in the long run", 0),
-            ("Holds when both L and K are flexible", 1),
-            ("Refers to a given output quantity Q", 1),
-            ("Assumes input prices w and pₖ are constant", 1),
-        ]
-        _add_hierarchical_bullets(
-            slide,
-            left=MARGIN + Inches(0.5), top=Inches(4.2),
-            width=RULE_W - Inches(1.0), height=Inches(2.2),
-            items=bullets,
-            size=24, sub_size=22, line_spacing_pts=8,
-        )
-
-        # Bottom takeaway
-        _add_takeaway_bar(slide,
-                           "Spend each extra $ on whichever input gives the most extra output per $",
-                           top=Inches(6.5), fill=GOLD, text_color=NAVY,
-                           width=Inches(11.5), size=18)
-
-    s = make_diagram_slide(
-        prs, page_num=33,
-        section_tag=SECTION_TAG_LR,
-        title="The 'Bang for the Buck' Rule:  Equalize MP per Dollar",
-        draw_diagram=draw,
-    )
-    _set_notes(s, (
-        "The 'bang for the buck' rule. Spend each additional dollar on "
-        "whichever input gives you the most extra output per dollar. At the "
-        "optimum, MP per dollar is the same across all inputs: "
-        "MP_K / p_K = MP_L / w."
-    ))
+# 2026-05-19: slide_33 (the standalone "Bang for the Buck Rule" page)
+# was removed by the user.  The rule itself now lives on slide_32's
+# page; the three sub-bullets that explained when it holds were
+# moved into slide_32 as well.  Function deleted to avoid a stale
+# page_num=34 reference.
 
 
 def slide_34(prs):
-    """Applying the rule – recipe for exams."""
+    """Applying the 'Bang for the Buck' rule — recipe for exams.
+
+    2026-05-19: rewritten to mirror the source deck's slide 40 — two
+    if-clauses naming which direction to shift dollars when the
+    MP-per-$ ratios are unequal, a nested "decreasing marginal returns"
+    explanation of why the adjustment converges, and a closing
+    "continue until equal" line.  Replaces the prior numbered five-step
+    layout.  Teaching-note card removed per user request — the
+    procedure is now self-contained on the slide.
+    """
     def draw(slide):
-        # Step-by-step recipe.  Steps that reference the formula get an
-        # inline OMML equation rendered next to the step text.
-        def step(slide, num, y, text_left, text_right=None,
-                 inline_formula=None):
-            _add_text(slide, MARGIN + Inches(0.3), y,
-                       Inches(0.5), Inches(0.55),
-                       num, size=22, bold=True, color=GOLD,
-                       font="Calibri", anchor=MSO_ANCHOR.TOP)
-            _add_text(slide, MARGIN + Inches(0.9), y,
-                       Inches(text_left[1]), Inches(0.6),
-                       text_left[0], size=20, bold=False, color=NAVY,
-                       font="Calibri")
-            if inline_formula is not None:
-                x, w = inline_formula['x_w']
-                _add_math_equation(
-                    slide,
-                    left=Inches(x), top=y - Inches(0.05),
-                    width=Inches(w), height=Inches(0.85),
-                    omml_content=inline_formula['omml'],
-                    size_pt=22, color=NAVY,
-                )
-            if text_right is not None:
-                x, w = text_right[1]
-                _add_text(slide, Inches(x), y, Inches(w), Inches(0.6),
-                           text_right[0], size=20, bold=False, color=NAVY,
-                           font="Calibri")
+        # Subtitle directly under the title rule — italic gray small,
+        # signals "this is the procedural / how-to variant".
+        _add_text(slide, MARGIN, Inches(1.30), RULE_W, Inches(0.45),
+                   "('recipe' for exams)",
+                   size=20, italic=True, color=GRAY,
+                   align=PP_ALIGN.LEFT, font="Calibri")
 
-        # Step 1
-        y = Inches(2.0)
-        _add_text(slide, MARGIN + Inches(0.3), y,
-                   Inches(0.5), Inches(0.55),
-                   "1.", size=22, bold=True, color=GOLD,
-                   font="Calibri", anchor=MSO_ANCHOR.TOP)
-        _add_text(slide, MARGIN + Inches(0.9), y,
-                   Inches(2.2), Inches(0.6),
-                   "Compute", size=20, color=NAVY, font="Calibri")
-        _add_math_equation(slide,
-                            left=Inches(3.2), top=y - Inches(0.05),
-                            width=Inches(1.5), height=Inches(0.85),
-                            omml_content=_formula_mp_ratio('K', 'p'),
-                            size_pt=22, color=NAVY)
-        _add_text(slide, Inches(4.7), y, Inches(0.6), Inches(0.6),
-                   "and", size=20, color=NAVY, font="Calibri")
-        _add_math_equation(slide,
-                            left=Inches(5.3), top=y - Inches(0.05),
-                            width=Inches(1.3), height=Inches(0.85),
-                            omml_content=_formula_mp_ratio('L', 'w'),
-                            size_pt=22, color=NAVY)
-        _add_text(slide, Inches(6.7), y, Inches(6.0), Inches(0.6),
-                   "at the current input mix",
-                   size=20, color=NAVY, font="Calibri")
+        # OMML formula chunks reused across bullets.  Built once so the
+        # subscripted variables render in Cambria Math (matching the
+        # headline formula on slide 33).
+        f_mpl_w   = _formula_mp_ratio('L', 'w')   # MP_L / w   (stacked)
+        f_mpk_pk  = _formula_mp_ratio('K', 'p')   # MP_K / p_K (stacked)
+        f_mpl     = _omml_sub(_omml_run('MP'), _omml_run('L'))   # MP_L
+        f_mpk     = _omml_sub(_omml_run('MP'), _omml_run('K'))   # MP_K
+        f_eq      = f_mpl_w + _omml_text('  =  ') + f_mpk_pk     # MP_L/w = MP_K/p_K
 
-        # Step 2
-        y = Inches(2.85)
-        _add_text(slide, MARGIN + Inches(0.3), y,
-                   Inches(0.5), Inches(0.55),
-                   "2.", size=22, bold=True, color=GOLD,
-                   font="Calibri", anchor=MSO_ANCHOR.TOP)
-        _add_text(slide, MARGIN + Inches(0.9), y,
-                   Inches(11.5), Inches(0.6),
-                   "If the two ratios are equal:  the mix is optimal — stop.",
-                   size=20, color=NAVY, font="Calibri")
-
-        # Step 3
-        y = Inches(3.7)
-        _add_text(slide, MARGIN + Inches(0.3), y,
-                   Inches(0.5), Inches(0.55),
-                   "3.", size=22, bold=True, color=GOLD,
-                   font="Calibri", anchor=MSO_ANCHOR.TOP)
-        _add_text(slide, MARGIN + Inches(0.9), y,
-                   Inches(0.4), Inches(0.6),
-                   "If", size=20, color=NAVY, font="Calibri")
-        _add_math_equation(slide,
-                            left=Inches(1.5), top=y - Inches(0.05),
-                            width=Inches(1.5), height=Inches(0.85),
-                            omml_content=_formula_mp_ratio('K', 'p'),
-                            size_pt=22, color=NAVY)
-        _add_text(slide, Inches(3.0), y, Inches(0.5), Inches(0.6),
-                   " > ", size=20, bold=True, color=NAVY,
-                   font="Calibri", align=PP_ALIGN.CENTER)
-        _add_math_equation(slide,
-                            left=Inches(3.5), top=y - Inches(0.05),
-                            width=Inches(1.3), height=Inches(0.85),
-                            omml_content=_formula_mp_ratio('L', 'w'),
-                            size_pt=22, color=NAVY)
-        _add_text(slide, Inches(4.9), y, Inches(8.0), Inches(0.6),
-                   ":  shift dollars toward K  (buy more capital)",
-                   size=20, color=NAVY, font="Calibri")
-
-        # Step 4
-        y = Inches(4.55)
-        _add_text(slide, MARGIN + Inches(0.3), y,
-                   Inches(0.5), Inches(0.55),
-                   "4.", size=22, bold=True, color=GOLD,
-                   font="Calibri", anchor=MSO_ANCHOR.TOP)
-        _add_text(slide, MARGIN + Inches(0.9), y,
-                   Inches(0.4), Inches(0.6),
-                   "If", size=20, color=NAVY, font="Calibri")
-        _add_math_equation(slide,
-                            left=Inches(1.5), top=y - Inches(0.05),
-                            width=Inches(1.5), height=Inches(0.85),
-                            omml_content=_formula_mp_ratio('K', 'p'),
-                            size_pt=22, color=NAVY)
-        _add_text(slide, Inches(3.0), y, Inches(0.5), Inches(0.6),
-                   " < ", size=20, bold=True, color=NAVY,
-                   font="Calibri", align=PP_ALIGN.CENTER)
-        _add_math_equation(slide,
-                            left=Inches(3.5), top=y - Inches(0.05),
-                            width=Inches(1.3), height=Inches(0.85),
-                            omml_content=_formula_mp_ratio('L', 'w'),
-                            size_pt=22, color=NAVY)
-        _add_text(slide, Inches(4.9), y, Inches(8.0), Inches(0.6),
-                   ":  shift dollars toward L  (hire more labor)",
-                   size=20, color=NAVY, font="Calibri")
-
-        # Step 5
-        y = Inches(5.4)
-        _add_text(slide, MARGIN + Inches(0.3), y,
-                   Inches(0.5), Inches(0.55),
-                   "5.", size=22, bold=True, color=GOLD,
-                   font="Calibri", anchor=MSO_ANCHOR.TOP)
-        _add_text(slide, MARGIN + Inches(0.9), y,
-                   Inches(11.5), Inches(0.6),
-                   "Repeat until the two ratios are equal.",
-                   size=20, color=NAVY, font="Calibri")
-
-        # External-document reference
-        _add_teaching_note(slide,
-                            "Recipe for Exams",
-                            top=Inches(6.5), width=Inches(6.5))
+        # Body — hierarchical bullets.  Formula portions are real inline
+        # OMML math zones (run_opts={'omml': True}); prose runs stay
+        # regular.  Single-letter L / K in prose stay italic.
+        # 2026-05-19 (manual): user hand-tweaked spacing throughout —
+        #  • first line presented as a heading (no bullet, no indent);
+        #    wording "the same" → "a given";
+        #  • blank spacer paragraphs removed in favour of explicit
+        #    space_before_pts=18 on the three major "If" / "continue"
+        #    lines (cleaner visual rhythm than empty paragraphs);
+        #  • padding around `>`, `<`, and `→` reduced (was 4 spaces, now
+        #    1–3) so the formulas sit tighter against the prose;
+        #  • each sub-sub-bullet now closes with "as L increases" to
+        #    make the diminishing-returns mechanism explicit.
+        bullets = [
+            ("How to adjust L and K in order to produce a given quantity at lower cost",
+             0, {'bullet_style': 'arrow', 'mar_l': 0, 'indent': 0}),
+            ([
+                ("If  ",                 {}),
+                (f_mpl_w,                {'omml': True}),
+                (" > ",                  {}),
+                (f_mpk_pk,               {'omml': True}),
+                ("   →    use more ",    {}),
+                ("L",                    {'italic': True}),
+                (" and less ",           {}),
+                ("K",                    {'italic': True}),
+            ], 0, {'space_before_pts': 18}),
+            ("Decreasing marginal returns imply:", 1),
+            ([
+                ("Due to increased ",    {}),
+                ("L",                    {'italic': True}),
+                (",  ",                  {}),
+                (f_mpl,                  {'omml': True}),
+                ("   will fall as ",     {}),
+                ("L",                    {'italic': True}),
+                (" increases",           {}),
+            ], 2),
+            ([
+                ("Due to reduced ",      {}),
+                ("K",                    {'italic': True}),
+                (",  ",                  {}),
+                (f_mpk,                  {'omml': True}),
+                ("   will rise as ",     {}),
+                ("L",                    {'italic': True}),
+                (" increases",           {}),
+            ], 2),
+            ([
+                ("If  ",                 {}),
+                (f_mpl_w,                {'omml': True}),
+                (" < ",                  {}),
+                (f_mpk_pk,               {'omml': True}),
+                ("   →    use less ",    {}),
+                ("L",                    {'italic': True}),
+                (" and more ",           {}),
+                ("K",                    {'italic': True}),
+            ], 0, {'space_before_pts': 18}),
+            ([
+                ("…continue to adjust until    ", {}),
+                (f_eq,                            {'omml': True}),
+            ], 0, {'space_before_pts': 18}),
+        ]
+        _add_hierarchical_bullets(
+            slide,
+            left=MARGIN, top=Inches(1.95),
+            width=RULE_W, height=Inches(5.0),
+            items=bullets,
+            size=28, sub_size=22, line_spacing_pts=10,
+        )
 
     s = make_diagram_slide(
         prs, page_num=34,
@@ -6642,21 +7047,28 @@ def slide_34(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Step-by-step procedure for applying the rule on the exam, and in "
-        "practice. Compute MP/$ for each input; if they're not equal, "
-        "shift dollars toward the higher one."
+        "Recipe for applying the rule.  Two cases when the MP-per-dollar "
+        "ratios are not yet equal:  if MP_L/w is the higher one, the firm "
+        "should shift toward labor (use more L, less K);  if MP_K/p_K is "
+        "higher, shift toward capital.  As the adjustment happens, "
+        "diminishing marginal returns kick in — adding L pulls MP_L down, "
+        "taking K away pushes MP_K up — so the two ratios converge.  "
+        "Keep going until they meet:  MP_L/w = MP_K/p_K is the optimum."
     ))
 
 
 def slide_35(prs):
     """Example: Rivian's New Georgia plant."""
     def draw(slide):
+        # 2026-05-19 (manual): current plan shifted from 5,000 → 4,500
+        # workers.  Recomputed Q at K=200, L=4,500 → 557 (vs 574 at
+        # L=5,000).  Wage and capital price unchanged.
         bullets = [
             ("Rivian is building a new plant in Stanton Springs, Georgia", 0),
             ("They ask for your advice on the optimal mix of robots and workers", 0),
             ("You know:", 0),
-            ("Current plan:  200 robots and 5,000 workers", 1),
-            ("→ produces ≈ 574 vehicles per week", 1),
+            ("Current plan:  200 robots and 4,500 workers", 1),
+            ("→ produces ≈ 557 vehicles per week", 1),
             ("Weekly wage for suitable workers:  w = $1,200", 1),
             ("Cost of one robot (per week):  pₖ = $20,000", 1),
         ]
@@ -6668,24 +7080,22 @@ def slide_35(prs):
             size=24, sub_size=22, line_spacing_pts=8,
         )
 
-        # Rivian R1 picture on the right (the source slide had a stale
-        # Tesla picture — use the proper Rivian image instead)
-        rivian = OUT_DIR / "_rivian.jpg"
+        # 2026-05-19 (manual): replaced the Wikimedia R1 photo with a
+        # new project rendering for the Georgia plant.  Apply rounded
+        # corners + soft drop shadow so the picture sits cleanly.
+        # Position + size hand-set by user; caption dropped.
+        rivian = OUT_DIR / "_rivian_georgia_plan.png"
         if rivian.exists():
             pic = slide.shapes.add_picture(
                 str(rivian),
-                int(Inches(8.7)), int(Inches(2.4)),
-                width=int(Inches(4.3)),
+                int(Inches(8.051)), int(Inches(1.405)),
+                width=int(Inches(5.187)), height=int(Inches(3.460)),
             )
-            _add_drop_shadow(pic)
-        _add_text(slide, Inches(8.7), Inches(5.6), Inches(4.3), Inches(0.25),
-                   "Rivian R1  (CC BY-SA, Wikimedia)",
-                   size=12, italic=True, color=GRAY, font="Calibri",
-                   align=PP_ALIGN.CENTER)
+            _apply_picture_style(pic)
 
         # Takeaway: the question we'll answer
         _add_takeaway_bar(slide,
-                           "Is Rivian's 200 robots / 5,000 workers plan optimal?",
+                           "Is Rivian's 200 robots / 4,500 workers plan optimal?",
                            top=Inches(6.5), fill=GOLD, text_color=NAVY,
                            width=Inches(10.5))
 
@@ -6712,14 +7122,14 @@ def slide_36(prs):
 
     Uses the SAME compact production-function table as slide 18, so all
     downstream calculations (MPL, MPK, the bang-for-the-buck ratio on
-    slide 39) read off one consistent data source.  At K = 200, L = 5,000
-    the table gives Q = 500 vehicles/week – matching the slide narrative.
+    slide 39) read off one consistent data source.  At K = 200, L = 4,500
+    the table gives Q = 557 vehicles/week – matching the slide narrative.
     """
     def draw(slide):
         bullets = [
             ("The production function at Rivian's new plant:", 0),
-            ("Current mix:  200 robots, 5,000 workers", 0),
-            ("Read Q at K = 200, L = 5,000 in the table  →  Q = 574", 1),
+            ("Current mix:  200 robots, 4,500 workers", 0),
+            ("Read Q at K = 200, L = 4,500 in the table  →  Q = 557", 1),
             ("Other input mixes are possible — which is best?", 0),
         ]
         _add_hierarchical_bullets(
@@ -6831,7 +7241,7 @@ def slide_38(prs):
     _draw_poll_pill(s)
     _set_notes(s, (
         "Quick PollEv.  Looking at the numbers on the previous slide – "
-        "200 robots and 5,000 workers producing ~574 R1 vehicles / week, with "
+        "200 robots and 4,500 workers producing ~557 R1 vehicles / week, with "
         "the MP values given – is the current mix optimal?  Give them 30 "
         "seconds to think through the bang-for-the-buck ratios.  Some "
         "will say yes, some no;  reveal in the next slide.  The point "
@@ -6845,10 +7255,16 @@ def slide_39(prs):
         # Source had just a title — build the analysis from speaker notes.
         # Show MP_K and MP_L estimates, then ratios, then conclusion.
         # Use a table-like layout with rows for K and L.
+        # 2026-05-19 (manual): re-derived MP values at the new operating
+        # point K=200, L=4,500 from the production-function table —
+        # MPK ≈ (Q(200,4500) − Q(100,4500)) / 100 = (557 − 394)/100 ≈ 1.6
+        # MPL ≈ (Q(200,4500) − Q(200,4000)) / 500 = (557 − 537)/500 ≈ 0.04
+        # MP/$ = MP / input-price; robots still win, so the conclusion
+        # (shift toward more robots) is unchanged.
         rows = [
-            ("",            "MP",          "Price",  "MP per $"),
-            ("Robots  (K)", "≈ 4 cars",    "$20,000", "0.0002 cars / $"),
-            ("Workers (L)", "≈ 0.1 cars",  "$1,200",  "0.0001 cars / $"),
+            ("",            "MP",            "Price",   "MP per $"),
+            ("Robots  (K)", "≈ 1.6 cars",    "$20,000", "0.00008 cars / $"),
+            ("Workers (L)", "≈ 0.04 cars",   "$1,200",  "0.000033 cars / $"),
         ]
         col_w = [Inches(3.0), Inches(2.5), Inches(2.5), Inches(3.0)]
         x0 = (SLIDE_W - sum(col_w)) // 2
@@ -9217,6 +9633,156 @@ def slide_74(prs):
 
 
 # --------------------------------------------------------------------------
+# Backup section (slides 75–77) — bare cover slide plus two placeholder
+# slides linked from slide 16's "Very high / Very low MPL image"
+# annotations.  2026-05-19 (user request).
+# --------------------------------------------------------------------------
+
+SECTION_TAG_BACKUP = "Module 3 · Backup"
+
+
+def _add_back_button(slide, *, fill=None, top=None):
+    """Lower-right block-arrow 'back' button.  Tagged so the hyperlink-
+    wiring pass at the end of build_deck() can find it.
+
+    ``fill`` defaults to light gray (#D9D9D9); pass an explicit
+    ``RGBColor`` to override.  ``top`` defaults to Inches(6.50).
+    """
+    if fill is None:
+        fill = RGBColor(0xD9, 0xD9, 0xD9)
+    btn_w = Inches(1.30)
+    btn_h = Inches(0.55)
+    btn_x = SLIDE_W - MARGIN - btn_w
+    btn_y = top if top is not None else Inches(6.50)
+    shp = _add_arrow_shape(slide, btn_x, btn_y, btn_w, btn_h,
+                            direction="left", fill=fill)
+    _add_drop_shadow(shp)
+    tf = shp.text_frame
+    tf.margin_left = Inches(0.1)
+    tf.margin_right = Inches(0.1)
+    tf.margin_top = 0
+    tf.margin_bottom = 0
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.CENTER
+    r = p.add_run()
+    r.text = "back"
+    r.font.name = "Calibri"
+    r.font.size = Pt(18)
+    r.font.bold = True
+    r.font.color.rgb = NAVY
+    # Tag the shape so the post-build wiring pass can identify it.
+    nvSpPr = shp._element.find(qn('p:nvSpPr'))
+    cNvPr = nvSpPr.find(qn('p:cNvPr')) if nvSpPr is not None else None
+    if cNvPr is not None:
+        cNvPr.set('name', 'BackButton')
+    return shp
+
+
+def slide_75_backup_cover(prs):
+    """Bare cover slide — large 'BACKUP' word centred.  Footer kept for
+    page-number navigation; top bar omitted for visual quiet."""
+    slide = _blank_slide(prs)
+    _add_text(slide, MARGIN, Inches(2.7), RULE_W, Inches(2.0),
+               "BACKUP",
+               size=140, bold=True, color=NAVY, font="Calibri",
+               align=PP_ALIGN.CENTER)
+    _draw_footer(slide, FOOTER_TEXT, 75)
+    return slide
+
+
+def _backup_chrome(slide, *, title, background_image=None,
+                    title_left, title_top, title_width, title_height,
+                    back_button_top=None):
+    """Minimalist chrome for the MPL-illustration backup slides.
+
+    2026-05-19 (manual, latest): only three elements remain per slide —
+    the full-slide background image, the cream title pill on the right,
+    and the light-gray back button.  Top bar / section tag, page number,
+    rule lines, and gold accents are all dropped.
+    """
+    # 1. Background image (whole-slide; LARGE PNG ~2.5 MB each).
+    if background_image is not None and background_image.exists():
+        slide.shapes.add_picture(
+            str(background_image), 0, 0,
+            width=SLIDE_W, height=SLIDE_H,
+        )
+    # 2. Title pill on a cream banner.  Geometry passed by the caller
+    #    so each slide can fine-tune (slide 77 places its title flush
+    #    against the top edge with a taller two-line-ready box).
+    title_box = _add_text(
+        slide, title_left, title_top, title_width, title_height,
+        title,
+        size=32, bold=True, color=NAVY, font="Calibri",
+        align=PP_ALIGN.LEFT,
+    )
+    title_box.fill.solid()
+    title_box.fill.fore_color.rgb = RGBColor(0xEE, 0xEC, 0xE1)
+    # 3. Light-gray back button, bottom-right.  Wired to slide 16 by
+    #    the post-build hyperlink pass in build_deck().
+    _add_back_button(slide, top=back_button_top)
+
+
+def slide_76_backup_high_mpl(prs):
+    """Backup slide — 'Very High MPL in the Rivian Plant' (linked from slide 16).
+
+    2026-05-19 (manual, latest): top bar removed, page number removed —
+    only the background image, the cream title pill, and the light-gray
+    back button remain.  Title position nudged right (6.31" → 6.495").
+    """
+    slide = _blank_slide(prs)
+    _backup_chrome(
+        slide,
+        # 2026-05-19 (manual, later): collapsed the 4-space gap between
+        # "MPL" and "in" down to a single space, so the title reads as
+        # one phrase rather than a label + subtitle.
+        title="Very High MPL in the Rivian Plant",
+        background_image=OUT_DIR / "_backup_high_mpl.png",
+        # 2026-05-19 (manual): title pill pinned to the right — left
+        # edge dragged inward (6.425 → 6.870, w 6.748 → 6.303) so the
+        # right edge stays at 13.173 against the slide's right margin.
+        title_left=Inches(6.870), title_top=Inches(0.180),
+        title_width=Inches(6.303), title_height=Inches(0.539),
+    )
+    _set_notes(slide, (
+        "Backup slide showing what a very high marginal product of labor "
+        "looks like in practice — the start of Rivian's hiring ramp, where "
+        "each additional worker adds a lot of output.  Linked from the "
+        "'Very high MPL image' annotation on slide 16; the bottom-right "
+        "back button returns to slide 16."
+    ))
+
+
+def slide_77_backup_low_mpl(prs):
+    """Backup slide — 'Very Low MPL in the Rivian Plant' (linked from slide 16).
+
+    2026-05-19 (manual, latest): same minimalist treatment as slide 76,
+    but the title sits flush against the top of the slide (top=0) in a
+    taller box, and the back button is hand-shifted down (~0.27").
+    """
+    slide = _blank_slide(prs)
+    _backup_chrome(
+        slide,
+        # 2026-05-19 (manual): wording extended to flag the
+        # near-zero-or-negative tail of the MPL curve.
+        title="Very Low (or negative) MPL in the Rivian Plant",
+        background_image=OUT_DIR / "_backup_low_mpl.png",
+        # Title pill moved right + narrowed (6.877 → 8.190, w 6.456 →
+        # 5.143) so it tucks against the slide's right edge.
+        title_left=Inches(8.190), title_top=Inches(0.0),
+        title_width=Inches(5.143), title_height=Inches(1.077),
+        back_button_top=Inches(6.77),
+    )
+    _set_notes(slide, (
+        "Backup slide showing what a very low marginal product of labor "
+        "looks like in practice — the saturated tail of Rivian's hiring "
+        "curve, where each additional worker adds almost nothing.  Linked "
+        "from the 'Very low MPL image' annotation on slide 16; the "
+        "bottom-right back button returns to slide 16."
+    ))
+
+
+# --------------------------------------------------------------------------
 # Layout-stripping surgery (kept from previous version)
 # --------------------------------------------------------------------------
 
@@ -9330,9 +9896,10 @@ def build_deck(output_name="Module 3_clean.pptx"):
     slide_9(prs)
     slide_10(prs)
     slide_11(prs)
-    slide_12(prs)
-    slide_mpl_data(prs)          # page 13 — MPL data (matches original slide 17)
-    slide_13(prs)                # page 14 onwards
+    slide_short_run_agenda(prs)  # page 13 — NEW intra-Part-1 divider (2026-05-19)
+    slide_12(prs)                # page 14 — Short Run MPL concept intro
+    slide_mpl_data(prs)          # page 15 — MPL data (matches original slide 17)
+    slide_13(prs)                # page 16 onwards
     slide_14(prs)
     slide_15(prs)
     slide_16(prs)
@@ -9357,7 +9924,8 @@ def build_deck(output_name="Module 3_clean.pptx"):
     slide_30(prs)
     slide_31(prs)
     slide_32(prs)
-    slide_33(prs)
+    # slide_33(prs) — 2026-05-19: deleted by user; the headline rule now
+    # lives on slide_32's page, with the three sub-bullets rescued there.
     slide_34(prs)
     slide_35(prs)
     slide_36(prs)
@@ -9405,6 +9973,43 @@ def build_deck(output_name="Module 3_clean.pptx"):
     slide_72(prs)
     slide_73(prs)
     slide_74(prs)
+
+    # Backup section (slides 75-77).  Slide 16's right-side annotations
+    # ("Very high MPL image" / "Very low MPL image") link to the
+    # appropriate backup slide; each backup slide's bottom-right "back"
+    # button returns to slide 16.
+    slide_75_backup_cover(prs)
+    slide_76_backup_high_mpl(prs)
+    slide_77_backup_low_mpl(prs)
+
+    # Wire slide-jump hyperlinks now that all targets exist.
+    slides = list(prs.slides)
+    s16 = slides[15]   # 0-indexed: deck slide 16
+    s76 = slides[75]
+    s77 = slides[76]
+    # 1. Slide-16 annotation textboxes → backup slides (matched by text).
+    for shape in s16.shapes:
+        if not shape.has_text_frame:
+            continue
+        body = shape.text_frame.text
+        if "Very high MPL" in body:
+            tgt = s76
+        elif "Very low MPL" in body:
+            tgt = s77
+        else:
+            continue
+        # Only hyperlink the run that holds the actual label text;
+        # the leading "➤  " prefix run stays plain (no underline,
+        # no hyperlink).
+        for p in shape.text_frame.paragraphs:
+            for r in p.runs:
+                if "MPL image" in r.text:
+                    _add_slide_jump_hyperlink_run(s16, r, tgt)
+    # 2. Back buttons on backup slides → slide 16.
+    for src in (s76, s77):
+        for shape in src.shapes:
+            if shape.name == 'BackButton':
+                _add_slide_jump_hyperlink_shape(src, shape, s16)
 
     out = OUT_DIR / output_name
     prs.save(out)

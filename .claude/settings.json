@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(rm *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import sys, json, re; d = json.load(sys.stdin); cmd = d.get('tool_input', {}).get('command', ''); print(json.dumps({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': 'Run bash commands bare. Do not prepend cd ... && ... -- use absolute paths in -c scripts, or pass --cwd/-C to the tool itself. CWD is already set.'}})) if re.match(r'\\s*cd(\\s|\\Z)', cmd) else None\""
+          }
+        ]
+      }
+    ]
+  }
+}

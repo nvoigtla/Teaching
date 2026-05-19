@@ -1,5 +1,9 @@
-# Local Claude Code state (settings.local.json, etc.)
-.claude/
+# Claude Code state — track team-wide settings.json (permissions, hooks,
+# plugin config) at any depth, but keep machine-local files (*.local.json)
+# and anything else under .claude/ that we haven't whitelisted ignored.
+# Leading **/ makes the rule match nested .claude/ folders too.
+**/.claude/*
+!**/.claude/settings.json
 
 # Common OS / editor cruft
 Thumbs.db

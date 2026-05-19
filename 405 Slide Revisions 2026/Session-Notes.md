@@ -1065,3 +1065,243 @@ The first rebuild via `_rebuild_module_3.py` (now deleted) produced a file Power
 - The Teaching folder lives on a network share (`\\FSC1\Faculty_Personal\nvoigtla\Claude Code\Teaching`), mapped to `H:\`. Git operations work but binary file sync is unreliable for large .pptx files. Consider working from a local copy and pushing to git rather than relying on the share to be the source of truth.
 - python-pptx 1.0.2 is installed and works fine for reading and building decks.
 - The git remote is `https://github.com/nvoigtla/Teaching.git` (branch `main`).
+
+## 2026-05-19 – Backup section, slides 13 / 16 / 32-35 polish, scenario re-anchor
+
+**One-line summary.** Long session: built a new three-slide BACKUP section
+at the end of the deck (with two-way slide-jump hyperlinks from slide 16);
+restructured slide 16's right-side annotations into a rounded link box
+with dashed navy arrows pointing at the high/low ends of the MPL curve;
+consolidated slides 32-34 (Long Run – Optimal Input Mix flow) with a
+peach teaching-note card, a white-bg legend with baseline-shifted K/L
+subscripts, and a from-source rewrite of slide 34 in OMML; re-anchored
+the Rivian Georgia scenario from 5,000 → 4,500 workers and cascaded the
+numerical updates through to slide 39's MP-per-$ table; added a new
+slide 13 (Part 1.b agenda) plus deleted the standalone "Bang for the
+Buck" slide.  Plus settings.json + .gitignore plumbing to sync Claude
+Code permissions / hooks across machines.
+
+### Per-slide changes
+
+1. **Slide 13 (NEW – Part 1.b Short Run agenda divider).**  Inserted
+   between page 12 and the short-run MPL pages.  Uses
+   `make_section_agenda` with a new `current_sub_idx=` parameter that
+   fades sibling sub-bullets within the current Part.  Decremented all
+   later `page_num=`s by +1 atomically; renumbered Long-Run divider
+   from "Part 1.2" to "Part 1.c"; agenda data updated in
+   `MODULE_AGENDA` (`_build_template_samples.py`) — Part 1 now has
+   three subs (Production Function / Short Run / Long Run); agenda
+   sub-bullet `line_spacing_pts` tightened from 10 → 3 pt deck-wide.
+
+2. **Slide 16 (Diminishing MPL).**  Right-chart caption white-fill so
+   it sits on an opaque banner above the chart; "MPL plotted at
+   midpoint" callout narrowed (3.50 → 2.786″) + repositioned.  Added
+   two annotations in the upper-right pointing to the high/low ends
+   of the MPL curve — refactored over multiple turns from cream-fill
+   callout boxes → plain ➤-prefixed text → final rounded navy box
+   (no fill) around a two-line cluster with the ➤ runs separated
+   from the underlined hyperlink runs so only "Very high MPL image"
+   / "Very low MPL image" carry the underline.  Arrows recolored
+   navy and made dashed; positions re-anchored against the new
+   label box.
+
+3. **Slide 31 (formerly slide 30, Part 1.c divider).**  Renumbered
+   title from "Part 1.2" to "Part 1.c"; fade subs a + b within
+   Part 1 via `current_sub_idx=2`.
+
+4. **Slide 32 (Long Run: Rivian builds a new Georgia plant).**  New
+   Brian Cassella / Tribune photo of the Normal IL plant (extracted
+   to `_rivian_georgia.jpg`) replaces the old Wikimedia R1; rectangular
+   crop with soft drop shadow; bullets narrowed to leave room.  Old
+   flat full-width takeaway bar replaced with a rounded navy
+   "Long run ⇒ pick the optimal K-and-L mix" pill sized to the
+   photo's width.
+
+5. **Slide 33 (Optimal Combination of Inputs).**  Major restructure:
+   single-bullet "Optimal Input Mix" line at top (32 pt); "Decision
+   rule for the long run:" subhead (28 pt); the headline stacked-
+   fraction formula at 44 pt; rounded NAVY anchor "Bang for the
+   Buck Rule" (28 pt white text, drop shadow, adj=30000); white
+   legend on the right with baseline-shifted italic K / L subscripts
+   for MP_K / MP_L, Unicode ₖ for p_K, italic w; teaching-note card
+   recolored to a peach tint (#FAC090 — resolved from theme accent6
+   lumMod60 / lumOff40) with PDF-paper icon + NAVY "SEE TEACHING
+   NOTE →" prefix; bottom-left sub-bullet cluster rescued from the
+   deleted slide_33 ("Holds when both L and K are flexible" etc.).
+
+6. **Slide 34 (Applying the Bang-for-the-Buck Rule — recipe).**
+   Rewritten from the source-deck slide 40.  Subtitle "('recipe' for
+   exams)" under the title; first line presented as a heading (no
+   bullet, no indent, wording "the same" → "a given"); two if-
+   clauses (`MPₗ/w > MPₖ/pₖ` / `MPₗ/w < MPₖ/pₖ`) with proper inline
+   OMML stacked fractions in Cambria Math at 28 pt; nested
+   "Decreasing marginal returns imply" sub-bullets at 22 pt with
+   "as L increases" appended; closing equality line.  Required two
+   helper changes: `_add_hierarchical_bullets` now accepts
+   `{'omml': True}` run opts to inject inline `<a14:m><m:oMath>`
+   math zones between text runs, and the helper's run loop respects
+   `space_before_pts` for major paragraphs (so the visual rhythm
+   uses spcBef rather than empty spacer paragraphs).
+
+7. **Deleted standalone "Bang for the Buck" slide.**  The page
+   between slide_32 and the recipe was removed; `slide_33` function
+   deleted from the build script and its three "when it holds" sub-
+   bullets moved into slide 32.  All `page_num=`s ≥ 35 decremented
+   by 1.
+
+8. **Slide 35 (Example: Rivian's New Georgia Plant).**  Replaced the
+   Wikimedia R1 photo with a new project-rendering image (extracted
+   to `_rivian_georgia_plan.png`, ~2.6 MB) at (8.051, 1.405) size
+   5.187 × 3.460", `_apply_picture_style` for rounded corners + soft
+   drop shadow; old "Rivian R1 (CC BY-SA, Wikimedia)" caption dropped.
+   Scenario re-anchored:  L = 5,000 → **4,500**, Q at K=200 → **557**
+   (was 574).  Wage ($1,200) and capital price ($20,000) unchanged.
+
+9. **Slides 36 / 38.**  Cascaded the new scenario:  bullet wording on
+   slide 36 ("Read Q at K = 200, L = 4,500 → Q = 557"), docstring
+   comment, and slide 38 speaker notes all updated.
+
+10. **Slide 39 (Solution: Optimal Input Mix).**  Re-derived MP values
+    at the new operating point from the production-function table:
+    `MP_K ≈ (557−394)/100 ≈ 1.6 cars`,
+    `MP_L ≈ (557−537)/500 ≈ 0.04 cars`.
+    MP per $ rows now read 0.00008 cars/$ (K) vs 0.000033 cars/$ (L)
+    — qualitative conclusion (shift toward more robots) preserved.
+
+11. **NEW Backup section (slides 75-77).**
+    - Slide 75: bare cover with "BACKUP" at 140 pt navy centred.
+    - Slide 76: "Very High MPL in the Rivian Plant" — full-slide
+      background image (`_backup_high_mpl.png`, ~2.5 MB), cream title
+      pill on the right (`#EEECE1`, theme bg2-resolved), light-gray
+      (`#D9D9D9`) left-arrow back button in the bottom right.  No top
+      bar, no section tag, no page number, no rule lines — only the
+      three elements the user kept.
+    - Slide 77: "Very Low (or negative) MPL in the Rivian Plant" —
+      same minimalist treatment, title pinned tighter to the right
+      edge, back button hand-shifted down (~0.27").
+    - Two-way slide-jump hyperlinks wired in `build_deck()` AFTER all
+      slides exist:  slide 16's "Very high / Very low MPL image"
+      annotation runs link to slides 76 / 77; the BackButton shapes
+      on 76 / 77 link to slide 16.  Underline preserved via explicit
+      `u="sng"`; explicit navy color preserved via the Office 2018
+      hyperlinkcolor extension (`<ahyp:hlinkClr val="tx"/>`) — without
+      that, PowerPoint repaints hyperlink text in the theme's hlink
+      blue regardless of the run's `solidFill`.
+
+### Decisions / conventions reinforced
+
+- **Inline OMML inside bullets.**  `_add_hierarchical_bullets` now
+  accepts `{'omml': True}` on a run to inject an inline math zone.
+  Sized + colored to match the surrounding bullet so stacked
+  fractions sit gracefully inside otherwise-Calibri text.
+
+- **Slide-jump hyperlinks are XML surgery.**  python-pptx doesn't
+  expose them; the helpers `_add_slide_jump_hyperlink_run` and
+  `_add_slide_jump_hyperlink_shape` register a `RT.SLIDE`
+  relationship via `slide.part.relate_to(...)` and inject
+  `<a:hlinkClick r:id="…" action="ppaction://hlinksldjump"/>` into
+  the rPr (runs) or cNvPr (shapes).  Color-lock + underline are
+  done in the same pass.
+
+- **Per-sub fade on agendas.**  New `current_sub_idx=` parameter on
+  `make_section_agenda` + a `colors=` list parameter on
+  `_add_bulleted_list` lets one sub-bullet stay navy while siblings
+  fade — used on the new slide 13 (Part 1.b active) and slide 31
+  (Part 1.c active).
+
+- **Permission / hook syntax.**  Bash permission rules use
+  `Bash(foo *)` (space + `*`), NOT `Bash(foo:*)` — the colon form
+  silently doesn't match.  PreToolUse hooks use
+  `<hookSpecificOutput><permissionDecision>deny</permissionDecision>`
+  to block; the `cd`-blocker hook injected at the Teaching level
+  forces commands to be run bare with absolute paths.
+
+- **Hyperlink color-lock extension.**  When a `solidFill` should
+  survive the theme's hyperlink color override, append
+  `<a:extLst><a:ext uri="{A12FA001-…}"><ahyp:hlinkClr val="tx"/>` to
+  the `<a:hlinkClick>`.  Without it, hyperlinks paint in light blue.
+
+### Files touched
+
+- `_build_clean_deck.py`:  many slide builders rewritten or tweaked
+  (13 / 16 / 30→31 / 32 / 33 / 34 / 35 / 36 / 38 / 39); new
+  `slide_short_run_agenda` (page 13); deleted `slide_33`; new
+  backup-section trio `slide_75_backup_cover` /
+  `slide_76_backup_high_mpl` / `slide_77_backup_low_mpl` + helpers
+  `_add_back_button`, `_backup_chrome`,
+  `_add_slide_jump_hyperlink_run`, `_add_slide_jump_hyperlink_shape`;
+  extended `_add_hierarchical_bullets` with `omml` run-opt support
+  and `_add_teaching_note` with `rounded` / `pdf_icon` /
+  `label_color` / `fill_rgb` / `left` opt-ins; updated `_add_back_button`
+  to take `fill=` and `top=` overrides; tightened agenda
+  `_add_bulleted_list` to accept per-item `colors=`.
+- `_build_template_samples.py`:  added "Production Function" as the
+  first sub of Part 1 in `MODULE_AGENDA`; `_add_bulleted_list` now
+  accepts `colors=` (parallel to `items`).
+- `Module 3_clean.pptx`:  rebuilt many times via the side-path
+  workflow (`Module 3_clean_test.pptx` → `mv -f`), now ~18 MB due
+  to the embedded backup-section images.
+- `_backup_high_mpl.png`, `_backup_low_mpl.png`,
+  `_rivian_georgia.jpg`, `_rivian_georgia_plan.png`:  new image
+  assets, all referenced by name from the build script.
+- `h:/Claude Code/Teaching/.claude/settings.json`:  NEW.  Permission
+  allowlist (`Bash(python *)`, `Bash(mv *)`, `Bash(cp *)`,
+  `Bash(rm *)`) plus a PreToolUse hook on Bash that blocks any
+  command beginning with `cd ` (forces absolute-path usage per the
+  universal CLAUDE.md rule).
+- `h:/Claude Code/Teaching/.gitignore`:  rule rewritten so
+  `**/.claude/*` is ignored but `!**/.claude/settings.json` is
+  re-included at any depth.  `*.local.json` stays ignored.  Same
+  rule mirrored in `h:/Claude Code/.gitignore` so the parent repo's
+  `settings.json` would also sync if added later.
+
+### Open / pending for next session
+
+- The build-script comments referencing earlier `# page N` numbers
+  inside `build_deck()` may be off-by-one after the slide-13 insert
+  and the slide-34 delete.  Cosmetic only — not load-bearing.
+- The `_add_teaching_note` "Recipe for Exams" call on the page-35
+  slide (now `slide_34` in the legacy function name → page 35) still
+  uses the old gold/flat default style.  Could be harmonized with
+  the slide-33 rounded + peach treatment if the user wants
+  consistency across teaching-note callouts.
+- The hyperlinkcolor extension fix means future slide-jump
+  hyperlinks will preserve their explicit text color; the same fix
+  could be backported to any URL hyperlinks (e.g., slide 29's
+  `ucannualwage.ucop.edu/wage/` link) if PowerPoint is still
+  repainting them in theme blue.
+
+### Commands / workflows worth remembering
+
+- **Atomic page_num bump / decrement** (when inserting or deleting
+  slides):
+  ```python
+  import re
+  src = open(path).read()
+  def shift(m):
+      n = int(m.group(1))
+      return f'page_num={n+1},' if n >= INSERT_AT else m.group(0)
+  open(path, 'w').write(re.subn(r'page_num=(\d+),', shift, src)[0])
+  ```
+  Use a single pass (not sequential N → N+1 edits) to avoid collisions.
+
+- **Image extraction from a built deck** (when the user adds images
+  by hand in PowerPoint that we want to keep on rebuild):
+  ```python
+  import zipfile
+  with zipfile.ZipFile('Module 3_clean.pptx') as z:
+      data = z.read('ppt/media/imageNN.png')
+  open('_descriptive_name.png', 'wb').write(data)
+  ```
+  Then add `slide.shapes.add_picture(str(path), ...)` in the builder.
+
+- **Side-path rebuild + readback** (when the user signals hand-edits
+  exist):  build to `Module 3_clean_test.pptx`, inspect the relevant
+  shape with a focused regex (NOT a full XML dump — keep the
+  ip-reminder noise down), then `mv -f` over the canonical.
+
+- **/hooks reload**:  not available in the VS Code extension
+  (`/hooks isn't available in this environment`).  Settings.json
+  changes mid-session don't apply until a fresh session.  In the
+  CLI build, `/hooks` would reload; in VS Code, just start a new
+  session.

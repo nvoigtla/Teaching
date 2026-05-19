@@ -171,11 +171,17 @@ def _add_bulleted_list(slide, left, top, width, height, items, *,
                        bullet_color=NAVY, bullet_char='▪',
                        bullet_size_pct=100,
                        line_spacing_pts=12,
-                       autonum_scheme=None):
+                       autonum_scheme=None,
+                       colors=None):
     """Render *items* as a real-bulleted list in a single text frame.
 
     If autonum_scheme is given (e.g. 'alphaUcPeriod') the bullets become
     auto-numbered (A. B. C.) instead of character bullets.
+
+    ``colors``: optional list of RGBColor parallel to ``items``.  When
+    provided, overrides per-item text + bullet color (both set to the
+    same color).  Used by agenda dividers to gray out subs that aren't
+    the current subsection, while a single bullet stays navy.
     """
     box = slide.shapes.add_textbox(left, top, width, height)
     tf = box.text_frame
@@ -186,6 +192,9 @@ def _add_bulleted_list(slide, left, top, width, height, items, *,
     tf.margin_bottom = 0
 
     for i, text in enumerate(items):
+        item_color = colors[i] if colors is not None else color
+        item_bullet_color = colors[i] if colors is not None else bullet_color
+
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.alignment = PP_ALIGN.LEFT
         # Spacing before each item except the first
@@ -200,13 +209,13 @@ def _add_bulleted_list(slide, left, top, width, height, items, *,
         run.font.name = font
         run.font.size = Pt(size)
         run.font.bold = bold
-        run.font.color.rgb = color
+        run.font.color.rgb = item_color
 
         if autonum_scheme:
-            _set_bullet_autonum(p, scheme=autonum_scheme, color=bullet_color,
-                                font=font)
+            _set_bullet_autonum(p, scheme=autonum_scheme,
+                                color=item_bullet_color, font=font)
         else:
-            _set_bullet_char(p, char=bullet_char, color=bullet_color,
+            _set_bullet_char(p, char=bullet_char, color=item_bullet_color,
                              font=font, size_pct=bullet_size_pct)
     return box
 
@@ -326,6 +335,11 @@ MODULE_AGENDA = [
     {
         "title": "Part 1: Production – Picking the Right Inputs",
         "subs": [
+            # 2026-05-19: added "Production Function" as a third sub of
+            # Part 1 — the deck spends a slide on Q = f(K, L) before
+            # diving into short/long-run hiring rules, so the agenda
+            # should reflect three subsections (a / b / c).
+            "Production Function",
             "Short Run – Hiring Decisions",
             "Long Run – Optimal Input Mix",
         ],
