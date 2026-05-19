@@ -1,5 +1,123 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-18 – Hand-edit ports across Module 3 slides 17 / 23 / 25 – 28
+
+**One-line summary.** Ported a batch of manual PowerPoint tweaks back into
+`_build_clean_deck.py` so the canonical deck and the build script are in
+sync again. Two opt-in side-path rebuilds (user signalled hand-edits both
+times); inspection XMLs used for round-trip diffs, then deleted.
+
+### Per-slide changes ported
+
+1. **Slide 17 – "Hiring Decisions in the Short Run – Context & Scenario".**
+   Gold "→ How many workers should Rivian optimally hire?" question box
+   shrunk and repositioned: w/h Inches(8.5) × Inches(0.65) →
+   Inches(6.973) × Inches(0.605); x/y centred at top=Inches(6.45) →
+   Inches(3.439), Inches(5.995). Corner-radius (0.20) and drop shadow
+   unchanged.
+
+2. **Slide 23 – "Optimal Hiring Rule – Numerical Solution"** (function
+   `slide_22b`). Added the deck's MB ≈ MC anchor in the lower-right
+   corner: 12-point gold star at (9.802", 5.934") size 1.6 × 1.05" with
+   "MB ≈ MC" / "(of labor)" overlay text (uses `_add_anchor_burst`).
+   Variant of the standard MB = MC pattern – the "=" softens to "≈"
+   because the rule lands inside an interval (3,000 – 3,500 workers)
+   rather than on a single L. Plus a gold arrow from the star up-and-
+   left to the ≈ row of the wage column, 2 pt, head=True.
+
+3. **Slide 25 – "Wage Searcher Caveat: Nobody likes being treated
+   unequally…"** Title changed from "Salary Comparisons across Firm
+   Size". Embedded video frame resized + repositioned: left/top
+   Inches(1.0) / Inches(1.85) → Inches(1.892) / Inches(1.509); width
+   Inches(11.3) → Inches(9.546); height now fixed at Inches(5.371)
+   instead of relying on aspect-ratio auto-compute. Old bottom italic
+   caption ("Bigger firms tend to pay more — consistent with the
+   wage-search story") removed – the new title carries the takeaway.
+
+4. **Slide 26 – "Example: The Full Cost of Poaching an AI Researcher".**
+   - Bullet sizes bumped from 24/22 → 28/28 pt (`_add_hierarchical_bullets`).
+   - Old flat full-width gold takeaway bar replaced by a rounded gold
+     box ("→ What is the marginal cost of the 3rd researcher?") at
+     (0.669", 5.645") size 7.255 × 0.505", corner_pct=0.20, drop shadow.
+   - Discussion-break parallelogram badge added in the lower-right
+     corner (`_add_discussion_break(slide, width=Inches(4.8))`).
+   - Hassabis caption nudged down from top=Inches(5.65) → Inches(5.799)
+     (and left by 0.031") so the small italic line sits clear of the
+     picture's drop shadow.
+
+5. **Slide 27 – "What Is the Full Marginal Cost of the New Researcher?"**
+   Switched poll chrome to the deck-standard bottom-right gold POLL
+   pill (same pattern already used on slide 20): `_draw_poll_pill(s,
+   position='bottom-right', fill=GOLD, text_color=NAVY, dot_color=None,
+   width=Inches(1.487), height=Inches(0.510), text_size=16,
+   shadow=True)`. Old small flat top-right pill + leading gold dot
+   removed, "Respond at PollEv.com/nvoigtlaender" italic caption
+   removed (the pill carries the PollEv signal on its own now).
+
+6. **Slide 28 – "Solution: Marginal Cost of the 3rd Researcher = $8M".**
+   - Three numbered "1. / 2. / 3." text-box steps + the separate navy
+     "$8M" hero box collapsed into four plain "▪" bullets at 24 pt via
+     `_add_hierarchical_bullets`. The fourth bullet is the punchline
+     ("Marginal cost of the 3rd researcher = $8M") that the navy hero
+     box used to carry on its own.
+   - Gold "Take-Away" bar moved up (top Inches(6.45) → Inches(5.85))
+     and switched from `_add_takeaway_bar` (flat rect) to
+     `_add_rounded_filled_box` (rounded + drop shadow). Bold
+     "Take-Away:" prefix preserved.
+
+### Decisions / conventions reinforced
+
+- **Side-path workflow is the path of least surprise when hand-edits
+  exist.** Build to `Module 3_clean_test.pptx`, run a `python-pptx`
+  readback against the canonical deck (which has the hand-edits),
+  port the deltas into the build script, rebuild, verify, then
+  `mv -f` over the canonical. Did this twice today – worked cleanly
+  both times.
+- **MB ≈ MC variant of the MB = MC anchor.** When the optimal rule
+  lands inside a discrete interval (here L = 3,000–3,500) rather than
+  on a single point, soften "=" to "≈". Visual chrome (12-point gold
+  star, navy text, drop shadow) stays identical so students still
+  read it as "this is the MB = MC anchor".
+- **Rounded gold question / takeaway boxes are now the deck default**
+  for any single-line punchline at the bottom of a slide:
+  `_add_rounded_filled_box(..., fill=GOLD, text_color=NAVY,
+  corner_pct=0.20, shadow=True, size=20, bold=True)`. Replacing the
+  old flat `_add_takeaway_bar` rects piecemeal as we hit them.
+- **Standard poll-slide chrome is the bottom-right enlarged pill**
+  (1.487 × 0.510", gold/navy, no leading dot, drop shadow), not the
+  small flat top-right pill. Slides 20 and 27 are now consistent.
+- **Inspection XMLs are transient.** Round-trip dumps written via
+  `python -c` and deleted at the end of the session — kept out of git.
+
+### Files touched
+
+- `Module 3/_build_clean_deck.py` – six `slide_*` builders updated.
+- `Module 3/Module 3_clean.pptx` – rebuilt twice (once per side-path
+  pass), now in sync with the build script.
+
+### Open / pending for next session
+
+- No specific open items from today. The Module 3 deck is consistent
+  with the build script and the visual conventions in the course
+  CLAUDE.md.
+
+### Commands / workflows worth remembering
+
+- **Side-path rebuild + readback (when user has made manual edits):**
+  ```powershell
+  cd "h:/Claude Code/Teaching/405 Slide Revisions 2026/Module 3"
+  python _build_clean_deck.py "Module 3_clean_test.pptx"
+  # Compare shape positions / text via python-pptx readback, then:
+  mv -f "Module 3_clean_test.pptx" "Module 3_clean.pptx"
+  ```
+- **Slice a single slide's XML out of a .pptx** (one-liner for diff /
+  inspection of hand-edits):
+  ```python
+  import zipfile
+  with zipfile.ZipFile('Module 3_clean.pptx') as z:
+      print(z.read('ppt/slides/slide26.xml').decode('utf-8'))
+  ```
+
 ## 2026-05-17 – MRPL example reframed; bullet helper overhaul; cross-refs hyperlinked
 
 **One-line summary.** Slides 19/20/21 reworked around L = 4,200 (so students
