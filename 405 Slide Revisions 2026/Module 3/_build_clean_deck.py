@@ -7058,19 +7058,25 @@ def slide_34(prs):
 
 
 def slide_35(prs):
-    """Example: Rivian's New Georgia plant."""
+    """Example: Rivian's New Georgia plant.
+
+    2026-05-19 (manual round 3): operating point reverted from the
+    off-grid K = 320 / L = 1,800 back to grid-aligned K = 300 / L = 2,000
+    — the nearest-grid-points convention added in round 2 was deemed too
+    complex for an intro to the bang-for-the-buck rule, so slides 36–39
+    return to direct table lookup.  Q line stays dropped (user preference
+    from round 2 hand-edits).  Bottom takeaway content remains folded
+    into the last bullet on the slide.
+    """
     def draw(slide):
-        # 2026-05-19 (manual): current plan shifted from 5,000 → 4,500
-        # workers.  Recomputed Q at K=200, L=4,500 → 557 (vs 574 at
-        # L=5,000).  Wage and capital price unchanged.
         bullets = [
             ("Rivian is building a new plant in Stanton Springs, Georgia", 0),
             ("They ask for your advice on the optimal mix of robots and workers", 0),
             ("You know:", 0),
-            ("Current plan:  200 robots and 4,500 workers", 1),
-            ("→ produces ≈ 557 vehicles per week", 1),
+            ("Current plan:  300 robots and 2,000 workers", 1),
             ("Weekly wage for suitable workers:  w = $1,200", 1),
             ("Cost of one robot (per week):  pₖ = $20,000", 1),
+            ("Is Rivian's 300 robots / 2,000 workers plan optimal?", 0),
         ]
         _add_hierarchical_bullets(
             slide,
@@ -7093,11 +7099,9 @@ def slide_35(prs):
             )
             _apply_picture_style(pic)
 
-        # Takeaway: the question we'll answer
-        _add_takeaway_bar(slide,
-                           "Is Rivian's 200 robots / 4,500 workers plan optimal?",
-                           top=Inches(6.5), fill=GOLD, text_color=NAVY,
-                           width=Inches(10.5))
+        # 2026-05-19 (manual round 5): user added a Discussion Break badge
+        # at the bottom-right.  Captured from the canonical deck.
+        _add_discussion_break(slide)
 
     s = make_diagram_slide(
         prs, page_num=35,
@@ -7106,49 +7110,170 @@ def slide_35(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Rivian announced a second US assembly plant in Social Circle, "
-        "Georgia, in late 2022 – a ~$5B project meant to add ~400,000 "
-        "vehicles per year of capacity once it ramps.  We'll apply the "
-        "bang-for-the-buck rule to a stylised version of those plans:  "
-        "robots vs. workers,  given each input's price and marginal "
-        "product.  The numbers I'll use are illustrative, calibrated to "
-        "give a clean teaching example;  the strategic point is what to "
-        "do when the two MP/price ratios are not yet equal."
+        "Rivian announced a second US assembly plant in Stanton Springs, "
+        "Georgia – a multi-billion-dollar project meant to add capacity "
+        "once it ramps.  We'll apply the bang-for-the-buck rule to a "
+        "stylised version of those plans:  robots vs. workers, given each "
+        "input's price and marginal product.  Current plan is K = 300 "
+        "robots and L = 2,000 workers — both on the production-function "
+        "table grid, so the next slides read Q, MPL, MPK straight off the "
+        "table.  The strategic point: when the two MP/price ratios aren't "
+        "equal, the firm should reallocate."
     ))
 
 
 def slide_36(prs):
-    """Is Rivian's current plan optimal? (production function).
+    """Is Rivian's current plan optimal? (production function + MPL/MPK).
 
-    Uses the SAME compact production-function table as slide 18, so all
-    downstream calculations (MPL, MPK, the bang-for-the-buck ratio on
-    slide 39) read off one consistent data source.  At K = 200, L = 4,500
-    the table gives Q = 557 vehicles/week – matching the slide narrative.
+    2026-05-19 (manual round 4): slide 37 was merged into this slide and
+    deleted.  The MPL / MPK derivation now lives directly under the table
+    lookup.  Convention switched to "next-higher input level" (forward
+    differences): MPL goes 2,000 → 2,500 at K=300; MPK goes 300 → 400 at
+    L=2,000.  Axis labels bumped to 14 pt — L  (workers) rotated 270° so
+    it reads bottom-up; K  (robots) moved a touch closer to the table top.
+
+    2026-05-19 (manual round 5):
+    - "Read Q at K=300, L=2,000 → Q=534" sub-bullet deleted by user.
+    - "Current mix" bullet recoloured BLUE (#0070C0); a matching blue
+      circle highlights the (K=300, L=2,000) cell in the table.
+    - "Labor" bullet recoloured DARK GREEN (~#4F6128, accent3 + 50% lum);
+      a matching green rounded rect frames the two cells used in the MPL
+      interval (Q at L=2,000 and L=2,500, both at K=300).
+    - "Robots" bullet recoloured DARK RED (#C00000); a matching red
+      rounded rect frames the two cells used in the MPK interval
+      (Q at K=300 and K=400, both at L=2,000).
     """
+    BLUE_HL    = RGBColor(0x00, 0x70, 0xC0)
+    DARK_GREEN = RGBColor(0x4F, 0x61, 0x28)
+    DARK_RED   = RGBColor(0xC0, 0x00, 0x00)
+
     def draw(slide):
         bullets = [
             ("The production function at Rivian's new plant:", 0),
-            ("Current mix:  200 robots, 4,500 workers", 0),
-            ("Read Q at K = 200, L = 4,500 in the table  →  Q = 557", 1),
-            ("Other input mixes are possible — which is best?", 0),
+            ("Current mix:  300 robots, 2,000 workers", 0,
+             {'color': BLUE_HL}),
+            ("Let's derive the “ingredients” for the bang-for-the-buck rule", 0),
+            ("Convention:  use the next-higher input level (Δ goes forward)", 1),
+            ("Labor:   MPₗ  =  ΔQ / ΔL  =  (571 − 534) / (2,500 − 2,000)  =  0.07", 1,
+             {'color': DARK_GREEN}),
+            ("Robots:  MPₖ  =  ΔQ / ΔK  =  (617 − 534) / (400 − 300)  =  0.83", 1,
+             {'color': DARK_RED}),
+            ("Now:  Check if Rivian's proposed choice is optimal  (PollEV)", 0),
         ]
         _add_hierarchical_bullets(
             slide,
             left=MARGIN, top=Inches(1.85),
-            width=Inches(7.0), height=Inches(3.5),
+            width=Inches(9.0), height=Inches(4.8),
             items=bullets,
             size=24, sub_size=22, line_spacing_pts=10,
         )
 
-        # Same compact production-function table as slide 18 — locks the
-        # downstream calculations to the slide-10 data.
+        # Compact production-function table on the right.  with_axes=False
+        # so the helper's default 10 pt labels don't render; the custom
+        # 14 pt labels below take their place.
+        tbl_left = Inches(9.55)
+        tbl_top = Inches(2.30)
+        col_w_label = Inches(0.72)
+        col_w_data = Inches(0.55)
+        tbl_h = Inches(3.70)
         _add_compact_pf_table(slide,
-                               tbl_left=Inches(9.55), tbl_top=Inches(2.30))
+                               tbl_left=tbl_left, tbl_top=tbl_top,
+                               with_axes=False)
+        # K  (robots) label — 14 pt, centered over the data columns,
+        # closer to the table top than the helper default.
+        _add_text(slide,
+                   tbl_left + col_w_label, tbl_top - Inches(0.25),
+                   col_w_data * 4, Inches(0.25),
+                   "K  (robots)",
+                   size=14, italic=True, color=NAVY,
+                   align=PP_ALIGN.CENTER, font="Calibri")
+        # L  (workers) label — 14 pt, rotated 270° so it reads bottom-up.
+        l_box = _add_text(slide,
+                   tbl_left - Inches(0.83), tbl_top + tbl_h / 2 - Inches(0.135),
+                   Inches(1.09), Inches(0.269),
+                   "L  (workers)",
+                   size=14, italic=True, color=NAVY,
+                   align=PP_ALIGN.CENTER, font="Calibri")
+        l_box.rotation = 270
+
+        # Coloured overlays on specific table cells (matching bullet colours).
+        n_rows = 1 + len(PF_L_VALS)  # 1 header + 12 data rows
+        row_h = tbl_h / n_rows
+        def cell_xywh(K, L):
+            """Return (left, top, width, height) of the (K, L) table cell."""
+            col_idx = PF_K_VALS.index(K)               # 0-indexed among K-vals
+            row_idx = PF_L_VALS.index(L) + 1           # +1 for header row
+            return (tbl_left + col_w_label + col_idx * col_w_data,
+                    tbl_top + row_idx * row_h,
+                    col_w_data, row_h)
+
+        # 1. Blue circle around the (K=300, L=2,000) cell — current mix.
+        cl, ct, cw, ch = cell_xywh(300, 2000)
+        circle_d = Inches(0.55)
+        circle = slide.shapes.add_shape(
+            MSO_SHAPE.OVAL,
+            int(cl + cw / 2 - circle_d / 2),
+            int(ct + ch / 2 - circle_d / 2),
+            int(circle_d), int(circle_d),
+        )
+        circle.fill.background()
+        circle.line.color.rgb = BLUE_HL
+        circle.line.width = Pt(1.75)
+        circle.shadow.inherit = False
+
+        # 2. Dark-green rounded rect around (K=300, L=2,000) + (K=300, L=2,500)
+        #    — the two cells used in the MPL forward-interval calculation.
+        gl, gt, gw, _ = cell_xywh(300, 2000)
+        _, gt2, _, gh2 = cell_xywh(300, 2500)
+        g_bottom = gt2 + gh2
+        pad = Inches(0.03)
+        g_rect = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(gl - pad), int(gt - pad),
+            int(gw + 2 * pad), int((g_bottom - gt) + 2 * pad),
+        )
+        g_rect.fill.background()
+        g_rect.line.color.rgb = DARK_GREEN
+        g_rect.line.width = Pt(1.75)
+        g_rect.shadow.inherit = False
+        try:
+            g_rect.adjustments[0] = 0.18
+        except Exception:
+            pass
+
+        # 3. Dark-red rounded rect around (K=300, L=2,000) + (K=400, L=2,000)
+        #    — the two cells used in the MPK forward-interval calculation.
+        rl, rt, _, rh = cell_xywh(300, 2000)
+        rr_left, _, rr_w, _ = cell_xywh(400, 2000)
+        r_right = rr_left + rr_w
+        r_rect = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(rl - pad), int(rt - pad),
+            int((r_right - rl) + 2 * pad), int(rh + 2 * pad),
+        )
+        r_rect.fill.background()
+        r_rect.line.color.rgb = DARK_RED
+        r_rect.line.width = Pt(1.75)
+        r_rect.shadow.inherit = False
+        try:
+            r_rect.adjustments[0] = 0.35
+        except Exception:
+            pass
 
         _add_takeaway_bar(slide,
                            "Compare MP per dollar across inputs at the current mix",
                            top=Inches(6.55), fill=NAVY, text_color=WHITE,
                            width=Inches(11.0))
+
+        # 2026-05-19 (manual round 5): user added a gold POLL pill at the
+        # bottom-right (matches the one introduced on slide 37 — primes
+        # students that the PollEV is the very next slide).  Gold fill +
+        # navy text + no leading dot + soft drop shadow + larger than the
+        # default top-right pill (1.49" × 0.51", 16 pt POLL text).
+        _draw_poll_pill(slide, position='bottom-right',
+                         fill=GOLD, text_color=NAVY, dot_color=None,
+                         width=Inches(1.49), height=Inches(0.51),
+                         text_size=16, shadow=True)
 
     s = make_diagram_slide(
         prs, page_num=36,
@@ -7159,69 +7284,18 @@ def slide_36(prs):
     # Hyperlink the "(link)" anchor in the compact-table caption to slide 11.
     _add_slide_link_in_slide(s, "link", SLIDE_IDX_PF_TABLE, prs=prs)
     _set_notes(s, (
-        "The production function for Georgia in numbers. Setup question: is "
-        "Rivian's current K/L mix optimal? Don't answer yet – the next "
-        "slide does the math."
+        "The production function for Georgia in numbers.  At K = 300, "
+        "L = 2,000 the table reads Q = 534.  Walk through the derivation: "
+        "by convention we step UP to the next grid value (2,000 → 2,500 "
+        "for labor, 300 → 400 for robots), so MPL = (571 − 534)/500 ≈ "
+        "0.07 cars per worker per week and MPK = (617 − 534)/100 ≈ 0.83 "
+        "cars per robot.  Don't reveal whether the mix is optimal yet — "
+        "the next slide is the PollEV."
     ))
+
 
 
 def slide_37(prs):
-    """Is Rivian's current plan optimal? (analysis)."""
-    def draw(slide):
-        # The analysis is fundamentally visual – show the production-function
-        # table with MP_K and MP_L highlighted, plus the per-$ calculation.
-        bullets = [
-            ("At the current mix:  read MPₖ and MPₗ from the table", 0),
-            ("Compute MPₖ / pₖ  and  MPₗ / w", 0),
-            ("If unequal → shift toward the input with the higher ratio", 0),
-        ]
-        _add_hierarchical_bullets(
-            slide,
-            left=MARGIN, top=Inches(1.85),
-            width=Inches(6.5), height=Inches(2.6),
-            items=bullets,
-            size=24, sub_size=22, line_spacing_pts=10,
-        )
-
-        # Analysis picture (annotated production function) on the right
-        _add_source_image(slide, 37, "rId5",
-                           left=Inches(7.5), top=Inches(1.9),
-                           width=Inches(5.5))
-
-        # Major-concept callout with OMML inequality
-        _add_text(slide, Inches(0.5), Inches(4.9), Inches(0.6), Inches(0.4),
-                   "If", size=20, color=NAVY, bold=True, font="Calibri")
-        _add_math_equation(
-            slide,
-            left=Inches(1.1), top=Inches(4.85),
-            width=Inches(5.5), height=Inches(0.9),
-            omml_content=_formula_bang_for_buck(op=' > '),
-            size_pt=22, color=NAVY,
-        )
-        _add_text(slide, Inches(0.5), Inches(5.9), Inches(6.5), Inches(0.4),
-                   "→  shift toward robots",
-                   size=20, bold=True, color=NAVY,
-                   align=PP_ALIGN.CENTER, font="Calibri")
-
-        # Bottom takeaway
-        _add_takeaway_bar(slide,
-                           "Bang-for-the-buck tells you which way to re-allocate",
-                           top=Inches(6.5), fill=NAVY, width=Inches(10.0))
-
-    s = make_diagram_slide(
-        prs, page_num=37,
-        section_tag=SECTION_TAG_LR,
-        title="Is Rivian's Current Plan Optimal?  (Analysis)",
-        draw_diagram=draw,
-    )
-    _set_notes(s, (
-        "Apply the rule. Compute MP/$ for K and MP/$ for L. If they're not "
-        "equal, the mix isn't optimal and Rivian should shift toward the "
-        "input with higher bang-for-the-buck."
-    ))
-
-
-def slide_38(prs):
     """Poll: Is Rivian's input mix optimal?"""
     def draw(slide):
         _add_source_image(slide, 38, "rId4",
@@ -7233,38 +7307,46 @@ def slide_38(prs):
                    align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=38,
+        prs, page_num=37,
         section_tag=SECTION_TAG_LR,
         title="Is Rivian's Input Mix Optimal?",
         draw_diagram=draw,
     )
-    _draw_poll_pill(s)
+    # 2026-05-19 (manual round 5): user removed the original top-right POLL
+    # pill + leading gold dot, and added a larger gold pill at the bottom-
+    # right instead (matches the one on slide 36 — same visual cue, same
+    # geometry).  No leading dot.
+    _draw_poll_pill(s, position='bottom-right',
+                     fill=GOLD, text_color=NAVY, dot_color=None,
+                     width=Inches(1.49), height=Inches(0.51),
+                     text_size=16, shadow=True)
     _set_notes(s, (
-        "Quick PollEv.  Looking at the numbers on the previous slide – "
-        "200 robots and 4,500 workers producing ~557 R1 vehicles / week, with "
-        "the MP values given – is the current mix optimal?  Give them 30 "
-        "seconds to think through the bang-for-the-buck ratios.  Some "
-        "will say yes, some no;  reveal in the next slide.  The point "
-        "isn't the vote count, it's the active calculation."
+        "Quick PollEv.  Looking at the numbers from the previous slide — "
+        "current plan K = 300 robots, L = 2,000 workers (Q = 534), with "
+        "MPL ≈ 0.07 and MPK ≈ 0.83 — is the current mix optimal?  Give "
+        "them 30 seconds to think through the bang-for-the-buck ratios "
+        "(MP / price).  Some will say yes, some no;  reveal in the next "
+        "slide.  The point isn't the vote count, it's the active "
+        "calculation."
     ))
 
 
-def slide_39(prs):
+def slide_38(prs):
     """Solution on optimal input mix."""
     def draw(slide):
-        # Source had just a title — build the analysis from speaker notes.
-        # Show MP_K and MP_L estimates, then ratios, then conclusion.
-        # Use a table-like layout with rows for K and L.
-        # 2026-05-19 (manual): re-derived MP values at the new operating
-        # point K=200, L=4,500 from the production-function table —
-        # MPK ≈ (Q(200,4500) − Q(100,4500)) / 100 = (557 − 394)/100 ≈ 1.6
-        # MPL ≈ (Q(200,4500) − Q(200,4000)) / 500 = (557 − 537)/500 ≈ 0.04
-        # MP/$ = MP / input-price; robots still win, so the conclusion
-        # (shift toward more robots) is unchanged.
+        # 2026-05-19 (manual round 4): forward (next-higher) intervals,
+        # consistent with the convention codified on slide 36:
+        #   MPL over L ∈ [2000, 2500] at K=300: (571 − 534)/500 ≈ 0.07
+        #   MPK over K ∈ [300, 400] at L=2000: (617 − 534)/100 ≈ 0.83
+        # MP/$:  MPL/w  = 0.07/1200  ≈ 5.8e-5
+        #        MPK/pK = 0.83/20000 ≈ 4.2e-5
+        # Workers' bang-for-the-buck still wins by ~1.4x → shift toward
+        # workers (same conclusion direction; smaller margin than the
+        # lookback variant).
         rows = [
             ("",            "MP",            "Price",   "MP per $"),
-            ("Robots  (K)", "≈ 1.6 cars",    "$20,000", "0.00008 cars / $"),
-            ("Workers (L)", "≈ 0.04 cars",   "$1,200",  "0.000033 cars / $"),
+            ("Robots  (K)", "≈ 0.83 cars",   "$20,000", "0.000042 cars / $"),
+            ("Workers (L)", "≈ 0.07 cars",   "$1,200",  "0.000058 cars / $"),
         ]
         col_w = [Inches(3.0), Inches(2.5), Inches(2.5), Inches(3.0)]
         x0 = (SLIDE_W - sum(col_w)) // 2
@@ -7300,18 +7382,25 @@ def slide_39(prs):
                 run.font.color.rgb = txt_color
                 cx += col_w[c]
 
-        # Conclusion: stacked-fraction OMML formula + arrow + advice
+        # Conclusion: stacked-fraction OMML formula + arrow + advice.
+        # 2026-05-19 (manual round 2): inequality flipped to MPK/pK < MPL/w
+        # since workers now have the higher bang-for-the-buck.
+        # 2026-05-19 (manual round 5): narrowed the box from 8.3" → 5.5"
+        # so the cream-fill rectangle hugs the formula instead of stretching
+        # across half the slide.  Re-centred horizontally.
+        eq_w = Inches(5.5)
+        eq_left = (SLIDE_W - eq_w) // 2
         _add_math_equation(
             slide,
-            left=Inches(2.5), top=Inches(4.7),
-            width=Inches(8.3), height=Inches(1.1),
-            omml_content=_formula_bang_for_buck(op=' > '),
+            left=eq_left, top=Inches(4.7),
+            width=eq_w, height=Inches(1.1),
+            omml_content=_formula_bang_for_buck(op=' &lt; '),
             size_pt=32, color=NAVY,
             fill=RGBColor(0xF4, 0xF1, 0xEA),
             line=NAVY,
         )
         _add_text(slide, MARGIN, Inches(5.85), RULE_W, Inches(0.4),
-                   "→  Rivian should use more robots, fewer workers",
+                   "→  Rivian should hire more workers, fewer robots",
                    size=20, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
 
@@ -7322,20 +7411,24 @@ def slide_39(prs):
                            width=Inches(9.5))
 
     s = make_diagram_slide(
-        prs, page_num=39,
+        prs, page_num=38,
         section_tag=SECTION_TAG_LR,
         title="Solution:  The Optimal Input Mix",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Reveal: the mix isn't optimal. Discuss which input was underused, "
-        "and what Rivian should do to fix it – hire more L or buy more "
-        "robots. Numbers shown are illustrative; replace with your "
-        "classroom-version values."
+        "Reveal: the mix isn't optimal.  Workers' bang-for-the-buck "
+        "(MPL / w ≈ 5.8 × 10⁻⁵) is roughly 1.4× robots' (MPK / pK ≈ "
+        "4.2 × 10⁻⁵), so Rivian should hire more workers and use fewer "
+        "robots.  Intuition: at K = 300, L = 2,000 the marginal worker "
+        "delivers more output per dollar than the marginal robot — "
+        "robots are relatively over-priced for the current labor force. "
+        "Same bang-for-the-buck rule as before; the conclusion direction "
+        "depends on where the operating point sits."
     ))
 
 
-def slide_40(prs):
+def slide_39(prs):
     """When prices change, the input mix shifts: robot tax & union wages.
 
     The two body boxes use OMML for the math (p_K, MP_K / p_K with real
@@ -7422,7 +7515,7 @@ def slide_40(prs):
                            width=Inches(12.0), size=18)
 
     s = make_diagram_slide(
-        prs, page_num=40,
+        prs, page_num=39,
         section_tag=SECTION_TAG_LR,
         title="When Prices Change, the Input Mix Shifts:  Robot Tax & Union Wages",
         draw_diagram=draw,
@@ -7436,7 +7529,7 @@ def slide_40(prs):
     ))
 
 
-def slide_41(prs):
+def slide_40(prs):
     """'Bang for the buck' in grocery shopping (intuition reinforcer)."""
     def draw(slide):
         # Left text: the intuition
@@ -7468,7 +7561,7 @@ def slide_41(prs):
                            top=Inches(6.5), fill=NAVY, width=Inches(9.0))
 
     s = make_diagram_slide(
-        prs, page_num=41,
+        prs, page_num=40,
         section_tag=SECTION_TAG_LR,
         title="'Bang for the Buck' in Grocery Shopping",
         draw_diagram=draw,
@@ -7481,10 +7574,10 @@ def slide_41(prs):
     ))
 
 
-def slide_42(prs):
+def slide_41(prs):
     """Section divider – Part 2: Costs."""
     s = make_section_agenda(
-        prs, page_num=42,
+        prs, page_num=41,
         current_part_idx=1,        # Part 2 now active
         section_tag=SECTION_TAG_DIV,
         title="Part 2:  Costs – Producing at the Lowest Price",
@@ -7504,7 +7597,7 @@ SECTION_TAG_P2 = "Module 3 · Costs · Cost Concepts"
 SECTION_TAG_P2_LR = "Module 3 · Costs · Long-Run & Scale"
 
 
-def slide_43(prs):
+def slide_42(prs):
     """Cost types: fixed / sunk / variable, with takeaway 'sunk costs
     should never drive decisions'."""
     def draw(slide):
@@ -7549,7 +7642,7 @@ def slide_43(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=43,
+        prs, page_num=42,
         section_tag=SECTION_TAG_P2,
         title="Three Cost Types,  Three Different Decision Rules",
         draw_diagram=draw,
@@ -7562,7 +7655,7 @@ def slide_43(prs):
     ))
 
 
-def slide_44(prs):
+def slide_43(prs):
     """Group work: choosing a car (own car vs. company car)."""
     def draw(slide):
         # Setup paragraph
@@ -7623,7 +7716,7 @@ def slide_44(prs):
         _add_discussion_break(slide, width=Inches(4.8))
 
     s = make_diagram_slide(
-        prs, page_num=44,
+        prs, page_num=43,
         section_tag=SECTION_TAG_P2,
         title="Group Work:  Your Car or the Company Car?",
         draw_diagram=draw,
@@ -7637,7 +7730,7 @@ def slide_44(prs):
     ))
 
 
-def slide_45(prs):
+def slide_44(prs):
     """Why studios finish movies they know will flop: Waterworld (1995).
 
     Source has the iconic Waterworld poster as a large background image.
@@ -7655,7 +7748,7 @@ def slide_45(prs):
                   align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=45,
+        prs, page_num=44,
         section_tag=SECTION_TAG_P2,
         title="Why Studios Finish Movies They Know Will Flop:  Waterworld",
         draw_diagram=draw,
@@ -7669,7 +7762,7 @@ def slide_45(prs):
     ))
 
 
-def slide_46(prs):
+def slide_45(prs):
     """Sunk cost in Waterworld – decision tree across 3 scenarios.
 
     Source has a complex 3-column decision table with budget/sunk/raised
@@ -7751,7 +7844,7 @@ def slide_46(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=46,
+        prs, page_num=45,
         section_tag=SECTION_TAG_P2,
         title="Waterworld:  Three Scenarios,  Same Decision",
         draw_diagram=draw,
@@ -7765,7 +7858,7 @@ def slide_46(prs):
     ))
 
 
-def slide_47(prs):
+def slide_46(prs):
     """Modern sunk cost: Meta's Reality Labs has lost $50B+ since 2020.
 
     Layout: bullets left + Meta Quest 3 image right (mirrors revision-v1).
@@ -7803,7 +7896,7 @@ def slide_47(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=47,
+        prs, page_num=46,
         section_tag=SECTION_TAG_P2,
         title="Modern Sunk Cost:  Meta's Reality Labs Has Lost $50B+ Since 2020",
         draw_diagram=draw,
@@ -7819,7 +7912,7 @@ def slide_47(prs):
     ))
 
 
-def slide_48(prs):
+def slide_47(prs):
     """Opportunity cost is a real cost: Apple's canceled Apple Car."""
     def draw(slide):
         bullets = [
@@ -7852,7 +7945,7 @@ def slide_48(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=48,
+        prs, page_num=47,
         section_tag=SECTION_TAG_P2,
         title="Opportunity Cost Is a Real Cost:  Apple's Canceled Apple Car",
         draw_diagram=draw,
@@ -7866,7 +7959,7 @@ def slide_48(prs):
     ))
 
 
-def slide_49(prs):
+def slide_48(prs):
     """Dictionary of costs – native three-card cheat sheet.
 
     Same formulas and labels as the source image, restyled to the deck's
@@ -7960,7 +8053,7 @@ def slide_49(prs):
                   align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
-        prs, page_num=49,
+        prs, page_num=48,
         section_tag=SECTION_TAG_P2,
         title="Dictionary of Costs",
         draw_diagram=draw,
@@ -7972,7 +8065,7 @@ def slide_49(prs):
     ))
 
 
-def slide_50(prs):
+def slide_49(prs):
     """Ross Stores annual report – grounding cost concepts in a real 10-K."""
     def draw(slide):
         # Reconstruct the original 10-K snippet layout: a row-label column
@@ -8055,7 +8148,7 @@ def slide_50(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=50,
+        prs, page_num=49,
         section_tag=SECTION_TAG_P2,
         title="Cost Concepts in the Real World:  Ross Stores Annual Report",
         draw_diagram=draw,
@@ -8068,7 +8161,7 @@ def slide_50(prs):
     ))
 
 
-def slide_51(prs):
+def slide_50(prs):
     """ChatGPT subscription tiers — Plus vs Team marginal cost question."""
     def draw(slide):
         # Two tier panels, side by side
@@ -8140,7 +8233,7 @@ def slide_51(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=51,
+        prs, page_num=50,
         section_tag=SECTION_TAG_P2,
         title="Marginal Cost ≠ Average Cost:  ChatGPT Subscription Tiers",
         draw_diagram=draw,
@@ -8154,7 +8247,7 @@ def slide_51(prs):
     ))
 
 
-def slide_52(prs):
+def slide_51(prs):
     """Poll: MC of the 2nd ChatGPT user?
 
     Source slide is a full-bleed PollEv screenshot.
@@ -8169,7 +8262,7 @@ def slide_52(prs):
                   align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=52,
+        prs, page_num=51,
         section_tag=SECTION_TAG_P2,
         title="What's the MC of Adding the 2nd User?",
         draw_diagram=draw,
@@ -8186,7 +8279,7 @@ def slide_52(prs):
     ))
 
 
-def slide_53(prs):
+def slide_52(prs):
     """Solution: MC = $30 / user-month."""
     def draw(slide):
         # Two side-by-side cost lines
@@ -8244,7 +8337,7 @@ def slide_53(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=53,
+        prs, page_num=52,
         section_tag=SECTION_TAG_P2,
         title="Solution:  MC = $30 / user · month",
         draw_diagram=draw,
@@ -8258,7 +8351,7 @@ def slide_53(prs):
     ))
 
 
-def slide_54(prs):
+def slide_53(prs):
     """Marginal cost in finance: the true rate on a bigger loan."""
     def draw(slide):
         # Setup
@@ -8309,7 +8402,7 @@ def slide_54(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=54,
+        prs, page_num=53,
         section_tag=SECTION_TAG_P2,
         title="Marginal Cost in Finance:  The True Rate on a Bigger Loan",
         draw_diagram=draw,
@@ -8322,7 +8415,7 @@ def slide_54(prs):
     ))
 
 
-def slide_55(prs):
+def slide_54(prs):
     """Rivian's Georgia plant – weekly Total Cost function.
 
     Layout: bullet intro on top, cost function box, source cost-curve image.
@@ -8374,7 +8467,7 @@ def slide_55(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=55,
+        prs, page_num=54,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Weekly Cost",
         draw_diagram=draw,
@@ -8388,7 +8481,7 @@ def slide_55(prs):
     ))
 
 
-def slide_56(prs):
+def slide_55(prs):
     """Rivian's Georgia plant – Cost Components (TC = TFC + TVC).
 
     Native python-pptx chart with three series, driven by the same data
@@ -8423,7 +8516,7 @@ def slide_56(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=56,
+        prs, page_num=55,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Cost Components",
         draw_diagram=draw,
@@ -8436,7 +8529,7 @@ def slide_56(prs):
     ))
 
 
-def slide_57(prs):
+def slide_56(prs):
     """Rivian's Georgia plant – Per-Unit Costs (ATC, AVC, MC).
 
     Native chart, three series, same Excel data (TC = 800k + 200·Q²).
@@ -8473,7 +8566,7 @@ def slide_57(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=57,
+        prs, page_num=56,
         section_tag=SECTION_TAG_P2,
         title="Rivian's Georgia Plant —  Per-Unit Costs",
         draw_diagram=draw,
@@ -8487,7 +8580,7 @@ def slide_57(prs):
     ))
 
 
-def slide_58(prs):
+def slide_57(prs):
     """Cost Estimation – iPhone 17 teardown (discussion setup, no internet)."""
     def draw(slide):
         # Setup prompt
@@ -8529,7 +8622,7 @@ def slide_58(prs):
         _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=58,
+        prs, page_num=57,
         section_tag=SECTION_TAG_P2,
         title="Cost Estimation:  What Does an iPhone Cost to Make?",
         draw_diagram=draw,
@@ -8543,7 +8636,7 @@ def slide_58(prs):
     ))
 
 
-def slide_59(prs):
+def slide_58(prs):
     """Poll: AVC of an iPhone 17?
 
     Source slide is a full-bleed PollEv screenshot.
@@ -8558,7 +8651,7 @@ def slide_59(prs):
                   align=PP_ALIGN.CENTER, font="Calibri")
 
     s = make_diagram_slide(
-        prs, page_num=59,
+        prs, page_num=58,
         section_tag=SECTION_TAG_P2,
         title="What's the AVC of an iPhone 17?",
         draw_diagram=draw,
@@ -8575,7 +8668,7 @@ def slide_59(prs):
     ))
 
 
-def slide_60(prs):
+def slide_59(prs):
     """Solution: AVC of iPhone 17 ≈ $580 (vs. $1,199 retail)."""
     def draw(slide):
         # Teardown image on the left
@@ -8615,7 +8708,7 @@ def slide_60(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=60,
+        prs, page_num=59,
         section_tag=SECTION_TAG_P2,
         title="AVC of iPhone 17  ≈  $580",
         draw_diagram=draw,
@@ -8628,7 +8721,7 @@ def slide_60(prs):
     ))
 
 
-def slide_61(prs):
+def slide_60(prs):
     """iPhone naïve cost function – total cost (line chart, hand-drawn)."""
     def draw(slide):
         # Axes
@@ -8707,7 +8800,7 @@ def slide_61(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=61,
+        prs, page_num=60,
         section_tag=SECTION_TAG_P2,
         title="Naïve Linear Cost Function:  Total Cost View",
         draw_diagram=draw,
@@ -8720,7 +8813,7 @@ def slide_61(prs):
     ))
 
 
-def slide_62(prs):
+def slide_61(prs):
     """iPhone naïve cost function – per-unit (constant MC line)."""
     def draw(slide):
         AX_L = Inches(1.6)
@@ -8798,7 +8891,7 @@ def slide_62(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=62,
+        prs, page_num=61,
         section_tag=SECTION_TAG_P2,
         title="Naïve Linear Cost Function:  Per-Unit View",
         draw_diagram=draw,
@@ -8817,7 +8910,7 @@ def slide_62(prs):
 # --------------------------------------------------------------------------
 
 
-def slide_63(prs):
+def slide_62(prs):
     """Bridge slide: real-world cost functions can be non-linear (U-shape
     MC). We will keep MC linear where possible – the iPhone toy model is
     fine for most decisions; the Rivian quadratic was the exception."""
@@ -8849,7 +8942,7 @@ def slide_63(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=63,
+        prs, page_num=62,
         section_tag=SECTION_TAG_P2,
         title="More Complex Cost Functions:  When MC Isn't Linear",
         draw_diagram=draw,
@@ -8867,11 +8960,11 @@ def slide_63(prs):
     ))
 
 
-def slide_64(prs):
+def slide_63(prs):
     """Section divider – Part 2.2: Long-Run Costs & Economies of Scale.
     Mirror of slide_30 (Part 1.2) using the Part-2 highlight."""
     s = make_section_agenda(
-        prs, page_num=64,
+        prs, page_num=63,
         current_part_idx=1,
         section_tag=SECTION_TAG_DIV,
         title="Part 2.2:  Long-Run Costs & Economies of Scale",
@@ -8884,7 +8977,7 @@ def slide_64(prs):
     ))
 
 
-def slide_65(prs):
+def slide_64(prs):
     """Short-run v. long-run costs – two-column comparison."""
     def draw(slide):
         col_w = Inches(6.0)
@@ -8948,7 +9041,7 @@ def slide_65(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=65,
+        prs, page_num=64,
         section_tag=SECTION_TAG_P2_LR,
         title="Short-Run vs. Long-Run Costs",
         draw_diagram=draw,
@@ -8964,7 +9057,7 @@ def slide_65(prs):
     ))
 
 
-def slide_66(prs):
+def slide_65(prs):
     """LR-AC envelope schematic.
 
     A clean schematic: three plant-size SAC bands across a quantity axis,
@@ -9133,7 +9226,7 @@ def slide_66(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=66,
+        prs, page_num=65,
         section_tag=SECTION_TAG_P2_LR,
         title="LR Average Cost is the Lower Envelope of SR Curves",
         draw_diagram=draw,
@@ -9149,7 +9242,7 @@ def slide_66(prs):
     ))
 
 
-def slide_67(prs):
+def slide_66(prs):
     """Economies of scale: definition + the three cases."""
     def draw(slide):
         # Question header
@@ -9196,7 +9289,7 @@ def slide_67(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=67,
+        prs, page_num=66,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scale:  Three Possible Patterns",
         draw_diagram=draw,
@@ -9214,7 +9307,7 @@ def slide_67(prs):
     ))
 
 
-def slide_68(prs):
+def slide_67(prs):
     """Technological reasons for economies of scale."""
     bullets = [
         ("Specialisation and division of labor", 0),
@@ -9229,7 +9322,7 @@ def slide_68(prs):
         ("Big firms can run dedicated lines, automation, AI/data infra", 1),
     ]
     s = make_content_bulleted(
-        prs, page_num=68,
+        prs, page_num=67,
         section_tag=SECTION_TAG_P2_LR,
         title="Technological Reasons for Economies of Scale",
         bullets=bullets,
@@ -9249,7 +9342,7 @@ def slide_68(prs):
     ))
 
 
-def slide_69(prs):
+def slide_68(prs):
     """Embraer ERJ-145 vs. Boeing 787 – scale economies in aviation."""
     def draw(slide):
         # Two airplane cards side by side
@@ -9314,7 +9407,7 @@ def slide_69(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=69,
+        prs, page_num=68,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scale in Aviation:  ERJ-145 vs. 787",
         draw_diagram=draw,
@@ -9330,7 +9423,7 @@ def slide_69(prs):
     ))
 
 
-def slide_70(prs):
+def slide_69(prs):
     """Reasons for diseconomies of scale."""
     bullets = [
         ("Coordination, communication, control  get harder", 0),
@@ -9345,7 +9438,7 @@ def slide_70(prs):
         ("Big-tech reorgs to break ranks into smaller, accountable units", 1),
     ]
     s = make_content_bulleted(
-        prs, page_num=70,
+        prs, page_num=69,
         section_tag=SECTION_TAG_P2_LR,
         title="Reasons for Diseconomies of Scale",
         bullets=bullets,
@@ -9364,7 +9457,7 @@ def slide_70(prs):
     ))
 
 
-def slide_71(prs):
+def slide_70(prs):
     """Economies of scope – producing 2+ products together."""
     def draw(slide):
         # Definition box at top
@@ -9412,7 +9505,7 @@ def slide_71(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=71,
+        prs, page_num=70,
         section_tag=SECTION_TAG_P2_LR,
         title="Economies of Scope:  Cheaper Together than Apart",
         draw_diagram=draw,
@@ -9430,7 +9523,7 @@ def slide_71(prs):
     ))
 
 
-def slide_72(prs):
+def slide_71(prs):
     """Amazon – scale, scope, or both? Discussion."""
     def draw(slide):
         _add_text(slide, MARGIN, Inches(1.95), RULE_W, Inches(0.55),
@@ -9481,7 +9574,7 @@ def slide_72(prs):
         _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=72,
+        prs, page_num=71,
         section_tag=SECTION_TAG_P2_LR,
         title="Amazon:  Economies of Scale,  Scope,  or Both?",
         draw_diagram=draw,
@@ -9499,7 +9592,7 @@ def slide_72(prs):
     ))
 
 
-def slide_73(prs):
+def slide_72(prs):
     """Shark Tank mini-case setup (video + group discussion)."""
     def draw(slide):
         # Setup line
@@ -9539,7 +9632,7 @@ def slide_73(prs):
         _add_discussion_break(slide, width=Inches(5.0))
 
     s = make_diagram_slide(
-        prs, page_num=73,
+        prs, page_num=72,
         section_tag=SECTION_TAG_P2_LR,
         title="Mini-Case:  Shark Tank Pitch — Group Discussion",
         draw_diagram=draw,
@@ -9555,7 +9648,7 @@ def slide_73(prs):
     ))
 
 
-def slide_74(prs):
+def slide_73(prs):
     """Shark Tank mini-case – the numbers / solution."""
     def draw(slide):
         # Two columns: Volume/Cost evidence  |  Deal comparison
@@ -9615,7 +9708,7 @@ def slide_74(prs):
         )
 
     s = make_diagram_slide(
-        prs, page_num=74,
+        prs, page_num=73,
         section_tag=SECTION_TAG_P2_LR,
         title="Shark Tank Solution:  Scale + Deal Comparison",
         draw_diagram=draw,
@@ -9933,12 +10026,12 @@ def build_deck(output_name="Module 3_clean.pptx"):
     slide_38(prs)
     slide_39(prs)
     slide_40(prs)
-    slide_41(prs)
 
     # Part 2 section divider
-    slide_42(prs)
+    slide_41(prs)
 
     # Part 2 §2.1 Cost Concepts
+    slide_42(prs)
     slide_43(prs)
     slide_44(prs)
     slide_45(prs)
@@ -9958,9 +10051,9 @@ def build_deck(output_name="Module 3_clean.pptx"):
     slide_59(prs)
     slide_60(prs)
     slide_61(prs)
-    slide_62(prs)
 
     # Part 2 §2.2 Long-Run Costs & Economies of Scale
+    slide_62(prs)
     slide_63(prs)
     slide_64(prs)
     slide_65(prs)
@@ -9972,7 +10065,6 @@ def build_deck(output_name="Module 3_clean.pptx"):
     slide_71(prs)
     slide_72(prs)
     slide_73(prs)
-    slide_74(prs)
 
     # Backup section (slides 75-77).  Slide 16's right-side annotations
     # ("Very high MPL image" / "Very low MPL image") link to the
@@ -9985,8 +10077,8 @@ def build_deck(output_name="Module 3_clean.pptx"):
     # Wire slide-jump hyperlinks now that all targets exist.
     slides = list(prs.slides)
     s16 = slides[15]   # 0-indexed: deck slide 16
-    s76 = slides[75]
-    s77 = slides[76]
+    s76 = slides[74]
+    s77 = slides[75]
     # 1. Slide-16 annotation textboxes → backup slides (matched by text).
     for shape in s16.shapes:
         if not shape.has_text_frame:
