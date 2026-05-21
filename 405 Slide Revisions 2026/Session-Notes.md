@@ -1,5 +1,139 @@
 # 405 Slide Revisions 2026 – Session Notes
 
+## 2026-05-21 – Module 3 slides 42 – 46 redesign + hand-edit ports
+
+**One-line summary.** Heavy redesign on the cost-types slide (42), the
+group-work car slide (43) and the Waterworld scenarios slide (45); plus
+title/picture/header port on slide 44 and a Reality Labs bullet on
+slide 46. Multiple opt-in side-path rebuilds throughout (user signalled
+hand-edits between iterations).
+
+### Per-slide changes
+
+1. **Slide 42 – "Three Cost Types".** Re-ordered the three columns
+   left → right by decision weight (**Variable / Fixed / Sunk**, was
+   Fixed / Sunk / Variable). Each column body now carries its own
+   decision verdict as a second paragraph with 12 pt space-before:
+   "→ Always consider!", "→ Consider for long-run decisions /
+   (entry, exit, capacity)" (split into two paragraphs after a hand-
+   edit), "cannot be recovered / → Ignore!". The mid-slide standalone
+   "Decision rule" sentence was removed (its verdict now lives inside
+   each column). Added **Examples cards** below each band: rounded
+   white rect, navy 1.25 pt border, soft drop shadow, "Examples" label
+   top-left at 12 pt italic-bold navy, 2-3 bullets at 14 pt navy.
+   Final examples after hand-edits: *Variable* — Buy raw materials,
+   Hire workers, Shipping & packaging. *Fixed* — Rent / lease
+   payments, Insurance & property tax, R&D investments (for future
+   innovation). *Sunk* — Past R&D, Past advertising, Non-refundable
+   deposits. Takeaway "Sunk costs should not affect managerial
+   decisions" hand-positioned under the Sunk Costs column at
+   `left=start_x + (band_w + gap) * 2`, top=5405247 EMU, width=band_w,
+   height=747521 EMU (text wraps to 2 lines). Title trimmed from
+   "Three Cost Types, Three Different Decision Rules" → "Three Cost
+   Types".
+
+2. **Slide 43 – "Group Work: Your Car or the Company Car?"** Inline-
+   built the two option boxes (custom path; `_add_outlined_box`
+   couldn't carry two paragraphs at different sizes). Title 28 pt,
+   subtitle 20 pt with a leading `\n` for a blank line: "Your own
+   car" + "→ you are reimbursed 50¢ / mile"; "Company car" + "(full
+   cost incl. charge paid by your company)". I used Unicode `→` not
+   the Wingdings glyph from the canonical — flagged to the user; no
+   pushback. Added a **wrapper container** around the cost breakdown:
+   ROUNDED_RECTANGLE with `adjustments[0]=0.04`, 2.0 pt navy border,
+   white fill, no shadow. Header "Costs associated with your car
+   (per mile driven):" bumped 14 → 18 pt italic gray. Four cost
+   boxes narrowed to W=2.50 in (longest text "45¢   lease on the
+   vehicle" measures 2.20 in at 15 pt bold Calibri → 2.40 min +
+   safety) and shortened to H=0.40 in (≈50% of the prior 0.75).
+   Cost rows pulled up to sit just below the header (row1_top=
+   Inches(4.5225), row2_top=Inches(4.9725); the wrapper is 1.50 in
+   tall ending at Y=5.50 with breathing room below). "Should you
+   use…" question prefixed with `⇒` and moved to T=5.815 in.
+   Discussion-break badge re-positioned: `top=Inches(6.34)`,
+   `left=Inches(8.457)` (right-edge tightened). Added a `left=`
+   parameter to `_add_discussion_break` so future hand-positioned
+   badges can pin themselves.
+
+3. **Slide 44 – "Why Studios Finish Movies They Know Lose Money".**
+   Title reworded. New "Waterworld (1995)" header textbox above the
+   picture (L=3.631, T=1.554 in, 28 pt bold navy, centered). Picture
+   moved L=3.7 → 2.65, T=1.65 → 2.12 in (height preserved at 4.85,
+   width auto from aspect ratio = 8.62 in). Bottom italic caption
+   "Sunk cost in Waterworld (1995): $175M spent before release"
+   removed.
+
+4. **Slide 45 – "Waterworld: Sunk Costs and Decisions over Time".**
+   Major rebuild back toward source slide 52 layout after the user
+   noted the prior version's left labels were illegible. New 4-column
+   geometry: **wide label column (W=4.0 in)** + **three narrower
+   scenario columns (W=2.5 in)**, col_gap=0.10 in, total 11.8 in,
+   centered. Row order restored to source: Revenues → Sunk →
+   Additional → Overall → Profit → Decision (was Sunk → Additional →
+   Overall → Revenue → Profit → Decision). **"(<150)" annotation**
+   added to the Expected Additional Cost row in every scenario —
+   the pedagogical hinge that the marginal cost is always below
+   revenue, so "Make the film!" still holds. Decision band text
+   restored to "Make the film!" (was abbreviated "Make!"). After
+   another hand-edit round: whole table shifted up ~0.28 in
+   (`row_y` starts at 1.569 in); Expected Additional Cost cells
+   got a **soft light-yellow fill `#FFF2CC`** (lighter than the
+   gold on the decision cells); Make-the-film cells kept gold fill
+   plus a navy outline so they read as part of the same boxed grid;
+   takeaway rewritten to "Ignore sunk costs — continue whenever
+   Expected Revenue > Expected Additional Cost", moved up to
+   T=6.389 in, now rounded with a soft drop shadow. Title finalized
+   as "Waterworld: Sunk Costs and Decisions over Time" (plural).
+
+5. **Slide 46 – "Modern Sunk Cost: Meta's Reality Labs Has Lost
+   $50B+ Since 2020".** Added a new sub-bullet "Reality Labs:
+   Meta's AR/VR arm – building the next computing platform" between
+   the "Meta has poured ~$50B" main bullet and the existing
+   "Metaverse / VR / AR…" sub-bullet. Bullets textbox W 8.7 → 7.0 in
+   (narrower), H 4.5 → 4.9 in (taller). Picture moved L=9.55 → 8.47,
+   T=2.0 → 2.92 in and enlarged W=3.30 → 4.47 in. "expected value"
+   capitalized to "Expected Value" on the last bullet.
+
+### Helper additions
+
+- `_add_takeaway_bar`: new `left=` parameter so hand-positioned
+  takeaways can pin themselves. When `None`, behaves as before
+  (horizontally centered).
+- `_add_discussion_break`: new `left=` parameter, same convention.
+- Top-of-file imports: `Cm` added next to `Inches, Pt` (used for the
+  +0.4 cm discussion-break nudge, since reverted to absolute
+  `Inches(6.34)`).
+
+### Decisions made
+
+- For slide 43's "→" arrow inside the option boxes, used Unicode
+  U+2192 with Calibri rather than reproducing the canonical's
+  Wingdings glyph (U+F0E0 with `<a:sym typeface="Wingdings"/>`).
+  Visually identical, consistent with the rest of the deck, avoids
+  XML symbol-font surgery. User did not ask to revert.
+- For slide 45, the standalone "Decision rule" middle text from
+  the prior version is gone; the rule now lives as a verdict inside
+  each cost-type column and again in the bottom takeaway.
+
+### Pending items
+
+- **Slide 46 image swap.** User wants the Meta Quest 3 product shot
+  replaced with a photo of a **person wearing a VR headset**.
+  Cannot fetch one autonomously; user will drop a file into
+  [Module 3](Module%203) and tell me the filename, then I'll swap
+  the `_add_source_image(slide, 47, "rId2", ...)` call for a
+  local-file load and update the "Meta Quest 3 (CC BY-SA,
+  Wikimedia)" caption attribution.
+
+### Files touched
+
+- `Module 3/_build_clean_deck.py` (slides 42 – 46, helpers
+  `_add_takeaway_bar`, `_add_discussion_break`; `Cm` import).
+- `Module 3/Module 3_clean.pptx` (canonical deck, regenerated from
+  the build script after each port).
+- `Module 3/Module 3.pptx` (source deck — only metadata touched,
+  unintentional; included in the commit).
+
 ## 2026-05-18 – Hand-edit ports across Module 3 slides 17 / 23 / 25 – 28
 
 **One-line summary.** Ported a batch of manual PowerPoint tweaks back into

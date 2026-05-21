@@ -27,7 +27,7 @@ from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.oxml.ns import qn
-from pptx.util import Inches, Pt
+from pptx.util import Cm, Inches, Pt
 
 # Reuse all primitives from the template script (single source of truth).
 from _build_template_samples import (
@@ -1193,7 +1193,8 @@ def _apply_picture_style(pic, *, corner_pct=8,
 # --------------------------------------------------------------------------
 
 def _add_takeaway_bar(slide, text, *, top=Inches(6.4), width=None,
-                       height=Inches(0.55), fill=GOLD, text_color=WHITE,
+                       height=Inches(0.55), left=None,
+                       fill=GOLD, text_color=WHITE,
                        size=20, font="Calibri", bold=True,
                        rounded=False, shadow=False):
     """Bottom-of-slide takeaway band — the 'major concept' callout.
@@ -1201,10 +1202,14 @@ def _add_takeaway_bar(slide, text, *, top=Inches(6.4), width=None,
     rounded=True  → ROUNDED_RECTANGLE with ~30% corner radius.
     shadow=True   → soft drop shadow (off by default to keep the flat
                     look on the majority of slides).
+    left=None     → horizontally centered. Pass an EMU/Inches value to
+                    pin the bar's left edge (used for hand-positioned
+                    takeaways).
     """
     if width is None:
         width = Inches(9.6)
-    left = (SLIDE_W - width) // 2
+    if left is None:
+        left = (SLIDE_W - width) // 2
     if not (rounded or shadow):
         return _add_filled_box(slide, left, top, width, height, text,
                                 fill=fill, text_color=text_color,
@@ -1363,16 +1368,20 @@ def _add_teaching_note(slide, text, *, top=Inches(6.6), width=None,
 
 
 def _add_discussion_break(slide, *, top=Inches(6.25), width=Inches(4.8),
-                           text="Discussion Break"):
+                           left=None, text="Discussion Break"):
     """Rounded-parallelogram 'discussion break' badge (bottom-right).
 
     Custom-geometry shape: top and bottom edges are horizontal; the left
     and right edges slant at 45° in real space (skew = height of the
     shape).  All four corners are slightly rounded.  Gold fill, navy
     bold text, soft drop shadow.
+
+    left=None → pin to the right edge with the default MARGIN. Pass an
+    EMU/Inches value to override (used for hand-positioned badges).
     """
     height = Inches(0.72)
-    left = SLIDE_W - MARGIN - width
+    if left is None:
+        left = SLIDE_W - MARGIN - width
     left, top, width, height = int(left), int(top), int(width), int(height)
     # Compute skew in path-coordinate units so that left/right sides slant
     # at 45° in REAL space:  horizontal offset of top edge == shape height.
@@ -7597,46 +7606,114 @@ def slide_39(prs):
 
 
 def slide_40(prs):
-    """'Bang for the buck' in grocery shopping (intuition reinforcer)."""
+    """'Bang for the Buck' in grocery shopping.
+
+    2026-05-21: rebuilt to mirror original slide 47 (same wording, same
+    OMML formulas, same image sizes; pictures shifted right by ~1.67"
+    to centre the pair on the 16:9 deck while preserving the original's
+    relative spacing).  The bottom NAVY 'universal decision rule' bar
+    from the prior rebuild is kept and upgraded with rounded corners +
+    a drop shadow.
+    """
     def draw(slide):
-        # Left text: the intuition
+        # ---- Bullets (original 47 wording, verbatim) ----
         bullets = [
-            ("The bang-for-the-buck rule isn't just for factories", 0),
-            ("You apply it every week at the grocery store", 0),
-            ("Spend each $ on the item that gives the most extra utility per $", 1),
-            ("Same logic, different decision", 0),
+            ("P&G offers two sizes for its flagship detergent", 0),
+            ("Small Tide Ultra Oxi (29 loads) for $17", 1),
+            ("Large Tide Ultra Oxi (81 loads) for $35", 1),
         ]
         _add_hierarchical_bullets(
             slide,
-            left=MARGIN, top=Inches(1.85),
-            width=Inches(6.5), height=Inches(4.0),
+            left=MARGIN, top=Inches(1.55),
+            width=Inches(12.0), height=Inches(1.1),
             items=bullets,
-            size=24, sub_size=22, line_spacing_pts=12,
+            size=24, sub_size=22, line_spacing_pts=8,
         )
 
-        # Two product pictures on the right – mirroring the source
-        _add_source_image(slide, 41, "rId6",
-                           left=Inches(7.5), top=Inches(2.2),
-                           height=Inches(2.4))
-        _add_source_image(slide, 41, "rId5",
-                           left=Inches(10.4), top=Inches(2.2),
-                           height=Inches(2.4))
+        # ---- Three OMML formulas, stacked, full-width centered ----
+        # MP_x / p_x  — multi-letter "small" / "large" subscripts kept
+        # italic (math-default) to match the original 47 rendering.
+        def mp_over_p(label):
+            return _omml_frac(
+                _omml_sub(_omml_run('MP'), _omml_run(label)),
+                _omml_sub(_omml_run('p'),  _omml_run(label)),
+            )
 
-        # Bottom takeaway
+        f_small_eq = (
+            mp_over_p('small')
+            + _omml_text(' = ')
+            + _omml_frac(_omml_text('29'), _omml_text('17'))
+            + _omml_text(' = ')
+            + _omml_text('1.7')
+        )
+        f_large_eq = (
+            mp_over_p('large')
+            + _omml_text(' = ')
+            + _omml_frac(_omml_text('81'), _omml_text('35'))
+            + _omml_text(' = ')
+            + _omml_text('2.3')
+        )
+        f_compare = (
+            mp_over_p('small')
+            + _omml_text(' &lt; ')      # bare '<' would break the XML parser
+            + mp_over_p('large')
+        )
+
+        # ---- Three OMML formulas — positions/sizes per 2026-05-21
+        # hand-tweaks in PowerPoint (small ratio left, large ratio right,
+        # inequality centred below the pair). ----
+        # F1 small ratio:  was full-width row at (0, 2.70, SLIDE_W, 0.50)
+        _add_math_equation(
+            slide, left=Inches(1.720), top=Inches(3.061),
+            width=Inches(3.130), height=Inches(0.859),
+            omml_content=f_small_eq, size_pt=22, color=NAVY,
+        )
+        # F2 large ratio:  was full-width row at (0, 3.25, SLIDE_W, 0.50)
+        _add_math_equation(
+            slide, left=Inches(8.080), top=Inches(3.005),
+            width=Inches(3.363), height=Inches(0.910),
+            omml_content=f_large_eq, size_pt=22, color=NAVY,
+        )
+        # F3 inequality:  was full-width row at (0, 3.80, SLIDE_W, 0.50)
+        _add_math_equation(
+            slide, left=Inches(4.780), top=Inches(4.450),
+            width=Inches(3.300), height=Inches(0.910),
+            omml_content=f_compare, size_pt=22, color=NAVY,
+        )
+
+        # ---- Two product pictures — positions per 2026-05-21 hand-tweaks
+        # (small bottle nudged left/up; large bottle nudged up). ----
+        # Source-deck rels: rId5 = small bottle, rId6 = large bottle.
+        # Small:  was (3.58, 4.39)  →  (2.69, 4.165)
+        # Large:  was (8.69, 4.26)  →  (8.69, 4.095)
+        _add_source_image(slide, 41, "rId5",
+                           left=Inches(2.690), top=Inches(4.165),
+                           height=Inches(1.90))
+        _add_source_image(slide, 41, "rId6",
+                           left=Inches(8.690), top=Inches(4.095),
+                           height=Inches(2.16))
+
+        # ---- Bottom NAVY takeaway bar — kept from prior rebuild,
+        # now rounded + drop-shadowed (2026-05-21 user ask). ----
         _add_takeaway_bar(slide,
                            "Bang-for-the-buck:  a universal decision rule",
-                           top=Inches(6.5), fill=NAVY, width=Inches(9.0))
+                           top=Inches(6.5), fill=NAVY, width=Inches(9.0),
+                           rounded=True, shadow=True)
 
     s = make_diagram_slide(
         prs, page_num=40,
         section_tag=SECTION_TAG_LR,
-        title="'Bang for the Buck' in Grocery Shopping",
+        title="“Bang for the Buck” in Grocery Shopping",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "The bang-for-the-buck rule isn't just for factories. You apply it "
-        "every week at the grocery store – balancing what you spend on "
-        "each item against the extra utility you get. Same logic, "
+        "The bang-for-the-buck rule isn't just for factories – you apply "
+        "it every week at the grocery store. P&G offers two sizes of Tide "
+        "Ultra Oxi: small at 29 loads for $17, large at 81 loads for $35. "
+        "Compute loads-per-dollar: 29/17 ≈ 1.7 for the small, 81/35 "
+        "≈ 2.3 for the large. The large size delivers more cleaning "
+        "per dollar, so the bang-for-the-buck rule says to buy the large "
+        "bottle. Same logic as the factory's input choice, just a "
         "different decision."
     ))
 
@@ -7665,53 +7742,147 @@ SECTION_TAG_P2_LR = "Module 3 · Costs · Long-Run & Scale"
 
 
 def slide_42(prs):
-    """Cost types: fixed / sunk / variable, with takeaway 'sunk costs
-    should never drive decisions'."""
+    """Cost types: variable / fixed / sunk, each with examples; takeaway
+    'sunk costs should not affect managerial decisions'."""
     def draw(slide):
-        # Three vertical bands, each with a category header and definition
+        # 2026-05-21: distinct accents per cost type — DARK_GREEN on
+        # Variable (always-consider), NAVY on Fixed (conditional), DARK_RED
+        # on Sunk (always-ignore). 2026-05-21 v2: re-ordered left→right by
+        # decision weight (Variable → Fixed → Sunk) and added an
+        # "Examples" card under each column.
+        DARK_RED   = RGBColor(0x8B, 0x1A, 0x1A)
+        DARK_GREEN = RGBColor(0x2E, 0x7D, 0x32)
+
+        # Each band carries (label, body_paragraphs, examples, fill).
+        # body_paragraphs is a list of (text, space_before_pt, space_after_pt)
+        # — first entry replaces the default paragraph created by
+        # _add_outlined_box; the rest are appended via add_paragraph.
+        # 2026-05-21 v3 hand-edits ported from PowerPoint:
+        #   • Variable verdict: "Always consider!" (was just "Consider!").
+        #   • Fixed verdict: split from one soft-broken paragraph into two
+        #     real paragraphs — "Consider for long-run decisions" then
+        #     "(entry, exit, capacity)" without the soft break.
+        #   • Sunk verdict: 12 pt moved from space-before → space-after, so
+        #     the centered block shifts up inside the box.
         bands = [
-            ("Fixed Costs", "Do not depend on quantity produced (Q)", NAVY, WHITE),
+            ("Variable Costs",
+             [("Depend on volume produced (Q)", None, None),
+              ("→  Always consider!", 12, None)],
+             ["Buy raw materials", "Hire workers",
+              "Shipping & packaging"],
+             DARK_GREEN),
+            ("Fixed Costs",
+             [("Do not depend on quantity produced (Q)", None, None),
+              ("→  Consider for long-run decisions", 12, None),
+              ("(entry, exit, capacity)", None, None)],
+             ["Rent / lease payments", "Insurance & property tax",
+              "R&D investments (for future innovation)"],
+             NAVY),
             ("Sunk Costs",
-             "A fixed cost that cannot be recovered\n(may be partially sunk)",
-             GOLD, NAVY),
-            ("Variable Costs", "Depend on volume produced (Q)", NAVY, WHITE),
+             [("A fixed cost that ", None, None),
+              ("cannot be recovered\n→  Ignore!", None, 12)],
+             ["Past R&D", "Past advertising",
+              "Non-refundable deposits"],
+             DARK_RED),
         ]
         band_w = Inches(3.95)
-        band_h = Inches(2.2)
         gap = Inches(0.15)
         total_w = band_w * 3 + gap * 2
         start_x = (SLIDE_W - total_w) // 2
-        for i, (label, body, fill, txt) in enumerate(bands):
+
+        for i, (label, body_paras, examples, fill) in enumerate(bands):
             bx = start_x + (band_w + gap) * i
             # Header band
-            _add_filled_box(
+            hdr = _add_filled_box(
                 slide, bx, Inches(2.05), band_w, Inches(0.7), label,
-                fill=fill, text_color=txt, size=22, bold=True,
+                fill=fill, text_color=WHITE, size=22, bold=True,
             )
-            # Body description
-            _add_outlined_box(
-                slide, bx, Inches(2.75), band_w, Inches(1.5), body,
+            _add_drop_shadow(hdr)
+            # Body description — first paragraph supplied to the helper,
+            # remaining verdict paragraphs appended below.
+            first_text, first_sb, first_sa = body_paras[0]
+            bdy = _add_outlined_box(
+                slide, bx, Inches(2.75), band_w, Inches(1.5), first_text,
                 fill=WHITE, line=fill, text_color=NAVY,
                 size=18, bold=False, line_w=1.5,
             )
+            _add_drop_shadow(bdy)
+            p0 = bdy.text_frame.paragraphs[0]
+            if first_sb is not None: p0.space_before = Pt(first_sb)
+            if first_sa is not None: p0.space_after = Pt(first_sa)
+            for text, sb, sa in body_paras[1:]:
+                pn = bdy.text_frame.add_paragraph()
+                pn.alignment = PP_ALIGN.CENTER
+                if sb is not None: pn.space_before = Pt(sb)
+                if sa is not None: pn.space_after = Pt(sa)
+                rn = pn.add_run()
+                rn.text = text
+                rn.font.name = "Calibri"
+                rn.font.size = Pt(18)
+                rn.font.bold = False
+                rn.font.color.rgb = NAVY
 
-        # Decision rule in the middle (links sunk to action)
-        _add_text(slide, MARGIN, Inches(4.6), RULE_W, Inches(0.5),
-                  "→  Decision rule:  ignore sunk costs when choosing what to do next",
-                  size=22, italic=True, color=GRAY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
+            # Examples card directly below — rounded white rect, navy
+            # border, soft drop shadow. "Examples" label sits top-left;
+            # 2–3 bullets follow.
+            ex = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE,
+                int(bx), int(Inches(4.35)),
+                int(band_w), int(Inches(1.20)),
+            )
+            try: ex.adjustments[0] = 0.10
+            except Exception: pass
+            ex.fill.solid()
+            ex.fill.fore_color.rgb = WHITE
+            ex.line.color.rgb = NAVY
+            ex.line.width = Pt(1.25)
+            ex.shadow.inherit = False
+            _add_drop_shadow(ex)
+            etf = ex.text_frame
+            etf.word_wrap = True
+            etf.margin_left = Inches(0.13)
+            etf.margin_right = Inches(0.08)
+            etf.margin_top = Inches(0.06)
+            etf.margin_bottom = Inches(0.05)
+            etf.vertical_anchor = MSO_ANCHOR.TOP
+            lbl_p = etf.paragraphs[0]
+            lbl_p.alignment = PP_ALIGN.LEFT
+            lbl_r = lbl_p.add_run()
+            lbl_r.text = "Examples"
+            lbl_r.font.name = "Calibri"
+            lbl_r.font.size = Pt(12)
+            lbl_r.font.bold = True
+            lbl_r.font.italic = True
+            lbl_r.font.color.rgb = NAVY
+            for ex_text in examples:
+                pe = etf.add_paragraph()
+                pe.alignment = PP_ALIGN.LEFT
+                re_ = pe.add_run()
+                re_.text = "•  " + ex_text
+                re_.font.name = "Calibri"
+                re_.font.size = Pt(14)
+                re_.font.bold = False
+                re_.font.color.rgb = NAVY
 
+        # 2026-05-21 v3 hand-edit: takeaway moved to sit directly under
+        # the Sunk Costs column (right edge), narrowed to band_w so it
+        # visually anchors to that single column; text wraps to 2 lines
+        # (hence the taller 0.82 in height). T=5.91 in matches the user's
+        # PowerPoint drag.
+        sunk_left = start_x + (band_w + gap) * 2
         _add_takeaway_bar(
             slide,
-            "Sunk costs should never drive decisions",
-            top=Inches(6.45), fill=GOLD, text_color=NAVY,
-            width=Inches(10.0),
+            "Sunk costs should not affect managerial decisions",
+            left=sunk_left, top=5405247,
+            width=band_w, height=747521,
+            fill=DARK_RED, text_color=WHITE,
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
         prs, page_num=42,
         section_tag=SECTION_TAG_P2,
-        title="Three Cost Types,  Three Different Decision Rules",
+        title="Three Cost Types",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -7733,41 +7904,114 @@ def slide_43(prs):
         # Two options side by side
         opt_w = Inches(5.5)
         opt_h = Inches(1.4)
-        gap = Inches(0.6)
-        start_x = (SLIDE_W - opt_w * 2 - gap) // 2
-        _add_outlined_box(
-            slide, start_x, Inches(2.45), opt_w, opt_h,
-            "Your own car\n+  reimbursed 50¢ / mile",
-            fill=WHITE, line=NAVY, text_color=NAVY,
-            size=20, bold=True, line_w=1.5,
-        )
-        _add_outlined_box(
-            slide, start_x + opt_w + gap, Inches(2.45), opt_w, opt_h,
-            "Company car\n(full cost incl. gas covered)",
-            fill=WHITE, line=NAVY, text_color=NAVY,
-            size=20, bold=True, line_w=1.5,
-        )
+        opt_gap = Inches(0.6)
+        start_x = (SLIDE_W - opt_w * 2 - opt_gap) // 2
+        own_left = start_x
+        co_left = start_x + opt_w + opt_gap
+        opt_top = Inches(2.45)
 
-        # Cost breakdown — 4 cost boxes positioned UNDER the "Your own car"
-        # option (per-mile costs only apply to that scenario, not to the
-        # company-car alternative).
-        _add_text(slide, start_x, Inches(4.05), opt_w, Inches(0.35),
+        # 2026-05-21 hand-edits on the option boxes:
+        #   • Title bumped to 28 pt (was 20 pt).
+        #   • Subtitle wording rewritten — "you are reimbursed 50¢ / mile"
+        #     (was "+  reimbursed 50¢ / mile") and "(full cost incl.
+        #     charge paid by your company)" (was "…gas covered)").
+        #   • A leading newline opens visible vertical air between title
+        #     and subtitle inside the box.
+        def _draw_option_box(left, title, subtitle):
+            shp = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE, int(left), int(opt_top),
+                int(opt_w), int(opt_h),
+            )
+            shp.fill.solid()
+            shp.fill.fore_color.rgb = WHITE
+            shp.line.color.rgb = NAVY
+            shp.line.width = Pt(1.5)
+            shp.shadow.inherit = False
+            tf = shp.text_frame
+            tf.word_wrap = True
+            tf.margin_left = Inches(0.1)
+            tf.margin_right = Inches(0.1)
+            tf.margin_top = Inches(0.05)
+            tf.margin_bottom = Inches(0.05)
+            tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+            p0 = tf.paragraphs[0]
+            p0.alignment = PP_ALIGN.CENTER
+            r0 = p0.add_run()
+            r0.text = title
+            r0.font.name = "Calibri"
+            r0.font.size = Pt(28)
+            r0.font.bold = True
+            r0.font.color.rgb = NAVY
+            p1 = tf.add_paragraph()
+            p1.alignment = PP_ALIGN.CENTER
+            r1 = p1.add_run()
+            r1.text = "\n" + subtitle
+            r1.font.name = "Calibri"
+            r1.font.size = Pt(20)
+            r1.font.bold = True
+            r1.font.color.rgb = NAVY
+
+        _draw_option_box(own_left, "Your own car",
+                         "→  you are reimbursed 50¢ / mile")
+        _draw_option_box(co_left, "Company car",
+                         "(full cost incl. charge paid by your company)")
+
+        # 2026-05-21 hand-edits to the wrapper container:
+        #   • Top nudged down from 3.85 → 4.00 so a visible gap opens
+        #     between the "Your own car" box (bottom 3.85) and the
+        #     wrapper.
+        #   • Border thickened from 1.0 pt → 2.0 pt for more presence.
+        #   • Header text bumped from 14 pt → 18 pt.
+        #   • Cost boxes shrunk in height (0.75 → 0.40 in, ≈50%).
+        #   • 2026-05-21 v2: wrapper height shrunk 1.95 → 1.50 in; cost
+        #     rows pulled up to sit just below the header (instead of
+        #     pinned to the wrapper bottom); the "Should you use…"
+        #     question pushed further down relative to the now-shorter
+        #     wrapper.
+        wrap_l = own_left
+        wrap_t = Inches(4.00)
+        wrap_w = opt_w
+        wrap_h = Inches(1.50)  # bottom at Y = 5.50
+        wrap = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(wrap_l), int(wrap_t), int(wrap_w), int(wrap_h),
+        )
+        try: wrap.adjustments[0] = 0.04
+        except Exception: pass
+        wrap.fill.solid()
+        wrap.fill.fore_color.rgb = WHITE
+        wrap.line.color.rgb = NAVY
+        wrap.line.width = Pt(2.0)
+        wrap.shadow.inherit = False
+
+        # Header sits at the top of the wrapper, 18 pt italic gray
+        _add_text(slide, wrap_l, Inches(4.10), wrap_w, Inches(0.40),
                   "Costs associated with your car  (per mile driven):",
-                  size=14, italic=True, color=GRAY, font="Calibri",
+                  size=18, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
+
+        # Four cost boxes — narrow (W=2.50 in, hugs longest text
+        # "45¢   lease on the vehicle") and short (H=0.40 in, ≈50% of
+        # the prior 0.75 in). 2026-05-21 v2: rows pulled up so row 1 sits
+        # flush below the header (gap ~0.02 in), giving the wrapper a
+        # tight header-then-grid stack with breathing room below.
         costs = [
             ("20¢", "insurance"),
             ("20¢", "maintenance"),
             ("15¢", "electricity"),
             ("45¢", "lease on the vehicle"),
         ]
-        # 2 × 2 grid under the LEFT option box (Your own car)
-        cost_w = (opt_w - Inches(0.10)) // 2
-        cost_h = Inches(0.75)
+        cost_w = Inches(2.50)
+        cost_h = Inches(0.40)
+        col_gap = Inches(0.10)
+        row_gap = Inches(0.05)
+        grid_w = cost_w * 2 + col_gap
+        grid_x0 = wrap_l + (wrap_w - grid_w) // 2
+        row1_top = Inches(4.5225)
         for i, (amt, lbl) in enumerate(costs):
             row, col = divmod(i, 2)
-            cx = start_x + col * (cost_w + Inches(0.10))
-            cy = Inches(4.45) + row * (cost_h + Inches(0.10))
+            cx = grid_x0 + col * (cost_w + col_gap)
+            cy = row1_top + row * (cost_h + row_gap)
             _add_filled_box(
                 slide, cx, cy, cost_w, cost_h,
                 f"{amt}   {lbl}",
@@ -7775,12 +8019,19 @@ def slide_43(prs):
                 size=15, bold=True,
             )
 
-        # Question + Discussion-break badge in the corner
-        _add_text(slide, MARGIN, Inches(5.95), RULE_W, Inches(0.45),
-                  "Should you use your own car or the company car?",
+        # Question — prefixed with double-right-arrow (⇒). 2026-05-21 v2
+        # hand-edit: T 5.95 → 5.815 in (pushed further down RELATIVE to
+        # the now-shorter wrapper, which now ends at 5.50).
+        _add_text(slide, MARGIN, Inches(5.815), RULE_W, Inches(0.45),
+                  "⇒  Should you use your own car or the company car?",
                   size=22, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
-        _add_discussion_break(slide, width=Inches(4.8))
+        # Discussion-break badge — 2026-05-21 v2 hand-edit: T = 6.34 in
+        # (was Inches(6.25) + Cm(0.4) = 6.407 in; user nudged up), and
+        # shifted right ~0.20 in (left margin from slide right edge
+        # tightened from MARGIN ≈ 0.28 in to ~0.08 in).
+        _add_discussion_break(slide, top=Inches(6.34), width=Inches(4.8),
+                              left=Inches(8.457))
 
     s = make_diagram_slide(
         prs, page_num=43,
@@ -7798,26 +8049,31 @@ def slide_43(prs):
 
 
 def slide_44(prs):
-    """Why studios finish movies they know will flop: Waterworld (1995).
+    """Why studios finish movies they know lose money — Waterworld (1995).
 
-    Source has the iconic Waterworld poster as a large background image.
+    2026-05-21 hand-edits ported from PowerPoint:
+      • Title reworded.
+      • "Waterworld (1995)" header textbox added above the picture
+        (28 pt bold navy, centered).
+      • Picture moved left/down (L 3.70 → 2.65 in, T 1.65 → 2.12 in).
+      • Bottom caption removed.
     """
     def draw(slide):
-        # The Waterworld poster, large and centered
-        _add_source_image(slide, 45, "rId3",
-                          left=Inches(3.7), top=Inches(1.65),
-                          height=Inches(4.85))
-
-        # Caption
-        _add_text(slide, MARGIN, Inches(6.55), RULE_W, Inches(0.4),
-                  "Sunk cost in Waterworld (1995):  $175M spent before release",
-                  size=18, italic=True, color=GRAY, font="Calibri",
+        # "Waterworld (1995)" header above the picture
+        _add_text(slide, Inches(3.631), Inches(1.554),
+                  Inches(6.665), Inches(0.572),
+                  "Waterworld (1995)",
+                  size=28, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
+        # The Waterworld poster, large and re-positioned
+        _add_source_image(slide, 45, "rId3",
+                          left=Inches(2.65), top=Inches(2.12),
+                          height=Inches(4.85))
 
     s = make_diagram_slide(
         prs, page_num=44,
         section_tag=SECTION_TAG_P2,
-        title="Why Studios Finish Movies They Know Will Flop:  Waterworld",
+        title="Why Studios Finish Movies They Know Lose Money",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -7832,88 +8088,119 @@ def slide_44(prs):
 def slide_45(prs):
     """Sunk cost in Waterworld – decision tree across 3 scenarios.
 
-    Source has a complex 3-column decision table with budget/sunk/raised
-    figures and the conclusion 'Make the film!' for each.  Rebuild as a
-    cleaner 3-column matrix.
+    2026-05-21 v2 hand-edits ported:
+      • Title reworded.
+      • Whole table shifted up ~0.28 in (row_y starts at 1.569).
+      • "Expected Additional Cost" data cells get a soft light-yellow
+        fill — visually flags the row whose value (<150 = revenue) is
+        the pedagogical hinge of "make the film".
+      • "Make the film!" decision cells get a NAVY outline (in addition
+        to the gold fill) so they read as part of the same boxed grid.
+      • Takeaway: reworded "Ignore sunk costs — continue whenever
+        Expected Revenue > Expected Additional Cost"; nudged up to
+        T=6.389 in; now rounded with a soft drop shadow.
     """
     def draw(slide):
-        # Three decision points during Waterworld's production – using the
-        # original-deck data (sunk vs. expected-additional cost at each
-        # point, with $150M expected revenue throughout).
-        # Header (date) | Sunk | Additional | Overall | Revenue | Profit | Decision
-        scenarios = [
-            ("June 1994",       16,  84, 100, 150, "+50", "Make!"),
-            ("September 1994", 100,  40, 140, 150, "+10", "Make!"),
-            ("December 1994",  140,  35, 175, 150, "−25", "Make!"),
-        ]
-        col_w = Inches(3.9)
-        col_gap = Inches(0.2)
-        col_x0 = (SLIDE_W - col_w * 3 - col_gap * 2) // 2
+        # Soft light-yellow for the "Expected Additional Cost" row —
+        # noticeably lighter than the GOLD on the decision cells.
+        LIGHT_YELLOW = RGBColor(0xFF, 0xF2, 0xCC)
 
-        # Small row-label column on the LEFT (outside the 3-column grid)
+        # Each scenario: (header, revenue, sunk, additional, overall, profit, decision)
+        scenarios = [
+            ("June 1994",       "150", "16",  "84    (<150)", "100", "+50", "Make the film!"),
+            ("September 1994",  "150", "100", "40    (<150)", "140", "+10", "Make the film!"),
+            ("December 1994",   "150", "140", "35    (<150)", "175", "−25", "Make the film!"),
+        ]
+        # Original-style row labels (in the column-0 cells of the table).
         row_labels = [
-            "",
-            "Sunk cost  ($M)",
-            "Expected additional cost  ($M)",
-            "Overall cost incl. sunk  ($M)",
-            "Expected revenue  ($M)",
-            "Expected profit  ($M)",
+            "",                                  # corner cell
+            "Expected Revenues  ($M)",
+            "Sunk Cost  ($M)",
+            "Expected Additional Cost  ($M)",
+            "Overall Cost (incl. sunk)  ($M)",
+            "Expected Profit  ($M)",
             "Decision",
         ]
-        # The 3-column scenario block fits; row labels appear as a faint
-        # caption strip running down between the divider and the leftmost
-        # column.  Display them as italic gray text positioned to the left.
-        label_w = Inches(0.05)   # not used – we render labels at the leftmost
-        row_y = [Inches(1.85), Inches(2.40), Inches(3.10),
-                  Inches(3.80), Inches(4.50), Inches(5.20),
-                  Inches(5.90)]
+        # 4-column layout: wide label col + 3 narrower scenario cols.
+        label_w = Inches(4.00)
+        col_w   = Inches(2.50)
+        col_gap = Inches(0.10)
+        total_w = label_w + col_gap + col_w * 3 + col_gap * 2
+        table_l = (SLIDE_W - total_w) // 2
+        col_x0  = table_l + label_w + col_gap
 
-        # Render the 3-column data
+        # Vertical row layout — 2026-05-21 v2: whole table shifted up
+        # ~0.28 in from the prior version.
+        row_y = [Inches(1.569), Inches(2.119), Inches(2.819),
+                  Inches(3.519), Inches(4.219), Inches(4.919),
+                  Inches(5.619)]
+        row_h = [Inches(0.50), Inches(0.60), Inches(0.60),
+                  Inches(0.60), Inches(0.60), Inches(0.60),
+                  Inches(0.55)]
+
+        # Left column: row labels in NAVY-outlined cells, left-aligned.
+        for i, lbl in enumerate(row_labels):
+            if i == 0:
+                # Empty corner cell (white fill, navy border)
+                _add_outlined_box(
+                    slide, table_l, row_y[0], label_w, row_h[0],
+                    "", fill=WHITE, line=NAVY, text_color=NAVY,
+                    size=10, bold=False, line_w=1.0,
+                )
+                continue
+            is_decision = (i == 6)
+            shp = _add_outlined_box(
+                slide, table_l, row_y[i], label_w, row_h[i],
+                lbl, fill=WHITE, line=NAVY, text_color=NAVY,
+                size=18 if not is_decision else 20,
+                bold=is_decision, line_w=1.0,
+            )
+            tf = shp.text_frame
+            tf.paragraphs[0].alignment = PP_ALIGN.LEFT
+            tf.margin_left = Inches(0.18)
+
+        # 3 scenario columns
         for j, sc in enumerate(scenarios):
             x = col_x0 + (col_w + col_gap) * j
             # Column header (date band)
             _add_filled_box(
-                slide, x, row_y[0], col_w, Inches(0.50),
+                slide, x, row_y[0], col_w, row_h[0],
                 sc[0], fill=NAVY, text_color=WHITE,
                 size=20, bold=True,
             )
-            # 5 number rows
-            cells = [str(sc[1]), str(sc[2]), str(sc[3]), str(sc[4]), sc[5]]
-            for i, v in enumerate(cells):
+            # 5 data rows: revenue, sunk, additional, overall, profit.
+            # i==2 is the "Expected Additional Cost" row — flagged with
+            # a soft light-yellow fill (the pedagogical "this matters"
+            # row: additional cost is below revenue 150 in every case).
+            for i, v in enumerate(sc[1:6]):
+                cell_fill = LIGHT_YELLOW if i == 2 else WHITE
                 _add_outlined_box(
-                    slide, x, row_y[i + 1], col_w, Inches(0.60),
-                    v, fill=WHITE, line=NAVY, text_color=NAVY,
+                    slide, x, row_y[i + 1], col_w, row_h[i + 1],
+                    v, fill=cell_fill, line=NAVY, text_color=NAVY,
                     size=18, bold=False, line_w=1.0,
                 )
-            # Decision band (gold)
+            # Decision band (gold fill + navy outline so it reads as
+            # part of the same boxed grid).
             _add_filled_box(
-                slide, x, row_y[6], col_w, Inches(0.55),
-                sc[6], fill=GOLD, text_color=NAVY,
-                size=20, bold=True,
+                slide, x, row_y[6], col_w, row_h[6],
+                sc[6], fill=GOLD, text_color=NAVY, line=NAVY,
+                size=18, bold=True,
             )
 
-        # Row-label captions on the left (width is already in EMU)
-        label_w = col_x0 - MARGIN - Inches(0.10)
-        for i, lbl in enumerate(row_labels):
-            if not lbl: continue
-            _add_text(slide, MARGIN, row_y[i], label_w,
-                       Inches(0.60),
-                       lbl, size=12, italic=True, color=GRAY,
-                       align=PP_ALIGN.RIGHT,
-                       anchor=MSO_ANCHOR.MIDDLE, font="Calibri")
-
-        # Bottom takeaway
+        # Bottom takeaway — rounded with soft drop shadow.
         _add_takeaway_bar(
             slide,
-            "Sunk costs are sunk  —  continue whenever  revenue  >  additional cost",
-            top=Inches(6.60), fill=NAVY, text_color=WHITE,
+            "Ignore sunk costs —  continue whenever          "
+            "Expected Revenue  >  Expected Additional Cost",
+            top=Inches(6.389), fill=NAVY, text_color=WHITE,
             width=Inches(11.5), size=18,
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
         prs, page_num=45,
         section_tag=SECTION_TAG_P2,
-        title="Waterworld:  Three Scenarios,  Same Decision",
+        title="Waterworld:  Sunk Costs and Decisions over Time",
         draw_diagram=draw,
     )
     _set_notes(s, (
@@ -7933,23 +8220,28 @@ def slide_46(prs):
     def draw(slide):
         bullets = [
             ("Meta has poured ~$50B into Reality Labs since 2020", 0),
+            ("Reality Labs:  Meta's AR/VR arm – building the next computing platform", 1),
             ("Metaverse / VR / AR – Quest headsets, Horizon Worlds", 1),
             ("Wall Street keeps asking when it pays off", 0),
             ("Zuckerberg keeps investing – past losses are sunk", 0),
-            ("Right question: does the next $10B have positive expected value?", 0),
+            ("Right question: does the next $10B have positive Expected Value?", 0),
         ]
+        # 2026-05-21 hand-edit: bullets textbox narrowed (W 8.7 → 7.0 in)
+        # and lengthened (H 4.5 → 4.9 in) to free up room on the right
+        # for a bigger picture.
         _add_hierarchical_bullets(
             slide,
             left=MARGIN, top=Inches(1.85),
-            width=Inches(8.7), height=Inches(4.5),
+            width=Inches(7.0), height=Inches(4.9),
             items=bullets,
             size=24, sub_size=22, line_spacing_pts=12,
         )
 
-        # Meta Quest 3 picture on the right
+        # Meta Quest 3 picture on the right — 2026-05-21 hand-edit:
+        # moved left/down and enlarged (W 3.30 → 4.47 in).
         _add_source_image(slide, 47, "rId2",
-                          left=Inches(9.55), top=Inches(2.0),
-                          width=Inches(3.3))
+                          left=Inches(8.468), top=Inches(2.92),
+                          width=Inches(4.472))
         _add_text(slide, Inches(9.55), Inches(6.05), Inches(3.3), Inches(0.3),
                   "Meta Quest 3  (CC BY-SA, Wikimedia)",
                   size=11, italic=True, color=GRAY, font="Calibri",
