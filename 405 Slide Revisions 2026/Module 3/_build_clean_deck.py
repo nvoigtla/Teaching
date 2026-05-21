@@ -1194,14 +1194,48 @@ def _apply_picture_style(pic, *, corner_pct=8,
 
 def _add_takeaway_bar(slide, text, *, top=Inches(6.4), width=None,
                        height=Inches(0.55), fill=GOLD, text_color=WHITE,
-                       size=20, font="Calibri", bold=True):
-    """Bottom-of-slide takeaway band — the 'major concept' callout."""
+                       size=20, font="Calibri", bold=True,
+                       rounded=False, shadow=False):
+    """Bottom-of-slide takeaway band — the 'major concept' callout.
+
+    rounded=True  → ROUNDED_RECTANGLE with ~30% corner radius.
+    shadow=True   → soft drop shadow (off by default to keep the flat
+                    look on the majority of slides).
+    """
     if width is None:
         width = Inches(9.6)
     left = (SLIDE_W - width) // 2
-    return _add_filled_box(slide, left, top, width, height, text,
-                            fill=fill, text_color=text_color,
-                            size=size, bold=bold, font=font)
+    if not (rounded or shadow):
+        return _add_filled_box(slide, left, top, width, height, text,
+                                fill=fill, text_color=text_color,
+                                size=size, bold=bold, font=font)
+    # Inline build for the rounded / shadowed variant
+    shape_type = MSO_SHAPE.ROUNDED_RECTANGLE if rounded else MSO_SHAPE.RECTANGLE
+    shape = slide.shapes.add_shape(
+        shape_type, int(left), int(top), int(width), int(height),
+    )
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = fill
+    shape.line.fill.background()
+    if rounded:
+        try: shape.adjustments[0] = 0.30
+        except Exception: pass
+    shape.shadow.inherit = False
+    if shadow:
+        _add_drop_shadow(shape)
+    tf = shape.text_frame
+    tf.margin_left = tf.margin_right = Inches(0.1)
+    tf.margin_top = tf.margin_bottom = Inches(0.05)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.CENTER
+    run = p.add_run()
+    run.text = text
+    run.font.name = font
+    run.font.size = Pt(size)
+    run.font.bold = bold
+    run.font.color.rgb = text_color
+    return shape
 
 
 def _add_teaching_note(slide, text, *, top=Inches(6.6), width=None,
@@ -2189,15 +2223,23 @@ def _add_math_equation(slide, left, top, width, height, omml_content, *,
 # Convenience: build typical formula structures
 # --------------------------------------------------------------------------
 
-def _formula_bang_for_buck(op=' = '):
-    """MP_K / p_K   [op]   MP_L / w  with stacked fractions and subscripts."""
+def _formula_bang_for_buck(op=' = ', reverse=False):
+    """Bang-for-the-buck rule with stacked fractions and subscripts.
+
+    Default order:  MP_K / p_K   [op]   MP_L / w
+    reverse=True:   MP_L / w     [op]   MP_K / p_K
+        (Use when the L-fraction is the larger one, so reading
+         left-to-right matches "workers' MP/$ > robots' MP/$".)
+    """
     mp_k = _omml_sub(_omml_run('MP'), _omml_run('K'))
     p_k  = _omml_sub(_omml_run('p'),  _omml_run('K'))
     mp_l = _omml_sub(_omml_run('MP'), _omml_run('L'))
     w    = _omml_run('w')
-    frac1 = _omml_frac(mp_k, p_k)
-    frac2 = _omml_frac(mp_l, w)
-    return frac1 + _omml_text(op) + frac2
+    frac_k = _omml_frac(mp_k, p_k)
+    frac_l = _omml_frac(mp_l, w)
+    if reverse:
+        return frac_l + _omml_text(op) + frac_k
+    return frac_k + _omml_text(op) + frac_l
 
 
 def _formula_optimal_inputs():
@@ -7260,10 +7302,10 @@ def slide_36(prs):
         except Exception:
             pass
 
-        _add_takeaway_bar(slide,
-                           "Compare MP per dollar across inputs at the current mix",
-                           top=Inches(6.55), fill=NAVY, text_color=WHITE,
-                           width=Inches(11.0))
+        # 2026-05-20 (manual round 6): the navy "Compare MP per dollar
+        # across inputs at the current mix" takeaway bar at the bottom
+        # was removed by hand — the bullets above already drive the
+        # comparison; the bottom band was redundant.
 
         # 2026-05-19 (manual round 5): user added a gold POLL pill at the
         # bottom-right (matches the one introduced on slide 37 — primes
@@ -7383,32 +7425,37 @@ def slide_38(prs):
                 cx += col_w[c]
 
         # Conclusion: stacked-fraction OMML formula + arrow + advice.
-        # 2026-05-19 (manual round 2): inequality flipped to MPK/pK < MPL/w
-        # since workers now have the higher bang-for-the-buck.
-        # 2026-05-19 (manual round 5): narrowed the box from 8.3" → 5.5"
-        # so the cream-fill rectangle hugs the formula instead of stretching
-        # across half the slide.  Re-centred horizontally.
-        eq_w = Inches(5.5)
-        eq_left = (SLIDE_W - eq_w) // 2
+        # 2026-05-20 (manual round 6):
+        #   - Operand order REVERSED so the LARGER side (workers') sits on
+        #     the left:  MP_L / w  >  MP_K / p_K  (reverse=True, op=' > ').
+        #   - Box shrunk to hug the formula and moved right-of-centre to
+        #     make room for a leading "Thus:" label.  New position
+        #     (5.29, 4.37) and size 2.75 × 1.20 (was 5.50 × 1.10 at 3.92,
+        #     4.70 in round 5; 8.30 × 1.10 originally).
         _add_math_equation(
             slide,
-            left=eq_left, top=Inches(4.7),
-            width=eq_w, height=Inches(1.1),
-            omml_content=_formula_bang_for_buck(op=' &lt; '),
+            left=Inches(5.29), top=Inches(4.37),
+            width=Inches(2.75), height=Inches(1.20),
+            omml_content=_formula_bang_for_buck(op=' > ', reverse=True),
             size_pt=32, color=NAVY,
             fill=RGBColor(0xF4, 0xF1, 0xEA),
             line=NAVY,
         )
-        _add_text(slide, MARGIN, Inches(5.85), RULE_W, Inches(0.4),
+        # 2026-05-20 (manual round 6): new "Thus: " label sitting to the
+        # left of the formula box (32 pt Calibri bold navy).
+        _add_text(slide, Inches(4.04), Inches(4.65), Inches(1.04), Inches(0.54),
+                   "Thus:", size=32, bold=True, color=NAVY, font="Calibri",
+                   align=PP_ALIGN.CENTER)
+        # 2026-05-20 (manual round 6): "Rivian should hire …" line nudged
+        # right + down (MARGIN, 5.85) → (0.44, 6.02) to clear the now-
+        # taller formula box.
+        _add_text(slide, Inches(0.44), Inches(6.02), Inches(12.78), Inches(0.4),
                    "→  Rivian should hire more workers, fewer robots",
                    size=20, bold=True, color=NAVY,
                    align=PP_ALIGN.CENTER, font="Calibri")
-
-        # Bottom takeaway
-        _add_takeaway_bar(slide,
-                           "Equalize MP per $  →  reach the optimal mix",
-                           top=Inches(6.5), fill=GOLD, text_color=NAVY,
-                           width=Inches(9.5))
+        # 2026-05-20 (manual round 6): the gold "Equalize MP per $ →
+        # reach the optimal mix" takeaway bar at the bottom was removed
+        # by hand — the formula + advice line above carries the message.
 
     s = make_diagram_slide(
         prs, page_num=38,
@@ -7508,11 +7555,14 @@ def slide_39(prs):
             "→  shift toward more automation",
         )
 
-        # Bottom takeaway
+        # Bottom takeaway — 2026-05-20 (manual round 6): user nudged the
+        # bar up from top=6.5 → 6.38 and asked for rounded corners + soft
+        # drop shadow so it sits up off the slide like a proper card.
         _add_takeaway_bar(slide,
                            "When input prices change, the optimal mix shifts toward the cheaper input",
-                           top=Inches(6.5), fill=GOLD, text_color=NAVY,
-                           width=Inches(12.0), size=18)
+                           top=Inches(6.38), fill=GOLD, text_color=NAVY,
+                           width=Inches(12.0), size=18,
+                           rounded=True, shadow=True)
 
     s = make_diagram_slide(
         prs, page_num=39,
@@ -9780,7 +9830,8 @@ def slide_75_backup_cover(prs):
                "BACKUP",
                size=140, bold=True, color=NAVY, font="Calibri",
                align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 75)
+    # 2026-05-20: was 75 — shifted down one when slide 37 was deleted.
+    _draw_footer(slide, FOOTER_TEXT, 74)
     return slide
 
 
@@ -9830,7 +9881,7 @@ def slide_76_backup_high_mpl(prs):
         # "MPL" and "in" down to a single space, so the title reads as
         # one phrase rather than a label + subtitle.
         title="Very High MPL in the Rivian Plant",
-        background_image=OUT_DIR / "_backup_high_mpl.png",
+        background_image=OUT_DIR / "Background Material" / "Module 3 - Rivian Plant -- Empty.png",
         # 2026-05-19 (manual): title pill pinned to the right — left
         # edge dragged inward (6.425 → 6.870, w 6.748 → 6.303) so the
         # right edge stays at 13.173 against the slide's right margin.
@@ -9859,7 +9910,7 @@ def slide_77_backup_low_mpl(prs):
         # 2026-05-19 (manual): wording extended to flag the
         # near-zero-or-negative tail of the MPL curve.
         title="Very Low (or negative) MPL in the Rivian Plant",
-        background_image=OUT_DIR / "_backup_low_mpl.png",
+        background_image=OUT_DIR / "Background Material" / "Module 3 - Rivian Plant -- Crowded.png",
         # Title pill moved right + narrowed (6.877 → 8.190, w 6.456 →
         # 5.143) so it tucks against the slide's right edge.
         title_left=Inches(8.190), title_top=Inches(0.0),
