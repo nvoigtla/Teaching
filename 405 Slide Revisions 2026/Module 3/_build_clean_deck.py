@@ -7497,7 +7497,7 @@ def slide_39(prs):
         cream = RGBColor(0xF4, 0xF1, 0xEA)
         body_h = col_h - Inches(0.75)
 
-        def _column(x, header_text, eq_xml, conclusion):
+        def _column(x, header_text, eq_xml, conclusion, math_pos=None):
             # Header band
             _add_filled_box(slide, x, y, col_w, Inches(0.7),
                              header_text,
@@ -7508,10 +7508,17 @@ def slide_39(prs):
                              col_w, body_h, "",
                              fill=cream, text_color=NAVY,
                              size=20, bold=False)
-            # OMML equation centered in the upper part of the cream body
+            # OMML equation — defaults to filling the cream body's upper
+            # half; ``math_pos=(left, top, width, height)`` lets callers
+            # nudge the equation tighter and inset (slide 39 round 7).
+            if math_pos is None:
+                m_left, m_top, m_w, m_h = (
+                    x, y + Inches(0.95), col_w, Inches(1.45),
+                )
+            else:
+                m_left, m_top, m_w, m_h = math_pos
             _add_math_equation(
-                slide, x, y + Inches(0.95),
-                col_w, Inches(1.45),
+                slide, m_left, m_top, m_w, m_h,
                 eq_xml, size_pt=24, color=NAVY,
             )
             # Conclusion line beneath the formula
@@ -7521,45 +7528,55 @@ def slide_39(prs):
                        size=20, color=NAVY, font="Calibri",
                        align=PP_ALIGN.CENTER)
 
+        # 2026-05-20 (manual round 7): user hand-tightened the math
+        # boxes — both shrunk and inset inside their cream bodies, with
+        # non-breaking-space tweaks to the operator spacing.  Left
+        # formula slightly wider with 3 nbsp + trailing nbsp; right
+        # formula a touch narrower with 2 nbsp and no trailing nbsp.
+
         # LEFT column: tax on robots → p_K rises → MP_K / p_K falls
         eq_left = (
             _omml_sub(_omml_run('p'), _omml_run('K')) +
-            _omml_text('  ↑   ⇒   ') +
+            _omml_text('↑\xa0\xa0\xa0⇒\xa0') +
             _omml_frac(
                 _omml_sub(_omml_run('MP'), _omml_run('K')),
                 _omml_sub(_omml_run('p'), _omml_run('K'))
             ) +
-            _omml_text('  ↓')
+            _omml_text('\xa0↓')
         )
         _column(
             left_x,
             "The government introduces a high tax on robots",
             eq_left,
             "→  shift toward more labor",
+            math_pos=(Inches(2.17), Inches(4.00),
+                      Inches(3.00), Inches(0.93)),
         )
 
         # RIGHT column: union wages → w rises → MP_L / w falls
         eq_right = (
             _omml_run('w') +
-            _omml_text('  ↑   ⇒   ') +
+            _omml_text('↑\xa0\xa0⇒\xa0') +
             _omml_frac(
                 _omml_sub(_omml_run('MP'), _omml_run('L')),
                 _omml_run('w')
             ) +
-            _omml_text('  ↓')
+            _omml_text('↓')
         )
         _column(
             right_x,
             "Labor unions demand significantly higher wages",
             eq_right,
             "→  shift toward more automation",
+            math_pos=(Inches(8.73), Inches(4.15),
+                      Inches(2.55), Inches(0.86)),
         )
 
-        # Bottom takeaway — 2026-05-20 (manual round 6): user nudged the
-        # bar up from top=6.5 → 6.38 and asked for rounded corners + soft
-        # drop shadow so it sits up off the slide like a proper card.
+        # Bottom takeaway — 2026-05-20 (manual round 7): user rewrote
+        # the line from "…the cheaper input" → "…the input that has
+        # become cheaper" for clearer phrasing.
         _add_takeaway_bar(slide,
-                           "When input prices change, the optimal mix shifts toward the cheaper input",
+                           "When input prices change, the optimal mix shifts toward the input that has become cheaper",
                            top=Inches(6.38), fill=GOLD, text_color=NAVY,
                            width=Inches(12.0), size=18,
                            rounded=True, shadow=True)
@@ -7567,7 +7584,7 @@ def slide_39(prs):
     s = make_diagram_slide(
         prs, page_num=39,
         section_tag=SECTION_TAG_LR,
-        title="When Prices Change, the Input Mix Shifts:  Robot Tax & Union Wages",
+        title="When Prices Change, the Input Mix Shifts",
         draw_diagram=draw,
     )
     _set_notes(s, (
