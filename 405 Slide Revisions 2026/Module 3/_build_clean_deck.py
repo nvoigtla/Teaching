@@ -8558,24 +8558,26 @@ def slide_49(prs):
             )
 
         # ----- Four red text annotations -------------------------
+        # 2026-05-23 hand-nudges to fine-tune row alignment: each of the
+        # four annotations was moved a few hundredths of an inch.
         RED = RGBColor(0xC0, 0x00, 0x00)
         # "≈ TVC" — aligned with the "Cost of goods sold" row.
-        _add_text(slide, Inches(3.45), Inches(4.55),
+        _add_text(slide, Inches(3.49), Inches(4.58),
                    Inches(1.16), Inches(0.44),
                    "≈ TVC",
                    size=20, bold=True, color=RED, font="Whitney Book")
         # "Mix FC & VC" — aligned with the SG&A row.
-        _add_text(slide, Inches(5.18), Inches(5.11),
+        _add_text(slide, Inches(5.26), Inches(5.12),
                    Inches(1.98), Inches(0.44),
                    "Mix FC & VC",
                    size=20, bold=True, color=RED, font="Whitney Book")
         # "Part of FC" — aligned with the Interest-expense row.
-        _add_text(slide, Inches(4.93), Inches(5.59),
+        _add_text(slide, Inches(4.92), Inches(5.66),
                    Inches(1.45), Inches(0.44),
                    "Part of FC",
                    size=20, bold=True, color=RED, font="Whitney Book")
         # "≈ TC" — aligned with the "Total costs and expenses" row.
-        _add_text(slide, Inches(4.20), Inches(6.19),
+        _add_text(slide, Inches(4.24), Inches(6.26),
                    Inches(1.16), Inches(0.44),
                    "≈ TC",
                    size=20, bold=True, color=RED, font="Whitney Book")
@@ -8601,95 +8603,82 @@ def slide_49(prs):
 
 
 def slide_50(prs):
-    """ChatGPT subscription tiers — Plus vs Team marginal cost question."""
+    """Marginal Cost in Action: MC of a Burn60 Workout.
+
+    2026-05-23 third pass: the user replaced the previous build's
+    image + separate "PACKAGES" pricing textbox with a single
+    pre-composited screenshot in which the package pricing is
+    baked into the bitmap.  The only overlay left on top of the
+    image is the red ellipse circling the package block.  The
+    slide now contains just three content pieces (chrome aside):
+    the merged screenshot, the red circle, and the
+    "Poll Everywhere break" badge in the lower-right corner.
+    """
     def draw(slide):
-        # Two tier panels, side by side
-        tier_w = Inches(4.0)
-        tier_h = Inches(2.6)
-        gap = Inches(0.4)
-        x0 = MARGIN + Inches(0.3)
-
-        # Plus tier
-        _add_filled_box(
-            slide, x0, Inches(2.0), tier_w, Inches(0.6),
-            "ChatGPT Plus", fill=NAVY, text_color=WHITE,
-            size=22, bold=True,
-        )
-        _add_outlined_box(
-            slide, x0, Inches(2.6), tier_w, Inches(2.0),
-            "$20 / user / month\n\n1 user minimum",
-            fill=WHITE, line=NAVY, text_color=NAVY,
-            size=22, bold=False, line_w=1.5,
-        )
-
-        # Team tier
-        _add_filled_box(
-            slide, x0 + tier_w + gap, Inches(2.0), tier_w, Inches(0.6),
-            "ChatGPT Team", fill=GOLD, text_color=NAVY,
-            size=22, bold=True,
-        )
-        _add_outlined_box(
-            slide, x0 + tier_w + gap, Inches(2.6), tier_w, Inches(2.0),
-            "$25 / user / month\n\n2 users minimum",
-            fill=WHITE, line=GOLD, text_color=NAVY,
-            size=22, bold=False, line_w=1.5,
-        )
-
-        # Clean ChatGPT logo on the right (replaces the busy phone-and-laptop
-        # photo).  Logo from Wikimedia Commons (PD-ineligible-trademark).
-        chatgpt = OUT_DIR / "_chatgpt_logo.png"
-        if chatgpt.exists():
-            pic = slide.shapes.add_picture(
-                str(chatgpt),
-                int(Inches(9.85)), int(Inches(2.40)),
-                width=int(Inches(3.00)), height=int(Inches(1.70)),
+        # ----- Merged Burn60 screenshot (pricing baked in) -------
+        # 2026-05-23 hand-positioned:
+        #   • Picture L 2.58 → 2.84, T 1.24 → 1.39 (image scaled
+        #     down slightly; new W 6.95, H 5.71).
+        #   • The standalone PACKAGES textbox is GONE — its text
+        #     now lives inside the screenshot's PNG bitmap.
+        burn60 = OUT_DIR / "_burn60_workout.png"
+        if burn60.exists():
+            slide.shapes.add_picture(
+                str(burn60),
+                int(Inches(2.84)), int(Inches(1.39)),
+                width=int(Inches(6.95)), height=int(Inches(5.71)),
             )
-            # Logo: flat, no shadow / rounding (per CLAUDE.md exceptions)
-        else:
-            _add_source_image(slide, 51, "rId5",
-                               left=Inches(9.6), top=Inches(2.0),
-                               height=Inches(3.5))
-        _add_text(slide, Inches(9.6), Inches(4.25), Inches(3.5), Inches(0.30),
-                   "ChatGPT logo  (OpenAI;  PD on Wikimedia)",
-                   size=10, italic=True, color=GRAY,
-                   align=PP_ALIGN.CENTER, font="Calibri")
 
-        # Question
-        _add_text(slide, MARGIN, Inches(5.0), Inches(8.6), Inches(0.55),
-                  "You're on Plus and want to add a 2nd user.",
-                  size=22, bold=True, color=NAVY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
-        _add_text(slide, MARGIN, Inches(5.5), Inches(8.6), Inches(0.55),
-                  "What is the marginal cost of that 2nd user?",
-                  size=22, bold=True, color=NAVY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
+        # ----- Red ellipse circling the package block -----------
+        # 2026-05-23 hand-tweak: oval re-positioned to track the
+        # smaller image (L 4.70 → 4.74, T 5.24 → 5.37).
+        RED = RGBColor(0xFF, 0x00, 0x00)
+        oval = slide.shapes.add_shape(
+            MSO_SHAPE.OVAL,
+            int(Inches(4.74)), int(Inches(5.37)),
+            int(Inches(2.98)), int(Inches(1.51)),
+        )
+        oval.fill.background()
+        oval.line.color.rgb = RED
+        oval.line.width = Pt(3.0)
 
-        _add_takeaway_bar(
+        # ----- "Poll Everywhere break" badge (bottom-right) -----
+        _add_discussion_break(
             slide,
-            "Hint:  it's not just $25",
-            top=Inches(6.5), fill=GOLD, text_color=NAVY,
-            width=Inches(5.0),
+            top=Inches(6.34),
+            width=Inches(4.8),
+            text="Poll Everywhere break",
         )
 
     s = make_diagram_slide(
         prs, page_num=50,
         section_tag=SECTION_TAG_P2,
-        title="Marginal Cost ≠ Average Cost:  ChatGPT Subscription Tiers",
+        title="Marginal Cost in Action:  What Is the MC of a Burn60 Workout?",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "A pricing case students will recognize from their own "
-        "subscriptions. ChatGPT Plus costs $20/user/month; ChatGPT Team "
-        "costs $25/user/month but requires a 2-user minimum. If you have "
-        "one user on Plus and want to add a second, what's the marginal "
-        "cost of that second user? Hint: it's not just $25."
+        "Real-world setup for the marginal-cost concept. Burn60 (a "
+        "boutique fitness studio) offers package pricing: 10 classes "
+        "for $10 each ($100 total) or 20 classes for $8 each "
+        "($160 total). The question to put to the room: starting "
+        "from the 10-pack, what's the marginal cost of the 11th "
+        "class? Hint: it's not $8. Going from the 10-pack to the "
+        "20-pack costs an additional $60 for ten more classes — so "
+        "the marginal cost of each of those next ten is $6, not the "
+        "$8 sticker price. Average cost (per-unit price you see "
+        "advertised) and marginal cost (what one more actually "
+        "costs) diverge whenever there is volume-tier pricing. We "
+        "poll the room on the next slide before walking through it."
     ))
 
 
 def slide_51(prs):
-    """Poll: MC of the 2nd ChatGPT user?
+    """Poll: MC of each additional Burn60 session beyond the 10th?
 
-    Source slide is a full-bleed PollEv screenshot.
+    Source slide is a full-bleed PollEv screenshot showing the Burn60
+    marginal-cost question with four candidate answers ($10, $8, $18,
+    $6) plus "None of the above".  2026-05-23 retitled and re-chromed
+    from the prior ChatGPT framing.
     """
     def draw(slide):
         _add_source_image(slide, 52, "rId4",
@@ -8699,27 +8688,46 @@ def slide_51(prs):
                   "Respond at PollEv.com/nvoigtlaender",
                   size=14, italic=True, color=GRAY,
                   align=PP_ALIGN.CENTER, font="Calibri")
+        # 2026-05-23: replaced the top-right POLL pill (yellow
+        # rectangle + label) with the deck-standard gold
+        # "Poll Everywhere break" badge in the lower-right corner,
+        # matching slide 50.
+        _add_discussion_break(
+            slide,
+            top=Inches(6.34),
+            width=Inches(4.8),
+            text="Poll Everywhere break",
+        )
 
     s = make_diagram_slide(
         prs, page_num=51,
         section_tag=SECTION_TAG_P2,
-        title="What's the MC of Adding the 2nd User?",
+        title="What Is the MC of Each Additional Session Beyond the 10th?",
         draw_diagram=draw,
     )
-    _draw_poll_pill(s)
     _set_notes(s, (
-        "Quick PollEv.  Compute the marginal cost of adding the second "
-        "user to a ChatGPT Team plan.  The common trap: students see "
-        "the $25 Team rate and answer $25.  But the FIRST user gets "
-        "re-priced from $20 to $25 when they switch plans — so the true "
-        "MC of the 2nd user is $5 (the re-pricing) + $25 (the new fee) = "
-        "$30.  This is the canonical example for MC ≠ AC.  Give them 30 "
-        "seconds, then reveal the solution on the next slide."
+        "Quick PollEv.  Compute the marginal cost of each additional "
+        "Burn60 session when buying the 20-pack instead of the 10-pack.  "
+        "The common trap: students see the $8 per-class rate on the "
+        "20-pack and answer $8.  But going from the 10-pack ($100 "
+        "total) to the 20-pack ($160 total) costs $60 more for 10 "
+        "more sessions — so the MC of each additional session is $6, "
+        "not $8.  The first 10 sessions get re-priced from $10 to $8 "
+        "as well; that re-pricing is what pulls the marginal cost "
+        "below the headline 20-pack rate.  Give them 30 seconds, then "
+        "reveal the solution on the next slide."
     ))
 
 
 def slide_52(prs):
-    """Solution: MC = $30 / user-month."""
+    """Solution: MC = $6 / session.
+
+    2026-05-23 rebuild: dropped the ChatGPT Plus-vs-Team solution at
+    the user's direction; mirrors the original deck's slide 58 (Burn60
+    package pricing).  Layout primitives kept identical to the prior
+    ChatGPT solution slide — two side-by-side cost-line boxes, a
+    centered MC-formula band, intuition line, and a takeaway bar.
+    """
     def draw(slide):
         # Two side-by-side cost lines
         col_w = Inches(5.6)
@@ -8728,116 +8736,326 @@ def slide_52(prs):
 
         _add_filled_box(
             slide, x0, Inches(1.95), col_w, Inches(0.55),
-            "1 user on Plus", fill=NAVY, text_color=WHITE,
+            "10-class pack  ($10 / class)", fill=NAVY, text_color=WHITE,
             size=20, bold=True,
         )
         _add_outlined_box(
             slide, x0, Inches(2.5), col_w, Inches(0.9),
-            "1 × $20  =  $20 / month",
+            "TC  =  10 × $10  =  $100",
             fill=WHITE, line=NAVY, text_color=NAVY,
             size=22, bold=True, line_w=1.5,
         )
 
         _add_filled_box(
             slide, x0 + col_w + col_gap, Inches(1.95), col_w, Inches(0.55),
-            "2 users on Team", fill=GOLD, text_color=NAVY,
+            "20-class pack  ($8 / class)", fill=GOLD, text_color=NAVY,
             size=20, bold=True,
         )
         _add_outlined_box(
             slide, x0 + col_w + col_gap, Inches(2.5), col_w, Inches(0.9),
-            "2 × $25  =  $50 / month",
+            "TC  =  20 × $8  =  $160",
             fill=WHITE, line=GOLD, text_color=NAVY,
             size=22, bold=True, line_w=1.5,
         )
 
         # MC calculation row
+        # 2026-05-23 hand-tweak: header font 22 → 28 pt.
         _add_text(slide, MARGIN, Inches(3.7), RULE_W, Inches(0.5),
-                  "Marginal cost of the 2nd user:",
-                  size=22, italic=True, color=GRAY, font="Calibri",
+                  "Marginal cost of each additional session beyond the 10th:",
+                  size=28, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
         _add_filled_box(
-            slide, (SLIDE_W - Inches(7.5)) // 2, Inches(4.25),
-            Inches(7.5), Inches(1.0),
-            "MC  =  $50  −  $20  =  $30 / month",
+            slide, (SLIDE_W - Inches(8.5)) // 2, Inches(4.25),
+            Inches(8.5), Inches(1.0),
+            "MC  =  ($160 − $100) / 10  =  $6 / session",
             fill=NAVY, text_color=WHITE, size=28, bold=True,
         )
 
         # Intuition
         _add_text(slide, MARGIN, Inches(5.5), RULE_W, Inches(0.5),
-                  "Re-price the existing user ($20 → $25)  +  add a new one ($25)  =  $30",
+                  "Bigger discount than the sticker:  the first 10 sessions also drop from $10 → $8",
                   size=18, italic=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
+        # 2026-05-23 hand-tweaks: takeaway bar moved up (T 6.5 → 6.22)
+        # and rephrased — "volume pricing" → "volume discounts".
         _add_takeaway_bar(
             slide,
-            "MC  >  AC :  subscription tiers can hide a higher marginal cost",
-            top=Inches(6.5), fill=GOLD, text_color=NAVY,
-            width=Inches(11.0),
+            "MC  <  AC :  volume discounts make the marginal session cheaper than the sticker",
+            top=Inches(6.22), fill=GOLD, text_color=NAVY,
+            width=Inches(11.6),
         )
 
     s = make_diagram_slide(
         prs, page_num=52,
         section_tag=SECTION_TAG_P2,
-        title="Solution:  MC = $30 / user · month",
+        title="Solution:  MC = $6 / Session",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Reveal: MC = $30/user-month for the second user (you go from "
-        "$20 to $50 total). The lesson: tiered subscription pricing can "
-        "hide a marginal cost that's HIGHER than the average rate. The "
-        "opposite of the classic 'volume discount' story – and "
-        "increasingly common in SaaS."
+        "Reveal: MC = $6 per additional session — not the $8 sticker "
+        "rate on the 20-pack. Total cost goes from $100 (10 classes at "
+        "$10) to $160 (20 classes at $8), so the next ten cost $60 "
+        "incremental → $6 per session. The intuition: the 20-pack also "
+        "re-prices the first ten sessions from $10 down to $8, and "
+        "that $2 × 10 = $20 of savings on the inframarginal sessions "
+        "is what pulls the marginal rate below the $8 sticker. "
+        "Pedagogical point: volume pricing makes the marginal unit "
+        "cheaper than the headline per-unit rate — the mirror image "
+        "of the SaaS-tier example where the marginal user is more "
+        "expensive than the headline rate."
     ))
 
 
 def slide_53(prs):
-    """Marginal cost in finance: the true rate on a bigger loan."""
+    """Marginal cost in finance: the true rate on a bigger loan.
+
+    2026-05-23 full redesign per user mockup:
+      • Two Option cards side-by-side — navy header band ("Option 1" /
+        "Option 2") over a white rounded body with a navy border and
+        soft drop shadow.
+      • Each card body: a navy HOME-shape bank icon, a large loan
+        title ("$100k loan" / "$110k loan", 28 pt bold navy) and an
+        italic subtitle ("at 5% annual interest" / "at 6% annual
+        interest", 18 pt italic navy).
+      • Three labelled rows per card below a divider line, each a
+        SEPARATE text box (so the user can fly them in independently
+        when animating).  Each row carries a small navy-outlined
+        icon (%, ≡, $) on the left, the label, and the right-aligned
+        value via a right-aligned tab stop.
+      • A red dashed arrow between the two cards labelled
+        "Extra $10k".
+      • A cream/peach rounded calculation box under the cards: the
+        question ("What is the marginal interest rate on the
+        additional $10k?", red bold) on line 1, the worked
+        calculation ("($6,600 − $5,000) / $10,000 = 16%", navy
+        bold) on line 2.
+      • The existing yellow takeaway bar at the bottom — now made
+        rounded + drop-shadowed and narrowed from W 11.0 to 10.0.
+    """
     def draw(slide):
-        # Setup
-        _add_text(slide, MARGIN, Inches(1.85), RULE_W, Inches(0.5),
-                  "Two options for a personal loan:",
-                  size=22, bold=True, color=NAVY, font="Calibri")
+        from pptx.oxml.ns import qn
 
-        # Two options side by side
-        opt_w = Inches(5.6)
-        opt_h = Inches(1.0)
-        gap = Inches(0.4)
-        x0 = (SLIDE_W - opt_w * 2 - gap) // 2
+        # ----- Card geometry -----
+        # 2026-05-23 second-pass user tweaks: cards narrowed and the
+        # gap between them widened so the "Extra $10k" arrow has
+        # significantly more room (W 5.50 → 4.80, gap 0.55 → 1.50).
+        card_w = Inches(4.80)
+        card_gap = Inches(1.50)
+        card_x0 = (SLIDE_W - 2 * card_w - card_gap) // 2
+        header_h = Inches(0.55)
+        body_h = Inches(3.30)
+        card_t = Inches(1.55)
+        body_t = card_t + header_h
 
-        _add_filled_box(
-            slide, x0, Inches(2.55), opt_w, opt_h,
-            "Loan A:  $100K  @  5% annual",
-            fill=NAVY, text_color=WHITE, size=22, bold=True,
+        RED = RGBColor(0xC0, 0x00, 0x00)
+        CREAM = RGBColor(0xFD, 0xEC, 0xDB)
+        DIVIDER = RGBColor(0xC8, 0xCE, 0xD6)
+
+        def build_card(x, option_label, loan_amount, interest_pct,
+                       annual_interest, loan_total, interest_cost):
+            # ---- Rounded navy header ("Option 1" / "Option 2") ----
+            # User asked for rounded corners + drop shadow on the
+            # Option headers (was a flat filled rectangle).
+            _add_rounded_filled_box(
+                slide, x, card_t, card_w, header_h,
+                label=option_label,
+                fill=NAVY, text_color=WHITE,
+                size=22, bold=True,
+                corner_pct=0.20, shadow=True,
+            )
+            # ---- Rounded white body card (navy border + shadow) ----
+            body = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE,
+                int(x), int(body_t), int(card_w), int(body_h),
+            )
+            try: body.adjustments[0] = 0.04
+            except Exception: pass
+            body.fill.solid(); body.fill.fore_color.rgb = WHITE
+            body.line.color.rgb = NAVY; body.line.width = Pt(0.75)
+            body.shadow.inherit = False
+            _add_drop_shadow(body)
+
+            # ---- House / bank pictogram (top-left of body) ----
+            # MSO_SHAPE.HOME isn't available in this python-pptx, so
+            # we compose a simple house silhouette from two primitives:
+            # a navy filled rectangle (building body) sitting under a
+            # navy filled isoceles triangle (pitched roof).
+            icon_x = x + Inches(0.25)
+            icon_y = body_t + Inches(0.30)
+            roof = slide.shapes.add_shape(
+                MSO_SHAPE.ISOSCELES_TRIANGLE,
+                int(icon_x), int(icon_y),
+                int(Inches(0.70)), int(Inches(0.28)),
+            )
+            roof.fill.solid(); roof.fill.fore_color.rgb = NAVY
+            roof.line.fill.background()
+            body_rect = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                int(icon_x + Inches(0.05)),
+                int(icon_y + Inches(0.26)),
+                int(Inches(0.60)), int(Inches(0.34)),
+            )
+            body_rect.fill.solid(); body_rect.fill.fore_color.rgb = NAVY
+            body_rect.line.fill.background()
+
+            # ---- Large loan title + italic subtitle ----
+            # 2026-05-23 second-pass: subtitle 18 → 22 pt.
+            title_x = x + Inches(1.05)
+            _add_text(slide, title_x, body_t + Inches(0.20),
+                      card_w - Inches(1.20), Inches(0.50),
+                      loan_amount, size=28, bold=True, color=NAVY,
+                      font="Calibri")
+            _add_text(slide, title_x, body_t + Inches(0.72),
+                      card_w - Inches(1.20), Inches(0.45),
+                      f"at {interest_pct} annual interest",
+                      size=22, italic=True, color=NAVY, font="Calibri")
+
+            # ---- Divider rule under title ----
+            div = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                int(x + Inches(0.25)),
+                int(body_t + Inches(1.35)),
+                int(card_w - Inches(0.50)),
+                int(Inches(0.012)),
+            )
+            div.fill.solid(); div.fill.fore_color.rgb = DIVIDER
+            div.line.fill.background()
+
+            # ---- Three labelled rows ----
+            # 2026-05-23 second-pass: row text 15 → 20 pt; row height
+            # 0.40 → 0.50 to accommodate; icons scaled 0.32 → 0.40.
+            row_h = Inches(0.50)
+            row_gap = Inches(0.10)
+            row_y0 = body_t + Inches(1.50)
+            icon_size = Inches(0.40)
+            label_x = x + Inches(0.80)
+            label_w = card_w - Inches(1.05)
+
+            def build_row(idx, icon_char, label, value):
+                row_y = row_y0 + idx * (row_h + row_gap)
+                # --- Icon: small navy-outlined oval with letter ---
+                ic = slide.shapes.add_shape(
+                    MSO_SHAPE.OVAL,
+                    int(x + Inches(0.28)),
+                    int(row_y + (row_h - icon_size) // 2),
+                    int(icon_size), int(icon_size),
+                )
+                ic.fill.solid(); ic.fill.fore_color.rgb = WHITE
+                ic.line.color.rgb = NAVY; ic.line.width = Pt(1.25)
+                itf = ic.text_frame
+                itf.margin_left = 0; itf.margin_right = 0
+                itf.margin_top = 0; itf.margin_bottom = 0
+                itf.vertical_anchor = MSO_ANCHOR.MIDDLE
+                ip = itf.paragraphs[0]; ip.alignment = PP_ALIGN.CENTER
+                ir = ip.add_run(); ir.text = icon_char
+                ir.font.name = "Calibri"; ir.font.size = Pt(16)
+                ir.font.bold = True; ir.font.color.rgb = NAVY
+
+                # --- Row text box: label left + value right (tab) ---
+                box = slide.shapes.add_shape(
+                    MSO_SHAPE.RECTANGLE,
+                    int(label_x), int(row_y),
+                    int(label_w), int(row_h),
+                )
+                box.fill.background(); box.line.fill.background()
+                btf = box.text_frame
+                btf.margin_left = 0; btf.margin_right = Inches(0.05)
+                btf.margin_top = 0; btf.margin_bottom = 0
+                btf.vertical_anchor = MSO_ANCHOR.MIDDLE
+                p = btf.paragraphs[0]; p.alignment = PP_ALIGN.LEFT
+                # Right-aligned tab stop at the right edge.
+                pPr = p._p.get_or_add_pPr()
+                tabLst = ET.SubElement(pPr, qn('a:tabLst'))
+                tab = ET.SubElement(tabLst, qn('a:tab'))
+                tab.set('pos', str(int(label_w)))
+                tab.set('algn', 'r')
+                # Label run (regular)
+                r1 = p.add_run(); r1.text = label
+                r1.font.name = "Calibri"; r1.font.size = Pt(20)
+                r1.font.color.rgb = NAVY
+                # Value run (bold) preceded by tab
+                r2 = p.add_run(); r2.text = "\t" + value
+                r2.font.name = "Calibri"; r2.font.size = Pt(20)
+                r2.font.bold = True; r2.font.color.rgb = NAVY
+
+            build_row(0, "%", "Annual interest", annual_interest)
+            build_row(1, "≡", "Total loan amount", loan_total)
+            build_row(2, "$", "Annual interest cost", interest_cost)
+
+        # Build both Option cards
+        build_card(
+            card_x0, "Option 1", "$100k loan", "5%",
+            "$5,000", "$100,000", "$5,000",
         )
-        _add_filled_box(
-            slide, x0 + opt_w + gap, Inches(2.55), opt_w, opt_h,
-            "Loan B:  $110K  @  6% annual",
-            fill=NAVY, text_color=WHITE, size=22, bold=True,
+        build_card(
+            card_x0 + card_w + card_gap, "Option 2", "$110k loan", "6%",
+            "$6,600", "$110,000", "$6,600",
         )
 
-        # Question
-        _add_text(slide, MARGIN, Inches(3.7), RULE_W, Inches(0.5),
-                  "What's the marginal interest rate on the extra $10K?",
-                  size=22, bold=True, color=NAVY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
+        # ----- "Extra $10k" dashed arrow between cards -----
+        # 2026-05-23 second-pass: label significantly larger
+        # (13 → 24 pt bold) and arrow thickened (2.0 → 4.0 pt) so the
+        # callout reads from the back row.
+        arrow_y = body_t + Inches(0.75)
+        arrow_x_start = card_x0 + card_w + Inches(0.10)
+        arrow_x_end = card_x0 + card_w + card_gap - Inches(0.06)
+        # Label above arrow
+        _add_text(slide,
+                   arrow_x_start - Inches(0.10),
+                   arrow_y - Inches(0.65),
+                   card_gap, Inches(0.50),
+                   "Extra $10k",
+                   size=24, bold=True, color=RED, font="Calibri",
+                   align=PP_ALIGN.CENTER)
+        # Red dashed arrow — thicker, more prominent
+        _add_arrow(slide,
+                   (arrow_x_start, arrow_y),
+                   (arrow_x_end, arrow_y),
+                   color=RED, weight_pt=4.0, dash='dash')
 
-        # Calculation
-        steps = [
-            "Extra interest:   $6,600  −  $5,000   =   $1,600",
-            "Extra loan amount:   $10,000",
-            "Marginal rate:   $1,600  /  $10,000   =   16%",
-        ]
-        for i, step in enumerate(steps):
-            _add_text(slide, MARGIN, Inches(4.4 + i * 0.45),
-                      RULE_W, Inches(0.4),
-                      step, size=20, color=NAVY, font="Calibri",
-                      align=PP_ALIGN.CENTER)
+        # ----- Cream calculation box (question + computation) -----
+        # 2026-05-23 second-pass: question font 18 → 26 pt; calc box
+        # height bumped 0.95 → 1.20 in to fit the larger text.
+        calc_w = Inches(10.80)
+        calc_left = (SLIDE_W - calc_w) // 2
+        calc_box = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(calc_left), int(Inches(5.45)),
+            int(calc_w), int(Inches(1.00)),
+        )
+        try: calc_box.adjustments[0] = 0.18
+        except Exception: pass
+        calc_box.fill.solid(); calc_box.fill.fore_color.rgb = CREAM
+        calc_box.line.color.rgb = RED; calc_box.line.width = Pt(0.75)
+        calc_box.shadow.inherit = False
+        _add_drop_shadow(calc_box)
+        ctf = calc_box.text_frame
+        ctf.margin_left = Inches(0.30); ctf.margin_right = Inches(0.20)
+        ctf.margin_top = Inches(0.10); ctf.margin_bottom = Inches(0.05)
+        ctf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        # Line 1: question (red bold) — significantly larger
+        p0 = ctf.paragraphs[0]; p0.alignment = PP_ALIGN.CENTER
+        r0 = p0.add_run()
+        r0.text = "What is the marginal interest rate on the additional $10k?"
+        r0.font.name = "Calibri"; r0.font.size = Pt(26)
+        r0.font.bold = True; r0.font.color.rgb = RED
+        # Line 2: calculation (navy bold)
+        p1 = ctf.add_paragraph(); p1.alignment = PP_ALIGN.CENTER
+        r1 = p1.add_run()
+        r1.text = "($6,600 − $5,000) / $10,000 = 16%"
+        r1.font.name = "Calibri"; r1.font.size = Pt(24)
+        r1.font.bold = True; r1.font.color.rgb = NAVY
 
-        _add_takeaway_bar(
+        # ----- Yellow takeaway bar (rounded + shadow, narrower) -----
+        _add_rounded_filled_box(
             slide,
-            "Marginal cost (16%) is much higher than average rate (6%)",
-            top=Inches(6.5), fill=GOLD, text_color=NAVY,
-            width=Inches(11.0),
+            (SLIDE_W - Inches(10.0)) // 2, Inches(6.55),
+            Inches(10.0), Inches(0.50),
+            label="Marginal cost (16%) is much higher than average rate (6%)",
+            fill=GOLD, text_color=NAVY,
+            size=18, bold=True,
+            corner_pct=0.30, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -8847,62 +9065,291 @@ def slide_53(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Same concept applied to finance: when a bigger loan comes with "
-        "a worse rate, the marginal cost of the extra dollars is much "
-        "higher than the average rate the loan was quoted at. This is a "
-        "very common executive trap when comparing financing options."
+        "Same concept applied to finance.  Option 1: a $100k loan at "
+        "5% costs $5,000 in interest per year.  Option 2: a $110k loan "
+        "at 6% costs $6,600 in interest per year.  The marginal "
+        "interest rate on the extra $10k is the EXTRA interest divided "
+        "by the EXTRA principal — ($6,600 − $5,000) / $10,000 = 16%.  "
+        "The headline rate of 6% is the AVERAGE; the marginal rate "
+        "you actually pay for the extra dollars is 16%.  This is the "
+        "common executive trap when comparing loan terms — the rate "
+        "advertised on the larger loan understates what the marginal "
+        "dollar truly costs."
     ))
 
 
 def slide_54(prs):
     """Rivian's Georgia plant – weekly Total Cost function.
 
-    Layout: bullet intro on top, cost function box, source cost-curve image.
+    2026-05-23 redesign to mirror original deck slide 60:
+      • Top intro text bumped 22 → 28 pt (user hand-edit).
+      • TC formula switched to the original deck's
+        TC = 10,000,000 + 30,000·Q + 40·Q² (was 800k + 200Q²).
+      • Native chart redrawn as XY scatter: an "Observed" series
+        of points scattered around the true curve (~6 % gaussian
+        noise, fixed seed) plus a smooth "Fitted" line drawing
+        the true TC function.  Replaces the prior perfect-fit
+        line chart.
+      • "Fixed Cost" annotation with red arrow pointing to the
+        y-intercept ($10M at Q=0).
+      • Y axis re-scaled to $M (max 90) so labels stay clean
+        across the larger value range.
+
+    Formula constants are LOCAL to this slide so slides 55-57
+    (which still use the 800k + 200Q² version via COST_TFC /
+    COST_VAR_COEF / COST_Q_VALS) keep building.  Propagate to
+    those slides only if/when the user asks.
     """
     def draw(slide):
-        # Intro lines
-        _add_text(slide, MARGIN, Inches(1.85), RULE_W, Inches(0.5),
-                  "Collect data on total cost at different output levels (Q)",
-                  size=22, color=NAVY, font="Calibri")
-        _add_text(slide, MARGIN, Inches(2.3), RULE_W, Inches(0.5),
-                  "→  Estimate the cost function",
-                  size=22, italic=True, color=GRAY, font="Calibri")
+        from pptx.chart.data import XyChartData
+        from pptx.enum.chart import XL_MARKER_STYLE
 
-        # Cost function (OMML).  Quadratic form fit to the Excel data:
-        # TC = 800,000 + 200 · Q²  (Q in vehicles/week, TC in $).
+        # ----- Condensed top intro (one line) -------------------
+        # 2026-05-25 hand-tweaks: text bumped 22 → 24 pt italic;
+        # box moved up T 1.55 → 1.46, height tightened 0.45 → 0.40.
+        _add_text(slide, MARGIN, Inches(1.46), RULE_W, Inches(0.40),
+                  "Collect data on total cost at different output levels (Q)  →  "
+                  "Estimate the cost function",
+                  size=24, italic=True, color=NAVY, font="Calibri",
+                  align=PP_ALIGN.CENTER)
+
+        # ----- Cost function (OMML) ------------------------------
+        # 2026-05-24 user updates:
+        #   • Prefix the equation with "Estimated cost curve:".
+        #   • Move the box up (T 2.10 → 1.95) so the chart has more
+        #     vertical room below.
+        # 2026-05-25: equation box gets rounded corners + soft drop
+        # shadow to match the deck's hero-formula treatment.
         eq_xml = (
+            _omml_text('Estimated cost curve:   ') +
             _omml_text('TC') +
             _omml_text(' = ') +
-            _omml_text('800,000') +
+            _omml_text('10,000,000') +
             _omml_text(' + ') +
-            _omml_text('200') +
+            _omml_text('30,000') +
+            _omml_text(' · ') +
+            _omml_run('Q') +
+            _omml_text(' + ') +
+            _omml_text('40') +
             _omml_text(' · ') +
             _omml_sup(_omml_run('Q'), _omml_text('2'))
         )
-        _add_math_equation(
-            slide, (SLIDE_W - Inches(9.0)) // 2, Inches(2.85),
-            Inches(9.0), Inches(0.70),
-            eq_xml, size_pt=24, color=WHITE, fill=NAVY,
+        eq_box = _add_math_equation(
+            slide, (SLIDE_W - Inches(11.0)) // 2, Inches(1.95),
+            Inches(11.0), Inches(0.60),
+            eq_xml, size_pt=22, color=WHITE, fill=NAVY,
         )
+        # Swap the textbox's rectangle geometry for a rounded one
+        # and attach a soft drop shadow.
+        # IMPORTANT: in OOXML, <a:prstGeom> must come immediately
+        # after <a:xfrm> and BEFORE any fill / effect element.
+        # If we append it with SubElement, it lands AFTER the
+        # solidFill that _add_math_equation set, and PowerPoint
+        # silently refuses to render the shape (it "disappears").
+        eq_spPr = eq_box._element.find(qn('p:spPr'))
+        if eq_spPr is not None:
+            for old in eq_spPr.findall(qn('a:prstGeom')):
+                eq_spPr.remove(old)
+            prstGeom = ET.Element(qn('a:prstGeom'))
+            prstGeom.set('prst', 'roundRect')
+            avLst = ET.SubElement(prstGeom, qn('a:avLst'))
+            gd = ET.SubElement(avLst, qn('a:gd'))
+            gd.set('name', 'adj'); gd.set('fmla', 'val 25000')
+            # Position prstGeom right after a:xfrm (schema-correct).
+            xfrm = eq_spPr.find(qn('a:xfrm'))
+            if xfrm is not None:
+                xfrm.addnext(prstGeom)
+            else:
+                eq_spPr.insert(0, prstGeom)
+        _add_drop_shadow(eq_box)
 
-        # Native TC curve.  Y-axis in $K so labels stay clean (10–3,220).
-        cats = [str(q) for q in COST_Q_VALS]
-        tc_vals_K = [_cost_tc(q) / 1000 for q in COST_Q_VALS]
-        _make_simple_line_chart(
-            slide, Inches(2.50), Inches(3.75),
-            Inches(8.30), Inches(2.65),
-            categories=cats, values=tc_vals_K,
-            line_color=NAVY,
-            x_title="Q   (vehicles per week)",
-            y_title="TC   ($K)",
-            y_min=0, y_max=3500, y_unit=500,
+        # ----- Local TC formula ----------------------------------
+        TFC_LOCAL = 10_000_000
+        LIN_LOCAL = 30_000
+        QUAD_LOCAL = 40
+        tc_of = lambda q: TFC_LOCAL + LIN_LOCAL * q + QUAD_LOCAL * q * q
+
+        # ----- Observed scatter ---------------------------------
+        # 2026-05-24 (second pass) user request: the previous
+        # hand-tuned offsets alternated signs and read as an
+        # artificial "up-down-up-down" pattern.  Switch to truly
+        # random uniform deviations in [-0.20, +0.20] (±20% on
+        # TC), rejection-sampled so no offset is smaller than 6 %
+        # (otherwise some dots would sit visually on the line).
+        # Seed = 3 chosen because it gives a balanced spread of
+        # signs (no run longer than 3) and magnitudes 0.10–0.20.
+        import random
+        random.seed(3)
+        Q_obs = list(range(0, 1001, 100))
+        obs_offsets = []
+        for _ in Q_obs:
+            while True:
+                o = random.uniform(-0.20, 0.20)
+                if abs(o) >= 0.06:
+                    break
+            obs_offsets.append(o)
+        TC_obs_M = [tc_of(q) * (1.0 + off) / 1_000_000
+                    for q, off in zip(Q_obs, obs_offsets)]
+        # Fitted curve: dense points (every 25 units) so the line
+        # connecting them reads as smooth.
+        Q_curve = list(range(0, 1001, 25))
+        TC_curve_M = [tc_of(q) / 1_000_000 for q in Q_curve]
+
+        # ----- Chart data ----------------------------------------
+        # 2026-05-24: legend added, series renamed to "TC" (line)
+        # and "TC (data)" (markers).  Line series goes FIRST so
+        # the data dots are drawn ON TOP and visible.
+        chart_data = XyChartData()
+        s_fit = chart_data.add_series('TC')
+        for q, tc in zip(Q_curve, TC_curve_M):
+            s_fit.add_data_point(q, tc)
+        s_obs = chart_data.add_series('TC (data)')
+        for q, tc in zip(Q_obs, TC_obs_M):
+            s_obs.add_data_point(q, tc)
+
+        # Chart geometry: taller now that the equation is higher.
+        # T 2.85 → 2.65;  H 3.60 → 3.80.
+        chart_x, chart_y = Inches(2.50), Inches(2.65)
+        chart_w, chart_h = Inches(8.30), Inches(3.80)
+        gf = slide.shapes.add_chart(
+            XL_CHART_TYPE.XY_SCATTER_LINES,
+            chart_x, chart_y, chart_w, chart_h, chart_data,
         )
+        chart = gf.chart
 
+        # ----- Axes (larger tick labels + titles) ----------------
+        xax = chart.category_axis
+        xax.maximum_scale = 1000
+        xax.minimum_scale = 0
+        xax.major_unit = 200
+        xax.has_title = True
+        xax.axis_title.text_frame.text = "Q   (vehicles per week)"
+        for r in xax.axis_title.text_frame.paragraphs[0].runs:
+            r.font.size = Pt(16); r.font.italic = True; r.font.bold = True
+            r.font.color.rgb = NAVY; r.font.name = "Calibri"
+        xax.tick_labels.font.size = Pt(14)
+        xax.tick_labels.font.color.rgb = NAVY
+        xax.tick_labels.font.name = "Calibri"
+
+        yax = chart.value_axis
+        yax.maximum_scale = 110
+        yax.minimum_scale = 0
+        yax.major_unit = 10
+        yax.has_title = True
+        yax.axis_title.text_frame.text = "TC   ($M)"
+        for r in yax.axis_title.text_frame.paragraphs[0].runs:
+            r.font.size = Pt(16); r.font.italic = True; r.font.bold = True
+            r.font.color.rgb = NAVY; r.font.name = "Calibri"
+        yax.tick_labels.font.size = Pt(14)
+        yax.tick_labels.font.color.rgb = NAVY
+        yax.tick_labels.font.name = "Calibri"
+
+        # ----- Dashed light-gray major gridlines on the Y axis ---
+        # Use the shared helper for consistency with the other
+        # Cobb-Douglas-style charts in the deck.
+        _add_dashed_gridlines(yax._element)
+
+        # ----- Per-series styling --------------------------------
+        # Series 0 (TC = fitted line): smooth line, no markers.
+        s_line = chart.plots[0].series[0]
+        s_line.marker.style = XL_MARKER_STYLE.NONE
+        s_line.format.line.color.rgb = NAVY
+        s_line.format.line.width = Pt(2.75)
+        s_line_el = s_line._element
+        for old in s_line_el.findall(qn('c:smooth')):
+            s_line_el.remove(old)
+        smooth = ET.SubElement(s_line_el, qn('c:smooth'))
+        smooth.set('val', '1')
+
+        # Series 1 (TC (data) = observed markers): circles only,
+        # hide connecting line.
+        s_dots = chart.plots[0].series[1]
+        s_dots.marker.style = XL_MARKER_STYLE.CIRCLE
+        s_dots.marker.size = 9
+        try:
+            s_dots.marker.format.fill.solid()
+            s_dots.marker.format.fill.fore_color.rgb = NAVY
+            s_dots.marker.format.line.color.rgb = NAVY
+        except Exception:
+            pass
+        s_dots_el = s_dots._element
+        spPr_dots = s_dots_el.find(qn('c:spPr'))
+        if spPr_dots is None:
+            spPr_dots = ET.SubElement(s_dots_el, qn('c:spPr'))
+        for child in list(spPr_dots):
+            if child.tag == qn('a:ln'):
+                spPr_dots.remove(child)
+        ln_dots = ET.SubElement(spPr_dots, qn('a:ln'))
+        ET.SubElement(ln_dots, qn('a:noFill'))
+
+        # ----- Legend: top-left inside the plot area -----------
+        # 2026-05-25 user request: bump the legend font size and
+        # stack the two entries vertically (one below the other).
+        # A narrow-tall manual-layout box forces single-column
+        # rendering even though the deck's legend uses default
+        # auto-flow.  2026-05-26 follow-up: add a white background
+        # + thin navy border, and nudge the legend a bit toward
+        # the center of the chart (x 0.12 → 0.20).
+        chart.has_legend = True
+        leg = chart.legend
+        leg.include_in_layout = False
+        leg.font.size = Pt(18)
+        leg.font.color.rgb = NAVY
+        leg.font.name = "Calibri"
+        leg_el = leg._element
+        for old in leg_el.findall(qn('c:layout')):
+            leg_el.remove(old)
+        layout = ET.SubElement(leg_el, qn('c:layout'))
+        manual = ET.SubElement(layout, qn('c:manualLayout'))
+        for name, val in (('xMode', 'edge'), ('yMode', 'edge')):
+            el = ET.SubElement(manual, qn('c:' + name))
+            el.set('val', val)
+        for name, val in (('x', '0.20'), ('y', '0.05'),
+                          ('w', '0.18'), ('h', '0.25')):
+            el = ET.SubElement(manual, qn('c:' + name))
+            el.set('val', val)
+        # White fill + thin navy border around the legend so it
+        # reads as a self-contained badge rather than floating
+        # text overlapping the gridlines.
+        for old in leg_el.findall(qn('c:spPr')):
+            leg_el.remove(old)
+        leg_spPr = ET.SubElement(leg_el, qn('c:spPr'))
+        leg_fill = ET.SubElement(leg_spPr, qn('a:solidFill'))
+        leg_fill_rgb = ET.SubElement(leg_fill, qn('a:srgbClr'))
+        leg_fill_rgb.set('val', 'FFFFFF')
+        leg_ln = ET.SubElement(leg_spPr, qn('a:ln'))
+        leg_ln.set('w', '9525')  # 0.75 pt
+        leg_ln_fill = ET.SubElement(leg_ln, qn('a:solidFill'))
+        leg_ln_rgb = ET.SubElement(leg_ln_fill, qn('a:srgbClr'))
+        leg_ln_rgb.set('val', '0B2B4E')  # navy
+
+        # ----- "Fixed Cost" annotation pointing at TC = 10 -------
+        # 2026-05-25 hand-positioned by user:
+        #   • Text box: L 0.55 → 0.34
+        #   • Arrow Y:  5.45 → 5.335 (lands closer to the y = 10
+        #     gridline now that we can see the rendered chart).
+        #   • Arrow X:  start 2.60 → 2.41, end 3.16 → 2.97.
+        fc_y = Inches(5.335)
+        _add_text(slide,
+                   Inches(0.34), fc_y - Inches(0.169),
+                   Inches(2.00), Inches(0.42),
+                   "Fixed Cost",
+                   size=18, bold=True, color=RGBColor(0xC0, 0x00, 0x00),
+                   font="Calibri", align=PP_ALIGN.RIGHT)
+        _add_arrow(slide,
+                    (Inches(2.41), fc_y),
+                    (Inches(2.97), fc_y),
+                    color=RGBColor(0xC0, 0x00, 0x00), weight_pt=2.25)
+
+        # 2026-05-25 user hand-edit: moved up T 6.55 → 6.45 and
+        # promoted to rounded corners + soft drop shadow (matches
+        # the equation box above for deck-wide consistency).
         _add_takeaway_bar(
             slide,
-            "Fixed plus a convex quadratic term — cost rises faster than output",
-            top=Inches(6.55), fill=GOLD, text_color=NAVY,
+            "Quadratic term:  cost rises faster than output, i.e. marginal cost is increasing",
+            top=Inches(6.45), fill=GOLD, text_color=NAVY,
             width=Inches(10.5),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -8912,11 +9359,16 @@ def slide_54(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Now back to Rivian. The Georgia plant's weekly total cost "
-        "function – how total cost varies with output Q. Fixed cost of "
-        "$10M, variable cost of $30K per vehicle, plus a quadratic term "
-        "($40 × Q²) that captures the rising marginal cost at high "
-        "volumes."
+        "Now back to Rivian.  Weekly total cost as a function of "
+        "output Q for the Georgia plant.  Fixed cost of $10M, a "
+        "linear variable component of $30,000 per vehicle, plus a "
+        "small quadratic term ($40·Q²) that captures the rising "
+        "marginal cost as production scales up.  The scattered dots "
+        "are observed weekly cost data at different Q levels; the "
+        "smooth navy curve is the fitted TC function — the same "
+        "TC = 10,000,000 + 30,000·Q + 40·Q² used in the original "
+        "deck.  Note where the curve crosses Q = 0: that y-intercept "
+        "is the fixed cost (~$10M)."
     ))
 
 
