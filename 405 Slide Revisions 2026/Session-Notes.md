@@ -1439,3 +1439,177 @@ Code permissions / hooks across machines.
   changes mid-session don't apply until a fresh session.  In the
   CLI build, `/hooks` would reload; in VS Code, just start a new
   session.
+
+
+## 2026-05-22 – Module 3 slides 46-49 polish + permissions cleanup
+
+**One-line summary.** Reframed slide 46 around tech-viability /
+2026 AI-shift narrative, broadened slide 47 to "Sunk Cost &
+Opportunity Cost", relocated slide 48's cheat-sheet caption and
+bumped formula-textbox fonts, and rebuilt slide 49 three times
+(landing on a single combined Ross Stores 10-K image + 4 red
+text annotations).  Also cleaned up `~/.claude/settings.json`
+permissions.
+
+### Per-slide changes
+
+1. **Slide 46 – "Modern Sunk Cost: Meta's Reality Labs Has Lost
+   $70B+".** User pre-edited the deck before this session — new
+   title ("$50B+ Since 2020" → "$70B+"), bullets reworked, new
+   Zuckerberg photo on the right, new WSJ headline screenshot on
+   the bottom-left, takeaway repositioned to lower-right.  Ported
+   into the build script:
+     - Bullets: lead bullet "Meta poured ~$70B into Reality Labs
+       since 2020"; two sub-bullets reframed around commercial
+       viability ("Quest headsets, Horizon Worlds – thin adoption,
+       little revenue" / "Hardware/software still not commercially
+       viable – payoff keeps slipping"); then "Wall Street kept
+       asking when it pays off" and the user-added closer "In
+       2026: Decision to shift spending to AI".  Sub-bullet font
+       bumped 22 → 24 pt on a follow-up pass; bullets-textbox
+       height shrunk H 4.9 → 3.25 in to clear the WSJ screenshot.
+     - Two new image assets persisted next to the build script:
+       `_zuckerberg_realitylabs.png` (rounded corners + soft drop
+       shadow), `_wsj_meta_reality_labs.png` (rectangular doc
+       screenshot, drop shadow + 0.75 pt gray border, no rounding).
+     - Lower-right pill upgraded from flat rectangle to
+       `_add_rounded_filled_box` (20% corner radius + drop shadow),
+       text "→ Classic sunk-cost discipline, 2020s edition" at
+       L 7.28 / T 6.40 / W 5.89 / H 0.55, GOLD fill / NAVY bold.
+     - Speaker notes rewritten to anchor on the WSJ $77B figure
+       and the 2026 AI pivot as the punchline.
+
+2. **Slide 47 – "Sunk Cost & Opportunity Cost: Apple's Canceled
+   Apple Car".** Title broadened from "Opportunity Cost Is a
+   Real Cost: …" — slide makes BOTH cost points together.  Bullet
+   2 prose-friendlier: "Sunk costs ≠ a reason to keep going" →
+   "Sunk costs not a reason to keep going".  Bullet 4 plainer:
+   "(the higher-MPL use)" → "(with higher expected returns)".
+   Bullets-textbox H 4.5 → 3.68 in; fonts 24/22 → 28/24 pt for
+   EMBA legibility.  Bottom takeaway rewritten to "Opportunity
+   cost = the next-best alternative use for the same dollars &
+   engineers", repositioned to L 1.53 / T 6.01 / W 10.5, upgraded
+   from `_add_takeaway_bar` (flat) to `_add_rounded_filled_box`
+   (20% corners, NAVY fill, WHITE bold, drop shadow).  Speaker
+   notes rewritten around the two cost concepts.
+
+3. **Slide 48 – "Dictionary of Costs".** "Cheat sheet to refer
+   back to" caption **moved from the bottom (T 6.60) to the top
+   (T 1.90)**, text shortened ("…for the rest of the module"
+   dropped), font bumped 14 → 24 pt italic gray centered.  All
+   three cards (colored header rect + OMML formula box + formula
+   textbox) shifted down by 0.89" to make room: `hdr_y` 1.85 →
+   2.74 (OMML and sub-textbox tops flow from there).  The three
+   formula textboxes below the OMML boxes now render at **20 pt
+   main / 18 pt sub-bullet** (was 15/12 pt).
+
+4. **Slide 49 – "Relationship to Accounting: Ross Stores Annual
+   Report".**  Three iterations on this one.
+     - **Pass 1.** Tried to mirror original slide 55's content
+       within the new 13.33" format using `_add_source_image`
+       references to `slide50_rId3-7`: three column images
+       (labels / 2022 / 2021) plus two red overlay images (≈ TVC,
+       ≈ TC) plus two red text boxes (Mix FC & VC, Part of FC).
+       Removed the four right-side commentary boxes, the
+       "Mapping to textbook concepts" header, and the takeaway
+       bar (user direction: original had none of those).  User
+       reported the layout looked distorted.
+     - **Pass 2.** User deleted my reconstruction and pasted the
+       original-deck Group (3 column images) directly into the
+       slide, plus the two red overlay images and the two red
+       text boxes.  Ported the user's effective positions into
+       the build script — group transform unrolled into 3
+       individual pictures so `_add_source_image` could place
+       them at the same effective spots.  User still found the
+       result off.
+     - **Pass 3 (current).** User replaced everything with a
+       single combined Ross Stores cost-table screenshot plus
+       four red text boxes ("≈ TVC", "Mix FC & VC", "Part of
+       FC", "≈ TC").  Extracted the combined image (image43.png
+       from the deck) into `_ross_costs_combined.png` next to
+       the build script.  Slide is now: single image at
+       L 0.82 / T 1.62 / W 11.46 / H 5.21, plus four 20 pt bold
+       red (C00000) Whitney-Book annotations aligned with the
+       COGS / SG&A / Interest expense / Total costs rows.  All
+       previous `_add_source_image(slide, 50, …)` references for
+       rId3-rId7 removed from the function.
+
+### Permissions / settings changes
+
+- `~/.claude/settings.json` (symlinked to OneDrive copy)
+  rewritten **twice**:
+    - **Mid-session pass.**  Old allow list had three malformed
+      entries with em-dash explanations baked into the rule
+      string (e.g., `"Read — auto-approve reading any file"`),
+      which the permission engine matched against the
+      `Tool(args)` syntax and never fired.  Split those out into
+      proper individual rules (`Read`, `Bash(git status)`,
+      `Bash(git diff:*)`, `Bash(ls:*)`, `Bash(cd:*)`, …) and
+      kept the existing `Bash(python:*)`, `Bash(python3:*)`,
+      `Bash(PYTHONIOENCODING=* python:*)`.
+    - **Final pass.**  After a multi-line `python -c "<heredoc>"`
+      still triggered a permission prompt (Claude Code treats
+      newline-bearing commands conservatively — prefix match only
+      covers the first line), collapsed the entire allow list to
+      `["Read", "Bash"]` (tool-level Bash allow).  A small deny
+      list of destructive commands (`rm -rf`, `git push --force`,
+      `git reset --hard`) was added at first, then **removed at
+      the user's request** — the CLAUDE.md safety rules are the
+      only guardrail now.
+- Net effect: every Bash command runs without prompting; trust is
+  on me (and CLAUDE.md) to confirm before destructive ops.
+
+### Decisions made
+
+- For slide 49, after two distorted reconstructions, the user
+  switched approaches entirely — collapse the table to a single
+  pasted screenshot and place the red annotations on top.  Keep
+  this approach on rebuild; don't try to reconstruct the
+  multi-column layout again.
+- "Cheat sheet" caption belongs **above** the three cards on
+  slide 48, not below.  Caption font is 24 pt (matching the
+  EMBA-scale of the rest of the slide), italic gray centered.
+- Module 3 takeaway pills are uniformly rounded (20% corners) +
+  drop-shadowed going forward — applied to slides 46 and 47 this
+  session.
+
+### Open / pending for next session
+
+- None flagged.
+
+### Commands / workflows worth remembering
+
+- **In-deck image extraction** (when the user pastes an image
+  in PowerPoint that we want to keep available for rebuild):
+  ```python
+  import zipfile
+  with zipfile.ZipFile('Module 3_clean.pptx') as z:
+      data = z.read('ppt/media/image43.png')
+  open('_ross_costs_combined.png', 'wb').write(data)
+  ```
+  Then reference it directly with `slide.shapes.add_picture(...)`
+  in the builder (skipping `_add_source_image`, which is
+  reserved for `_source_images/slide<n>_rId<m>` lookups).
+
+- **Permission-rule format reminder.**  `Bash(<prefix>:*)` is
+  the prefix-wildcard syntax.  Embedding human-readable
+  comments inside the rule string (em-dash explanations, etc.)
+  silently breaks the rule — the engine matches the whole string
+  against `Tool(args)`.  Put comments in a separate `_comment`
+  field or out of the JSON entirely.
+
+- **Multi-line `python -c "…"` commands** trigger permission
+  prompts even when `Bash(python:*)` is in the allow list,
+  because the engine's prefix match only covers the first line.
+  Either keep one-liners (semicolon-joined), save the script to
+  a `.py` file and run it, or allow `Bash` tool-wide.
+
+- **Group-transform unrolling** — when an original-deck group
+  needs to be reproduced as individual pictures, the effective
+  rendered position of a child is:
+  ```
+  eff_x = group_off_x + (child_x - chOff_x) * (ext_x / chExt_x)
+  eff_y = group_off_y + (child_y - chOff_y) * (ext_y / chExt_y)
+  ```
+  with corresponding scale factors for width/height.  Pulled
+  this out for slide 49 pass 2 before retiring it in pass 3.

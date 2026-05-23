@@ -8213,79 +8213,150 @@ def slide_45(prs):
 
 
 def slide_46(prs):
-    """Modern sunk cost: Meta's Reality Labs has lost $50B+ since 2020.
+    """Modern sunk cost: Meta's Reality Labs has lost $70B+.
 
-    Layout: bullets left + Meta Quest 3 image right (mirrors revision-v1).
+    Layout: bullets top-left, WSJ headline screenshot bottom-left,
+    Zuckerberg-with-Quest photo right, rounded takeaway pill bottom-right.
+
+    Reworked 2026-05-22 to reflect the user's hand-edits in PowerPoint:
+      • Title shortened — "$50B+ Since 2020" → "$70B+" (matches WSJ
+        screenshot, which cites $77B losses).
+      • Bullets reworked to lead with the spend, then explain *why*
+        Reality Labs is effectively sunk (tech not commercially
+        viable, weak adoption, payoff slipping), ending with Meta's
+        2026 decision to shift investment to AI.
+      • Old Meta Quest 3 source-deck image replaced by a Zuckerberg /
+        Quest 3 photo (now rounded corners + drop shadow).
+      • WSJ "Meta Plans to Shift Spending Away from the Metaverse"
+        headline added bottom-left, with drop shadow + thin gray
+        border (kept rectangular per user's hand-positioning).
+      • Old full-width takeaway bar replaced by a smaller rounded
+        navy/gold pill in the lower-right corner.
     """
     def draw(slide):
+        # ---- Bullets (top-left) ----------------------------------------
+        # User reworked the first major bullet + its two sub-points to
+        # focus on commercial viability rather than the original "Wall
+        # Street vs. Zuckerberg" framing.  Last bullet ("In 2026 …") was
+        # hand-added by the user.
         bullets = [
-            ("Meta has poured ~$50B into Reality Labs since 2020", 0),
-            ("Reality Labs:  Meta's AR/VR arm – building the next computing platform", 1),
-            ("Metaverse / VR / AR – Quest headsets, Horizon Worlds", 1),
-            ("Wall Street keeps asking when it pays off", 0),
-            ("Zuckerberg keeps investing – past losses are sunk", 0),
-            ("Right question: does the next $10B have positive Expected Value?", 0),
+            ("Meta poured ~$70B into Reality Labs since 2020", 0),
+            ("Quest headsets, Horizon Worlds – thin adoption, little revenue", 1),
+            ("Hardware/software still not commercially viable – payoff keeps slipping", 1),
+            ("Wall Street kept asking when it pays off", 0),
+            ("In 2026: Decision to shift spending to AI", 0),
         ]
-        # 2026-05-21 hand-edit: bullets textbox narrowed (W 8.7 → 7.0 in)
-        # and lengthened (H 4.5 → 4.9 in) to free up room on the right
-        # for a bigger picture.
+        # 2026-05-22 hand-tweaked from H 4.9 → 3.25 in (originally 3.52,
+        # tightened further on second pass) to free up the lower-left
+        # quadrant for the WSJ screenshot.  sub_size hand-bumped from
+        # 22 → 24 pt — user wanted the two viability sub-bullets to
+        # read at the same weight as the main bullets for EMBA legibility.
         _add_hierarchical_bullets(
             slide,
-            left=MARGIN, top=Inches(1.85),
-            width=Inches(7.0), height=Inches(4.9),
+            left=MARGIN, top=Inches(1.57),
+            width=Inches(7.0), height=Inches(3.25),
             items=bullets,
-            size=24, sub_size=22, line_spacing_pts=12,
+            size=24, sub_size=24, line_spacing_pts=12,
         )
 
-        # Meta Quest 3 picture on the right — 2026-05-21 hand-edit:
-        # moved left/down and enlarged (W 3.30 → 4.47 in).
-        _add_source_image(slide, 47, "rId2",
-                          left=Inches(8.468), top=Inches(2.92),
-                          width=Inches(4.472))
-        _add_text(slide, Inches(9.55), Inches(6.05), Inches(3.3), Inches(0.3),
-                  "Meta Quest 3  (CC BY-SA, Wikimedia)",
-                  size=11, italic=True, color=GRAY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
+        # ---- Zuckerberg / Reality Labs photo (right) -------------------
+        # 2026-05-22 hand-added by user — Zuckerberg holding/using a
+        # Quest-class headset.  Rounded corners + soft drop shadow so
+        # the photo "lifts" off the slide (per course CLAUDE.md).
+        zuck_path = OUT_DIR / "_zuckerberg_realitylabs.png"
+        if zuck_path.exists():
+            zuck = slide.shapes.add_picture(
+                str(zuck_path),
+                int(Inches(7.37)), int(Inches(2.16)),
+                width=int(Inches(5.77)), height=int(Inches(3.76)),
+            )
+            _apply_picture_style(zuck, corner_pct=8)
 
-        _add_takeaway_bar(
+        # ---- WSJ headline screenshot (bottom-left) ---------------------
+        # 2026-05-22 hand-added by user — screenshot of WSJ Tech/AI
+        # article "Meta Plans to Shift Spending Away from the Metaverse"
+        # citing $77B in Reality Labs losses.  Position preserved
+        # exactly as user placed it.  Drop shadow + thin gray border
+        # per user request (no rounded corners — it's a doc screenshot).
+        wsj_path = OUT_DIR / "_wsj_meta_reality_labs.png"
+        if wsj_path.exists():
+            wsj = slide.shapes.add_picture(
+                str(wsj_path),
+                int(Inches(0.28)), int(Inches(5.23)),
+                width=int(Inches(6.57)), height=int(Inches(1.78)),
+            )
+            _add_drop_shadow(wsj)
+            wsj.line.color.rgb = GRAY
+            wsj.line.width = Pt(0.75)
+
+        # ---- Takeaway pill (lower-right) -------------------------------
+        # 2026-05-22 hand-positioned by user to the lower-right corner
+        # (was: full-width takeaway bar at bottom).  Rounded corners +
+        # soft drop shadow per user request.
+        _add_rounded_filled_box(
             slide,
-            "Same lesson as Waterworld  —  classic sunk-cost discipline, 2020s edition",
-            top=Inches(6.5), fill=GOLD, text_color=NAVY,
-            width=Inches(11.0),
+            Inches(7.28), Inches(6.40),
+            Inches(5.89), Inches(0.55),
+            label="→ Classic sunk-cost discipline, 2020s edition",
+            fill=GOLD, text_color=NAVY,
+            size=18, bold=True,
+            corner_pct=0.20, shadow=True,
         )
 
     s = make_diagram_slide(
         prs, page_num=46,
         section_tag=SECTION_TAG_P2,
-        title="Modern Sunk Cost:  Meta's Reality Labs Has Lost $50B+ Since 2020",
+        title="Modern Sunk Cost:  Meta's Reality Labs Has Lost $70B+",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "The same logic, in a current strategic context. Meta's Reality "
-        "Labs has lost roughly $50B from 2020-2024 on Metaverse and VR "
-        "investments. Wall Street keeps asking when it pays off. "
-        "Zuckerberg keeps investing – correctly – because the past losses "
-        "are sunk. The right question is forward-looking: does the next "
-        "$10B have positive expected value? Same lesson as Waterworld, "
-        "dressed in 2025 clothes."
+        "The same Waterworld logic, in a current strategic context. "
+        "Meta has poured roughly $70B – the Wall Street Journal puts "
+        "the figure north of $77B – into Reality Labs since 2020. "
+        "Quest headsets and Horizon Worlds never crossed into mass "
+        "adoption, and the AR/VR hardware-and-software stack still "
+        "is not commercially viable. Wall Street kept asking when it "
+        "pays off, and forward-looking returns kept getting pushed "
+        "out. In 2026 Meta made the call to shift incremental "
+        "spending toward AI – higher MPL on the next dollar, "
+        "regardless of how many billions had already been spent on "
+        "Reality Labs. Classic sunk-cost discipline, 2020s edition."
     ))
 
 
 def slide_47(prs):
-    """Opportunity cost is a real cost: Apple's canceled Apple Car."""
+    """Sunk cost & opportunity cost: Apple's canceled Apple Car.
+
+    User hand-edits ported 2026-05-22:
+      • Title broadened — was "Opportunity Cost Is a Real Cost: …",
+        now leads with BOTH cost concepts since the slide makes the
+        sunk-vs-opportunity point together.
+      • Bullet 2: "Sunk costs ≠ a reason to keep going" →
+        "Sunk costs not a reason to keep going" (avoid the math
+        glyph in a plain-prose bullet).
+      • Bullet 4: "(the higher-MPL use)" → "(with higher expected
+        returns)" — plainer language for EMBA pacing.
+      • Bullets box: H 4.5 → 3.68 in; font 24/22 → 28/24 pt
+        (heavier read for the executive audience).
+      • Bottom takeaway: rewritten to "next-best alternative use
+        for the same dollars & engineers", repositioned to
+        L 1.53 / T 6.01 / W 10.5, and upgraded to rounded corners
+        + soft drop shadow per the deck-wide takeaway treatment.
+    """
     def draw(slide):
         bullets = [
             ("Apple killed Project Titan in 2024 after ~10 years and ~$10B spent", 0),
-            ("Sunk costs ≠ a reason to keep going", 0),
+            ("Sunk costs not a reason to keep going", 0),
             ("Real reason to stop: opportunity cost of capital + 2,000 engineers", 0),
-            ("Reallocated → AI / Apple Intelligence (the higher-MPL use)", 1),
+            ("Reallocated → AI / Apple Intelligence (with higher expected returns)", 1),
         ]
+        # 2026-05-22 hand-tweaks: H 4.5 → 3.68 in; size 24/22 → 28/24 pt.
         _add_hierarchical_bullets(
             slide,
             left=MARGIN, top=Inches(1.85),
-            width=Inches(7.0), height=Inches(4.5),
+            width=Inches(7.0), height=Inches(3.68),
             items=bullets,
-            size=24, sub_size=22, line_spacing_pts=12,
+            size=28, sub_size=24, line_spacing_pts=12,
         )
 
         # Vanarama Apple Car concept render on the right
@@ -8297,24 +8368,35 @@ def slide_47(prs):
                   size=11, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
-        _add_takeaway_bar(
+        # 2026-05-22 hand-tweaked: was a flat full-width takeaway bar
+        # at top=Inches(6.5); user wanted the deck-standard rounded +
+        # shadow treatment, repositioned slightly up and right.
+        _add_rounded_filled_box(
             slide,
-            "Opportunity cost  =  the next-best use of the same dollars  &  people",
-            top=Inches(6.5), fill=NAVY, width=Inches(10.5),
+            Inches(1.53), Inches(6.01),
+            Inches(10.50), Inches(0.55),
+            label="Opportunity cost  =  the next-best alternative use for the same dollars  &  engineers",
+            fill=NAVY, text_color=WHITE,
+            size=20, bold=True,
+            corner_pct=0.20, shadow=True,
         )
 
     s = make_diagram_slide(
         prs, page_num=47,
         section_tag=SECTION_TAG_P2,
-        title="Opportunity Cost Is a Real Cost:  Apple's Canceled Apple Car",
+        title="Sunk Cost & Opportunity Cost:  Apple's Canceled Apple Car",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "The flip side of sunk costs is opportunity cost. Apple killed "
-        "Project Titan in 2024 after roughly a decade and $10B spent. "
-        "The sunk costs were sunk. What killed the project was "
-        "opportunity cost: those engineers and that capital had a "
-        "higher-MPL use in Apple Intelligence and AI."
+        "Apple killed Project Titan in 2024 after roughly a decade and "
+        "$10B spent on the car. The slide makes two cost points at "
+        "once. First, the sunk costs are sunk – $10B already spent is "
+        "not a reason to keep going. Second, the real reason to stop "
+        "was opportunity cost: the capital and the ~2,000 engineers "
+        "had a higher-return use in Apple Intelligence and the AI "
+        "stack. Reallocation, not refusal-to-cut-losses, is the "
+        "executive lesson. Opportunity cost is the next-best "
+        "alternative use of the same dollars and engineers."
     ))
 
 
@@ -8323,13 +8405,35 @@ def slide_48(prs):
 
     Same formulas and labels as the source image, restyled to the deck's
     NAVY/GOLD palette with OMML rendering for each headline formula.
+
+    User hand-edits ported 2026-05-22:
+      • "Cheat sheet to refer back to" caption moved from below the
+        cards (T 6.60) to ABOVE the cards (T 1.90), text shortened
+        ("…for the rest of the module" dropped), font 14 → 24 pt.
+      • Three cards (header rect + OMML formula box + formula
+        textbox) shifted down by 0.89" to make room for the caption:
+        hdr_y 1.85 → 2.74.
+      • Sub-formula textbox fonts bumped from 15/12 pt → 20/18 pt
+        for EMBA legibility.
     """
     def draw(slide):
         # Three-card row: Total / Average / Marginal cost.
         col_w = Inches(4.05)
         col_gap = Inches(0.15)
         col_x0 = (SLIDE_W - col_w * 3 - col_gap * 2) // 2
-        hdr_y = Inches(1.85)
+
+        # "Cheat sheet…" caption — moved ABOVE the cards (2026-05-22
+        # hand-edit: was at T=6.60 below the cards, now at T=1.90
+        # spanning roughly the column band). Font bumped 14 → 24 pt.
+        _add_text(slide, Inches(0.44), Inches(1.90), Inches(12.78), Inches(0.40),
+                  "Cheat sheet to refer back to",
+                  size=24, italic=True, color=GRAY, font="Calibri",
+                  align=PP_ALIGN.CENTER)
+
+        # 2026-05-22 hand-tweaked: hdr_y 1.85 → 2.74 to clear the
+        # newly-placed top caption.  OMML and sub-textbox tops flow
+        # from this.
+        hdr_y = Inches(2.74)
         hdr_h = Inches(0.55)
         formula_y = hdr_y + hdr_h + Inches(0.10)
         formula_h = Inches(0.95)
@@ -8346,6 +8450,7 @@ def slide_48(prs):
             size_pt=22, color=NAVY, fill=RGBColor(0xFD, 0xF6, 0xE6),
             line=NAVY,
         )
+        # 2026-05-22 hand-tweak: bullet fonts 15/12 → 20/18 pt.
         _add_hierarchical_bullets(
             slide,
             left=x + Inches(0.15), top=subs_y,
@@ -8355,7 +8460,7 @@ def slide_48(prs):
                 ("(ignore sunk costs)", 1),
                 ("TVC = Total Variable Cost", 0),
             ],
-            size=15, sub_size=12, line_spacing_pts=8,
+            size=20, sub_size=18, line_spacing_pts=8,
         )
 
         # Card 2 — Average Cost
@@ -8378,7 +8483,7 @@ def slide_48(prs):
                 ("AVC = TVC / Q", 0),
                 ("ATC = AFC + AVC", 0),
             ],
-            size=15, sub_size=12, line_spacing_pts=8,
+            size=20, sub_size=18, line_spacing_pts=8,
         )
 
         # Card 3 — Marginal Cost
@@ -8403,13 +8508,8 @@ def slide_48(prs):
                 ("MC = dTC / dQ", 1),
                 ("    = dTVC / dQ", 1),
             ],
-            size=15, sub_size=12, line_spacing_pts=8,
+            size=20, sub_size=18, line_spacing_pts=8,
         )
-
-        _add_text(slide, MARGIN, Inches(6.60), RULE_W, Inches(0.4),
-                  "Cheat sheet to refer back to for the rest of the module",
-                  size=14, italic=True, color=GRAY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
 
     s = make_diagram_slide(
         prs, page_num=48,
@@ -8425,98 +8525,78 @@ def slide_48(prs):
 
 
 def slide_49(prs):
-    """Ross Stores annual report – grounding cost concepts in a real 10-K."""
+    """Relationship to Accounting: Ross Stores annual report.
+
+    2026-05-22 third pass: the user replaced my multi-column
+    reconstruction with a single combined 10-K screenshot
+    (_ross_costs_combined.png) plus four red text annotations.
+    This version reproduces the user's paste verbatim:
+
+      • Single combined cost-table image at
+        L 0.82 / T 1.62 / W 11.46 / H 5.21.
+      • Four red text annotations (all 20 pt bold red C00000,
+        Whitney Book font — PowerPoint substitutes Calibri
+        locally where Whitney Book isn't installed):
+          - "≈ TVC"        at L 3.45 / T 4.55   (Cost of goods sold row)
+          - "Mix FC & VC"  at L 5.18 / T 5.11   (SG&A row)
+          - "Part of FC"   at L 4.93 / T 5.59   (Interest expense row)
+          - "≈ TC"         at L 4.20 / T 6.19   (Total costs and expenses row)
+
+    Coordinates copied verbatim from the user's pasted shapes.
+    """
     def draw(slide):
-        # Reconstruct the original 10-K snippet layout: a row-label column
-        # (rId3), a 2022 numbers column (rId4), a 2021 numbers column (rId5),
-        # and two red "≈ TVC" / "≈ TC" overlay annotations (rId6 / rId7).
-        labels_x = Inches(0.6)
-        labels_y = Inches(1.90)
-        labels_w = Inches(3.40)             # row labels
-        labels_h = Inches(2.20)
-        # Match piece-to-piece native aspect: image43 235×152 (~1.55:1)
-        _add_source_image(slide, 50, "rId3",
-                           left=labels_x, top=labels_y,
-                           width=labels_w, height=labels_h,
-                           shadow=False)
+        # ----- Single combined Ross Stores cost-table image ------
+        # User pasted this as one image (replaces the previous
+        # multi-column source-image reconstruction, which looked
+        # distorted in 16:9).
+        ross = OUT_DIR / "_ross_costs_combined.png"
+        if ross.exists():
+            slide.shapes.add_picture(
+                str(ross),
+                int(Inches(0.82)), int(Inches(1.62)),
+                width=int(Inches(11.46)), height=int(Inches(5.21)),
+            )
 
-        # 2022 numbers column (image44, 173×489 ≈ 0.354:1)
-        col_w = Inches(1.75)
-        col_h = Inches(4.40)
-        col22_x = labels_x + labels_w + Inches(0.10)
-        _add_source_image(slide, 50, "rId4",
-                           left=col22_x, top=labels_y,
-                           width=col_w, height=col_h,
-                           shadow=False)
-
-        # 2021 numbers column (image45, 141×201 ≈ 0.70:1)
-        col21_x = col22_x + col_w + Inches(0.05)
-        col21_w = Inches(1.70)
-        col21_h = Inches(1.85)
-        _add_source_image(slide, 50, "rId5",
-                           left=col21_x, top=labels_y,
-                           width=col21_w, height=col21_h,
-                           shadow=False)
-
-        # "≈ TVC" red overlay near the COGS line (image230, rId6)
-        _add_source_image(slide, 50, "rId6",
-                           left=labels_x + Inches(0.30),
-                           top=labels_y + Inches(0.95),
-                           width=Inches(1.50), height=Inches(0.45),
-                           shadow=False)
-        # "≈ TC" red overlay near the Total-costs line (image240, rId7)
-        _add_source_image(slide, 50, "rId7",
-                           left=labels_x + Inches(0.30),
-                           top=labels_y + Inches(1.80),
-                           width=Inches(1.40), height=Inches(0.40),
-                           shadow=False)
-
-        # Right-side commentary — fixed vs variable mapping
-        _add_text(slide, Inches(9.20), Inches(1.95), Inches(3.90), Inches(0.40),
-                  "Mapping to textbook concepts",
-                  size=18, italic=True, bold=True, color=NAVY,
-                  font="Calibri")
-        _add_filled_box(
-            slide, Inches(9.20), Inches(2.45), Inches(3.90), Inches(0.65),
-            "Cost of goods sold  ≈  TVC",
-            fill=NAVY, text_color=WHITE, size=15, bold=True,
-        )
-        _add_filled_box(
-            slide, Inches(9.20), Inches(3.20), Inches(3.90), Inches(0.65),
-            "Total costs and expenses  ≈  TC",
-            fill=NAVY, text_color=WHITE, size=15, bold=True,
-        )
-        _add_outlined_box(
-            slide, Inches(9.20), Inches(3.95), Inches(3.90), Inches(0.70),
-            "SG&A  ≈  Mix of fixed (rent, depreciation) and variable (wages)",
-            fill=WHITE, line=NAVY, text_color=NAVY, size=12, bold=False,
-            line_w=1.0,
-        )
-        _add_outlined_box(
-            slide, Inches(9.20), Inches(4.75), Inches(3.90), Inches(0.70),
-            "Interest expense  ≈  Fixed (long-term debt service)",
-            fill=WHITE, line=NAVY, text_color=NAVY, size=12, bold=False,
-            line_w=1.0,
-        )
-
-        _add_takeaway_bar(
-            slide,
-            "Every 10-K can be read as a fixed-vs-variable split",
-            top=Inches(6.55), fill=GOLD, text_color=NAVY,
-            width=Inches(10.5),
-        )
+        # ----- Four red text annotations -------------------------
+        RED = RGBColor(0xC0, 0x00, 0x00)
+        # "≈ TVC" — aligned with the "Cost of goods sold" row.
+        _add_text(slide, Inches(3.45), Inches(4.55),
+                   Inches(1.16), Inches(0.44),
+                   "≈ TVC",
+                   size=20, bold=True, color=RED, font="Whitney Book")
+        # "Mix FC & VC" — aligned with the SG&A row.
+        _add_text(slide, Inches(5.18), Inches(5.11),
+                   Inches(1.98), Inches(0.44),
+                   "Mix FC & VC",
+                   size=20, bold=True, color=RED, font="Whitney Book")
+        # "Part of FC" — aligned with the Interest-expense row.
+        _add_text(slide, Inches(4.93), Inches(5.59),
+                   Inches(1.45), Inches(0.44),
+                   "Part of FC",
+                   size=20, bold=True, color=RED, font="Whitney Book")
+        # "≈ TC" — aligned with the "Total costs and expenses" row.
+        _add_text(slide, Inches(4.20), Inches(6.19),
+                   Inches(1.16), Inches(0.44),
+                   "≈ TC",
+                   size=20, bold=True, color=RED, font="Whitney Book")
 
     s = make_diagram_slide(
         prs, page_num=49,
         section_tag=SECTION_TAG_P2,
-        title="Cost Concepts in the Real World:  Ross Stores Annual Report",
+        title="Relationship to Accounting:  Ross Stores Annual Report",
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Cost concepts in the real world – a page from Ross Stores' "
-        "annual report. Have students classify each line as fixed or "
-        "variable. The point is to ground the abstract concepts in "
-        "something they'll see in a 10-K."
+        "Ross Stores' annual report, used here to ground the cost "
+        "concepts in something students will recognise from a 10-K. "
+        "Walk through the three items under 'costs and expenses': "
+        "cost of goods sold is essentially variable (≈ TVC); "
+        "selling, general and administrative is a mix of fixed and "
+        "variable (sales commissions vary with revenue, the CEO's "
+        "salary does not); interest expense is fixed (the cost of "
+        "servicing long-term debt). Everything labelled costs and "
+        "expenses together is the firm's TC. The red overlays make "
+        "the mapping visible without rewriting the line items."
     ))
 
 
