@@ -168,6 +168,27 @@ For work in this folder, you are assisting with **teaching materials**
   (Q, K, L, w) stay italic by default. This matches journal-style
   notation and is the cue economists expect.
 
+### Chart legends
+- **Legends stack vertically, one entry per line.** When a chart has
+  more than one series, the legend entries should appear vertically
+  one under the other – never side-by-side. Use a narrow + tall
+  manual-layout box (e.g., `w ≈ 0.15`, `h ≈ 0.07 × N_entries`) so
+  PowerPoint is forced to render single-column.
+- **Entries packed close together.** Don't pad the legend box with
+  extra vertical whitespace; the entries should sit just a small
+  gap apart. The user can read three TC / TFC / TVC labels in
+  ~0.22 of chart height comfortably.
+- **Legend lives inside the chart**, not below or beside it. Set
+  `chart.legend.include_in_layout = False` so the legend overlays
+  the plot area in an empty corner (typically upper-left when the
+  curves rise from left to right). Place it where it does NOT
+  occlude any series.
+- **White fill + thin primary-color border.** A 0.75 pt navy border
+  with a solid white fill makes the legend read as a self-contained
+  badge even when it overlaps gridlines or low data points.
+- **18 pt navy Calibri text by default** – matches the deck's
+  oversized-for-EMBA-readability axis-label scale.
+
 ### Workflow with existing .pptx decks
 - **Never round-trip an existing deck through python-pptx.** It
   silently strips NULL hyperlink rels and other elements PowerPoint

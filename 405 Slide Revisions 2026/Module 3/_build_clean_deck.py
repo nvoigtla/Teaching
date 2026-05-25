@@ -308,7 +308,7 @@ def _add_rounded_filled_box(slide, left, top, width, height, label, *,
 
 
 def _add_arrow(slide, start_xy, end_xy, *, color=NAVY, weight_pt=1.5,
-               head=True, dash=None):
+               head=True, dash=None, head_size='med'):
     """Draw a line/arrow from start to end (in EMU/Inches values).
 
     EMU coordinates MUST be integers — PowerPoint rejects decimal values
@@ -316,6 +316,11 @@ def _add_arrow(slide, start_xy, end_xy, *, color=NAVY, weight_pt=1.5,
 
     ``dash`` accepts any OOXML preset-dash name (e.g., ``"dash"``,
     ``"dashDot"``, ``"sysDash"``).  Default ``None`` = solid line.
+
+    ``head_size`` is the OOXML preset arrowhead size — one of ``'sm'``,
+    ``'med'`` (default), or ``'lg'``.  Width and height are set
+    together, so passing ``'lg'`` gives a noticeably larger tip while
+    leaving the line weight unchanged.
     """
     sx, sy = int(start_xy[0]), int(start_xy[1])
     ex, ey = int(end_xy[0]), int(end_xy[1])
@@ -331,8 +336,8 @@ def _add_arrow(slide, start_xy, end_xy, *, color=NAVY, weight_pt=1.5,
     if head:
         tailEnd = ET.SubElement(ln, qn('a:tailEnd'))
         tailEnd.set('type', 'triangle')
-        tailEnd.set('w', 'med')
-        tailEnd.set('h', 'med')
+        tailEnd.set('w', head_size)
+        tailEnd.set('h', head_size)
     return line
 
 
@@ -9375,35 +9380,155 @@ def slide_54(prs):
 def slide_55(prs):
     """Rivian's Georgia plant – Cost Components (TC = TFC + TVC).
 
-    Native python-pptx chart with three series, driven by the same data
-    as slides 55 and 57 (TC = 800k + 200·Q²).
+    2026-05-23 second pass: chart fully rebuilt to mirror slide 54's
+    geometry and formula.  Previously this slide used a categorical
+    line chart driven by the OLD formula TC = 800k + 200·Q² with
+    Q in 10..110; that drifted out of sync once slide 54 moved to
+    the original-deck formula and a 0..1000 Q range.  Now:
+
+      • XY-scatter chart (matches slide 54), Q axis 0..1000.
+      • TFC = $10M constant horizontal line; TVC = 30,000·Q + 40·Q²
+        rising convex curve; TC = TFC + TVC.  Y axis in $M, max
+        110 (same scale as slide 54).
+      • Three smooth navy/gold/red lines, no markers.
+      • Narrower frame (W 12.30 → 8.30) and taller (H 4.55 → 4.90)
+        with chart_title hidden so the plot area fills the frame.
+      • Larger fonts everywhere: 16 pt axis titles, 14 pt tick
+        labels, 18 pt legend.
+      • Legend overlay inside the plot at top-left, three entries
+        stacked vertically (narrow-tall manual layout), white fill
+        + navy border (matching slide 54's legend treatment).
     """
     def draw(slide):
-        cats = [str(q) for q in COST_Q_VALS]
-        tc_vals  = [_cost_tc(q)  / 1000 for q in COST_Q_VALS]
-        tfc_vals = [COST_TFC     / 1000 for _ in COST_Q_VALS]
-        tvc_vals = [_cost_tvc(q) / 1000 for q in COST_Q_VALS]
+        from pptx.chart.data import XyChartData
+        from pptx.enum.chart import XL_MARKER_STYLE
 
-        _make_multi_line_chart(
-            slide, Inches(0.50), Inches(1.85),
-            Inches(12.30), Inches(4.55),
-            categories=cats,
-            series=[
-                ("TC",  tc_vals,  NAVY,                        'circle'),
-                ("TFC", tfc_vals, GOLD,                        'square'),
-                ("TVC", tvc_vals, RGBColor(0xC0, 0x50, 0x4D),  'triangle'),  # warm red — distinct from TC
-            ],
-            x_title="Q   (vehicles per week)",
-            y_title="Cost   ($K)",
-            y_min=0, y_max=3500, y_unit=500,
-            legend_pos=('0.10', '0.08', '0.18', '0.22'),
+        # ----- TC formula (matches slide 54) ---------------------
+        TFC_LOCAL = 10_000_000
+        LIN_LOCAL = 30_000
+        QUAD_LOCAL = 40
+        tc_of  = lambda q: TFC_LOCAL + LIN_LOCAL * q + QUAD_LOCAL * q * q
+        tvc_of = lambda q:             LIN_LOCAL * q + QUAD_LOCAL * q * q
+
+        # Dense Q grid so the three curves look smooth.
+        Q_curve = list(range(0, 1001, 25))
+        TC_M  = [tc_of(q)  / 1_000_000 for q in Q_curve]
+        TFC_M = [TFC_LOCAL / 1_000_000 for _ in Q_curve]   # constant 10
+        TVC_M = [tvc_of(q) / 1_000_000 for q in Q_curve]
+
+        chart_data = XyChartData()
+        for name, vals in (('TC', TC_M), ('TFC', TFC_M), ('TVC', TVC_M)):
+            s = chart_data.add_series(name)
+            for q, v in zip(Q_curve, vals):
+                s.add_data_point(q, v)
+
+        # ----- Chart geometry: narrow, tall, no chart-title gap --
+        # 2026-05-23 third pass: user hand-positioned the chart
+        # frame to T 1.58 / W 8.27 / H 4.67 (tweaks of a few
+        # hundredths of an inch each).
+        chart_x, chart_y = Inches(2.50), Inches(1.58)
+        chart_w, chart_h = Inches(8.27), Inches(4.67)
+        # White backing rectangle for the soft drop-shadow effect.
+        _add_graphicframe_shadow(slide, chart_x, chart_y, chart_w, chart_h)
+        gf = slide.shapes.add_chart(
+            XL_CHART_TYPE.XY_SCATTER_LINES,
+            chart_x, chart_y, chart_w, chart_h, chart_data,
         )
+        chart = gf.chart
+        chart.has_title = False
 
+        # ----- Axes (larger tick labels + titles) ----------------
+        # 2026-05-23 second pass: axis titles 16 → 18 pt and tick
+        # labels 14 → 16 pt per user request.
+        xax = chart.category_axis
+        xax.maximum_scale = 1000
+        xax.minimum_scale = 0
+        xax.major_unit = 200
+        xax.has_title = True
+        xax.axis_title.text_frame.text = "Q   (vehicles per week)"
+        for r in xax.axis_title.text_frame.paragraphs[0].runs:
+            r.font.size = Pt(18); r.font.italic = True; r.font.bold = True
+            r.font.color.rgb = NAVY; r.font.name = "Calibri"
+        xax.tick_labels.font.size = Pt(16)
+        xax.tick_labels.font.color.rgb = NAVY
+        xax.tick_labels.font.name = "Calibri"
+
+        yax = chart.value_axis
+        yax.maximum_scale = 90
+        yax.minimum_scale = 0
+        yax.major_unit = 10
+        yax.has_title = True
+        yax.axis_title.text_frame.text = "Cost   ($M)"
+        for r in yax.axis_title.text_frame.paragraphs[0].runs:
+            r.font.size = Pt(18); r.font.italic = True; r.font.bold = True
+            r.font.color.rgb = NAVY; r.font.name = "Calibri"
+        yax.tick_labels.font.size = Pt(16)
+        yax.tick_labels.font.color.rgb = NAVY
+        yax.tick_labels.font.name = "Calibri"
+
+        # Dashed light-grey major gridlines on the Y axis.
+        _add_dashed_gridlines(yax._element)
+
+        # ----- Per-series styling: smooth lines, no markers -----
+        colors = [NAVY, GOLD, RGBColor(0xC0, 0x50, 0x4D)]
+        for i, color in enumerate(colors):
+            ser = chart.plots[0].series[i]
+            ser.marker.style = XL_MARKER_STYLE.NONE
+            ser.format.line.color.rgb = color
+            ser.format.line.width = Pt(2.75)
+            ser_el = ser._element
+            for old in ser_el.findall(qn('c:smooth')):
+                ser_el.remove(old)
+            smooth = ET.SubElement(ser_el, qn('c:smooth'))
+            smooth.set('val', '1')
+
+        # ----- Legend: top-left inside the plot area -----------
+        # Vertical stacking (three entries on three lines), white
+        # fill + thin navy border, 18 pt navy text.
+        chart.has_legend = True
+        leg = chart.legend
+        leg.include_in_layout = False
+        leg.font.size = Pt(18)
+        leg.font.color.rgb = NAVY
+        leg.font.name = "Calibri"
+        leg_el = leg._element
+        for old in leg_el.findall(qn('c:layout')):
+            leg_el.remove(old)
+        layout = ET.SubElement(leg_el, qn('c:layout'))
+        manual = ET.SubElement(layout, qn('c:manualLayout'))
+        for name, val in (('xMode', 'edge'), ('yMode', 'edge')):
+            el = ET.SubElement(manual, qn('c:' + name))
+            el.set('val', val)
+        # 2026-05-23 third pass: user nudged the legend up and
+        # slightly right (x 0.168 → 0.193, y 0.226 → 0.149); box
+        # dimensions kept at 0.15 × 0.221 — narrow + tight enough
+        # for 3 entries to stack vertically, close together.
+        for name, val in (('x', '0.193'), ('y', '0.149'),
+                          ('w', '0.15'), ('h', '0.221')):
+            el = ET.SubElement(manual, qn('c:' + name))
+            el.set('val', val)
+        # White fill + thin navy border.
+        for old in leg_el.findall(qn('c:spPr')):
+            leg_el.remove(old)
+        leg_spPr = ET.SubElement(leg_el, qn('c:spPr'))
+        leg_fill = ET.SubElement(leg_spPr, qn('a:solidFill'))
+        leg_fill_rgb = ET.SubElement(leg_fill, qn('a:srgbClr'))
+        leg_fill_rgb.set('val', 'FFFFFF')
+        leg_ln = ET.SubElement(leg_spPr, qn('a:ln'))
+        leg_ln.set('w', '9525')
+        leg_ln_fill = ET.SubElement(leg_ln, qn('a:solidFill'))
+        leg_ln_rgb = ET.SubElement(leg_ln_fill, qn('a:srgbClr'))
+        leg_ln_rgb.set('val', '0B2B4E')
+
+        # 2026-05-23 third pass: takeaway moved up T 6.55 → 6.40
+        # so it sits closer to the chart bottom now that the chart
+        # frame ends at T 6.25 (1.58 + 4.67).
         _add_takeaway_bar(
             slide,
             "Fixed costs dominate at low Q;  the quadratic TVC overtakes at scale",
-            top=Inches(6.55), fill=NAVY, text_color=WHITE,
+            top=Inches(6.40), fill=NAVY, text_color=WHITE,
             width=Inches(11.5), size=18,
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -9413,48 +9538,223 @@ def slide_55(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Decompose total cost into its components: fixed plus variable, "
-        "broken into sub-categories. The visual lets students see how "
-        "the cost structure shifts as output grows: at low Q, the fixed "
-        "cost ($10M) dominates; at high Q, the quadratic term takes over."
+        "Decompose total cost into its components: fixed plus variable. "
+        "Same Rivian cost function used on the previous slide: "
+        "TC = 10,000,000 + 30,000·Q + 40·Q², so TFC = $10M (the flat "
+        "gold line at 10) and TVC = 30,000·Q + 40·Q² (the rising red "
+        "curve).  Their vertical sum is the navy TC curve.  The visual "
+        "lets students see how the cost structure shifts as output "
+        "grows: at low Q, the fixed cost dominates; at high Q, the "
+        "quadratic TVC term takes over and TC tracks TVC."
     ))
 
 
 def slide_56(prs):
-    """Rivian's Georgia plant – Per-Unit Costs (ATC, AVC, MC).
+    """Rivian's Georgia plant – Per-Unit Costs (ATC, AFC, AVC, MC).
 
-    Native chart, three series, same Excel data (TC = 800k + 200·Q²).
-    Demonstrates: MC = 400Q − 200·dQ; AVC = 200·Q (linear rising);
-    ATC = TFC/Q + 200·Q (U-shape).  MC crosses ATC at the ATC minimum.
+    2026-05-23 third pass: chart redrawn to mirror original-deck
+    slide 62 exactly.  Three changes vs. the prior pass:
+      • Added a fourth series — AFC = 10,000,000 / Q — the
+        hyperbolic average-fixed-cost curve (was missing).
+      • Adopted the original deck's four-color palette: ATC blue,
+        AFC orange, AVC green, MC red.
+      • Replaced the navy "MC crosses ATC..." takeaway at the
+        bottom with three callouts ABOVE the chart, each with a
+        navy arrow pointing to the relevant feature on the curves:
+          1. "ATC falls below sales price ($80k) at Q ≈ 250"
+          2. "The minimum of ATC is where it crosses MC"
+          3. "ATC increases again due to rising MC"
+
+    Per-unit derivations from TC = 10M + 30k·Q + 40·Q²:
+      • ATC(Q) = 10,000,000/Q + 30,000 + 40·Q     (U-shape)
+      • AFC(Q) = 10,000,000/Q                      (hyperbolic)
+      • AVC(Q) =                 30,000 + 40·Q     (linear up)
+      • MC(Q)  =                 30,000 + 80·Q     (linear up,
+                                                    twice AVC slope)
+
+    Sales-price line is $80K.  Solving ATC(Q) = 80 gives Q = 250
+    (the first crossing — ATC falling below) and Q = 1000.
     """
     def draw(slide):
-        cats = [str(q) for q in COST_Q_VALS]
-        # Per-unit values in $K so the y axis stays readable.
-        atc_vals = [_cost_atc(q) / 1000 for q in COST_Q_VALS]
-        avc_vals = [_cost_avc(q) / 1000 for q in COST_Q_VALS]
-        mc_vals  = [_cost_mc(q)  / 1000 for q in COST_Q_VALS]
+        from pptx.chart.data import XyChartData
+        from pptx.enum.chart import XL_MARKER_STYLE
 
-        _make_multi_line_chart(
-            slide, Inches(0.50), Inches(1.85),
-            Inches(12.30), Inches(4.55),
-            categories=cats,
-            series=[
-                ("ATC", atc_vals, NAVY,                        'circle'),
-                ("AVC", avc_vals, GOLD,                        'square'),
-                ("MC",  mc_vals,  RGBColor(0xC0, 0x50, 0x4D),  'triangle'),  # warm red — distinct from ATC/AVC
-            ],
-            x_title="Q   (vehicles per week)",
-            y_title="Per-unit cost   ($K)",
-            y_min=0, y_max=90, y_unit=10,
-            legend_pos=('0.78', '0.08', '0.18', '0.22'),
-        )
+        # ----- Per-unit formulas (matches slides 54 / 55) -------
+        TFC_LOCAL = 10_000_000
+        LIN_LOCAL = 30_000
+        QUAD_LOCAL = 40
+        atc_of = lambda q: TFC_LOCAL / q + LIN_LOCAL + QUAD_LOCAL * q
+        afc_of = lambda q: TFC_LOCAL / q
+        avc_of = lambda q:                  LIN_LOCAL + QUAD_LOCAL * q
+        mc_of  = lambda q:                  LIN_LOCAL + 2 * QUAD_LOCAL * q
 
-        _add_takeaway_bar(
-            slide,
-            "MC crosses ATC at the ATC minimum  —  the textbook U-shape",
-            top=Inches(6.55), fill=GOLD, text_color=NAVY,
-            width=Inches(11.0),
+        Q_curve = list(range(100, 1001, 25))
+        ATC_K = [atc_of(q) / 1000 for q in Q_curve]
+        AFC_K = [afc_of(q) / 1000 for q in Q_curve]
+        AVC_K = [avc_of(q) / 1000 for q in Q_curve]
+        MC_K  = [mc_of(q)  / 1000 for q in Q_curve]
+
+        chart_data = XyChartData()
+        for name, vals in (('ATC', ATC_K), ('AFC', AFC_K),
+                           ('AVC', AVC_K), ('MC',  MC_K)):
+            s = chart_data.add_series(name)
+            for q, v in zip(Q_curve, vals):
+                s.add_data_point(q, v)
+
+        # ----- Chart geometry: shifted DOWN to leave room at the
+        # top for the three callout boxes (user hand-tweaked
+        # 2026-05-24: T 2.10 → 2.56, H 4.95 → 4.49).
+        chart_x, chart_y = Inches(2.50), Inches(2.56)
+        chart_w, chart_h = Inches(8.27), Inches(4.49)
+        _add_graphicframe_shadow(slide, chart_x, chart_y, chart_w, chart_h)
+        gf = slide.shapes.add_chart(
+            XL_CHART_TYPE.XY_SCATTER_LINES,
+            chart_x, chart_y, chart_w, chart_h, chart_data,
         )
+        chart = gf.chart
+        chart.has_title = False
+
+        # ----- Axes ---------------------------------------------
+        xax = chart.category_axis
+        xax.maximum_scale = 1000
+        xax.minimum_scale = 0
+        xax.major_unit = 100
+        xax.has_title = True
+        xax.axis_title.text_frame.text = "Q   (vehicles per week)"
+        for r in xax.axis_title.text_frame.paragraphs[0].runs:
+            r.font.size = Pt(18); r.font.italic = True; r.font.bold = True
+            r.font.color.rgb = NAVY; r.font.name = "Calibri"
+        xax.tick_labels.font.size = Pt(16)
+        xax.tick_labels.font.color.rgb = NAVY
+        xax.tick_labels.font.name = "Calibri"
+
+        yax = chart.value_axis
+        yax.maximum_scale = 110
+        yax.minimum_scale = 0
+        yax.major_unit = 10
+        yax.has_title = True
+        yax.axis_title.text_frame.text = "Per-unit cost   ($K)"
+        for r in yax.axis_title.text_frame.paragraphs[0].runs:
+            r.font.size = Pt(18); r.font.italic = True; r.font.bold = True
+            r.font.color.rgb = NAVY; r.font.name = "Calibri"
+        yax.tick_labels.font.size = Pt(16)
+        yax.tick_labels.font.color.rgb = NAVY
+        yax.tick_labels.font.name = "Calibri"
+
+        _add_dashed_gridlines(yax._element)
+
+        # ----- Plot area (user hand-extended to the right) ------
+        # 2026-05-25: user dragged the plot area right edge to use
+        # more of the chart frame; capture the resulting layout so
+        # the next rebuild reproduces it.
+        plot_area_el = chart._chartSpace.find('.//' + qn('c:plotArea'))
+        if plot_area_el is not None:
+            for old in plot_area_el.findall(qn('c:layout')):
+                plot_area_el.remove(old)
+            pa_layout = ET.Element(qn('c:layout'))
+            pa_manual = ET.SubElement(pa_layout, qn('c:manualLayout'))
+            ET.SubElement(pa_manual, qn('c:layoutTarget')).set('val', 'inner')
+            ET.SubElement(pa_manual, qn('c:xMode')).set('val', 'edge')
+            ET.SubElement(pa_manual, qn('c:yMode')).set('val', 'edge')
+            ET.SubElement(pa_manual, qn('c:x')).set('val', '0.12872569057646513')
+            ET.SubElement(pa_manual, qn('c:y')).set('val', '0.045672603842114391')
+            ET.SubElement(pa_manual, qn('c:w')).set('val', '0.79662349869506943')
+            ET.SubElement(pa_manual, qn('c:h')).set('val', '0.74657618660696368')
+            # layout must be the first child of plotArea per schema
+            plot_area_el.insert(0, pa_layout)
+
+        # ----- Per-series styling: smooth lines, no markers -----
+        # Colors mirror the original deck slide 62 palette:
+        #   ATC blue, AFC orange, AVC green, MC red.
+        ATC_BLUE = RGBColor(0x2E, 0x75, 0xB6)
+        AFC_ORNG = RGBColor(0xED, 0x7D, 0x31)
+        AVC_GRN  = RGBColor(0x70, 0xAD, 0x47)
+        MC_RED   = RGBColor(0xC0, 0x00, 0x00)
+        colors = [ATC_BLUE, AFC_ORNG, AVC_GRN, MC_RED]
+        for i, color in enumerate(colors):
+            ser = chart.plots[0].series[i]
+            ser.marker.style = XL_MARKER_STYLE.NONE
+            ser.format.line.color.rgb = color
+            ser.format.line.width = Pt(2.75)
+            ser_el = ser._element
+            for old in ser_el.findall(qn('c:smooth')):
+                ser_el.remove(old)
+            smooth = ET.SubElement(ser_el, qn('c:smooth'))
+            smooth.set('val', '1')
+
+        # ----- Legend: vertical stacking, close together -------
+        # Four entries; placed on the right side of the plot
+        # area (middle vertical) where AFC has decayed and the
+        # curves leave the most room.
+        chart.has_legend = True
+        leg = chart.legend
+        leg.include_in_layout = False
+        leg.font.size = Pt(18)
+        leg.font.color.rgb = NAVY
+        leg.font.name = "Calibri"
+        leg_el = leg._element
+        for old in leg_el.findall(qn('c:layout')):
+            leg_el.remove(old)
+        layout = ET.SubElement(leg_el, qn('c:layout'))
+        manual = ET.SubElement(layout, qn('c:manualLayout'))
+        for name, val in (('xMode', 'edge'), ('yMode', 'edge')):
+            el = ET.SubElement(manual, qn('c:' + name))
+            el.set('val', val)
+        # 2026-05-24 user nudge: legend slightly up and left
+        # (x 0.82 → 0.776, y 0.42 → 0.392).
+        for name, val in (('x', '0.776'), ('y', '0.392'),
+                          ('w', '0.14'), ('h', '0.30')):
+            el = ET.SubElement(manual, qn('c:' + name))
+            el.set('val', val)
+        for old in leg_el.findall(qn('c:spPr')):
+            leg_el.remove(old)
+        leg_spPr = ET.SubElement(leg_el, qn('c:spPr'))
+        leg_fill = ET.SubElement(leg_spPr, qn('a:solidFill'))
+        leg_fill_rgb = ET.SubElement(leg_fill, qn('a:srgbClr'))
+        leg_fill_rgb.set('val', 'FFFFFF')
+        leg_ln = ET.SubElement(leg_spPr, qn('a:ln'))
+        leg_ln.set('w', '9525')
+        leg_ln_fill = ET.SubElement(leg_ln, qn('a:solidFill'))
+        leg_ln_rgb = ET.SubElement(leg_ln_fill, qn('a:srgbClr'))
+        leg_ln_rgb.set('val', '0B2B4E')
+
+        # ----- Three callout boxes above the chart, each with
+        # an arrow pointing down to a specific feature on the
+        # ATC curve.  Cream rounded boxes with thin navy border —
+        # same Convention-callout style used elsewhere in the
+        # deck.  2026-05-24 user hand-positioned every box, every
+        # arrow start/end, and bumped the text font 13 → 16 pt.
+        # Arrow tips also enlarged ('med' → 'lg') so the heads
+        # read clearly at the back of the room without thickening
+        # the lines themselves.
+        cream = RGBColor(0xFD, 0xF6, 0xE6)
+        callouts = [
+            # (text, box_L, box_T, box_W, box_H,
+            #  arrow_start_xy, arrow_end_xy)   – all in inches
+            ("ATC falls below sales price ($80k)  at Q ≈ 250",
+              2.200, 1.452, 3.000, 0.705,
+              (4.708, 2.212), (5.200, 3.613)),
+            ("The minimum of ATC is where it crosses MC",
+              5.417, 1.452, 2.850, 0.705,
+              (6.666, 2.172), (6.842, 3.979)),
+            ("ATC increases again due to rising MC",
+              8.563, 1.508, 2.400, 0.675,
+              (9.548, 2.212), (9.603, 3.743)),
+        ]
+        for text, bx, by, bw, bh, (sx, sy), (ex, ey) in callouts:
+            _add_rounded_filled_box(
+                slide,
+                Inches(bx), Inches(by), Inches(bw), Inches(bh),
+                label=text,
+                fill=cream, text_color=NAVY, line=NAVY,
+                size=16, bold=True, font="Calibri",
+                corner_pct=0.08, shadow=True,
+            )
+            _add_arrow(slide,
+                        (Inches(sx), Inches(sy)),
+                        (Inches(ex), Inches(ey)),
+                        color=NAVY, weight_pt=1.5,
+                        head_size='lg')
 
     s = make_diagram_slide(
         prs, page_num=56,
@@ -9463,54 +9763,150 @@ def slide_56(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Same Rivian data, but expressed per vehicle: average cost (AC), "
-        "average variable cost (AVC), and marginal cost (MC). Three "
-        "curves on one chart. Note: MC crosses AVC and AC at their "
-        "respective minima – this is the textbook U-shape and a "
-        "diagnostic students should be able to read."
+        "Same Rivian cost function expressed per vehicle.  From "
+        "TC = 10,000,000 + 30,000·Q + 40·Q²: ATC = 10M/Q + 30,000 "
+        "+ 40·Q gives a U-shape (fixed-cost dilution dominates at "
+        "low Q, the quadratic term takes over at high Q); AVC = "
+        "30,000 + 40·Q is linear-rising; MC = 30,000 + 80·Q is "
+        "linear-rising with twice the slope of AVC.  Diagnostic to "
+        "highlight: MC crosses ATC exactly at the ATC minimum "
+        "(here Q ≈ 500, value ≈ $70K).  The classic U-shape result "
+        "from any intro micro textbook."
     ))
 
 
 def slide_57(prs):
-    """Cost Estimation – iPhone 17 teardown (discussion setup, no internet)."""
-    def draw(slide):
-        # Setup prompt
-        _add_text(slide, MARGIN, Inches(1.85), RULE_W, Inches(0.55),
-                  "Without Internet Access!",
-                  size=24, bold=True, color=GOLD, font="Calibri",
-                  align=PP_ALIGN.CENTER)
+    """Problem-set preview – iPhone cost estimation.
 
-        _add_text(slide, MARGIN, Inches(2.5), RULE_W, Inches(0.55),
-                  "What is the average variable cost of producing a current-generation iPhone 17?",
+    2026-05-25 (second pass) restructure:
+      • Four cost buckets instead of three: Fixed costs (R&D,
+        marketing, stores, other), Material inputs (processor is
+        now part of this), Labor, and Distribution.
+      • Two questions instead of one: AVC and ATC.  ATC requires
+        students to compute AFC = TFC / annual worldwide iPhone
+        sales (~230M / year), which is the explicit hint.
+      • Retail price stated as "≈ $1,200" (was $1,199).
+      • Keeps the "Problem Set Preview" badge and "you can use AI"
+        tip from the first pass.
+    """
+    def draw(slide):
+        # ----- Problem-set framing badge (top-left) -------------
+        ps_badge = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int(MARGIN), int(Inches(1.40)),
+            int(Inches(3.10)), int(Inches(0.45)),
+        )
+        try: ps_badge.adjustments[0] = 0.30
+        except Exception: pass
+        ps_badge.fill.solid(); ps_badge.fill.fore_color.rgb = NAVY
+        ps_badge.line.fill.background()
+        ps_badge.shadow.inherit = False
+        _add_drop_shadow(ps_badge)
+        ptf = ps_badge.text_frame
+        ptf.margin_left = Inches(0.10); ptf.margin_right = Inches(0.10)
+        ptf.margin_top = 0; ptf.margin_bottom = 0
+        ptf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        p = ptf.paragraphs[0]; p.alignment = PP_ALIGN.CENTER
+        r = p.add_run(); r.text = "Problem Set Preview"
+        r.font.name = "Calibri"; r.font.size = Pt(16)
+        r.font.bold = True; r.font.color.rgb = WHITE
+
+        # ----- Two core questions -------------------------------
+        _add_text(slide, MARGIN, Inches(1.95), RULE_W, Inches(0.45),
+                  "1.  What is the AVC of a current-generation iPhone?",
+                  size=22, bold=True, color=NAVY, font="Calibri",
+                  align=PP_ALIGN.CENTER)
+        _add_text(slide, MARGIN, Inches(2.40), RULE_W, Inches(0.45),
+                  "2.  What is the ATC of a current-generation iPhone?",
                   size=22, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
-        # Components grid (3 boxes)
-        _add_text(slide, MARGIN, Inches(3.4), RULE_W, Inches(0.4),
-                  "Provide a numerical guess  +  rough split:",
-                  size=18, italic=True, color=GRAY, font="Calibri",
+        # ----- Hint line ---------------------------------------
+        _add_text(slide, MARGIN, Inches(2.95), RULE_W, Inches(0.40),
+                  "Hint:  estimate each bucket;  for AFC divide annual "
+                  "fixed costs by ≈ 230M iPhones sold worldwide per year",
+                  size=16, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
-        comps = ["Processor", "Other material inputs", "Labor"]
-        cw = Inches(3.3)
-        ch = Inches(1.1)
-        gap = Inches(0.2)
-        x0 = (SLIDE_W - cw * 3 - gap * 2) // 2
-        for i, name in enumerate(comps):
-            _add_outlined_box(
-                slide, x0 + (cw + gap) * i, Inches(3.9),
-                cw, ch, f"{name}\n\n$ ?",
-                fill=WHITE, line=NAVY, text_color=NAVY,
-                size=20, bold=True, line_w=1.5,
+        # ----- Four component cards (outlined, "$ ?" inside) ----
+        comps = [
+            ("Fixed costs",
+              "R&D, marketing,\nstores, other"),
+            ("Material inputs",
+              "processor, display,\nbattery, cameras, memory, …"),
+            ("Labor",
+              "assembly +\nfinal test"),
+            ("Distribution",
+              "logistics, shipping,\nchannel"),
+        ]
+        cw = Inches(2.95)
+        ch = Inches(1.75)
+        gap = Inches(0.25)
+        x0 = (SLIDE_W - cw * 4 - gap * 3) // 2
+        for i, (name, sub) in enumerate(comps):
+            card_x = x0 + (cw + gap) * i
+            card_y = Inches(3.55)
+            card = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE,
+                int(card_x), int(card_y), int(cw), int(ch),
             )
+            try: card.adjustments[0] = 0.08
+            except Exception: pass
+            card.fill.solid(); card.fill.fore_color.rgb = WHITE
+            card.line.color.rgb = NAVY; card.line.width = Pt(1.5)
+            card.shadow.inherit = False
+            _add_drop_shadow(card)
+            tf = card.text_frame
+            tf.word_wrap = True
+            tf.margin_left = Inches(0.10); tf.margin_right = Inches(0.10)
+            tf.margin_top = Inches(0.08); tf.margin_bottom = Inches(0.08)
+            tf.vertical_anchor = MSO_ANCHOR.TOP
+            # Header (category name)
+            p0 = tf.paragraphs[0]; p0.alignment = PP_ALIGN.CENTER
+            r0 = p0.add_run(); r0.text = name
+            r0.font.name = "Calibri"; r0.font.size = Pt(18)
+            r0.font.bold = True; r0.font.color.rgb = NAVY
+            # Subtext (italic gray)
+            p1 = tf.add_paragraph(); p1.alignment = PP_ALIGN.CENTER
+            p1.space_before = Pt(4)
+            r1 = p1.add_run(); r1.text = sub
+            r1.font.name = "Calibri"; r1.font.size = Pt(12)
+            r1.font.italic = True; r1.font.color.rgb = GRAY
+            # "$ ?" prompt at the bottom
+            p2 = tf.add_paragraph(); p2.alignment = PP_ALIGN.CENTER
+            p2.space_before = Pt(6)
+            r2 = p2.add_run(); r2.text = "$ ?"
+            r2.font.name = "Calibri"; r2.font.size = Pt(22)
+            r2.font.bold = True
+            r2.font.color.rgb = RGBColor(0xC0, 0x00, 0x00)
 
-        # Hint as gold callout
-        _add_text(slide, MARGIN, Inches(5.4), RULE_W, Inches(0.4),
-                  "Total retail price of an iPhone 17 ≈  $1,199",
-                  size=20, italic=True, color=NAVY, font="Calibri",
+        # ----- Anchor: retail price (the only "given") ----------
+        _add_text(slide, MARGIN, Inches(5.45), RULE_W, Inches(0.45),
+                  "Retail price  ≈  $1,200",
+                  size=22, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
-        _add_discussion_break(slide, width=Inches(5.0))
+        # ----- "You can use AI" tip (gold, rounded + shadow) ----
+        ai_tip = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int((SLIDE_W - Inches(6.50)) // 2), int(Inches(6.30)),
+            int(Inches(6.50)), int(Inches(0.55)),
+        )
+        try: ai_tip.adjustments[0] = 0.30
+        except Exception: pass
+        ai_tip.fill.solid(); ai_tip.fill.fore_color.rgb = GOLD
+        ai_tip.line.fill.background()
+        ai_tip.shadow.inherit = False
+        _add_drop_shadow(ai_tip)
+        atf = ai_tip.text_frame
+        atf.margin_left = Inches(0.10); atf.margin_right = Inches(0.10)
+        atf.margin_top = 0; atf.margin_bottom = 0
+        atf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        ap = atf.paragraphs[0]; ap.alignment = PP_ALIGN.CENTER
+        ar = ap.add_run()
+        ar.text = "Tip:  you can use AI to research the teardown"
+        ar.font.name = "Calibri"; ar.font.size = Pt(18)
+        ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
 
     s = make_diagram_slide(
         prs, page_num=57,
@@ -9519,43 +9915,234 @@ def slide_57(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "iPhone manufacturing teardowns – what do the parts and assembly "
-        "actually cost for the current-gen iPhone 17? Have students "
-        "guess BEFORE you reveal in two slides. Discuss what's included "
-        "(components, labor, assembly) and what's not (R&D, marketing, "
-        "retail). Most students wildly overestimate the build cost."
+        "Problem-set preview.  Students leave the lecture with four "
+        "cost buckets to estimate (fixed costs, material inputs, "
+        "labor, distribution) and a retail-price anchor of ~$1,200, "
+        "then research the actual numbers on their own — AI is fine "
+        "as a research aid.  Two deliverables: AVC (sum of the three "
+        "per-unit buckets — material inputs, labor, distribution) "
+        "AND ATC (AVC plus AFC, where AFC = annual fixed costs "
+        "divided by worldwide iPhone sales of ~230M / year).  The "
+        "pedagogical payoff is the comparison of BOTH numbers to "
+        "retail price — students will see that even ATC sits well "
+        "below the sticker."
     ))
 
 
 def slide_58(prs):
-    """Poll: AVC of an iPhone 17?
+    """Problem-set solution sketch – iPhone AVC build-up.
 
-    Source slide is a full-bleed PollEv screenshot.
+    2026-05-25 new content: replaces the prior in-class PollEv
+    setup with a written worked-solution sketch that mirrors what
+    an MBA student would hand in for the problem set previewed on
+    slide 57.  Cost figures are deliberately order-of-magnitude
+    teaching approximations — students should arrive at numbers
+    in the same ballpark, not exact teardown estimates.
+
+    Structure:
+      • Three filled cards reproducing the slide-57 categories,
+        with the bucket subtotal filled in (Processor ≈ $80,
+        Other material inputs ≈ $350, Labor ≈ $30).
+      • Each card lists the dominant subcomponents in small text
+        beneath the bucket total.
+      • Hero navy band: AVC ≈ $80 + $350 + $30 ≈ $460.
+      • Retail-vs-markup comparison line (≈ $1,199 retail; ≈ $740
+        gross margin per unit, ≈ 62 %).
+      • Gold rounded takeaway bar restating the pedagogical
+        point: build cost is a small share of retail; the rest
+        covers R&D, marketing, distribution, and profit.
     """
     def draw(slide):
-        _add_source_image(slide, 59, "rId4",
-                          left=Inches(3.2), top=Inches(1.85),
-                          height=Inches(5.1))
-        _add_text(slide, MARGIN, Inches(7.0), RULE_W, Inches(0.3),
-                  "Respond at PollEv.com/nvoigtlaender",
-                  size=14, italic=True, color=GRAY,
-                  align=PP_ALIGN.CENTER, font="Calibri")
+        RED = RGBColor(0xC0, 0x00, 0x00)
+        # ----- Four filled cards (one per cost bucket) ---------
+        # Card 1 (Fixed costs) is annual TOTAL — the unit on the
+        # big number is "$ / yr".  Cards 2-4 are per-unit ($ /
+        # iPhone).  Same visual treatment so they read as parallel
+        # estimates; the explicit unit on each dollar amount makes
+        # the apples-to-oranges nature obvious.
+        card_w = Inches(2.95)
+        card_h = Inches(2.05)
+        card_gap = Inches(0.25)
+        card_t = Inches(1.55)
+        card_x0 = (SLIDE_W - card_w * 4 - card_gap * 3) // 2
+
+        cards = [
+            ("Fixed costs",
+              "$30B",
+              "per year",
+              "R&D ~$15B,  marketing ~$5B,\nstores ~$5B,  other ~$5B"),
+            ("Material inputs",
+              "$430",
+              "per iPhone",
+              "processor ~$80,  display ~$80,\nmemory ~$50,  battery ~$10,\ncameras ~$70,  other ~$140"),
+            ("Labor",
+              "$30",
+              "per iPhone",
+              "assembly + final test"),
+            ("Distribution",
+              "$20",
+              "per iPhone",
+              "logistics, shipping,\nchannel"),
+        ]
+        for i, (header, dollar, unit, footer) in enumerate(cards):
+            card_x = card_x0 + (card_w + card_gap) * i
+            card = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE,
+                int(card_x), int(card_t), int(card_w), int(card_h),
+            )
+            try: card.adjustments[0] = 0.08
+            except Exception: pass
+            card.fill.solid(); card.fill.fore_color.rgb = WHITE
+            card.line.color.rgb = NAVY; card.line.width = Pt(1.5)
+            card.shadow.inherit = False
+            _add_drop_shadow(card)
+            tf = card.text_frame
+            tf.word_wrap = True
+            tf.margin_left = Inches(0.10); tf.margin_right = Inches(0.10)
+            tf.margin_top = Inches(0.08); tf.margin_bottom = Inches(0.08)
+            tf.vertical_anchor = MSO_ANCHOR.TOP
+            # Header (category name)
+            p0 = tf.paragraphs[0]; p0.alignment = PP_ALIGN.CENTER
+            r0 = p0.add_run(); r0.text = header
+            r0.font.name = "Calibri"; r0.font.size = Pt(18)
+            r0.font.bold = True; r0.font.color.rgb = NAVY
+            # Big dollar amount
+            p1 = tf.add_paragraph(); p1.alignment = PP_ALIGN.CENTER
+            p1.space_before = Pt(2)
+            r1 = p1.add_run(); r1.text = dollar
+            r1.font.name = "Calibri"; r1.font.size = Pt(28)
+            r1.font.bold = True; r1.font.color.rgb = NAVY
+            # Unit (small italic, just under the dollar amount)
+            p2 = tf.add_paragraph(); p2.alignment = PP_ALIGN.CENTER
+            r2 = p2.add_run(); r2.text = unit
+            r2.font.name = "Calibri"; r2.font.size = Pt(11)
+            r2.font.italic = True; r2.font.color.rgb = GRAY
+            # Footer (subcomponent list)
+            p3 = tf.add_paragraph(); p3.alignment = PP_ALIGN.CENTER
+            p3.space_before = Pt(4)
+            r3 = p3.add_run(); r3.text = footer
+            r3.font.name = "Calibri"; r3.font.size = Pt(11)
+            r3.font.italic = True; r3.font.color.rgb = GRAY
+
+        # ----- AVC computation line (italic gray, small) -------
+        _add_text(slide, MARGIN, Inches(3.75), RULE_W, Inches(0.40),
+                  "AVC  =  $430  +  $30  +  $20   ≈   $480 / iPhone",
+                  size=18, italic=True, bold=True, color=NAVY,
+                  font="Calibri", align=PP_ALIGN.CENTER)
+
+        # ----- AFC computation line (italic gray, small) -------
+        _add_text(slide, MARGIN, Inches(4.20), RULE_W, Inches(0.40),
+                  "AFC  =  $30 B  /  230 M iPhones / yr   ≈   $130 / iPhone",
+                  size=18, italic=True, bold=True, color=NAVY,
+                  font="Calibri", align=PP_ALIGN.CENTER)
+
+        # ----- Hero ATC band (navy filled, rounded + shadow) ---
+        atc_w = Inches(9.50)
+        atc_box = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            int((SLIDE_W - atc_w) // 2), int(Inches(4.75)),
+            int(atc_w), int(Inches(0.75)),
+        )
+        try: atc_box.adjustments[0] = 0.20
+        except Exception: pass
+        atc_box.fill.solid(); atc_box.fill.fore_color.rgb = NAVY
+        atc_box.line.fill.background()
+        atc_box.shadow.inherit = False
+        _add_drop_shadow(atc_box)
+        ftf = atc_box.text_frame
+        ftf.margin_left = Inches(0.15); ftf.margin_right = Inches(0.15)
+        ftf.margin_top = 0; ftf.margin_bottom = 0
+        ftf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        fp = ftf.paragraphs[0]; fp.alignment = PP_ALIGN.CENTER
+        fr = fp.add_run()
+        fr.text = "ATC  =  AVC + AFC  =  $480 + $130   ≈   $610 / iPhone"
+        fr.font.name = "Calibri"; fr.font.size = Pt(24)
+        fr.font.bold = True; fr.font.color.rgb = WHITE
+
+        # ----- Comparison schematic: AVC | AFC | ATC | Retail --
+        pill_data = [
+            ("AVC\n$480",    NAVY,                          WHITE),
+            ("+ AFC\n$130",  GOLD,                          NAVY),
+            ("= ATC\n$610",  NAVY,                          WHITE),
+            ("Retail\n$1,200", RGBColor(0xFD, 0xF6, 0xE6),  RED),  # cream w/ red text
+        ]
+        pill_w = Inches(2.30)
+        pill_h = Inches(0.75)
+        pill_gap = Inches(0.15)
+        n = len(pill_data)
+        pill_total_w = pill_w * n + pill_gap * (n - 1)
+        pill_x0 = (SLIDE_W - pill_total_w) // 2
+        pill_y = Inches(5.65)
+        for i, (text, fill, txtcol) in enumerate(pill_data):
+            pill_x = pill_x0 + (pill_w + pill_gap) * i
+            pill = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE,
+                int(pill_x), int(pill_y), int(pill_w), int(pill_h),
+            )
+            try: pill.adjustments[0] = 0.25
+            except Exception: pass
+            pill.fill.solid(); pill.fill.fore_color.rgb = fill
+            if fill == RGBColor(0xFD, 0xF6, 0xE6):
+                pill.line.color.rgb = RED; pill.line.width = Pt(1.5)
+            else:
+                pill.line.fill.background()
+            pill.shadow.inherit = False
+            _add_drop_shadow(pill)
+            ptf2 = pill.text_frame
+            ptf2.margin_left = Inches(0.05); ptf2.margin_right = Inches(0.05)
+            ptf2.margin_top = Inches(0.03); ptf2.margin_bottom = Inches(0.03)
+            ptf2.vertical_anchor = MSO_ANCHOR.MIDDLE
+            ptf2.word_wrap = True
+            # Multi-line: line1 label, line2 dollar.  Split on '\n'.
+            lines = text.split('\n')
+            for li, line in enumerate(lines):
+                if li == 0:
+                    pp = ptf2.paragraphs[0]
+                else:
+                    pp = ptf2.add_paragraph()
+                pp.alignment = PP_ALIGN.CENTER
+                rr = pp.add_run(); rr.text = line
+                rr.font.name = "Calibri"
+                rr.font.size = Pt(14 if li == 0 else 18)
+                rr.font.bold = True
+                rr.font.color.rgb = txtcol
+
+        # ----- Gold takeaway bar (rounded + shadow) -----------
+        _add_takeaway_bar(
+            slide,
+            "Even ATC sits well below retail  —  the rest is gross "
+            "profit margin on each iPhone",
+            top=Inches(6.55), fill=GOLD, text_color=NAVY,
+            width=Inches(11.5), size=18,
+            rounded=True, shadow=True,
+        )
 
     s = make_diagram_slide(
         prs, page_num=58,
         section_tag=SECTION_TAG_P2,
-        title="What's the AVC of an iPhone 17?",
+        title="Solution Sketch:  Estimating the iPhone Cost Stack",
         draw_diagram=draw,
     )
-    _draw_poll_pill(s)
     _set_notes(s, (
-        "Quick PollEv.  Given the iPhone 17 teardown numbers (display, "
-        "logic board, chips, battery, casing, labour & assembly), what "
-        "is the AVC of one unit?  Most students overestimate because "
-        "they confuse retail price with marginal cost.  The teardown "
-        "estimates put it around $580 — roughly half the retail price "
-        "of ~$1,200.  That gap (price minus MC) is the contribution "
-        "margin Apple keeps on each handset.  Reveal the answer next."
+        "Walk through the kind of answer an MBA student would hand in "
+        "for the problem set previewed last slide.  Four buckets, "
+        "order-of-magnitude estimates that basic research lands on:  "
+        "(1) Annual fixed costs ~$30B / year — R&D ~$15B, marketing "
+        "~$5B, Apple Retail stores ~$5B, other corporate overhead "
+        "~$5B.  (2) Material inputs ~$430 per iPhone — Apple's "
+        "A-series chip ~$80 plus display ~$80, memory ~$50, battery "
+        "~$10, multi-lens cameras ~$70, and the long tail of modem, "
+        "antennas, housing, packaging ~$140.  (3) Labor (assembly + "
+        "final test) ~$30 per iPhone.  (4) Distribution (logistics, "
+        "shipping, channel) ~$20 per iPhone.  Sum the three per-unit "
+        "buckets → AVC ≈ $480 / iPhone.  Divide annual fixed costs "
+        "by ~230 M iPhones sold worldwide per year → AFC ≈ $130 / "
+        "iPhone.  ATC = AVC + AFC ≈ $610 / iPhone.  Retail ~$1,200 "
+        "minus ATC ~$610 = ~$590 gross profit margin per iPhone "
+        "(~49 %), consistent with Apple's reported iPhone gross "
+        "margin in the mid-40 % range.  Pedagogical payoff: even "
+        "after loading in fixed costs, ATC is roughly half the "
+        "sticker price — the rest is profit."
     ))
 
 
