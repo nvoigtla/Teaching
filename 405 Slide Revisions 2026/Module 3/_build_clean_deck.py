@@ -9812,40 +9812,47 @@ def slide_57(prs):
         r.font.bold = True; r.font.color.rgb = WHITE
 
         # ----- Two core questions -------------------------------
-        _add_text(slide, MARGIN, Inches(1.95), RULE_W, Inches(0.45),
+        # 2026-05-25 (fourth pass): bumped 22 → 26 pt.
+        _add_text(slide, MARGIN, Inches(1.95), RULE_W, Inches(0.55),
                   "1.  What is the AVC of a current-generation iPhone?",
-                  size=22, bold=True, color=NAVY, font="Calibri",
+                  size=26, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
-        _add_text(slide, MARGIN, Inches(2.40), RULE_W, Inches(0.45),
+        _add_text(slide, MARGIN, Inches(2.55), RULE_W, Inches(0.55),
                   "2.  What is the ATC of a current-generation iPhone?",
-                  size=22, bold=True, color=NAVY, font="Calibri",
+                  size=26, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
         # ----- Hint line ---------------------------------------
-        _add_text(slide, MARGIN, Inches(2.95), RULE_W, Inches(0.40),
-                  "Hint:  estimate each bucket;  for AFC divide annual "
-                  "fixed costs by ≈ 230M iPhones sold worldwide per year",
-                  size=16, italic=True, color=GRAY, font="Calibri",
+        # 2026-05-25 (fourth pass): dropped the parenthetical
+        # "~ 200 M units" (students should research that themselves);
+        # font bumped 16 → 20 pt.
+        _add_text(slide, MARGIN, Inches(3.25), RULE_W, Inches(0.45),
+                  "Hint:  estimate each bucket;  for AFC, divide the "
+                  "fixed costs of this model by its total lifetime sales",
+                  size=20, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
 
         # ----- Four component cards (outlined, "$ ?" inside) ----
+        # 2026-05-25 (fourth pass): card height shrunk 2.00 → 1.70
+        # (taller than needed for the three text rows).  Stores
+        # moved from Fixed costs → Distribution subtext.
         comps = [
             ("Fixed costs",
-              "R&D, marketing,\nstores, other"),
+              "R&D, marketing,\nother"),
             ("Material inputs",
               "processor, display,\nbattery, cameras, memory, …"),
             ("Labor",
               "assembly +\nfinal test"),
             ("Distribution",
-              "logistics, shipping,\nchannel"),
+              "stores, logistics,\nshipping, channel"),
         ]
         cw = Inches(2.95)
-        ch = Inches(1.75)
+        ch = Inches(1.70)
         gap = Inches(0.25)
         x0 = (SLIDE_W - cw * 4 - gap * 3) // 2
         for i, (name, sub) in enumerate(comps):
             card_x = x0 + (cw + gap) * i
-            card_y = Inches(3.55)
+            card_y = Inches(3.85)
             card = slide.shapes.add_shape(
                 MSO_SHAPE.ROUNDED_RECTANGLE,
                 int(card_x), int(card_y), int(cw), int(ch),
@@ -9864,24 +9871,26 @@ def slide_57(prs):
             # Header (category name)
             p0 = tf.paragraphs[0]; p0.alignment = PP_ALIGN.CENTER
             r0 = p0.add_run(); r0.text = name
-            r0.font.name = "Calibri"; r0.font.size = Pt(18)
+            r0.font.name = "Calibri"; r0.font.size = Pt(22)
             r0.font.bold = True; r0.font.color.rgb = NAVY
-            # Subtext (italic gray)
+            # Subtext (italic gray) — bumped 12 → 16 pt
             p1 = tf.add_paragraph(); p1.alignment = PP_ALIGN.CENTER
             p1.space_before = Pt(4)
             r1 = p1.add_run(); r1.text = sub
-            r1.font.name = "Calibri"; r1.font.size = Pt(12)
+            r1.font.name = "Calibri"; r1.font.size = Pt(16)
             r1.font.italic = True; r1.font.color.rgb = GRAY
-            # "$ ?" prompt at the bottom
+            # "$ ?" prompt at the bottom — bumped 22 → 26 pt
             p2 = tf.add_paragraph(); p2.alignment = PP_ALIGN.CENTER
             p2.space_before = Pt(6)
             r2 = p2.add_run(); r2.text = "$ ?"
-            r2.font.name = "Calibri"; r2.font.size = Pt(22)
+            r2.font.name = "Calibri"; r2.font.size = Pt(26)
             r2.font.bold = True
             r2.font.color.rgb = RGBColor(0xC0, 0x00, 0x00)
 
         # ----- Anchor: retail price (the only "given") ----------
-        _add_text(slide, MARGIN, Inches(5.45), RULE_W, Inches(0.45),
+        # 2026-05-25 (fourth pass): moved down T 5.45 → 5.80 so it
+        # sits clearly below the shorter cards.
+        _add_text(slide, MARGIN, Inches(5.80), RULE_W, Inches(0.45),
                   "Retail price  ≈  $1,200",
                   size=22, bold=True, color=NAVY, font="Calibri",
                   align=PP_ALIGN.CENTER)
@@ -9904,7 +9913,7 @@ def slide_57(prs):
         atf.vertical_anchor = MSO_ANCHOR.MIDDLE
         ap = atf.paragraphs[0]; ap.alignment = PP_ALIGN.CENTER
         ar = ap.add_run()
-        ar.text = "Tip:  you can use AI to research the teardown"
+        ar.text = "Tip:  you can use AI to research the cost breakdown"
         ar.font.name = "Calibri"; ar.font.size = Pt(18)
         ar.font.bold = True; ar.font.italic = True; ar.font.color.rgb = NAVY
 
@@ -9921,11 +9930,15 @@ def slide_57(prs):
         "then research the actual numbers on their own — AI is fine "
         "as a research aid.  Two deliverables: AVC (sum of the three "
         "per-unit buckets — material inputs, labor, distribution) "
-        "AND ATC (AVC plus AFC, where AFC = annual fixed costs "
-        "divided by worldwide iPhone sales of ~230M / year).  The "
-        "pedagogical payoff is the comparison of BOTH numbers to "
-        "retail price — students will see that even ATC sits well "
-        "below the sticker."
+        "AND ATC (AVC plus AFC).  Crucial framing for AFC: fixed "
+        "costs (R&D, marketing, allocated stores, other) are "
+        "PER MODEL, allocated over that model's TOTAL LIFETIME "
+        "sales — not annual sales of all iPhones.  For a current "
+        "iPhone model, lifetime worldwide sales are roughly 200M "
+        "units, so AFC = TFC_model / 200M.  The pedagogical payoff "
+        "is the comparison of BOTH AVC and ATC to retail price — "
+        "students will see that even ATC sits well below the "
+        "sticker."
     ))
 
 
@@ -9966,11 +9979,21 @@ def slide_58(prs):
         card_t = Inches(1.55)
         card_x0 = (SLIDE_W - card_w * 4 - card_gap * 3) // 2
 
+        # 2026-05-25 (third pass): reframed Fixed-costs card from
+        # annual TFC ($30B / yr) to PER-MODEL LIFETIME TFC
+        # ($20B for this iPhone model's whole lifecycle), and the
+        # AFC denominator from annual sales (~230M / yr) to total
+        # lifetime sales (~200M units).  Card fonts bumped:
+        # header 18 → 20 pt, subitems 11 → 14 pt.
+        # 2026-05-25 (fourth pass): mirror slide 57's relocation of
+        # "stores" from Fixed costs → Distribution.  Fixed-costs
+        # subitems rebalanced so the $20B total still ties out
+        # without listing "stores" separately.
         cards = [
             ("Fixed costs",
-              "$30B",
-              "per year",
-              "R&D ~$15B,  marketing ~$5B,\nstores ~$5B,  other ~$5B"),
+              "$20B",
+              "this model (lifetime)",
+              "R&D ~$10B,  marketing ~$5B,\nother ~$5B"),
             ("Material inputs",
               "$430",
               "per iPhone",
@@ -9982,7 +10005,7 @@ def slide_58(prs):
             ("Distribution",
               "$20",
               "per iPhone",
-              "logistics, shipping,\nchannel"),
+              "stores, logistics,\nshipping, channel"),
         ]
         for i, (header, dollar, unit, footer) in enumerate(cards):
             card_x = card_x0 + (card_w + card_gap) * i
@@ -10004,7 +10027,7 @@ def slide_58(prs):
             # Header (category name)
             p0 = tf.paragraphs[0]; p0.alignment = PP_ALIGN.CENTER
             r0 = p0.add_run(); r0.text = header
-            r0.font.name = "Calibri"; r0.font.size = Pt(18)
+            r0.font.name = "Calibri"; r0.font.size = Pt(20)
             r0.font.bold = True; r0.font.color.rgb = NAVY
             # Big dollar amount
             p1 = tf.add_paragraph(); p1.alignment = PP_ALIGN.CENTER
@@ -10015,13 +10038,13 @@ def slide_58(prs):
             # Unit (small italic, just under the dollar amount)
             p2 = tf.add_paragraph(); p2.alignment = PP_ALIGN.CENTER
             r2 = p2.add_run(); r2.text = unit
-            r2.font.name = "Calibri"; r2.font.size = Pt(11)
+            r2.font.name = "Calibri"; r2.font.size = Pt(13)
             r2.font.italic = True; r2.font.color.rgb = GRAY
-            # Footer (subcomponent list)
+            # Footer (subcomponent list) — bumped 11 → 14 pt
             p3 = tf.add_paragraph(); p3.alignment = PP_ALIGN.CENTER
             p3.space_before = Pt(4)
             r3 = p3.add_run(); r3.text = footer
-            r3.font.name = "Calibri"; r3.font.size = Pt(11)
+            r3.font.name = "Calibri"; r3.font.size = Pt(14)
             r3.font.italic = True; r3.font.color.rgb = GRAY
 
         # ----- AVC computation line (italic gray, small) -------
@@ -10031,8 +10054,12 @@ def slide_58(prs):
                   font="Calibri", align=PP_ALIGN.CENTER)
 
         # ----- AFC computation line (italic gray, small) -------
+        # 2026-05-25 (third pass): denominator switched from annual
+        # sales (230M / yr) to TOTAL LIFETIME sales of this model
+        # (~200M units), so AFC is the per-unit allocation of the
+        # model-specific lifetime TFC.
         _add_text(slide, MARGIN, Inches(4.20), RULE_W, Inches(0.40),
-                  "AFC  =  $30 B  /  230 M iPhones / yr   ≈   $130 / iPhone",
+                  "AFC  =  $20 B  /  200 M iPhones (lifetime)   ≈   $100 / iPhone",
                   size=18, italic=True, bold=True, color=NAVY,
                   font="Calibri", align=PP_ALIGN.CENTER)
 
@@ -10055,15 +10082,15 @@ def slide_58(prs):
         ftf.vertical_anchor = MSO_ANCHOR.MIDDLE
         fp = ftf.paragraphs[0]; fp.alignment = PP_ALIGN.CENTER
         fr = fp.add_run()
-        fr.text = "ATC  =  AVC + AFC  =  $480 + $130   ≈   $610 / iPhone"
+        fr.text = "ATC  =  AVC + AFC  =  $480 + $100   ≈   $580 / iPhone"
         fr.font.name = "Calibri"; fr.font.size = Pt(24)
         fr.font.bold = True; fr.font.color.rgb = WHITE
 
         # ----- Comparison schematic: AVC | AFC | ATC | Retail --
         pill_data = [
             ("AVC\n$480",    NAVY,                          WHITE),
-            ("+ AFC\n$130",  GOLD,                          NAVY),
-            ("= ATC\n$610",  NAVY,                          WHITE),
+            ("+ AFC\n$100",  GOLD,                          NAVY),
+            ("= ATC\n$580",  NAVY,                          WHITE),
             ("Retail\n$1,200", RGBColor(0xFD, 0xF6, 0xE6),  RED),  # cream w/ red text
         ]
         pill_w = Inches(2.30)
@@ -10124,25 +10151,29 @@ def slide_58(prs):
         draw_diagram=draw,
     )
     _set_notes(s, (
-        "Walk through the kind of answer an MBA student would hand in "
-        "for the problem set previewed last slide.  Four buckets, "
+        "Walk through the kind of answer an MBA student would hand "
+        "in for the problem set previewed last slide.  Four buckets, "
         "order-of-magnitude estimates that basic research lands on:  "
-        "(1) Annual fixed costs ~$30B / year — R&D ~$15B, marketing "
-        "~$5B, Apple Retail stores ~$5B, other corporate overhead "
-        "~$5B.  (2) Material inputs ~$430 per iPhone — Apple's "
-        "A-series chip ~$80 plus display ~$80, memory ~$50, battery "
-        "~$10, multi-lens cameras ~$70, and the long tail of modem, "
-        "antennas, housing, packaging ~$140.  (3) Labor (assembly + "
-        "final test) ~$30 per iPhone.  (4) Distribution (logistics, "
-        "shipping, channel) ~$20 per iPhone.  Sum the three per-unit "
-        "buckets → AVC ≈ $480 / iPhone.  Divide annual fixed costs "
-        "by ~230 M iPhones sold worldwide per year → AFC ≈ $130 / "
-        "iPhone.  ATC = AVC + AFC ≈ $610 / iPhone.  Retail ~$1,200 "
-        "minus ATC ~$610 = ~$590 gross profit margin per iPhone "
-        "(~49 %), consistent with Apple's reported iPhone gross "
-        "margin in the mid-40 % range.  Pedagogical payoff: even "
-        "after loading in fixed costs, ATC is roughly half the "
-        "sticker price — the rest is profit."
+        "(1) Fixed costs FOR THIS MODEL OVER ITS LIFETIME ~$20B — "
+        "R&D allocated to this generation ~$10B, marketing ~$5B, "
+        "other corporate overhead ~$5B.  (2) Material inputs ~$430 "
+        "per iPhone — A-series chip ~$80 plus display ~$80, memory "
+        "~$50, battery ~$10, multi-lens cameras ~$70, and the long "
+        "tail of modem, antennas, housing, packaging ~$140.  "
+        "(3) Labor (assembly + final test) ~$30 per iPhone.  "
+        "(4) Distribution (Apple Retail stores, logistics, "
+        "shipping, channel) ~$20 per iPhone — stores treated as a "
+        "distribution-channel cost amortised per unit.  Sum the "
+        "three per-unit buckets → AVC ≈ $480 / iPhone.  Critical "
+        "framing for AFC: divide the model's lifetime TFC by its "
+        "TOTAL lifetime worldwide sales (~200M units) — NOT by "
+        "annual sales.  AFC ≈ $20B / 200M = $100 / iPhone.  "
+        "ATC = AVC + AFC ≈ $580 / iPhone.  Retail ~$1,200 minus "
+        "ATC ~$580 = ~$620 gross profit margin per iPhone "
+        "(~52%), consistent with Apple's reported iPhone gross "
+        "margin in the mid-40% to low-50% range.  Pedagogical "
+        "payoff: even after loading in fixed costs, ATC is "
+        "roughly half the sticker price — the rest is profit."
     ))
 
 
