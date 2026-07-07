@@ -239,6 +239,68 @@ For work in this folder, you are assisting with **teaching materials**
   deck's consolidated dividers over reinstating every original
   outline-of-module slide.
 
+### Rebuilding a deck that has animations, hidden slides, or live content
+When the source deck I hand you includes builds/animations, hidden slides,
+polls, or videos, faithfulness extends beyond text and figures:
+
+- **Match the animation choreography slide-by-slide.** Reproduce the
+  original's build order and click count – the exact interleaving of graph
+  pieces, labels, and text. Per-bullet builds are fine on text slides; match
+  click counts where they carry pedagogical meaning.
+- **Guides before regions.** Reveal a dashed guide line to a value first,
+  then the shaded area / region it annotates – never the fill before its
+  guide.
+- **Keep figures economically correct, not just visually matched.** E.g., a
+  kinked joint-demand's top segment equals the higher-cost firm's demand and
+  the flat part is the horizontal sum; demand and MR share the same vertical
+  intercept. Correctness beats pixel-matching.
+- **Preserve hidden slides** – rebuild them and keep them hidden; un-hide
+  only temporarily for review, then re-hide.
+- **Preserve live / interactive content** – PollEverywhere slides and
+  embedded or online (YouTube) videos must stay functional. Never drop poll
+  URLs, poll `tags` relationships, or video links; size online videos as in
+  the original.
+- **Keep slide count and order identical** for a faithful rebuild of a
+  specific deck, so speaker notes and any spliced-in original slides line up
+  – **unless I explicitly ask to add, delete, or renumber slides** (that
+  overrides this; and see the "Section dividers" note above for the divider
+  exception).
+- **Toolchain-independent build gotchas:** large decks can read back
+  corrupted over a working mount – save the final file straight to its
+  destination and verify it re-opens; and large in-place edits to a generated
+  build script can truncate – prefer writing a fresh versioned file. (The
+  specific way animation timing gets injected depends on the machine's tools
+  – a LibreOffice "normalize-then-inject" round-trip where LibreOffice is
+  installed, or direct OOXML `<p:timing>` surgery where it isn't; follow the
+  course layer for the current machine.)
+
+### Rebuilding game-theory / payoff-matrix decks
+These conventions apply **only** when rebuilding a game-theory deck (payoff
+matrices, best responses, Nash equilibria); ignore them for other decks.
+
+- **Payoff matrix (2×2) layout.** Column player's name centered on top
+  (accent color); row player's name rotated at the left (a reserved concept
+  color); strategy labels around a 2×2 grid of white cells with navy borders.
+  Each cell shows *"a , b"* with player-1's payoff and player-2's payoff in
+  the two players' respective colors. Caption below: "Payoffs to (Player 1,
+  Player 2)."
+- **Best-response method.** For each column, draw an arrow (player 1's color)
+  to player 1's best row and circle that number; for each row, draw an arrow
+  (player 2's color) to player 2's best column and circle that number. A
+  **Nash equilibrium** is a cell where both numbers are circled – draw a
+  larger oval plus a "Nash equilibrium" callout. No cell with both circled ⇒
+  **no pure-strategy equilibrium** (say so on the slide). Multiple equilibria
+  ⇒ a "*N* Nash Equilibria" gold pill.
+- **Animate the matrix step-by-step.** Reveal one step at a time – **arrow
+  first, then its circle**, a separate click each, for all four best
+  responses. The **equilibrium is the finale:** on the last click, reveal
+  together the Nash oval, a "Nash equilibrium" conclusion box on the right,
+  and a connector line from that box to the equilibrium cell, with a slow
+  (~1.4 s) fade-in so it lands as the punchline.
+- **Worked-solution answers.** Step through the algebra; put the **final
+  numeric answer in deep red**.
+- **Discussion / poll badges** use the gold parallelogram style (never coral).
+
 ### Iteration is the norm
 - **Expect 2 – 3 rounds of "too cluttered → simplify"** on any
   diagram slide. Don't try to land it in one shot. Propose a layout,

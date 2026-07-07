@@ -317,7 +317,7 @@ def slide_title(prs):
               size=26, bold=True, color=GRAY, font="Calibri",
               align=PP_ALIGN.CENTER)
     _add_text(slide, MARGIN, Inches(5.5), RULE_W, Inches(0.5),
-              "Prof. Nico Voigtlaender  ·  UCLA Anderson",
+              "Prof. Nico Voigtländer  ·  UCLA Anderson",
               size=22, color=GRAY, font="Calibri",
               align=PP_ALIGN.CENTER)
 

@@ -133,17 +133,30 @@ def _add_filled_box(slide, left, top, width, height, label, *,
 
 def _add_outlined_box(slide, left, top, width, height, label, *,
                       line=NAVY, text_color=NAVY, fill=WHITE,
-                      size=18, bold=True, line_w=1.25, font="Calibri"):
-    """Outlined rectangle (white fill) with centered text."""
+                      size=18, bold=True, line_w=1.25, font="Calibri",
+                      rounded=False, shadow=False, corner_pct=0.06):
+    """Outlined rectangle (white fill) with centered text.
+
+    ``rounded=True`` switches the base shape to a rounded rectangle
+    (corner-adjust = ``corner_pct``); ``shadow=True`` adds a soft drop
+    shadow.  Both default off so existing flat call-sites are
+    unaffected.
+    """
     left, top, width, height = int(left), int(top), int(width), int(height)
+    shape_type = MSO_SHAPE.ROUNDED_RECTANGLE if rounded else MSO_SHAPE.RECTANGLE
     shp = slide.shapes.add_shape(
-        MSO_SHAPE.RECTANGLE, left, top, width, height,
+        shape_type, left, top, width, height,
     )
+    if rounded:
+        try: shp.adjustments[0] = corner_pct
+        except Exception: pass
     shp.fill.solid()
     shp.fill.fore_color.rgb = fill
     shp.line.color.rgb = line
     shp.line.width = Pt(line_w)
     shp.shadow.inherit = False
+    if shadow:
+        _add_drop_shadow(shp)
     tf = shp.text_frame
     tf.word_wrap = True
     tf.margin_left = Inches(0.1)
@@ -460,7 +473,7 @@ def make_title_slide(prs):
               size=26, bold=True, color=GRAY, font="Calibri",
               align=PP_ALIGN.CENTER)
     _add_text(slide, MARGIN, Inches(5.5), RULE_W, Inches(0.5),
-              "Prof. Nico Voigtlaender  ·  UCLA Anderson",
+              "Prof. Nico Voigtländer  ·  UCLA Anderson",
               size=22, color=GRAY, font="Calibri",
               align=PP_ALIGN.CENTER)
     _add_rect(slide, 0, Inches(7.15), SLIDE_W, Inches(0.02), RULE)
@@ -1122,13 +1135,18 @@ def _add_graphicframe_shadow(slide, left, top, width, height, *,
 
 
 def _add_source_image(slide, src_slide_no, rid, *, left, top, width=None,
-                      height=None, shadow=True):
+                      height=None, shadow=True, rounded=False):
     """Place a source-deck image on the new slide.
 
     `shadow=True` (default) adds a soft drop shadow so figures pop off the
     background — applied deck-wide per the latest visual direction.  Set
     `shadow=False` for niche cases (transparent PNGs, screenshots that
     already include a shadow, etc.).
+
+    `rounded=True` gives real photographs the deck-standard rounded corners
+    (routes through :func:`_apply_picture_style`, which sets both the
+    rounded geometry and the drop shadow).  Leave False for logos,
+    screenshots, and framed images per the Pictures guideline.
     """
     candidates = list(SRC_IMG_DIR.glob(f"slide{src_slide_no}_{rid}.*"))
     if not candidates:
@@ -1140,7 +1158,9 @@ def _add_source_image(slide, src_slide_no, rid, *, left, top, width=None,
     if height is not None:
         kwargs["height"] = int(height)
     pic = slide.shapes.add_picture(str(img), **kwargs)
-    if shadow:
+    if rounded:
+        _apply_picture_style(pic, corner_pct=6)
+    elif shadow:
         _add_drop_shadow(pic)
     return pic
 
@@ -1503,9 +1523,19 @@ def _add_discussion_break(slide, *, top=Inches(6.25), width=Inches(4.8),
 
 
 def _add_callout_box(slide, left, top, width, height, text, *,
-                      fill=GOLD, text_color=WHITE, size=14, bold=True):
+                      fill=GOLD, text_color=WHITE, size=14, bold=True,
+                      rounded=False, shadow=False):
     """Small free-form annotation/callout (e.g., 'plot the slope', 'Revenue
-    per car net of material cost').  Used to mark a graph or sub-region."""
+    per car net of material cost').  Used to mark a graph or sub-region.
+
+    ``rounded``/``shadow`` (default off) route to the rounded + drop-shadow
+    variant for the deck-wide box treatment."""
+    if rounded or shadow:
+        return _add_rounded_filled_box(
+            slide, left, top, width, height, text,
+            fill=fill, text_color=text_color,
+            size=size, bold=bold, font="Calibri",
+            corner_pct=0.12, shadow=shadow)
     return _add_filled_box(slide, left, top, width, height, text,
                             fill=fill, text_color=text_color,
                             size=size, bold=bold, font="Calibri")
@@ -2158,11 +2188,18 @@ def _add_mixed_textbox(slide, left, top, width, height, segments, *,
 
 
 def _add_math_equation(slide, left, top, width, height, omml_content, *,
-                       size_pt=32, color=NAVY, fill=None, line=None):
+                       size_pt=32, color=NAVY, fill=None, line=None,
+                       rounded=False, shadow=False, corner_pct=25000):
     """Place an OMML equation in a textbox on the slide.
 
     omml_content: a string built from _omml_* helpers (without the outer
     <m:oMathPara> wrapper).
+
+    ``rounded=True`` gives the fill box rounded corners (``corner_pct`` in
+    OOXML adj units, 25000 ≈ 25%); ``shadow=True`` adds a soft drop
+    shadow.  Both default off.  IMPORTANT: the roundRect prstGeom must be
+    inserted right after <a:xfrm> and BEFORE the fill, or PowerPoint
+    silently drops the shape (see slide-54 fix).
     """
     left, top, width, height = int(left), int(top), int(width), int(height)
     box = slide.shapes.add_textbox(left, top, width, height)
@@ -2230,6 +2267,28 @@ def _add_math_equation(slide, left, top, width, height, omml_content, *,
         sf = ET.SubElement(arPr, qn('a:solidFill'))
         srgb = ET.SubElement(sf, qn('a:srgbClr'))
         srgb.set('val', clr_hex)
+
+    # Optional rounded corners + drop shadow on the fill box.  prstGeom
+    # MUST sit right after <a:xfrm> and before <a:solidFill>, else PPT
+    # silently refuses to render the shape (slide-54 lesson).
+    if rounded or shadow:
+        spPr = box._element.find(qn('p:spPr'))
+        if spPr is not None:
+            if rounded:
+                for old in spPr.findall(qn('a:prstGeom')):
+                    spPr.remove(old)
+                prstGeom = ET.Element(qn('a:prstGeom'))
+                prstGeom.set('prst', 'roundRect')
+                avLst = ET.SubElement(prstGeom, qn('a:avLst'))
+                gd = ET.SubElement(avLst, qn('a:gd'))
+                gd.set('name', 'adj'); gd.set('fmla', f'val {int(corner_pct)}')
+                xfrm = spPr.find(qn('a:xfrm'))
+                if xfrm is not None:
+                    xfrm.addnext(prstGeom)
+                else:
+                    spPr.insert(0, prstGeom)
+            if shadow:
+                _add_drop_shadow(box)
     return box
 
 
@@ -3625,11 +3684,11 @@ def slide_11(prs):
             plot_el.insert(0, pl_layout)
 
         # Native legend, positioned inside the plot area (top-left).
-        # Font bumped 12 → 13 pt and box dims bumped on 2026-05-15 per
-        # user request — agenda reads a touch larger.
+        # 2026-05-25: bumped 13 → 18 pt per the new Teaching/CLAUDE.md
+        # "Chart legends" default.
         chart.has_legend = True
         chart.legend.font.name = "Calibri"
-        chart.legend.font.size = Pt(13)
+        chart.legend.font.size = Pt(18)
         chart.legend.font.color.rgb = NAVY
         chart.legend.include_in_layout = False
         # Force legend to a manual layout inside the plot area (top-left).
@@ -3655,7 +3714,9 @@ def slide_11(prs):
         x_el = ET.SubElement(ml, qn('c:x')); x_el.set('val', '0.18')
         y_el = ET.SubElement(ml, qn('c:y')); y_el.set('val', '0.05')
         w_el = ET.SubElement(ml, qn('c:w')); w_el.set('val', '0.17')
-        h_el = ET.SubElement(ml, qn('c:h')); h_el.set('val', '0.24')
+        # 2026-05-25: h 0.24 → 0.32 to accommodate the 18 pt entries
+        # (four lines at ~0.07 fraction each + padding).
+        h_el = ET.SubElement(ml, qn('c:h')); h_el.set('val', '0.32')
         # Re-order: legendPos must precede layout (already done by insert(0)).
         # Move <c:layout> right after <c:legendPos>.
         leg_el.remove(layout)
@@ -5720,15 +5781,17 @@ def slide_22(prs):
             x_min=0, x_max=5000, x_unit=500,
             y_min=0, y_max=5000, y_unit=500,
             legend=True,
-            legend_pos=('0.6888', '0.1830', '0.22', '0.20'),
+            legend_pos=('0.6888', '0.1830', '0.15', '0.20'),
             smooth=True,
         )
         # 2026-05-18 (manual): post-modify the chart to (a) bump legend
-        # font to 14 pt (helper hardcodes 11 pt) and (b) add a manual
-        # inner-plot-area layout so the plot fills more of the chart
-        # shape.  Both values sampled from the hand-edited canonical.
+        # font and (b) add a manual inner-plot-area layout so the plot
+        # fills more of the chart shape.
+        # 2026-05-25: legend font bumped 14 → 18 pt and box narrowed
+        # from w=0.22 → 0.15 to guarantee the two entries stack
+        # vertically per Teaching/CLAUDE.md "Chart legends" default.
         chart = chart_shape.chart
-        chart.legend.font.size = Pt(14)
+        chart.legend.font.size = Pt(18)
         plot_area = chart._chartSpace.find(qn('c:chart') + '/' + qn('c:plotArea'))
         # Remove existing <c:layout/> (auto) and insert a manualLayout
         for old in plot_area.findall(qn('c:layout')):
@@ -10214,6 +10277,7 @@ def slide_59(prs):
             slide,
             "About half of retail goes to fixed-cost recovery, R&D, retail margin",
             top=Inches(6.5), fill=NAVY, width=Inches(11.0),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10293,6 +10357,7 @@ def slide_60(prs):
         _add_math_equation(
             slide, Inches(9.5), Inches(3.0), Inches(3.5), Inches(0.95),
             eq_xml, size_pt=24, color=NAVY, fill=GOLD,
+            rounded=True, shadow=True,
         )
 
         # Slope annotation
@@ -10300,12 +10365,14 @@ def slide_60(prs):
             slide, Inches(5.8), Inches(4.3), Inches(2.4), Inches(0.45),
             "slope  =  $500",
             fill=NAVY, text_color=WHITE, size=14, bold=True,
+            rounded=True, shadow=True,
         )
 
         _add_takeaway_bar(
             slide,
             "Linear naïve TC :  fixed cost  +  constant marginal cost  ($500 / unit)",
             top=Inches(6.55), fill=NAVY, width=Inches(11.5),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10390,6 +10457,7 @@ def slide_61(prs):
             slide,
             Inches(9.5), Inches(3.0), Inches(3.5), Inches(1.5),
             callout_xml, size_pt=18, color=NAVY, fill=GOLD,
+            rounded=True, shadow=True,
         )
 
         _add_takeaway_bar(
@@ -10397,6 +10465,7 @@ def slide_61(prs):
             "Per-unit view :  constant marginal cost,  AC falls as fixed cost spreads",
             top=Inches(6.55), fill=GOLD, text_color=NAVY,
             width=Inches(11.5),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10448,6 +10517,7 @@ def slide_62(prs):
             "Keep MC linear when possible — use the U-shape only when scale really matters",
             top=Inches(6.5), fill=GOLD, text_color=NAVY,
             width=Inches(12.0),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10497,10 +10567,10 @@ def slide_64(prs):
         y0 = Inches(2.0)
 
         # Headers
-        _add_filled_box(slide, x_l, y0, col_w, col_h,
+        _add_rounded_filled_box(slide, x_l, y0, col_w, col_h,
                          "Short Run",
                          fill=NAVY, text_color=WHITE, size=26, bold=True)
-        _add_filled_box(slide, x_r, y0, col_w, col_h,
+        _add_rounded_filled_box(slide, x_r, y0, col_w, col_h,
                          "Long Run",
                          fill=NAVY, text_color=WHITE, size=26, bold=True)
 
@@ -10540,6 +10610,7 @@ def slide_64(prs):
             (SLIDE_W - Inches(7.0)) // 2, Inches(5.55),
             Inches(7.0), Inches(0.7),
             eq_xml, size_pt=26, color=WHITE, fill=NAVY,
+            rounded=True, shadow=True,
         )
 
         _add_takeaway_bar(
@@ -10547,6 +10618,7 @@ def slide_64(prs):
             "Long-run costs are the lower envelope:  more freedom  ⇒  weakly cheaper",
             top=Inches(6.5), fill=GOLD, text_color=NAVY,
             width=Inches(11.0),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10732,6 +10804,7 @@ def slide_65(prs):
             "LR-AC is the lower envelope of all SAC curves:  pick the best plant for each Q",
             top=Inches(6.4), fill=GOLD, text_color=NAVY,
             width=Inches(12.0),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10767,15 +10840,15 @@ def slide_66(prs):
         x0 = (SLIDE_W - case_w * 3 - gap * 2) // 2
         y0 = Inches(2.8)
 
-        _add_filled_box(slide, x0, y0, case_w, case_h,
+        _add_rounded_filled_box(slide, x0, y0, case_w, case_h,
                          "Economies of Scale\n\nLAC FALLS with Q\n\n(bigger ⇒ cheaper / unit)",
                          fill=NAVY, text_color=WHITE,
                          size=18, bold=True)
-        _add_filled_box(slide, x0 + (case_w + gap), y0, case_w, case_h,
+        _add_rounded_filled_box(slide, x0 + (case_w + gap), y0, case_w, case_h,
                          "Constant Returns\n\nLAC is FLAT in Q\n\n(size doesn't matter)",
                          fill=GRAY, text_color=WHITE,
                          size=18, bold=True)
-        _add_filled_box(slide, x0 + 2 * (case_w + gap), y0, case_w, case_h,
+        _add_rounded_filled_box(slide, x0 + 2 * (case_w + gap), y0, case_w, case_h,
                          "Diseconomies of Scale\n\nLAC RISES with Q\n\n(too big to manage)",
                          fill=NAVY, text_color=WHITE,
                          size=18, bold=True)
@@ -10795,6 +10868,7 @@ def slide_66(prs):
             "Economies of scale is a COST concept;  returns to scale is a TECHNOLOGY concept",
             top=Inches(6.4), fill=GOLD, text_color=NAVY,
             width=Inches(12.0),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10864,14 +10938,15 @@ def slide_68(prs):
 
         # Left card – Embraer
         _add_outlined_box(slide, x_l, y0, card_w, card_h,
-                          "", fill=WHITE, line=NAVY, line_w=1.5)
+                          "", fill=WHITE, line=NAVY, line_w=1.5,
+                          rounded=True, shadow=True)
         _add_text(slide, x_l, y0 + Inches(0.1), card_w, Inches(0.4),
                   "Embraer ERJ-145  ·  Regional Jet",
                   size=18, bold=True, color=NAVY,
                   font="Calibri", align=PP_ALIGN.CENTER)
         _add_source_image(slide, 69, "rId1",
                           left=x_l + Inches(0.3), top=y0 + Inches(0.55),
-                          width=card_w - Inches(0.6))
+                          width=card_w - Inches(0.6), rounded=True)
         # Stats
         stats_y = y0 + Inches(2.4)
         stat_lines = [
@@ -10888,14 +10963,15 @@ def slide_68(prs):
 
         # Right card – Boeing 787
         _add_outlined_box(slide, x_r, y0, card_w, card_h,
-                          "", fill=WHITE, line=NAVY, line_w=1.5)
+                          "", fill=WHITE, line=NAVY, line_w=1.5,
+                          rounded=True, shadow=True)
         _add_text(slide, x_r, y0 + Inches(0.1), card_w, Inches(0.4),
                   "Boeing 787-9  ·  Wide-Body",
                   size=18, bold=True, color=NAVY,
                   font="Calibri", align=PP_ALIGN.CENTER)
         _add_source_image(slide, 69, "rId2",
                           left=x_r + Inches(0.3), top=y0 + Inches(0.55),
-                          width=card_w - Inches(0.6))
+                          width=card_w - Inches(0.6), rounded=True)
         stat_lines_r = [
             "List price:    ~ $290 M",
             "Seats:           ~ 290 passengers",
@@ -10913,6 +10989,7 @@ def slide_68(prs):
             "Bigger plane  →  similar (or lower) cost per passenger-hour:  geometry + load",
             top=Inches(6.45), fill=GOLD, text_color=NAVY,
             width=Inches(12.0),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -10970,7 +11047,7 @@ def slide_70(prs):
     """Economies of scope – producing 2+ products together."""
     def draw(slide):
         # Definition box at top
-        _add_filled_box(slide, MARGIN, Inches(1.95),
+        _add_rounded_filled_box(slide, MARGIN, Inches(1.95),
                          RULE_W, Inches(0.9),
                          "Economies of scope:   producing 2+ related products together is cheaper than separately",
                          fill=NAVY, text_color=WHITE,
@@ -10994,7 +11071,7 @@ def slide_70(prs):
         # Example image on right – Airbus A380 + A318
         _add_source_image(slide, 71, "rId1",
                           left=Inches(7.5), top=Inches(3.15),
-                          width=Inches(5.5))
+                          width=Inches(5.5), rounded=True)
         _add_text(slide, Inches(7.5), Inches(5.85),
                   Inches(5.5), Inches(0.25),
                   "British Airways A380 + A318  (CC BY-SA, Wikimedia)",
@@ -11011,6 +11088,7 @@ def slide_70(prs):
             "Scope ≠ scale:  one firm, MANY products  →  cheaper than splitting them up",
             top=Inches(6.5), fill=GOLD, text_color=NAVY,
             width=Inches(11.5),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(
@@ -11048,11 +11126,11 @@ def slide_71(prs):
         x_r = x_l + col_w + gap
         y_hdr = Inches(2.7)
 
-        _add_filled_box(slide, x_l, y_hdr, col_w, col_h,
+        _add_rounded_filled_box(slide, x_l, y_hdr, col_w, col_h,
                          "Economies of SCALE",
                          fill=NAVY, text_color=WHITE,
                          size=22, bold=True)
-        _add_filled_box(slide, x_r, y_hdr, col_w, col_h,
+        _add_rounded_filled_box(slide, x_r, y_hdr, col_w, col_h,
                          "Economies of SCOPE",
                          fill=NAVY, text_color=WHITE,
                          size=22, bold=True)
@@ -11121,12 +11199,14 @@ def slide_72(prs):
         _add_outlined_box(slide, x_l, y0, card_w, card_h,
                           "PollEV  ·  Q1\n\nAre there economies of scale\nin this business?",
                           fill=WHITE, line=NAVY, text_color=NAVY,
-                          size=20, bold=True, line_w=2.0)
+                          size=20, bold=True, line_w=2.0,
+                          rounded=True, shadow=True)
         _add_outlined_box(slide, x_r, y0, card_w, card_h,
                           "PollEV  ·  Q2\n\nWhich deal would you choose?\n"
                           "$100K, royalty 25¢/can   vs.   $75K, 15% equity",
                           fill=WHITE, line=NAVY, text_color=NAVY,
-                          size=18, bold=True, line_w=2.0)
+                          size=18, bold=True, line_w=2.0,
+                          rounded=True, shadow=True)
 
         # Cue bullet under the cards
         _add_text(slide, MARGIN, Inches(5.1), RULE_W, Inches(0.5),
@@ -11168,7 +11248,7 @@ def slide_73(prs):
         y0 = Inches(1.95)
 
         # Left – volume + AC
-        _add_filled_box(slide, x_l, y0, col_w, Inches(0.7),
+        _add_rounded_filled_box(slide, x_l, y0, col_w, Inches(0.7),
                          "Volume & average cost",
                          fill=NAVY, text_color=WHITE,
                          size=20, bold=True)
@@ -11189,7 +11269,7 @@ def slide_73(prs):
                       font="Calibri")
 
         # Right – deal comparison
-        _add_filled_box(slide, x_r, y0, col_w, Inches(0.7),
+        _add_rounded_filled_box(slide, x_r, y0, col_w, Inches(0.7),
                          "Deals on a per-can basis",
                          fill=NAVY, text_color=WHITE,
                          size=20, bold=True)
@@ -11214,6 +11294,7 @@ def slide_73(prs):
             "EoS is real here.  Royalty and equity deals look similar  —  pick based on control & risk",
             top=Inches(6.45), fill=GOLD, text_color=NAVY,
             width=Inches(12.5),
+            rounded=True, shadow=True,
         )
 
     s = make_diagram_slide(

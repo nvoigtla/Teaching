@@ -1797,3 +1797,32 @@ scatter+fit XY chart.
   prose like "Estimated cost curve:" renders upright (not
   italic math style) inside the same `<m:oMath>` block as the
   formula that follows.
+
+
+## 2026-07-07 – Module 3: Long-Run & Scale polish, video import, summary slide, notes audit, teleprompter draft
+
+**One-line summary.** Finished the Long-Run & Scale section (slides 60–73), imported the Bezos-1997 video as a new slide before the Amazon slide, added a module-summary slide, ran a full speaker-notes audit, and drafted the slides 1–10 teleprompter script. Deck now 77 slides.
+
+### Key work
+- **Slide 64 (LR-AC envelope):** rebuilt entirely as native shapes — 3 SAC U-curves + gold lower-envelope + dashed linear "approximate LAC". User hand-moved/rotated the curves; envelope recomputed from the drawn (rotated) curves via sampling + median de-spike.
+- **Slide 65:** three mini-curve cards (falling / flat / rising) replacing text cards; later enlarged fonts, removed takeaway box, re-centered.
+- **Slide 67 ("E175 vs. 787"):** CASM (Cost per Available Seat-Mile) rebuild; embedded a real Wikimedia E175 photo (American Eagle) replacing the discontinued ERJ-145; images sized ~2:1 to real scale; cost-per-mile line dropped, CASM source (BTS Form 41 / 10-K ranges) moved to notes.
+- **Slide 70:** imported the Bezos 1997 interview **video** (embedded MP4 + poster + <p:timing>) as a NEW slide before Amazon; kept title; footers renumbered.
+- **Slides 65/70/72/73:** consolidated per-column bullets into single text boxes; larger fonts.
+- **New summary slide** (display 74, "Module 3 Summary: Production and Costs"): two columns, smaller font, takeaway bar, own notes; BACKUP footer renumbered.
+- **Notes audit** across all slides; fixed slide 3 (6h→3.5h), 59 (de-iPhone → generic $500/unit), 64 (approx-line mention), 70 (added video notes).
+- **Teaching/CLAUDE.md:** added "Rebuilding a deck with animations / hidden / live content" and "Rebuilding game-theory / payoff-matrix decks" subsections.
+- **Teleprompter script (slides 1–10)** drafted in Markdown (`Module 3 - Teleprompter Script - Slides 1-10.md`) — PENDING user review before Word (pandoc) conversion.
+
+### Decisions
+- Economies-of-scale metric = per-seat-mile (CASM), not per-passenger-hour.
+- Verify EVERY structural .pptx edit by opening in PowerPoint via COM, not just python-pptx.
+
+### Gotchas (important)
+- **PowerPoint renumbers .pptx part filenames on save** — slideN.xml ≠ display N after a user save. Map display→part via presentation.xml sldIdLst (ElementTree, not regex). Caused a corrupt file (duplicate notesSlide rel on the wrong slide); recovered.
+- custGeom curves: use `<a:lnTo>` (not lineTo); inside `<a:ln>` put the fill BEFORE the join — both caused invisible curves.
+- Render/verify via PowerPoint COM → PNG (no LibreOffice on this machine); kill stale POWERPNT before opening.
+
+### Open / pending
+- Teleprompter: user reviews slides 1–10 MD → then convert to .docx and continue slides 11+.
+- Eyeball slide 64 scallop depth / SAC label positions; slide 67 photo licensing if distributed publicly.
