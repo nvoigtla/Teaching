@@ -266,6 +266,14 @@ taped video) follows one idea at a time. Calibrated defaults:
   - **End with the concluding observation** — the summarising arrow and its
     note box (e.g. the down-arrow under the MPL column + "MPL is declining
     as we add workers") as the final click.
+- **The MB=MC star reveals AFTER the rule it abstracts, never before.**
+  The recurring 12-point "MB = MC" (or "MB > MC") star is the concept the
+  concrete decision rule is an instance of. Reveal the concrete rule first
+  (e.g. slide 19: "If MRPL > w, hire more"), then reveal the star as the
+  "…and this is really the MB = MC idea" payoff on the next click. Same on
+  slide 23 (optimal-workers rule → star) and slide 24 (optimal-hiring
+  interval → star). Show the star together with its little label and its
+  connector line to the rule.
 - **The takeaway / conclusion bar gets its own final click** so the
   punchline lands last.
 - **Skip (no animation):** the title slide, the agenda / Part-X roadmap
