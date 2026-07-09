@@ -168,6 +168,10 @@ slide. My preferences:
 I like slides to build up step by step so the audience (often watching a
 taped video) follows one idea at a time. Calibrated defaults:
 
+- **Tell the story of the slide.** Put yourself in my head as the
+  instructor and reveal the bullets and figures in the order the story
+  unfolds as I talk through it — not just mechanically top-to-bottom.
+  Group whatever belongs to one beat of the story so it appears together.
 - **Effect: Fade, about 0.5 s, on click.** Fade is the default entrance for
   every revealed element. Not instant "appear," not flashy motion. Keep one
   effect style across the whole deck.
@@ -181,12 +185,19 @@ taped video) follows one idea at a time. Calibrated defaults:
     "guides before regions" (a dashed guide line before the shaded area it
     marks), and reveal the building blocks before the synthesis (e.g. the
     individual short-run curves before the long-run envelope).
-- **Group a graphic with its label** on one click, not two.
+- **Group things that belong to one beat on a single click:**
+  - a graphic and its own label;
+  - a picture and its source / attribution line beneath it — always
+    reveal the source at the same time as the picture (e.g. slide 33);
+  - an image and the text box that gives its title or context — reveal
+    them together (e.g. slide 44);
+  - a context picture and the bullet points it supports — reveal them
+    together so they land as one thought (e.g. slide 47).
 - **The takeaway / conclusion bar gets its own final click** so the
   punchline lands last.
-- **Skip:** the title slide, poll slides (PollEverywhere), the embedded
-  video slide (it has its own click-to-play trigger), and BACKUP / backup
-  slides.
+- **Skip (no animation):** the title slide, the agenda / Part-X roadmap
+  slides, poll slides (PollEverywhere), the embedded video slide (it has
+  its own click-to-play trigger), and BACKUP / backup slides.
 - **Build mechanics (this machine):** inject a `<p:timing>` block via OOXML
   surgery (no LibreOffice here). I can't watch playback, so verify the
   effect count and targets via PowerPoint COM
