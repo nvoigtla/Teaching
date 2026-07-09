@@ -392,7 +392,7 @@ helper that builds any feeding table so the two can't drift apart.
 - **Default: rebuild the canonical deck in place, no verification.**
   The build script is the source of truth and the start-of-day Git
   snapshot is the safety net, so the normal flow is to write straight
-  to the canonical filename (e.g., `Module 3_clean.pptx`) and stop.
+  to the canonical filename (e.g., `Module 3 - Revised.pptx`) and stop.
   Do **not** run a python-pptx readback, footer-page-number check,
   or duplicate-`<a:effectLst>` audit by default – these add latency
   and noise without changing the outcome.
@@ -427,6 +427,17 @@ helper that builds any feeding table so the two can't drift apart.
   value and date – e.g., `tbl_top = Inches(2.45)  # hand-tweaked from
   2.85 on 2026-05-12`. Saves the next reviewer from wondering why a
   value is "odd".
+
+## File naming (this project)
+- **Revised deck:** `Module X - Revised.pptx` – e.g. `Module 3 - Revised.pptx`.
+  This is the canonical, in-place-edited deck. (Replaces the earlier
+  `_clean` suffix; do not use `Module X_clean.pptx` going forward.)
+- **Per-module build script:** `_build_ModuleX.py` – e.g. `_build_Module3.py`.
+  The one-time scaffold for that module (see the phase-order rule and the
+  STALE banner at the top of the script).
+- **Source images:** live in that module's `Images/` subfolder.
+- **Backups** follow the universal-layer convention:
+  `Module X - Revised_backup_YYYY-MM-DD.pptx`.
 
 ## Build mechanics (for the shared toolkit)
 The decks are generated with **python-pptx** from a small set of

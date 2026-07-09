@@ -1,14 +1,14 @@
 # ==========================================================================
 #  STALE  --  DO NOT RUN THIS SCRIPT.
 #
-#  The canonical deck (Module 3_clean.pptx) has DIVERGED from this script.
+#  The canonical deck (Module 3 - Revised.pptx) has DIVERGED from this script.
 #  It now contains changes this script does NOT reproduce, including:
 #    - the Jeff Bezos 1997 VIDEO slide (embedded MP4)
 #    - the Module 3 SUMMARY slide
 #    - many PowerPoint hand-edits, notes fixes, and in-place OOXML edits
 #
 #  Running this would REGENERATE the deck from scratch and OVERWRITE
-#  Module 3_clean.pptx, LOSING all of the above.
+#  Module 3 - Revised.pptx, LOSING all of the above.
 #
 #  The .pptx is now the SOURCE OF TRUTH. Edit it in place (OOXML / lxml
 #  surgery, or PowerPoint), NOT by re-running this file.
@@ -27,7 +27,7 @@ on the Blank layout, so PowerPoint's Layout dropdown stays clean.
 
 Build is by batches – front matter (1-6), then §1.1 Short Run (7-22), etc.
 
-Output: `Module 3_clean.pptx`
+Output: `Module 3 - Revised.pptx`
 """
 
 import copy
@@ -3435,7 +3435,7 @@ def _add_compact_pf_table(slide, *, tbl_left, tbl_top, col_w_label=Inches(0.72),
 # This XML was hand-built in PowerPoint (oval circling a table cell,
 # rectangle label "Number of / cars" on the right, slanted line with
 # arrowhead from label to oval) and copied verbatim so that running
-# `_build_clean_deck.py` reproduces it identically. Do NOT regenerate
+# `_build_Module3.py` reproduces it identically. Do NOT regenerate
 # from python-pptx primitives – the styling (Whitney-Book font,
 # stealth arrowhead, drop shadow on the second-line text) is hard to
 # recreate via the python-pptx API and is preserved here as-is.
@@ -11578,7 +11578,7 @@ def strip_unused_layouts(pptx_path: Path):
     shutil.move(str(tmp), str(src))
 
 
-def build_deck(output_name="Module 3_clean.pptx"):
+def build_deck(output_name="Module 3 - Revised.pptx"):
     prs = Presentation()
     prs.slide_width = SLIDE_W
     prs.slide_height = SLIDE_H
@@ -11721,6 +11721,6 @@ def build_deck(output_name="Module 3_clean.pptx"):
 
 if __name__ == "__main__":
     import sys
-    name = sys.argv[1] if len(sys.argv) > 1 else "Module 3_clean.pptx"
+    name = sys.argv[1] if len(sys.argv) > 1 else "Module 3 - Revised.pptx"
     out = build_deck(name)
     print(f"Wrote {out}")
