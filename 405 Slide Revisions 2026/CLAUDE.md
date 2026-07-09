@@ -486,6 +486,30 @@ reusable modules:
   copy back. If reading the file intermittently fails (corrupt central
   directory), ask me to re-save/revert and retry.
 
+## Rebuilding a module from its old deck: phase order (do build.py FIRST)
+When reformatting a new module from its old PPT, the phases must run in
+this order – and the order is **not reversible**:
+
+1. **build.py scaffold.** Generate ALL script-buildable slides (text,
+   bullets, native charts / tables / equations, chrome) in the clean
+   style. Finish *every* such slide before moving on.
+2. **Freeze build.py.** The moment phase 3 begins, the `.pptx` becomes
+   the source of truth and build.py must not be re-run – re-running
+   regenerates from scratch and **overwrites everything from phase 3**
+   (see the STALE-banner note on the Module 3 build script).
+3. **OOXML surgery + hand-edits.** Splice in video / poll / interactive
+   slides from the old deck (these **cannot** go through python-pptx –
+   it strips NULL video rels and poll `tags`), then fine-tune and port
+   my PowerPoint hand-edits.
+
+- **WARN ME if I try to start phase 3 too early.** If I ask you to
+  import a video, a poll, or any live-content slide – or to hand-edit /
+  do OOXML surgery – while the build.py pass is **not yet complete for
+  all slides**, STOP and warn me first: doing so freezes build.py
+  prematurely, so any later build.py run would wipe the imported video
+  and the edits. Confirm with me that the build.py step is finished for
+  every slide before proceeding.
+
 ## Things to avoid on every slide
 - Walls of text. If a bullet runs past two lines, split or trim.
 - Orange/gold used for ordinary emphasis (use bold navy).
