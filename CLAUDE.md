@@ -213,6 +213,19 @@ taped video) follows one idea at a time. Calibrated defaults:
   wrong. Group offset/extent = the children's bounding box, with
   `chOff/chExt` equal to `off/ext` so the children keep their absolute
   positions.
+  - **Two exceptions to the grouping (do NOT group these):**
+    - **Table-cell number-highlights** — the little rounded box behind a
+      single computed value in a table column (e.g. `$29,700`, `0.660`).
+      That's a different device from a callout: it stays locked to its cell,
+      isn't dragged around, and already co-reveals with its column. Leave
+      it as two shapes.
+    - **Shapes whose text is native OMML math wrapped in
+      `mc:AlternateContent`** (the `a14` namespace is declared on the inner
+      `mc:Choice`, outside the `<p:sp>`). Extracting just the `<p:sp>` to
+      group it orphans that namespace and the equation fails to render.
+      Leave such math callouts ungrouped; just make sure they co-reveal.
+      (When extracting a `<p:sp>` for grouping, match the **balanced**
+      closing tag by depth — an `mc:Fallback` can nest another `<p:sp>`.)
 - **The takeaway / conclusion bar gets its own final click** so the
   punchline lands last.
 - **Skip (no animation):** the title slide, the agenda / Part-X roadmap
