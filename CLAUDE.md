@@ -122,6 +122,37 @@ For work in this folder, you are assisting with **teaching materials**
   the speaker notes should contain the full explanation I'll deliver
   verbally.
 
+## Teleprompter Notes
+I tape video lectures and read the script off a teleprompter. When I ask
+for a "teleprompter script," it is the verbatim, read-aloud text for each
+slide. My preferences:
+
+- **Home = the slides' speaker notes.** Put the read-aloud script in each
+  slide's speaker notes (that box below the slide), NOT a separate Word
+  doc unless I ask. Notes are per-slide, so the script always matches the
+  slide number and shows in Presenter View / teleprompter tools. This
+  script replaces the guidance-style notes (it doubles as student guidance
+  when I upload the deck).
+- **Write for a tired end-of-day viewer.** Assume the person has worked
+  all day and is watching a recording. Be clear, well-signposted, and easy
+  to follow; guide their attention to what's on the slide.
+- **Natural, flowing spoken English.** Conversational, first person, as if
+  reading to camera. Not choppy or staccato — longer sentences are fine
+  when they read naturally.
+- **No " – " dash-asides.** Don't set off sub-clauses with dashes; use
+  plain sentences instead.
+- **Never say "tonight"** (or other live-moment words). The videos are
+  watched anytime, so keep it time-neutral ("in this module", "now",
+  "here").
+- **No unverified emphasis claims.** Do NOT assert things like "this is one
+  of the most important ideas in the course", "the key point", or "crucial"
+  on your own — those judgments are mine. Don't inherit them from the old
+  notes either. Where emphasis might help, flag the spot and ask me first.
+- **Skip the poll slides** (PollEverywhere / "respond at PollEv…" and
+  poll-break slides) — no teleprompter narration there.
+- Work in **verified batches** and confirm the voice on the first batch
+  before scripting the whole deck.
+
 ## Drafting Workflow for Slide Content
 - For new slide content or substantial restructuring, **first draft
   the deck outline in Markdown** (one section per slide, with bullets
