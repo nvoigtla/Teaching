@@ -136,6 +136,11 @@ slide. My preferences:
 - **Write for a tired end-of-day viewer.** Assume the person has worked
   all day and is watching a recording. Be clear, well-signposted, and easy
   to follow; guide their attention to what's on the slide.
+- **On complex slides, walk through an example.** When a slide is
+  technical or abstract, talk the viewer through the concrete example on
+  it (the numbers, the named firm, the case) instead of just restating the
+  concept. A tired viewer follows a worked example far better than a
+  definition.
 - **Natural, flowing spoken English.** Conversational, first person, as if
   reading to camera. Not choppy or staccato — longer sentences are fine
   when they read naturally.
