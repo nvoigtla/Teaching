@@ -185,16 +185,34 @@ taped video) follows one idea at a time. Calibrated defaults:
     "guides before regions" (a dashed guide line before the shaded area it
     marks), and reveal the building blocks before the synthesis (e.g. the
     individual short-run curves before the long-run envelope).
+- **First bullet shows WITH the slide — don't animate it.** On a
+  text/bullet slide, the FIRST top-level bullet is visible the moment the
+  slide appears (no click); the build starts from the second bullet, so
+  the slide never opens completely empty when its content is bullets.
+  **Exception:** slides whose build is of pictures, boxes, formulas, or a
+  diagram (e.g. the Big-Picture map, the concept map, definition/formula
+  slides) may still open empty and fade everything in — there, the
+  empty-then-build is the point.
 - **Group things that belong to one beat on a single click:**
   - a graphic and its own label;
-  - a picture and its source / attribution line beneath it — always
-    reveal the source at the same time as the picture (e.g. slide 47);
+  - a picture and its source / attribution line beneath it — **always**
+    reveal the source at the same time as the picture, on **every** slide
+    (e.g. slide 47) — never let the picture land a click before its source;
   - an image and the text box that gives its title or context — reveal
     them together (e.g. slide 44);
   - a context picture and the bullet points it supports — reveal them
     together so they land as one thought (e.g. slide 47);
   - a formula and the description of its terms (its glossary / legend) —
     reveal them together (e.g. slide 33).
+- **A rounded/filled shape and the text box layered on it are ONE object.**
+  When a callout is built as a background rounded-rect plus a separate text
+  box on top (the "layer a text box on top" pattern), merge the two into a
+  single PowerPoint **group** (`<p:grpSp>`) so they move, resize, and
+  animate as one — never as two shapes that can fade in on separate clicks.
+  Do this **everywhere** the pattern occurs, not just where it's currently
+  wrong. Group offset/extent = the children's bounding box, with
+  `chOff/chExt` equal to `off/ext` so the children keep their absolute
+  positions.
 - **The takeaway / conclusion bar gets its own final click** so the
   punchline lands last.
 - **Skip (no animation):** the title slide, the agenda / Part-X roadmap
