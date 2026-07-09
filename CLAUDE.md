@@ -188,11 +188,13 @@ taped video) follows one idea at a time. Calibrated defaults:
 - **Group things that belong to one beat on a single click:**
   - a graphic and its own label;
   - a picture and its source / attribution line beneath it — always
-    reveal the source at the same time as the picture (e.g. slide 33);
+    reveal the source at the same time as the picture (e.g. slide 47);
   - an image and the text box that gives its title or context — reveal
     them together (e.g. slide 44);
   - a context picture and the bullet points it supports — reveal them
-    together so they land as one thought (e.g. slide 47).
+    together so they land as one thought (e.g. slide 47);
+  - a formula and the description of its terms (its glossary / legend) —
+    reveal them together (e.g. slide 33).
 - **The takeaway / conclusion bar gets its own final click** so the
   punchline lands last.
 - **Skip (no animation):** the title slide, the agenda / Part-X roadmap
