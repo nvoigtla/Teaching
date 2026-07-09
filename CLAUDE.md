@@ -46,6 +46,12 @@ For work in this folder, you are assisting with **teaching materials**
   not on the slide itself.
 - **One idea per slide.** If a slide has multiple distinct ideas,
   suggest splitting it.
+- **One list = one text box.** When a column or region is really a
+  bulleted list, put it in a **single text box with real hanging
+  bullets**, not a stack of separate one-line text boxes. One box is
+  cleaner to enlarge, edit, and animate, and wrapped lines align under
+  the text instead of under the bullet. (I repeatedly ask for these
+  stacked one-liners to be consolidated – do it by default.)
 - **Title each slide with the takeaway**, not the topic. Bad title:
   "Supply and Demand". Better: "Prices Coordinate Strangers Without
   Central Direction".

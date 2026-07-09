@@ -228,6 +228,13 @@ helper that builds any feeding table so the two can't drift apart.
   **Curves** (parabolas, MPV, step functions): `build_freeform(...)`
   → `convert_to_shape()` → one editable freeform. **Dashed** guides:
   `<a:prstDash val="dash"/>`.
+- **Make each curve independently movable.** Give every curve its **own
+  tight bounding box** hugging just that curve – never one big box
+  spanning the whole plot (overlapping full-plot boxes make the curves
+  impossible to click and drag). Build the path from a **few Bézier
+  anchor points** (`quadBezTo` / `cubicBezTo`), not a dense 40-point
+  polyline, so "Edit Points" shows a handful of draggable handles. I care
+  about being able to grab, reshape, and animate each curve by hand.
 - **Bars:** gold-fill / navy-edge rectangles. **Markers / scatter
   points:** small OVAL / RECTANGLE / TRIANGLE shapes – a distinct
   marker shape per series (color alone isn't enough for handout
@@ -451,9 +458,28 @@ reusable modules:
   `/dev/shm`, build there).
 - **Deploy with an integrity check:** copy to the destination, verify
   the zip (`zipfile.testzip()`), retry on transient lock errors.
-- **Render to verify:** LibreOffice headless → PDF → `pdftoppm` PNG,
-  then look at the images (montages for whole-deck review, higher-res
-  single pages for detail).
+- **Render / verify — this machine has NO LibreOffice.** Drive
+  **PowerPoint via COM** from PowerShell: export a slide to PNG to *see*
+  it, and **open the file in PowerPoint as the real integrity check**.
+  python-pptx and `zipfile.testzip()` are far too lenient — this session
+  they both accepted a file PowerPoint rejected as corrupt (0x80070570).
+  Open in PowerPoint after **any structural edit** (insert / delete /
+  reorder slides, add notes or media); kill any stale `POWERPNT` process
+  first. (The `/tmp` · `/dev/shm` · `tr -d` bullets above apply only when
+  building inside a Linux sandbox, not on this Windows machine.)
+- **PowerPoint renumbers part filenames on save.** After I save the deck
+  in PowerPoint, `slideN.xml` is **NOT** display-slide N (and
+  `imageN` / `notesSlideN` shift too). Resolve display→part by parsing
+  `ppt/presentation.xml` `<p:sldIdLst>` order → `r:id` →
+  `presentation.xml.rels` (use ElementTree, **not** a regex over the
+  rels). Assuming `slideN.xml = display N` corrupted the deck this
+  session — a duplicate notesSlide relationship landed on the wrong
+  slide.
+- **custGeom curve gotchas** (each makes a shape render invisible or get
+  dropped): the path segment element is `<a:lnTo>`, **not** `<a:lineTo>`;
+  inside `<a:ln>` the child order is fill → dash → join (put `<a:round/>`
+  AFTER `<a:solidFill>`); and `<a:prstGeom>` must sit after `<a:xfrm>`
+  and before the fill.
 - **After I hand-edit the canonical .pptx, edit it in place** with
   python-pptx (swap an image blob, remove a paragraph, etc.) rather
   than rebuilding from scripts – and do it within one bash call, then
