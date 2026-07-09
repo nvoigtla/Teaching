@@ -150,6 +150,18 @@ slide. My preferences:
 - **Natural, flowing spoken English.** Conversational, first person, as if
   reading to camera. Not choppy or staccato — longer sentences are fine
   when they read naturally.
+- **Prefer a full stop over a comma-splice.** When two complete thoughts
+  run together with "and" or a comma, break them into two sentences. E.g.
+  "…then flattens out, and that flattening is diminishing MPL" becomes
+  "…then flattens out. That flattening is diminishing MPL." Likewise start
+  a fresh sentence for a contrast: "…held constant. In contrast, labor is
+  the input that can still be adjusted." Shorter sentences read better on
+  the teleprompter — just don't tip into staccato.
+- **Lead with the number the slide highlights.** When a slide visually
+  highlights or circles a specific figure (e.g. the boxed 467 on slide 11,
+  the first MPL value on slide 15), that highlighted number is the FIRST
+  worked example in the script — point at it and read it before making any
+  general point. Don't bury it or replace it with a different example.
 - **No " – " dash-asides.** Don't set off sub-clauses with dashes; use
   plain sentences instead.
 - **Never say "tonight"** (or other live-moment words). The videos are
