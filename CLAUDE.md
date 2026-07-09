@@ -141,6 +141,12 @@ slide. My preferences:
   it (the numbers, the named firm, the case) instead of just restating the
   concept. A tired viewer follows a worked example far better than a
   definition.
+- **Feel free to add extra examples on complex slides.** Beyond what's on
+  the slide, you may bring in one more illustration to help the idea land.
+  Search the web for a fitting, current case, or use one from your own
+  knowledge. Keep them real and accurate — no invented facts or figures;
+  prefer named, verifiable examples, and flag the source (or your
+  uncertainty) for anything specific, per the no-hallucination rule.
 - **Natural, flowing spoken English.** Conversational, first person, as if
   reading to camera. Not choppy or staccato — longer sentences are fine
   when they read naturally.
