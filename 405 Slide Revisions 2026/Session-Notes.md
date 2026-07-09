@@ -1826,3 +1826,6 @@ scatter+fit XY chart.
 ### Open / pending
 - Teleprompter: user reviews slides 1–10 MD → then convert to .docx and continue slides 11+.
 - Eyeball slide 64 scallop depth / SAC label positions; slide 67 photo licensing if distributed publicly.
+
+### Repo note — build script is stale (2026-07-07)
+`Module 3/_build_clean_deck.py` is NO LONGER the source of truth and must NOT be re-run: the canonical `Module 3_clean.pptx` has diverged (video slide, summary slide, hand-edits, in-place OOXML edits). Re-running would overwrite and lose all of that. The .pptx is canonical — edit it in place. The script is kept only for its reusable helpers + original-build record; a STALE banner is now at the top of the file.

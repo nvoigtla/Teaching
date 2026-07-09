@@ -1,3 +1,22 @@
+# ==========================================================================
+#  STALE  --  DO NOT RUN THIS SCRIPT.
+#
+#  The canonical deck (Module 3_clean.pptx) has DIVERGED from this script.
+#  It now contains changes this script does NOT reproduce, including:
+#    - the Jeff Bezos 1997 VIDEO slide (embedded MP4)
+#    - the Module 3 SUMMARY slide
+#    - many PowerPoint hand-edits, notes fixes, and in-place OOXML edits
+#
+#  Running this would REGENERATE the deck from scratch and OVERWRITE
+#  Module 3_clean.pptx, LOSING all of the above.
+#
+#  The .pptx is now the SOURCE OF TRUTH. Edit it in place (OOXML / lxml
+#  surgery, or PowerPoint), NOT by re-running this file.
+#
+#  Kept only for its reusable helpers (palette, chrome, boxes, badges,
+#  the OMML equation engine, the Fig/chart primitives) and as the record
+#  of the original clean build.                          -- noted 2026-07-07
+# ==========================================================================
 """
 Build a clean Module 3 deck from scratch, using ONLY the six template layouts
 defined in `_build_template_samples.py`.
