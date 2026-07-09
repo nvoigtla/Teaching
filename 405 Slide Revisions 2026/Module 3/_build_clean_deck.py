@@ -2393,7 +2393,7 @@ def slide_2(prs):
     ]
 
     def add_zoom_logo(slide):
-        logo_path = OUT_DIR / "_zoom_logo.png"
+        logo_path = OUT_DIR / "Images" / "_zoom_logo.png"
         if logo_path.exists():
             slide.shapes.add_picture(
                 str(logo_path),
@@ -3121,7 +3121,7 @@ def slide_9(prs):
                    align=PP_ALIGN.CENTER, font="Calibri")
         # LEFT image: Rivian Normal IL assembly-plant floor (CC BY-SA,
         # Wikimedia).  Replaces the stale Tesla factory floor.
-        rivian_plant = OUT_DIR / "_rivian_plant.jpg"
+        rivian_plant = OUT_DIR / "Images" / "_rivian_plant.jpg"
         if rivian_plant.exists():
             pic_left = slide.shapes.add_picture(
                 str(rivian_plant),
@@ -5074,7 +5074,7 @@ def slide_15(prs):
         )
 
         # Rivian R1 picture on the RIGHT (replaces the Tesla car carrier).
-        rivian = OUT_DIR / "_rivian.jpg"
+        rivian = OUT_DIR / "Images" / "_rivian.jpg"
         if rivian.exists():
             pic = slide.shapes.add_picture(
                 str(rivian),
@@ -6821,7 +6821,7 @@ def slide_31(prs):
         # the Normal, IL plant assembly line — image23.jpeg in the
         # canonical deck, persisted to _rivian_georgia.jpg in this folder.
         # Rectangular crop kept; soft drop shadow lifts it off the slide.
-        rivian = OUT_DIR / "_rivian_georgia.jpg"
+        rivian = OUT_DIR / "Images" / "_rivian_georgia.jpg"
         if rivian.exists():
             pic = slide.shapes.add_picture(
                 str(rivian),
@@ -7209,7 +7209,7 @@ def slide_35(prs):
         # new project rendering for the Georgia plant.  Apply rounded
         # corners + soft drop shadow so the picture sits cleanly.
         # Position + size hand-set by user; caption dropped.
-        rivian = OUT_DIR / "_rivian_georgia_plan.png"
+        rivian = OUT_DIR / "Images" / "_rivian_georgia_plan.png"
         if rivian.exists():
             pic = slide.shapes.add_picture(
                 str(rivian),
@@ -8331,7 +8331,7 @@ def slide_46(prs):
         # 2026-05-22 hand-added by user — Zuckerberg holding/using a
         # Quest-class headset.  Rounded corners + soft drop shadow so
         # the photo "lifts" off the slide (per course CLAUDE.md).
-        zuck_path = OUT_DIR / "_zuckerberg_realitylabs.png"
+        zuck_path = OUT_DIR / "Images" / "_zuckerberg_realitylabs.png"
         if zuck_path.exists():
             zuck = slide.shapes.add_picture(
                 str(zuck_path),
@@ -8346,7 +8346,7 @@ def slide_46(prs):
         # citing $77B in Reality Labs losses.  Position preserved
         # exactly as user placed it.  Drop shadow + thin gray border
         # per user request (no rounded corners — it's a doc screenshot).
-        wsj_path = OUT_DIR / "_wsj_meta_reality_labs.png"
+        wsj_path = OUT_DIR / "Images" / "_wsj_meta_reality_labs.png"
         if wsj_path.exists():
             wsj = slide.shapes.add_picture(
                 str(wsj_path),
@@ -8617,7 +8617,7 @@ def slide_49(prs):
         # User pasted this as one image (replaces the previous
         # multi-column source-image reconstruction, which looked
         # distorted in 16:9).
-        ross = OUT_DIR / "_ross_costs_combined.png"
+        ross = OUT_DIR / "Images" / "_ross_costs_combined.png"
         if ross.exists():
             slide.shapes.add_picture(
                 str(ross),
@@ -8689,7 +8689,7 @@ def slide_50(prs):
         #     down slightly; new W 6.95, H 5.71).
         #   • The standalone PACKAGES textbox is GONE — its text
         #     now lives inside the screenshot's PNG bitmap.
-        burn60 = OUT_DIR / "_burn60_workout.png"
+        burn60 = OUT_DIR / "Images" / "_burn60_workout.png"
         if burn60.exists():
             slide.shapes.add_picture(
                 str(burn60),
