@@ -242,6 +242,30 @@ taped video) follows one idea at a time. Calibrated defaults:
       Leave such math callouts ungrouped; just make sure they co-reveal.
       (When extracting a `<p:sp>` for grouping, match the **balanced**
       closing tag by depth — an `mc:Fallback` can nest another `<p:sp>`.)
+- **Worked-computation / derivation tables build in the order you'd teach
+  them, not row-by-row top-to-bottom** (e.g. slide 15's MPL table). The
+  pattern I want:
+  - **Setup stays on screen from the start** — title, subtitle, and the
+    empty/partly-filled table are visible before the first click; the
+    build fills in the computed values.
+  - **Teach the mechanic once, in full, on the FIRST instance.** Reveal the
+    first cell's whole apparatus together — the arrow / connector, the line
+    that points to the result, and the result itself (e.g. the down-arrow
+    0→165, its rounded line, and the ΔQ value 165).
+  - **Attach the explanation to that first instance.** Immediately AFTER the
+    first computed value, reveal the convention / legend / definition box
+    (with the connector that points to it) — it explains the step just
+    shown. Not up front, not saved for the end.
+  - **Do the second instance in full too, then BATCH the rest.** Second cell
+    gets its own click (arrow + line + value); then one click reveals all
+    remaining arrows + lines + values in that column at once.
+  - **Go column by column, and introduce each new column's first value
+    together with the box/formula that defines it** (e.g. the first MPL
+    value revealed with the `MPL = ΔQ/ΔL` box + its connector), then batch
+    the rest of that column.
+  - **End with the concluding observation** — the summarising arrow and its
+    note box (e.g. the down-arrow under the MPL column + "MPL is declining
+    as we add workers") as the final click.
 - **The takeaway / conclusion bar gets its own final click** so the
   punchline lands last.
 - **Skip (no animation):** the title slide, the agenda / Part-X roadmap
