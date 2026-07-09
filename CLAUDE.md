@@ -164,6 +164,35 @@ slide. My preferences:
 - Work in **verified batches** and confirm the voice on the first batch
   before scripting the whole deck.
 
+## Animations
+I like slides to build up step by step so the audience (often watching a
+taped video) follows one idea at a time. Calibrated defaults:
+
+- **Effect: Fade, about 0.5 s, on click.** Fade is the default entrance for
+  every revealed element. Not instant "appear," not flashy motion. Keep one
+  effect style across the whole deck.
+- **Chrome stays put.** The top bar, section tag, title, thin rule, footer,
+  page number, and a chart's axes and axis labels are visible from the
+  start and are never animated.
+- **Build the content, one step per click:**
+  - Text slides: reveal one bullet (top-level point) per click.
+  - Charts / diagrams: reveal the pieces one at a time, and reveal each
+    curve or series together with its own label on the same click. Follow
+    "guides before regions" (a dashed guide line before the shaded area it
+    marks), and reveal the building blocks before the synthesis (e.g. the
+    individual short-run curves before the long-run envelope).
+- **Group a graphic with its label** on one click, not two.
+- **The takeaway / conclusion bar gets its own final click** so the
+  punchline lands last.
+- **Skip:** the title slide, poll slides (PollEverywhere), the embedded
+  video slide (it has its own click-to-play trigger), and BACKUP / backup
+  slides.
+- **Build mechanics (this machine):** inject a `<p:timing>` block via OOXML
+  surgery (no LibreOffice here). I can't watch playback, so verify the
+  effect count and targets via PowerPoint COM
+  (`Slide.TimeLine.MainSequence`), confirm the file opens in PowerPoint,
+  and have me eyeball the slideshow. Work in verified batches.
+
 ## Drafting Workflow for Slide Content
 - For new slide content or substantial restructuring, **first draft
   the deck outline in Markdown** (one section per slide, with bullets
