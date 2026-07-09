@@ -198,12 +198,28 @@ taped video) follows one idea at a time. Calibrated defaults:
   - a picture and its source / attribution line beneath it — **always**
     reveal the source at the same time as the picture, on **every** slide
     (e.g. slide 47) — never let the picture land a click before its source;
-  - an image and the text box that gives its title or context — reveal
-    them together (e.g. slide 44);
+  - an image and the text box that gives its title, header, or context —
+    reveal them together, whether that text sits **above** the picture (a
+    header/label) or below it (a caption) (e.g. slides 10, 44);
+  - **a whole labelled panel reveals as one beat.** When a picture has a
+    header above it and/or a caption/source below it, the header +
+    picture + caption/source are ONE click, not three. In a **multi-column
+    / multi-panel** layout (e.g. slide 10's short-run vs. long-run
+    columns), reveal each column as its own single beat — header + picture
+    + source together — and go **column by column**. Never reveal all the
+    headers first and then all the pictures.
   - a context picture and the bullet points it supports — reveal them
     together so they land as one thought (e.g. slide 47);
   - a formula and the description of its terms (its glossary / legend) —
     reveal them together (e.g. slide 33).
+- **Don't trust a generic shape-by-shape auto-rollout on picture slides.**
+  A blind "one body shape per click" pass has no idea that a text box is
+  the *title* of the picture next to it, so it splits them onto separate
+  clicks (this is exactly how slide 10 ended up with headers on clicks 1–2
+  and pictures on clicks 3–4). Any slide with pictures gets a **custom
+  per-panel grouping** — bind each picture to its adjacent header and
+  caption/source before assigning clicks. Verify picture slides by eye, not
+  just by click count.
 - **A rounded/filled shape and the text box layered on it are ONE object.**
   When a callout is built as a background rounded-rect plus a separate text
   box on top (the "layer a text box on top" pattern), merge the two into a
