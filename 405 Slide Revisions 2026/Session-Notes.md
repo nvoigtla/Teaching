@@ -1829,3 +1829,35 @@ scatter+fit XY chart.
 
 ### Repo note — build script is stale (2026-07-07)
 `Module 3/_build_clean_deck.py` is NO LONGER the source of truth and must NOT be re-run: the canonical `Module 3_clean.pptx` has diverged (video slide, summary slide, hand-edits, in-place OOXML edits). Re-running would overwrite and lose all of that. The .pptx is canonical — edit it in place. The script is kept only for its reusable helpers + original-build record; a STALE banner is now at the top of the file.
+
+---
+
+## 2026-07-18 – Module 3: full animation rollout, teleprompter notes for whole deck, Poll Break badges, PollEv slides adopted, live page numbers, slide 52 styling
+
+**One-line summary.** Completed step-by-step animations across the entire deck, wrote teleprompter read-aloud notes into every content slide's speaker notes, relabeled/refit the Poll Break badges, adopted the user's hand-inserted PollEv answer slides, converted footer page numbers to live slide-number fields, and gave slide 52's boxes rounded corners + drop shadows. Deck now **79 slides**; canonical `.pptx` remains the source of truth (build script frozen).
+
+### Key work
+- **Animations (deck-wide).** Fade-on-click, story-grouped builds on all content slides. Calibrated on 64/65, then: per-bullet builds (2,3,4,22,66,68), picture/multi-element story builds, batch A (15 text/diagram slides), batch B (6 tables; Waterworld 45 revealed column-by-column), batch C (data charts 6,16,54,56,59,60), concept map (7), plus stragglers (35,38). Slide 15 got a bespoke 8-step MPL-computation choreography. Title/agenda/poll/video/backup left unanimated by design.
+- **Three animation correction passes** (each + CLAUDE.md rule): (1) first bullet shows WITH the slide, not on a click (27 text-led slides; per-bullet slides dropped bldP so para 0 stays static); (2) every picture reveals together with its source/caption (fixed 10,18,61); (3) callout box + layered text merged into single `<p:grpSp>` groups (9,11,12,16,24,28,33,36). Exceptions recorded: don't group table-cell number-highlights or OMML-math-in-mc:AlternateContent callouts.
+- **MB=MC star:** reveal AFTER the decision rule it abstracts (fixed 19,23; 24 already correct). Considered adding stars to bang-for-buck/Waterworld slides — dropped (MC not cleanly defined there; badge wouldn't fit 45).
+- **Slide 10:** each column's header reveals WITH its picture (was split); added the "labelled panel = one beat, column by column" rule + a guardrail against trusting generic shape-by-shape rollout on picture slides.
+- **Teleprompter notes** written into speaker notes for ALL content slides (1–10 already done prior; wrote 11–74 + backups 76,77). Poll slides (21,28,37,50,51) keep brief poll instructions; slide 70 got a video intro. Voice = natural first person, full-stop style, leads with the highlighted number, walks through numbers on technical slides. Removed the standalone teleprompter MD (notes are now the single source).
+- **Poll Break badges** (slides 20,27,35,43,50,71,72): relabeled "Discussion Break"/"Poll Everywhere break" → **"Poll Break"**, box refit to text keeping slide-20 shape (text box = 70% of parallelogram width, right edge anchored in corner). Badges sit bottom-RIGHT (not left).
+- **PollEv answer slides adopted:** user hand-inserted 2 PollEv slides (display 73–74, after Shark Tank); deck 77→79. Fixed the shifted footers (75/76/77).
+- **Live page numbers:** converted all 70 footer numbers to `<a:fld type="slidenum">` fields → auto-renumber on any insert/reorder. Made this the default in Teaching/CLAUDE.md.
+- **Slide 52:** 5 filled content boxes (pack headers, TC boxes, MC answer) given rounded corners (roundRect adj 8000) + the deck's standard outerShdw, matching slide 58.
+
+### Decisions
+- Teleprompter is notes-only (no Word file); notes double as student guidance.
+- Footer page numbers = live slidenum fields by default going forward.
+- Star pattern stays only where MB and MC are each cleanly defined (hiring / go-no-go), not the input-mix rule.
+
+### Gotchas (important, added to CLAUDE.md)
+- **Duplicate `<a:effectLst>` corrupts the file for PowerPoint** (python-pptx accepts it). Boxes often already carry an empty `<a:effectLst/>` — REPLACE it, don't add a second. Caught slide 52 via the PowerPoint open-check.
+- **`python -c` + bash quoting ate `\1`** → Python read `\1` as octal `chr(1)`, wiping run content with a SOH byte. Use a script FILE and a function-replacement in re.sub, not a backreference string.
+- **Grouping shapes wrapped in `mc:AlternateContent`** (OMML math, a14 ns on inner mc:Choice) orphans the namespace — skip. Match balanced `<p:sp>` by depth (an mc:Fallback can nest another `<p:sp>`).
+- slidenum field shows ABSOLUTE slide position, so unnumbered poll slides are still "counted through" (…72, [poll][poll], 75…).
+
+### Open / pending
+- Module 3 is DONE. Deck = 79 slides, canonical `Module 3 - Revised.pptx`.
+- If more PollEv/other slides are hand-inserted later, page numbers now self-renumber; just tell me so I edit AROUND the live poll slides (never round-trip them through python-pptx).
