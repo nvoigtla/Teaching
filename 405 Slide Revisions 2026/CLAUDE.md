@@ -342,6 +342,17 @@ helper that builds any feeding table so the two can't drift apart.
   add one by default.
 - **Discussion / poll badge** for group-discussion or poll cues. A
   distinctive slanted gold parallelogram, bottom-right corner.
+- **Poll-break slides say "Poll Break" in the badge.** A slide that cues a
+  poll break carries the badge in the bottom-right corner reading **"Poll
+  Break"** (navy bold Calibri, 28 pt, on the gold slanted parallelogram) —
+  not "Discussion Break" or "Poll Everywhere break". **Fit the box to the
+  text:** keep slide 20's badge as the reference shape — the navy text box
+  is auto-fit (`wrap="none"` + `spAutoFit`) and sits at **70 %** of the
+  parallelogram width (≈15 % slant margin each side), and the parallelogram
+  is sized to that (text-box width ÷ 0.70) with its **right edge anchored in
+  the corner** so it shrinks leftward. Measure the label width in Calibri
+  Bold (PIL/Carlito) rather than guessing. The badge sits at the same
+  bottom-right position as the other break badges, never lower-left.
 - **Convention callout box.** A small cream-fill rounded rect with a
   thin primary-color border, slight rounding (~6%), soft drop shadow,
   holding a bold primary-color "Convention:" prefix and a single line
