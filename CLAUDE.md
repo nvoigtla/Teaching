@@ -112,6 +112,18 @@ For work in this folder, you are assisting with **teaching materials**
   ask to change it.
 - When adding new slides, **match the layout of the surrounding
   slides** so the deck feels coherent.
+- **Footer page numbers are LIVE slide-number fields, by default.** The
+  page number in the footer must be a PowerPoint slide-number field
+  (`<a:fld type="slidenum">` in OOXML, or Insert → Slide Number in the UI),
+  never a hand-typed static number. Live fields auto-renumber whenever I
+  insert, delete, or reorder slides — including slides I add by hand (e.g.
+  PollEverywhere activity slides) — so the numbering never drifts. When
+  building a new deck, emit the footer number as a `slidenum` field; when I
+  hand it a deck with static footer numbers, convert them to fields (touch
+  only the footer number run, leave slides that intentionally have no number
+  — title, poll, backup — alone). Each field gets its own GUID `id`; keep
+  the cached `<a:t>` set to the current number so it looks right before
+  PowerPoint recomputes.
 
 ## Speaker Notes
 - Speaker notes should be **substantive, not bullet repeats**. They will be used for students as guidance when I upload the slides. So they can state again what the slides actually talks about. 
