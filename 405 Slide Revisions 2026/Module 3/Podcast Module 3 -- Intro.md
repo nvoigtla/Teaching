@@ -1,6 +1,10 @@
 # Management 405 · Module 3 — Production and Costs
 ## PRE-CLASS PREVIEW (about 5 minutes)
 
+> **Audio Overview prompt — paste this into NotebookLM's Audio Overview / Customize box:**
+>
+> About a 5-minute preview that prepares students before class. Two hosts: one has done the reading and is prepared; the other hasn't and just wants a quick sense of what's coming, so the prepared one gives a high-level tour. Open with "Here's a preview of what to expect from Module 3." Speak entirely in the future tense. Name the core concepts and tease the kinds of examples, but give away no answers, no worked examples, and no specific numbers. Audience: executives pursuing an MBA at UCLA Anderson (never "Executive MBA students"). Call it "Module 3," never a masterclass; say "the class" or "Module 3," never "the source material." Warm and inviting; end by telling them to come ready to dig in.
+
 ## Instructions for the audio hosts (read this first)
 This is a short **preview** to get students ready **before** they attend Module 3. Keep it to **about 5 minutes** — high-level, inviting, and quick. It is a look-ahead, not a summary.
 

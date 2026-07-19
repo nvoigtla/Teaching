@@ -1,6 +1,10 @@
 # Management 405 · Module 3 — Production and Costs
 ## POST-CLASS WRAP-UP (about 15 minutes)
 
+> **Audio Overview prompt — paste this into NotebookLM's Audio Overview / Customize box:**
+>
+> About a 15-minute recap that helps students recall the class. Two hosts who are two students who just took Module 3, talking it through to lock it in. Speak in the past tense. Cover all the main ideas. Use concrete numbers only where an example needs them (salaries in the talent-war case; the dollar figures in the fitness-pack and loan examples; cost-per-seat-mile in the aviation comparison) and skip fine-grained figures elsewhere. Explain the hiring decision by intuition, not arithmetic. Keep flagging context (short run vs long run) and keep returning to the one unifying idea: compare marginal benefit with marginal cost. Audience: executives pursuing an MBA at UCLA Anderson (never "Executive MBA students"). Call it "Module 3," never a masterclass; say "the class" or "Module 3," never "the source material." Warm and conversational.
+
 ## Instructions for the audio hosts (read this first)
 This is a **post-class recap** so students can recall what they saw in Module 3. Aim for **about 15 minutes**. It is a look-back, not a preview. Warm, reflective, conversational tone. Define any term (marginal product, marginal cost, sunk cost, opportunity cost, economies of scale and scope) in plain language, and go light on formulas. Please follow these rules:
 

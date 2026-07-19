@@ -212,6 +212,12 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
   `Podcast Module X -- Intro` and `Podcast Module X -- Wrap-up`. Each must
   stand alone (its own instructions + its own content) because each is
   uploaded separately. Draft in Markdown, keep alongside the deck.
+- **Always supply a ready-to-paste Audio Overview prompt for each episode** –
+  a short single-paragraph version of that episode's instructions. Give it
+  in chat **and** as a labeled block at the very top of the source doc
+  ("Audio Overview prompt — paste this into NotebookLM's Audio Overview /
+  Customize box:") so I can drop it straight into NotebookLM's Customize box
+  as a redundancy on top of the in-doc instructions.
 - **Every source doc starts with an "Instructions for the audio hosts (read
   this first)" block** carrying these standing rules:
   - **Audience = "executives pursuing an MBA at UCLA Anderson"** (this
