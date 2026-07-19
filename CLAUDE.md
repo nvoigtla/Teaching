@@ -188,6 +188,63 @@ slide. My preferences:
 - Work in **verified batches** and confirm the voice on the first batch
   before scripting the whole deck.
 
+## Podcasts (module audio overviews)
+When I ask for a "podcast" for a module, I mean an audio conversation I
+generate with **Google NotebookLM's Audio Overview** from a source document.
+**You don't produce the audio** – you write the self-contained Markdown
+**source doc(s)**; I upload each to NotebookLM and hit Generate. Steering
+lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
+
+- **Two episodes per module, by default:**
+  - **Intro / preview – about 5 minutes.** *Prepares* students before class.
+    High-level: name the core concepts that will be covered and tease the
+    kinds of examples, but **no give-aways** – no answers, no worked
+    examples, no specific numbers. **Future tense** ("in Module X we'll look
+    at…"). Open with a line like "Here's a preview of what to expect from
+    Module X." Two hosts: **one who did the reading and is prepared**,
+    briefing **one who did not and just wants a quick sense of what's
+    coming.**
+  - **Wrap-up / recap – about 15 minutes.** Lets students *recall* what they
+    saw. Covers all the main ideas. **Past tense** ("as we saw in
+    Module X…"). Two hosts: **two students who just took the class, talking
+    it through** to lock it in.
+- **File convention:** one **self-contained** `.md` per episode, named
+  `Podcast Module X -- Intro` and `Podcast Module X -- Wrap-up`. Each must
+  stand alone (its own instructions + its own content) because each is
+  uploaded separately. Draft in Markdown, keep alongside the deck.
+- **Every source doc starts with an "Instructions for the audio hosts (read
+  this first)" block** carrying these standing rules:
+  - **Audience = "executives pursuing an MBA at UCLA Anderson"** (this
+    covers both my Fully Employed and Executive MBA sections). Never say
+    "Executive MBA students."
+  - **Call it "Module X," never a "masterclass."**
+  - **Refer to the material as "the class talks about…" / "Module X
+    covers…"** – never "the source material," "this document," or "the
+    notes."
+  - **Concrete numbers only when the example truly needs them** (e.g. keep
+    exact salaries in a talent-poaching case, dollar figures in a
+    package-pricing or loan example, cost-per-seat-mile in an aviation
+    comparison). Don't recite fine-grained figures where the idea stands on
+    its own (e.g. don't quote that marginal product "falls from 0.66 to
+    0.04").
+  - **Explain decisions by intuition, not arithmetic** (hiring = "does the
+    next worker bring in at least as much extra revenue as we pay them?").
+  - **Always anchor the context and remind the listener periodically**
+    (e.g. "remember, we're still in the short run, so capital is fixed").
+  - **Keep returning to the module's one unifying idea** (the throughline).
+  - **Lead with real-world stories** and let them carry the ideas.
+  - Warm, curious, conversational tone – smart colleagues (or two students)
+    connecting the dots, not a lecture; define terms in plain language, go
+    light on formulas.
+- **Usage / mechanics:** put **each episode in its own NotebookLM notebook**
+  (NotebookLM blends all sources in a notebook into one audio), so the two
+  files must never share a notebook. There is **no editor for the finished
+  audio** – to change an episode, edit the source doc (especially the
+  instruction block) and regenerate. Length isn't exact; the "about N
+  minutes" instruction plus a correspondingly short/long source doc pushes
+  it the right way. No invented facts or numbers, and spot-check the
+  generated audio since the hosts ad-lib.
+
 ## Animations
 I like slides to build up step by step so the audience (often watching a
 taped video) follows one idea at a time. Calibrated defaults:
