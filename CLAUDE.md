@@ -197,10 +197,14 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
 
 - **Two episodes per module, by default:**
   - **Intro / preview – about 5 minutes.** *Prepares* students before class.
-    High-level: name the core concepts that will be covered and tease the
-    kinds of examples, but **no give-aways** – no answers, no worked
-    examples, no specific numbers. **Future tense** ("in Module X we'll look
-    at…"). Open with a line like "Here's a preview of what to expect from
+    Don't be vague – a listener should come away with an **intuitive grasp
+    of each core concept**, so briefly explain what each one means in plain
+    language (e.g. when you say "economies of scale and scope," say in a
+    sentence what each is). What you DO hold back is the **worked examples,
+    the specific numbers, and how each case resolves** – those are the
+    payoff for class; name the example *types* as illustrations without
+    working them through. **Future tense** ("in Module X we'll look at…").
+    Open with a line like "Here's a preview of what to expect from
     Module X." Two hosts: **one who did the reading and is prepared**,
     briefing **one who did not and just wants a quick sense of what's
     coming.**
