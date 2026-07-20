@@ -73,6 +73,15 @@ For work in this folder, you are assisting with **teaching materials**
   when a slide has unusually little or unusually much text. Other
   acceptable pairs: 28 / 26, 26 / 24. Sub-bullets at 20 pt or below
   are almost always too small for this audience.
+- **Preferred sizing when space allows: 28 pt main / 24 pt sub.** Go
+  bigger by default — use **28 / 24** whenever the bullets fit
+  comfortably; **fall back to 24 / 22 on more crowded slides**. Either
+  way keep an overall balanced look and make sure the larger font never
+  spills past the slide borders (measure with the actual font — PIL
+  ImageFont on Calibri/Carlito — rather than guessing).
+- **Bullet spacing-before: 12 pt before main bullets, 3 pt before
+  sub-bullets** (first bullet in a box gets none), as long as the result
+  looks balanced.
 
 ## Concept-explanation textboxes (preferred format)
 - When a slide needs a short, visually-distinct callout to **explain a
@@ -252,6 +261,14 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     right. E.g., Waterworld's disaster was the runaway, over-budget
     **production cost** (now sunk), not weak box-office revenue; saying only
     "the movie was a disaster" is ambiguous and misleads.
+  - **Convey each concept correctly — don't overstate the result.** The
+    hosts ad-lib and tend to exaggerate. Guard the classic slip:
+    **diminishing** marginal product means output keeps **rising**, just by
+    smaller and smaller amounts as you add workers — it does NOT mean output
+    falls or that "adding workers slows production." Output only actually
+    declines under **negative** marginal product, which this course does not
+    reach unless we deliberately exaggerate. Keep those two distinct, and in
+    general state each result no more strongly than the economics supports.
   - **Keep returning to the module's one unifying idea** (the throughline).
   - **Lead with real-world stories** and let them carry the ideas.
   - Warm, curious, conversational tone – smart colleagues (or two students)
