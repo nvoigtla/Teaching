@@ -124,6 +124,13 @@ For work in this folder, you are assisting with **teaching materials**
   ask to change it.
 - When adding new slides, **match the layout of the surrounding
   slides** so the deck feels coherent.
+- **"Back" navigation buttons go in the lower-right corner.** Any
+  jump-back button (e.g., on a backup/detail slide that a content slide
+  links to) is a navy rounded-rect pill with white bold "← Back",
+  placed in the **lower-right corner just above the footer** — the same
+  fixed position for every back button in the deck (≈ x 11.72", y 6.6",
+  size ≈ 1.55 × 0.46"). It links back to the source slide. Keep this
+  position consistent even when it overlays a full-bleed image.
 - **Footer page numbers are LIVE slide-number fields, by default.** The
   page number in the footer must be a PowerPoint slide-number field
   (`<a:fld type="slidenum">` in OOXML, or Insert → Slide Number in the UI),
@@ -288,6 +295,38 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
   minutes" instruction plus a correspondingly short/long source doc pushes
   it the right way. No invented facts or numbers, and spot-check the
   generated audio since the hosts ad-lib.
+
+## Wrap-Up Video (NotebookLM Video Overview)
+A module can also get a **video** wrap-up, produced with **NotebookLM's
+Video Overview** from a source doc I write (I don't produce the video). It's
+the video sibling of the Wrap-up podcast: a ~15-minute, **past-tense** recap
+for students to recall the module.
+
+- **Reuse the Wrap-up podcast body verbatim** (same corrected content), with
+  a **video-specific** instruction block and a ready-to-paste **Video
+  Overview prompt** at the top of the doc (same paste-in convention as the
+  podcasts — give it in chat *and* in the doc).
+- **All the standing podcast rules apply** (audience = executives pursuing an
+  MBA at UCLA Anderson; "Module X," not "masterclass"; "the class covered…,"
+  never "the source material"; numbers sparingly; intuition over arithmetic;
+  be explicit about which regime a rule lives in — MRPL = w is short-run,
+  bang-for-the-buck is long-run; precise example framing, e.g. Waterworld =
+  runaway *production* cost, not weak box office; diminishing ≠ negative
+  marginal product; keep returning to MB = MC).
+- **Video-specific:** tell it to let clean visuals carry each point — one
+  simple diagram / label / image per idea (a rising-then-flattening output
+  curve, a U-shaped average-cost curve, a short-run vs. long-run split, the
+  named companies for each example) — and NOT to crowd the frame with text.
+  A single narrator or two voices are both fine, as long as it stays past
+  tense.
+- **File + title convention:** name the file **`Video Module X -- Wrap-up`**;
+  set the H1 title to **`Module X - Video Wrap-Up`**.
+- **Set expectations — this is a supplement, not the real lecture video.**
+  NotebookLM generates its OWN visuals from the text; it does **not** use my
+  slides or animations. Spot-check both the narration and the AI-made visuals
+  for distortions. Video renders are slower than audio and may have a smaller
+  daily quota. NotebookLM auto-titles the output, so rename the downloaded
+  file to `Module X - Video Wrap-Up`. Put it in its own notebook.
 
 ## Animations
 I like slides to build up step by step so the audience (often watching a
