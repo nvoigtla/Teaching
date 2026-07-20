@@ -102,6 +102,9 @@ For work in this folder, you are assisting with **teaching materials**
 - Before making any edits to a .pptx file, **create a timestamped
   backup**: e.g., `slides_backup_2026-05-11.pptx`. Keep it in the
   same folder until I confirm I'm satisfied with the new version.
+- **Only the two most recent backups are kept.** When you create a new
+  backup, automatically delete any older ones for that deck, so at most
+  the two newest backup files remain in the folder at any time.
 - For substantive edits (rewording, restructuring, adding slides),
   **summarize the proposed changes in chat first** in a clear list
   before touching the file. Wait for my confirmation before applying.
@@ -239,8 +242,16 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     0.04").
   - **Explain decisions by intuition, not arithmetic** (hiring = "does the
     next worker bring in at least as much extra revenue as we pay them?").
-  - **Always anchor the context and remind the listener periodically**
-    (e.g. "remember, we're still in the short run, so capital is fixed").
+  - **Always be clear about context, including which regime a rule lives
+    in.** State explicitly that the hire-until-MRPL-=-w rule is a
+    **short-run** rule (capital fixed) while the bang-for-the-buck input-mix
+    rule is a **long-run** rule (both inputs flexible), and remind the
+    listener periodically which world they're in.
+  - **If you're unsure how an example should be framed, ask me before
+    writing it — don't guess.** Get the *point* of each example exactly
+    right. E.g., Waterworld's disaster was the runaway, over-budget
+    **production cost** (now sunk), not weak box-office revenue; saying only
+    "the movie was a disaster" is ambiguous and misleads.
   - **Keep returning to the module's one unifying idea** (the throughline).
   - **Lead with real-world stories** and let them carry the ideas.
   - Warm, curious, conversational tone – smart colleagues (or two students)
