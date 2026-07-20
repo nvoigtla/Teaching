@@ -1,4 +1,4 @@
-# Management 405 · Module 3 — Production and Costs
+# Module 3 - Podcast Wrap-Up
 ## POST-CLASS WRAP-UP (about 15 minutes)
 
 > **Audio Overview prompt — paste this into NotebookLM's Audio Overview / Customize box:**

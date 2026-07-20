@@ -228,6 +228,12 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
   `Podcast Module X -- Intro` and `Podcast Module X -- Wrap-up`. Each must
   stand alone (its own instructions + its own content) because each is
   uploaded separately. Draft in Markdown, keep alongside the deck.
+- **Document title (H1) must be exactly `Module X - Podcast Intro` /
+  `Module X - Podcast Wrap-Up`.** NotebookLM keys the episode/notebook title
+  off the doc's first heading, so keep the H1 in this exact, consistent form
+  (the titles were drifting when the H1 was something else). A descriptive
+  subtitle line underneath (e.g. "PRE-CLASS PREVIEW (about 5 minutes)") is
+  fine.
 - **Always supply a ready-to-paste Audio Overview prompt for each episode** –
   a short single-paragraph version of that episode's instructions. Give it
   in chat **and** as a labeled block at the very top of the source doc
