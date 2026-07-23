@@ -50,6 +50,11 @@ FIG_GROUP = {
     90: 1,    # Fiat 500 -> "Icons: the Vespa, the Fiat 500 ..."
     47: -1,   # Naples-plague painting -> "The 1630 plague devastated the northern cities"
 }
+# When each picture pairs with its own bullet: map pictures (sorted top-to-bottom)
+# to the ANIMATED bullet index they fade in with. Overrides FIG_GROUP for the slide.
+PIC_BULLET = {
+    6: [0, 1],   # top photo -> "Hotel in Milan"; second photo -> "Hotel in Turin"
+}
 
 
 def q(ns, t):
@@ -202,36 +207,29 @@ def plan(shapes, disp=None):
     title = next((s for s in shapes if s["name"] == "TextBox 3"), None)
     title_txt = (title["text"].strip() if title else "")
 
-    pics = [s for s in content if s["tag"] in ("pic", "grpSp")]
     boxes = [s for s in content if s["tag"] == "sp" and s["bul0"] >= 2]
     bullets = max(boxes, key=lambda s: s["bul0"]) if boxes else None
-    # takeaway: rounded rect at the bottom + its overlapping text box
-    round_bottom = [s for s in content if s["name"].startswith("Rounded Rectangle") and s["y"] > 6.2 and s["w"] > 10]
-    takeaway_ids = []
-    if round_bottom:
-        rr = round_bottom[0]
-        takeaway_ids = [rr["id"]]
-        for s in content:
-            if s["tag"] == "sp" and s["y"] > 6.2 and s["w"] > 10 and s["id"] != rr["id"] and not s["name"].startswith("Rounded"):
-                takeaway_ids.append(s["id"])
-    # cards: rounded rects in the body (two columns)
-    cards = [s for s in content if s["name"].startswith("Rounded Rectangle") and s["y"] < 6.0 and 4.5 < s["w"] < 7.5]
+    # takeaway = the grouped bottom bar (fallback: an ungrouped rounded rect at bottom)
+    takeaway_ids = [s["id"] for s in content if s["name"] == "TakeawayGroup"]
+    if not takeaway_ids:
+        takeaway_ids = [s["id"] for s in content if s["tag"] == "sp"
+                        and s["name"].startswith("Rounded Rectangle") and s["y"] > 5.8]
+    # cards = grouped body columns (fallback: ungrouped rounded rects)
+    cards = [s for s in content if s["name"] == "CardGroup"]
+    if not cards:
+        cards = [s for s in content if s["tag"] == "sp"
+                 and s["name"].startswith("Rounded Rectangle") and s["y"] < 5.8 and 4.5 < s["w"] < 7.5]
+    # figures / galleries exclude the takeaway & card groups (handled explicitly)
+    _handled = set(takeaway_ids) | {c["id"] for c in cards}
+    pics = [s for s in content if s["tag"] in ("pic", "grpSp") and s["id"] not in _handled]
 
     beats = []
     para_ids = []
 
-    # ---- two-column cards (e.g. slide 102) ----
+    # ---- two-column cards (e.g. slide 102): each card is now one group ----
     if len(cards) >= 2:
         for card in sorted(cards, key=lambda s: s["x"]):
-            members = [card["id"]]
-            for s in content:
-                if s["id"] == card["id"]:
-                    continue
-                if s["tag"] == "sp" and not s["name"].startswith("Rounded") \
-                        and s["x"] >= card["x"] - 0.2 and (s["x"] + s["w"]) <= (card["x"] + card["w"] + 0.2) \
-                        and card["y"] - 0.2 <= s["y"] <= card["y"] + card["h"]:
-                    members.append(s["id"])
-            beats.append([(m, None) for m in members])
+            beats.append([(card["id"], None)])
         if takeaway_ids:
             beats.append([(t, None) for t in takeaway_ids])
         return beats, para_ids
@@ -254,14 +252,26 @@ def plan(shapes, disp=None):
         fig.sort(key=lambda s: (0 if s["tag"] in ("pic", "grpSp") else 1, s["y"], s["x"]))
         fig_targets = [(s["id"], None) for s in fig]
         if fig_targets:
-            if bullet_beats:
+            if not bullet_beats:
+                bullet_beats.append(fig_targets)
+            elif disp in PIC_BULLET:
+                # each picture (top-to-bottom) pairs with its own bullet
+                def clamp(i):
+                    return max(0, min(i, len(bullet_beats) - 1))
+                idxs = PIC_BULLET[disp]
+                pics_f = [s for s in fig if s["tag"] in ("pic", "grpSp")]
+                for i, pic in enumerate(pics_f):
+                    bullet_beats[clamp(idxs[i] if i < len(idxs) else idxs[-1])].append((pic["id"], None))
+                # any captions / other bits ride with the last mapped bullet
+                for s in fig:
+                    if s["tag"] not in ("pic", "grpSp"):
+                        bullet_beats[clamp(idxs[-1])].append((s["id"], None))
+            else:
                 gi = FIG_GROUP.get(disp, FIG_GROUP_DEFAULT)
                 if gi < 0:
                     gi = len(bullet_beats) + gi
                 gi = max(0, min(gi, len(bullet_beats) - 1))
                 bullet_beats[gi] += fig_targets
-            else:
-                bullet_beats.append(fig_targets)
         beats.extend(bullet_beats)
         if takeaway_ids:
             beats.append([(t, None) for t in takeaway_ids])

@@ -11,6 +11,60 @@ Original source (untouched): **`Class 1.pptx`** (4:3, 123 slides).
 
 ---
 
+## Resume here (start of next session)
+
+- **Status:** deck is **132 slides**, opens cleanly, and everything is
+  **committed and pushed to `main`** (working tree clean). This folder now
+  lives at `Teaching/Italy IBR/` (moved up out of `405 Slide Revisions 2026/`).
+  The single design/build rulebook is `Teaching/CLAUDE.md`.
+- **The deck is the source of truth** (edited in place via OOXML; never
+  round-trip through python-pptx — it strips poll `tags` + null links). Only
+  the **reusable engine scripts** remain in the folder (the one-off build
+  scripts were deleted — recoverable from git history):
+  - `_animate.py` — rebuild animations after any structural change:
+    `python _animate.py all apply` (or specific slides). Holds `FIG_GROUP`
+    (figure→bullet) and `PIC_BULLET` (per-picture→bullet, e.g. slide 6).
+  - `_group_shades.py` / `_group_boxes.py` — group figure+shade / colored
+    box+text; **re-run `_animate.py` afterward** (grouping wipes timing).
+  - `_resize_bullets.py apply` — re-fit bullet sizes.
+  - `_add_notes.py apply` + `_notes_data.py` — edit speaker-note text in
+    `_notes_data.py`, then re-apply (edits notesSlides in place; poll notes
+    are protected).
+- **Open items:**
+  - Delete the empty stale folder `405 Slide Revisions 2026/Italy IBR/` — it
+    was locked while the prior session was running; remove it now that this
+    session is closed.
+  - **Slide 132** (poll "Italian-Speakers in 1861?") is an orphan backup that
+    nothing links to → it got **no** Back button. Add one → slide 61 if wanted.
+  - Podcast **Parts I–IV** emails are drafted (link placeholders) — paste the
+    NotebookLM links and double-check the per-part summaries.
+  - Optional, previously flagged: slide **20** has no figure (too text-dense —
+    could split); slide **47**'s plague image is Naples 1656 (captioned so);
+    slides **49 / 100 / 101** reveal their image clusters on a single click.
+- **Continuity note:** the chat transcript does *not* carry into a session
+  opened from this folder — this file is the handoff.
+
+---
+
+## 2026-07-23 (session 2) – map, box grouping, back buttons, folder move, cleanup
+
+- **Slide 15:** replaced relief map rounded + shadowed; normalized its messy
+  embedded media name (`image8.jpg&w=828&q=100` → `relief15.jpg`).
+- **Colored box + text grouping:** grouped each takeaway bar / card with its
+  text into one `<p:grpSp>` on slides **15, 25, 29, 43, 64, 90, 91, 102** (fixes
+  "box appears before its text"); updated `_animate.py` to detect the groups
+  (`TakeawayGroup` = final click; `CardGroup` = column beats) and re-ran
+  animations. Added the rule to `Teaching/CLAUDE.md`.
+- **Slide 6:** each hotel photo now fades in with its bullet (top → "Hotel in
+  Milan", second → "Hotel in Turin") via the new `PIC_BULLET` map.
+- **Back buttons:** added to backups **115–117 → 31, 119 → 53, 120 → 55,
+  121–131 → 57** (cloned from slide 114). **Deleted empty slides 133–135**
+  (deck 135 → 132).
+- **Structure:** consolidated the course-layer CLAUDE.md into `Teaching/CLAUDE.md`
+  and moved `Italy IBR/` up to `Teaching/`; Session-Notes are now per-subfolder.
+
+---
+
 ## 2026-07-23 – Consolidated log for the Class 1 build (covers 07-18 → 07-23)
 
 **One-line summary.** Rebuilt the old "Class 1" deck into the 405 visual
@@ -22,7 +76,8 @@ pushed once (`e0fa35d`); later edits (shade grouping, CLAUDE.md consolidation,
 this notes restructure) are still local.
 
 ### Current deck state
-- **`Class 1 - Revised.pptx` — 135 slides**, opens cleanly in PowerPoint.
+- **`Class 1 - Revised.pptx` — 132 slides** (was 135; 3 empty trailing slides
+  deleted 2026-07-23), opens cleanly in PowerPoint.
 - Preserves the **7 live PollEverywhere embeds** (slides 11, 13, 21, 35, 48,
   69, 132) and all **internal slide-jump links** (e.g. slide-4 "Schedule" →
   trip itinerary; company/topic → backup detail slides; "← Back" buttons).

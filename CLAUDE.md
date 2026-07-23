@@ -68,6 +68,20 @@ For work in this folder, you are assisting with **teaching materials**
   this everywhere the split occurs (e.g. every table slide). **Grouping
   invalidates any existing animations on that slide, so re-run the
   animation build afterward.**
+- **A colored box and the text inside it are ONE object — group them.**
+  Same procedure as the figure-shade rule, applied to callouts: any box
+  built as a filled / rounded rectangle plus a **separate** text box on
+  top (takeaway bars, cards, question boxes, "Convention" callouts)
+  must be merged into a single PowerPoint group (`<p:grpSp>`, box behind
+  + text in front; group `off/ext` = the two shapes' bounding box, with
+  `chOff/chExt` equal to `off/ext`). Otherwise the box fades in on its
+  own and the text lags a beat behind. Do this everywhere the pattern
+  occurs (detect the box by geometry — a filled `roundRect` with no text
+  of its own — not by shape name, since python-pptx often names rounded
+  rects "Rectangle N"). Same two exceptions as the grouping rule in the
+  Animations section (table-cell number-highlights; OMML-math callouts).
+  **Grouping invalidates the slide's animations, so re-run the animation
+  build afterward.**
 - **Minimize text on slides.** Aim for short bullets (5 – 10 words),
   not full sentences. Longer explanation belongs in **speaker notes**,
   not on the slide itself.
