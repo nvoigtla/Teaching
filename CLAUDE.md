@@ -41,6 +41,33 @@ For work in this folder, you are assisting with **teaching materials**
 - **Visuals are the priority.** Executive MBA slides should be heavily
   visual. Each major point should be supported by a chart, diagram,
   image, or schematic – not a wall of text.
+- **Every new slide should carry at least one illustrative figure.**
+  When I ask you to create a new slide, include at least one relevant
+  image or figure (photo, map, chart, diagram, or schematic), with a
+  **soft shade**, a **source / attribution line**, and **rounded edges
+  where applicable** (photos and maps get rounded corners; charts and
+  tables sit on a shadowed white backing card). Only skip the figure
+  when the slide is inherently text-only — a section divider, a
+  formula / definition slide, or a quiz prompt.
+- **Filled boxes and callouts get rounded edges + a soft shade.** Any
+  filled box — a concept / "Convention" callout, a takeaway bar, a
+  link / "button" box, a back button — uses slightly rounded corners
+  and a soft drop shadow so it reads as a lifted card. (Kept flat, no
+  rounding/shadow: the navy top bar, the thin rules and gold accent
+  strips, and table-cell number highlights.)
+- **A figure's shade is part of the figure — group them.** Pictures
+  carry their own drop shadow directly, so they need nothing extra. But
+  PowerPoint can't put a shadow on a table or chart frame
+  (`graphicFrame`), so the shade lives on a **separate white backing
+  rectangle** behind it. In that case, **group the figure and its
+  backing/shade into a single PowerPoint group** (`<p:grpSp>`, backing
+  behind + figure in front; group `off/ext` = the two shapes' bounding
+  box, with `chOff/chExt` equal to `off/ext` so the children keep their
+  absolute positions) so the shade always moves, resizes, and animates
+  **with** the figure rather than lagging behind as a stray shape. Do
+  this everywhere the split occurs (e.g. every table slide). **Grouping
+  invalidates any existing animations on that slide, so re-run the
+  animation build afterward.**
 - **Minimize text on slides.** Aim for short bullets (5 – 10 words),
   not full sentences. Longer explanation belongs in **speaker notes**,
   not on the slide itself.
@@ -92,6 +119,7 @@ For work in this folder, you are assisting with **teaching materials**
   - Rounded rectangle, ~12 % corner radius (slight rounding).
   - Cream / soft-yellow fill (e.g., `#FDF6E6`).
   - Thin primary-color border (~1 pt, navy).
+  - Soft drop shadow, so the box reads as a lifted card.
   - Primary-color text – bold for any prefix/header (e.g.,
     `Convention:`), regular for the rest.
   - One or two short lines of body text, 14 – 16 pt, left- or
@@ -104,6 +132,202 @@ For work in this folder, you are assisting with **teaching materials**
   students recognise the box on sight as "this is a concept
   clarification". Course-layer `CLAUDE.md` files can override
   colors / sizes if a course uses a different palette.
+
+## Canvas, palette, and chrome
+Any new slide or deck should feel like it belongs to the same family as
+the ones already shipped: same canvas, chrome, palette, and typography.
+
+**Canvas and master**
+- **Widescreen 13.33 × 7.5"** (16:9). Convert legacy 4:3 decks to widescreen.
+- **One single slide master** for the whole deck; strip the python-pptx
+  defaults. Never mix multiple masters.
+- **Calibri** for all on-slide text (Cambria Math only inside equations).
+  Charts use **Carlito**, the metric-compatible Calibri clone, so
+  code-measured widths match what PowerPoint renders.
+
+**Color palette** – three colors do the work: one strong primary, one warm
+accent, one neutral.
+
+| Role | Color | Hex |
+|---|---|---|
+| Primary (headers, filled boxes, structural arrows, axes) | Navy | `0B2B4E` |
+| Accent (emphasis bars, anchors, "this is the point") | Gold | `E09F3E` |
+| Neutral (captions, secondary text) | Gray | `555B66` |
+| Thin rule | Light gray | `C8CDD3` |
+| Cream box fill | Cream | `FDF6E6` |
+| Dimmed / "off" box | Gray box | `B0B5BC` |
+| Pale gold (revenue rectangle fill) | Pale gold | `F6E8C9` |
+
+- **Backgrounds stay white** – create weight with filled boxes, not tints.
+- **Gold loses its power if overused** – if more than ~20% of a slide is
+  accent-colored, prune.
+- **Ordinary emphasis = bold navy, not gold.** Gold is reserved for accent
+  chrome, takeaway bars, and anchors.
+- **Pair related visualizations by accent color** – two shapes/charts for
+  the same concept share one accent color so the eye links them.
+- **Reserved pedagogical colors** (off-limits for structural / chrome use;
+  concept-introduction and worked-solution slides only): **concept blue
+  `#0070C0`** (bold) for the concept name being introduced (e.g. "Marginal
+  Product of Labor", *elastic* / *inelastic*, *causal effect*); **dark
+  yellow `#B8860B`** (italic) for the single emphasised word inside a
+  definition. Deck-specific accents (green `#1B5E20` for "Market demand";
+  red / green for revenue lost / gained) are fine as examples but are not
+  part of the structural palette – don't use them for chrome.
+
+**Chrome** – keep identical across content slides; never enlarge one slide's
+title relative to the others.
+- **Navy top bar** with a three-level hierarchical section tag, white bold
+  ~15–16 pt: `Module · Part · Section`, title-cased. (A non-module deck
+  family may use a two-level tag.)
+- **Action title** = the takeaway, not the topic; navy bold ~30 pt.
+- Under the title, above the footer: a **thin gray rule** with a short
+  **gold accent strip** on the left.
+- **Minimal footer:** left = optional course footer text; right = page
+  number only (live slide-number field, auto-numbered). No "Page X of N",
+  watermarks, or "Confidential" stamps.
+- **Title slide** – centered horizontally and vertically, no top bar and no
+  page number: deck name navy 60 pt bold; section subtitle gold 40 pt bold;
+  short gold strip; course line ("Management 405") gray **bold**;
+  "Prof. Nico Voigtländer · UCLA Anderson" gray regular.
+
+## Typography and text
+(Bullet sizing and spacing-before are under Slide Design Principles; these
+are the additional layout rules.)
+- **Vertically center body text.** Bullet blocks sit vertically centered in
+  the content area (equal whitespace above the first line and below the
+  last), around ~y 4.2" between the title rule (~1.28") and footer rule
+  (~7.15"). Use a MIDDLE-anchored text box – even when text is paired with a
+  side graphic (center the text column on its own).
+- **Even spacing between main bullets** – distribute the vertical space
+  evenly; don't strand the last bullet at the bottom.
+- **No awkward line breaks.** Keep key bullets / labels on one line. To stay
+  big AND on one line, in order: widen the text column → shrink / move the
+  adjacent graphic → only then trim the font. Measure with the actual font
+  (PIL ImageFont on Calibri / Carlito), don't guess.
+- **Equal sizes within a group** – sibling bullets at the same level get the
+  same size; numbered steps "1./2./3." are all equal.
+- **Bold = emphasis; italic = variables / captions / "soft" voice.** Don't
+  combine bold + italic in body text – reserve that for takeaway bars and
+  italic callouts.
+- **No trailing periods** on bullets / labels (a sentence-final period after
+  a lowercase letter, digit, %, ), or ” is stripped deck-wide). Captions and
+  running prose keep normal punctuation.
+- **Captions: small (11–13 pt), italic, gray, centered** – the same
+  treatment for every image attribution.
+
+## Figures, charts, and tables – native, not screenshots
+**Standing rule: reproduce every table, chart, and equation as a native,
+editable PowerPoint object – never a screenshot or flattened image.** Tables
+are real PowerPoint tables; charts are built from PowerPoint shapes (lines,
+freeforms, markers, text boxes); equations are native OMML. The only images
+that stay images are genuine photographs, logos, news clippings, poll
+captures, and other screenshots that can't be reconstructed (see Pictures).
+Use matplotlib / preview images only while drafting, never as the shipped
+artifact.
+
+**Charts (native shapes):**
+- The shade lives on a white backing rectangle behind the chart (OOXML can't
+  shadow a `graphicFrame`); **group the backing with the chart** (see the
+  shade-grouping rule under Slide Design Principles).
+- **Axes:** straight navy connectors with a triangle arrowhead
+  (`<a:tailEnd type="triangle"/>`). Y-axis title above the top arrow, X-axis
+  title below the right arrow; axis titles italic-bold navy, tick labels
+  regular navy.
+- **Lines** (demand, MC, MR, fitted line) = connectors. **Curves**
+  (parabolas, step functions) = one editable freeform built from a **few
+  Bézier anchor points** (`quadBezTo` / `cubicBezTo`), not a dense polyline,
+  so "Edit Points" shows a handful of handles. **Dashed** guides use
+  `<a:prstDash val="dash"/>`.
+- **Each curve gets its own tight bounding box** hugging just that curve –
+  never one big box spanning the plot (overlapping full-plot boxes are
+  impossible to grab and drag).
+- **Bars** = gold-fill / navy-edge rectangles. **Markers** = small oval /
+  rectangle / triangle shapes, a distinct shape per series (color alone
+  isn't enough for handout printing).
+- **Labels live inside the plot area**, in clear zones; avoid annotation
+  arrows. Label the demand curve "D" at its end; keep Q* as a dashed drop
+  line. Labels must not cross the curves.
+- **All figure text large:** axis titles ~18–20 pt, in-chart labels ~16–20
+  pt, uniform within a chart.
+- **No horizontal gridlines** unless pedagogically necessary (then
+  light-gray dashed). Round the axis maximum to a clean number.
+- **Legend inside the plot area** (see the Chart legends section for the
+  manual-layout mechanics).
+- When a chart is the main content it fills the slide (~10.5 × 5.15") on its
+  white backing rectangle.
+
+**Tables:**
+- Native tables: navy header row (white bold), body rows alternating
+  white / cream, navy text, thin borders. Strip the python-pptx default
+  table style; set fills explicitly.
+- Same shadow-on-backing-rectangle treatment, grouped with the table.
+
+## Pictures
+- **Drop shadow + rounded corners by default** – pictures should feel lifted
+  (soft shadow, modest blur, slight offset, not heavy).
+- **Flat exceptions** (no shadow / rounding): logos and brand marks; book
+  covers, posters, screenshots with their own border / background; source
+  images that already include a shadow or frame.
+- **Keep the original image assets** for screenshots, poll captures, news
+  clippings, product photos, and photographs – pull the actual asset from
+  the source deck, not a re-creation. Rebuild only charts / tables /
+  equations natively. Preserve multi-part figures as separate shapes so they
+  can animate one at a time.
+- **Prefer real photographs over logos** – a photo of the product / place
+  beats a brand mark. No stock photos, clip art, or emojis.
+- **Crop tight to the subject**; size / place so the image never overlaps
+  text.
+- **Captions:** title-style caption ABOVE the picture (small italic-bold
+  navy, centered); source / license BELOW (smaller italic gray) – only when
+  it adds information the image / title doesn't already carry. Remove
+  redundant captions / labels / source lines by default.
+
+## Visual hierarchy: boxes, arrows, bridges
+- **Filled boxes = primary content nodes** (a key concept, rule, definition)
+  – primary color, white text.
+- **Outlined boxes = annotations / bridges / "see also"** – white fill,
+  accent border, primary-color text; lighter weight.
+- **Three-level box rhythm on concept slides:** (1) **Hero** –
+  primary-filled box (white bold) with the headline definition; (2)
+  **Elaboration** – cream-fill / thin-navy-border rounded rect with the
+  decomposition, glossary, and 2–3 bullets; (3) **Action** – accent-filled
+  box (primary bold) with the actionable rule / takeaway. Primary →
+  secondary → action.
+- **Arrows carry meaning:** primary-color arrows for structural flow
+  (parent → child, step 1 → 2); accent-color arrows for "this leads to that"
+  or "remember this here".
+- **Bridge boxes between clusters** – one outlined box naming a relationship,
+  one inflow + one outflow arrow, beats a tangle of diagonal arrows.
+- **Recurring concept → distinctive shape.** If asked, pick one
+  non-rectangular shape per recurring concept (12-point star, parallelogram,
+  starburst) and reuse it everywhere that concept appears. Don't fight the
+  shape with text – layer a separate text box on top rather than shrinking
+  text or deforming the shape (then group the two, per the grouping rule).
+
+## Layout patterns
+- **Two-column comparison** for any "X vs. Y" content – symmetric widths,
+  header cells on top, parallel bullet structure.
+- **Three-card row** for "the three cases" – equal widths, even spacing,
+  parallel sentence structure.
+- **Definition slides share ONE layout** – a cream rounded formula box near
+  the top with the native formula centered inside, then ~26–28 pt bullets
+  below; all definition slides match in box size / position and bullet size.
+- **Takeaway bar** at the bottom of dense slides – accent-filled,
+  primary-color bold-italic centered text, the one-line punchline. Use
+  sparingly (only for a genuine takeaway); it gets its own final animation
+  click.
+- **Discussion / poll badge** – a slanted gold parallelogram, bottom-right
+  corner (never coral). A **poll-break** slide's badge reads **"Poll Break"**
+  (navy bold Calibri 28 pt on the gold parallelogram), not "Discussion
+  Break". Fit the parallelogram to the text: the navy text box is auto-fit
+  (`wrap="none"` + `spAutoFit`) at ~70% of the parallelogram width, right
+  edge anchored in the corner; measure the label in Calibri Bold, don't
+  guess.
+- **Convention callout** – see "Concept-explanation textboxes" above.
+- **Concept maps / outline anchors** – a network-graph overview slide at the
+  start of each major section, returned to at transitions; the section
+  divider highlights the current section (cream band, navy / gold badge,
+  others dimmed).
 
 ## Working with .pptx Files
 - PowerPoint files are **binary**, so VS Code visual diffs do not
@@ -468,14 +692,16 @@ taped video) follows one idea at a time. Calibrated defaults:
 - Each distinct course gets its own subfolder under `Teaching\`
   (e.g., `Teaching\405-Fall-2026\`, `Teaching\Macro-EMBA-Spring-2027\`).
 - Within a course folder, organize by lecture or topic as I direct.
-- A `Session-Notes.md` lives in each course subfolder for that
-  course's continuity (per the universal CLAUDE.md rules).
-- **Session-Notes location is at the course-folder level only.** If a
-  session is started from any nested subfolder of a course (e.g., a
-  lecture, module, or topic folder), walk **up** the directory tree
-  until you find the course folder's `Session-Notes.md`, and read that
-  one. There is exactly one `Session-Notes.md` per course; do not
-  create per-subfolder session-notes files.
+- **A `Session-Notes.md` lives in each distinct deck / module
+  subfolder** – one per deck or course-unit (e.g. `Module 3/`,
+  `Italy IBR/`), not one shared file at the parent level. A folder that
+  merely groups several distinct decks does **not** carry a shared
+  Session-Notes; each deck keeps its own.
+- **When a session works on a given deck, read and update the
+  `Session-Notes.md` in THAT deck's subfolder.** If the subfolder
+  doesn't have one yet, create it. Never merge notes for different
+  decks / courses into a single file. (A small course folder holding a
+  single deck can keep one Session-Notes at its top level.)
 - Shared materials (general visual templates, recurring case examples,
   reusable diagrams) can live in `Teaching\Shared\` and be referenced
   from any course.
@@ -500,6 +726,21 @@ taped video) follows one idea at a time. Calibrated defaults:
   multi-letter acronyms (MRPL, MPL, MC, TFC). Single-letter variables
   (Q, K, L, w) stay italic by default. This matches journal-style
   notation and is the cue economists expect.
+- **TeX style, always.** Anything beyond `a = b + c` is OMML / Cambria
+  Math, never plain text or Calibri math.
+- **Stacked fractions for ratios** (e.g. %ΔQ / %ΔP); inline `/` only inside
+  running prose. Spell operators out in definitions ("divided by", not "÷").
+- **Hero formulas get their own box** – a navy filled rectangle with a small
+  Calibri label on top and white bold OMML filling the rest, for the
+  headline equation on a "rule" / "concept" slide (e.g. `Q = a + b·P`).
+- **Bullets with embedded variables:** Unicode subscripts (`pₖ`, `MPₗ`) are
+  an acceptable middle ground inline; standalone formulas stay OMML.
+- **Elasticity symbol (econ decks):** render with the **D as a subscript –
+  Eᴅ** – everywhere it appears (titles, bullets, equations), consistently.
+- **Worked-solution slides** mirror the source's "1. / 2. / 3." numbered
+  structure and wording; color-code matched quantities (each quantity its
+  own color, reused in equation + bullets), but only the quantities carrying
+  the pedagogical link.
 
 ### Chart legends
 - **Legends stack vertically, one entry per line.** When a chart has
@@ -647,3 +888,91 @@ matrices, best responses, Nash equilibria); ignore them for other decks.
   content, prefer the slide content.** The slide is what was actually
   shown; the notes may be outdated drafts. Flag the discrepancy in
   chat so I can decide whether the notes had a good reason.
+
+### Build discipline: verification and manual tweaks
+- **Default: rebuild the canonical deck in place, no verification.** The
+  build script is the source of truth and the start-of-day Git snapshot is
+  the safety net – write straight to the canonical filename and stop. Don't
+  run a python-pptx readback, footer-page-number check, or
+  duplicate-`<a:effectLst>` audit by default.
+- **Opt-in verification when I report a problem** ("the page numbers are
+  off", "PowerPoint won't open it", "shape X disappeared") – then use the
+  readback to diagnose, fix the script, and rebuild.
+- **Opt-in side-path only when I signal hand-edits** (e.g. "I tweaked slide
+  12 by hand"): build to a side path (`<deck>_test.pptx`), diff against the
+  canonical file to surface the hand-edits and port them into the script,
+  re-run to the side path, verify, then move it over the canonical deck.
+  Don't invoke this flow on your own.
+- **Preserve hand-edits as signal** – port each manual tweak into the build
+  script with a one-line comment giving the prior value and date (e.g.
+  `tbl_top = Inches(2.45)  # hand-tweaked from 2.85 on 2026-05-12`).
+- **Exceptions require confirmation.** Anything outside those two opt-in
+  cases – extra files (`_test`, `_temp`, `_v2`), forced moves (`mv -f`),
+  parallel scripts, hidden readbacks – stop and ask first.
+
+### Build mechanics and machine gotchas
+(These extend "Workflow with existing .pptx decks" – never round-trip through
+python-pptx, integer EMUs only, one master.)
+- **Reusable modules:** a base / helpers module (palette, single master,
+  `slide()`, `rect()`, `textbox()`, `bullets()`, `picture()`, `filled_box` /
+  `outlined_box` / `cream_box`, `badge()`, `takeaway()`, `chrome()` –
+  `chrome()` auto-computes the page number from the slide count); an
+  equation + figure module (the `eqn()` stacked-fraction engine, `curve()`
+  freeforms, and a `Fig` class with a logical→inches transform and
+  `axes / line / vdash / parabola / point / lbl / brace` primitives); and a
+  per-deck slides module (one function per slide + a `main()` applying
+  deck-wide post-processors such as trailing-period stripping).
+- **Render / verify — this machine has NO LibreOffice.** Drive PowerPoint via
+  COM from PowerShell: export a slide to PNG to *see* it, and **open the file
+  in PowerPoint as the real integrity check** after any structural edit
+  (insert / delete / reorder slides, add notes or media). python-pptx and
+  `zipfile.testzip()` are too lenient – both have accepted files PowerPoint
+  rejected as corrupt (0x80070570). Kill any stale `POWERPNT` process first.
+- **PowerPoint renumbers part filenames on save.** After a save, `slideN.xml`
+  is **NOT** display-slide N (and `imageN` / `notesSlideN` shift too).
+  Resolve display→part by parsing `ppt/presentation.xml` `<p:sldIdLst>`
+  order → `r:id` → `presentation.xml.rels` (ElementTree, not a regex).
+  Assuming `slideN.xml = display N` has corrupted a deck.
+- **custGeom curve gotchas** (each makes a shape invisible or dropped): the
+  path segment element is `<a:lnTo>`, not `<a:lineTo>`; inside `<a:ln>` the
+  child order is fill → dash → join (put `<a:round/>` after `<a:solidFill>`);
+  `<a:prstGeom>` sits after `<a:xfrm>` and before the fill.
+- **After I hand-edit the canonical .pptx, edit it in place** with
+  python-pptx (swap an image blob, remove a paragraph) within one call, then
+  copy back – don't rebuild from scripts. If reads intermittently fail
+  (corrupt central directory), ask me to re-save and retry.
+
+### Phase order: rebuilding a module from its old deck (build.py FIRST)
+The phases run in this order and it is **not reversible**:
+1. **build.py scaffold** – generate ALL script-buildable slides (text,
+   bullets, native charts / tables / equations, chrome) in the clean style;
+   finish every such slide first.
+2. **Freeze build.py** – once phase 3 begins the `.pptx` is the source of
+   truth; re-running build.py regenerates from scratch and overwrites the
+   phase-3 work.
+3. **OOXML surgery + hand-edits** – splice in video / poll / interactive
+   slides from the old deck (these can't go through python-pptx – it strips
+   NULL video rels and poll `tags`), then fine-tune and port my hand-edits.
+- **Warn me if I try to start phase 3 too early.** Importing a video / poll /
+  live-content slide, or doing OOXML surgery, while build.py isn't complete
+  for all slides freezes build.py prematurely – confirm the build.py pass is
+  finished for every slide first.
+
+### File naming
+- **Revised deck:** `Module X - Revised.pptx` (canonical, in-place-edited).
+- **Per-module build script:** `_build_ModuleX.py` (the one-time scaffold;
+  add a STALE banner once it's frozen).
+- **Source images** live in that module's `Images/` subfolder.
+- **Backups:** `Module X - Revised_backup_YYYY-MM-DD.pptx` (keep only the two
+  newest, per the .pptx rules above).
+- For ad-hoc / non-module decks, the drafting-workflow naming applies.
+
+### Things to avoid on every slide
+Walls of text (split / trim any bullet past two lines); orange / gold for
+ordinary emphasis (use bold navy); gray sub-bullets (use dark navy);
+decorative imagery that carries no information; chart junk (duplicate
+legends, needless gridlines, axis titles that repeat the slide title);
+redundant captions / labels / source lines; stock photos and clip art;
+emojis anywhere on the slide; trailing periods on bullets; "Page X of N"
+footers / watermarks / "Confidential" stamps; multiple slide-layout masters
+in one deck.
