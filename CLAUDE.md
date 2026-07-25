@@ -295,6 +295,10 @@ artifact.
   navy, centered); source / license BELOW (smaller italic gray) – only when
   it adds information the image / title doesn't already carry. Remove
   redundant captions / labels / source lines by default.
+- **Captions sit RIGHT UNDERNEATH their picture** (~0.05–0.1" gap, box
+  centered on the picture) – never floating at the bottom of the slide or
+  drifting away from the figure they describe. If a picture moves or
+  resizes, its caption moves with it.
 
 ## Visual hierarchy: boxes, arrows, bridges
 - **Filled boxes = primary content nodes** (a key concept, rule, definition)
@@ -357,6 +361,14 @@ artifact.
   before touching the file. Wait for my confirmation before applying.
 - For minor edits (typo fixes, single-word changes), proceed but
   describe what changed afterward.
+- **Slide titles and factual content: check with me FIRST.** Never
+  change a slide's title, and never "correct" names, places, dates, or
+  other facts in slide content, captions, or speaker notes — even fixes
+  that seem obviously right, and even in passing while doing other
+  work — without asking me first. If something looks factually wrong
+  (a mislabeled place, artwork, or person; a note contradicting the
+  slide), flag it in chat with the evidence and wait for my
+  confirmation; report such findings as proposals, never as done.
 - When editing slides, **preserve the existing visual style** (fonts,
   colors, master slide layout, header/footer) unless I explicitly
   ask to change it.
@@ -416,6 +428,23 @@ slide. My preferences:
   knowledge. Keep them real and accurate — no invented facts or figures;
   prefer named, verifiable examples, and flag the source (or your
   uncertainty) for anything specific, per the no-hallucination rule.
+- **Digits, not spelled-out numbers.** Write "5", not "five"; "28 times",
+  not "twenty-eight times"; "50,000", not "fifty thousand"; "16th century",
+  not "sixteenth century". Exceptions: "one" stays a word (usually a
+  pronoun), discourse ordinals stay words ("the first emperor", "Third
+  Italy"), and proper names are never touched ("Two Sicilies"). Keep mixed
+  forms consistent ("1 to 5 to 28", never "one to 5 to 28").
+- **Verbatim speech ONLY — no stage directions.** Every word in the notes
+  must be speakable as-is. Never write instructions to myself like "let the
+  relief map do the work", "point to the map", "linger on the images", or
+  "name the buildings as you point". If the audience's attention needs
+  directing, write the words I would actually say ("Look at the map with
+  me…", "Take a moment with these images…").
+- **Substance over gloss.** When a note compresses a major development into
+  one clause (e.g. "by 500 BC Rome had absorbed them"), give it 2–3
+  sentences of real, well-established detail on the process instead. Only
+  uncontroversial facts — no invented numbers or quotes; when unsure, leave
+  the gloss and flag it.
 - **Natural, flowing spoken English.** Conversational, first person, as if
   reading to camera. Not choppy or staccato — longer sentences are fine
   when they read naturally.
@@ -600,6 +629,14 @@ taped video) follows one idea at a time. Calibrated defaults:
   - a picture and its source / attribution line beneath it — **always**
     reveal the source at the same time as the picture, on **every** slide
     (e.g. slide 47) — never let the picture land a click before its source;
+  - **a figure and its label / legend reveal on the SAME click — never
+    staggered.** This includes legend cards, callout labels, and source
+    lines, and applies equally on figure-only slides with no bullets (a
+    map plus its legend plus its source line = ONE click, not three);
+  - **one caption per picture, revealed WITH that picture.** Never use a
+    single combined caption for several pictures ("A · B" at the bottom of
+    the slide); split it so each description sits with its own picture and
+    fades in on that picture's click;
   - an image and the text box that gives its title, header, or context —
     reveal them together, whether that text sits **above** the picture (a
     header/label) or below it (a caption) (e.g. slides 10, 44);

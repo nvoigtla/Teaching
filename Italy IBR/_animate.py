@@ -34,10 +34,12 @@ EMU = 914400.0
 
 SKIP_LOGISTICS = set()   # logistics slides 3-9 now animate (build after each main bullet)
 SKIP_AGENDA = {10, 12, 18, 30, 32, 41, 46, 56, 65, 68, 92}
-SKIP_POLL = {11, 13, 21, 35, 48, 69, 132}
+SKIP_POLL = {11, 13, 21, 35, 48, 69, 137}
 SKIP_TITLE = {1, 2}
-SKIP_BACKUP = set(range(105, 136))
-SKIP = SKIP_LOGISTICS | SKIP_AGENDA | SKIP_POLL | SKIP_TITLE | SKIP_BACKUP
+SKIP_BACKUP = set(range(109, 140))
+SKIP_FEATURED = {36, 51, 78, 88, 96}  # featured-research dividers: no animations (2026-07-23)
+SKIP_CUSTOM = {54, 59, 61, 72, 106}  # 105 = GBU ten-years-on (question static, changes on clicks)  # hand-built timing: fig+label+legend co-reveal (2026-07-24); rebuild wipes it
+SKIP = SKIP_LOGISTICS | SKIP_AGENDA | SKIP_POLL | SKIP_TITLE | SKIP_BACKUP | SKIP_FEATURED | SKIP_CUSTOM
 
 # For bullet slides with a side figure: which ANIMATED top-level bullet the
 # figure fades in with (0-based index among the animated bullet groups; -1 = the
