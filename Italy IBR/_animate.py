@@ -33,12 +33,12 @@ R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
 
 SKIP_LOGISTICS = set()   # logistics slides 3-9 now animate (build after each main bullet)
-SKIP_AGENDA = {10, 12, 18, 30, 32, 41, 46, 56, 65, 68, 92}
-SKIP_POLL = {11, 13, 21, 35, 48, 69, 137}
+SKIP_AGENDA = {10, 12, 18, 31, 33, 43, 48, 58, 67, 70, 94}
+SKIP_POLL = {11, 13, 22, 36, 50, 71, 139}
 SKIP_TITLE = {1, 2}
-SKIP_BACKUP = set(range(109, 140))
-SKIP_FEATURED = {36, 51, 78, 88, 96}  # featured-research dividers: no animations (2026-07-23)
-SKIP_CUSTOM = {54, 59, 61, 72, 106}  # 105 = GBU ten-years-on (question static, changes on clicks)  # hand-built timing: fig+label+legend co-reveal (2026-07-24); rebuild wipes it
+SKIP_BACKUP = set(range(111, 142))
+SKIP_FEATURED = {38, 52, 80, 90, 98}  # featured-research dividers: no animations (2026-07-23)
+SKIP_CUSTOM = {21, 56, 61, 63, 74, 108}  # 21 = hand-inserted Caesar slide (own copied timing, 2026-07-26); 107 = GBU ten-years-on (question static, changes on clicks)  # hand-built timing: fig+label+legend co-reveal (2026-07-24); rebuild wipes it
 SKIP = SKIP_LOGISTICS | SKIP_AGENDA | SKIP_POLL | SKIP_TITLE | SKIP_BACKUP | SKIP_FEATURED | SKIP_CUSTOM
 
 # For bullet slides with a side figure: which ANIMATED top-level bullet the
@@ -49,8 +49,8 @@ SKIP = SKIP_LOGISTICS | SKIP_AGENDA | SKIP_POLL | SKIP_TITLE | SKIP_BACKUP | SKI
 FIG_GROUP_DEFAULT = 0
 FIG_GROUP = {
     16: 3,    # Sarcophagus -> "Advanced art and written language"
-    90: 1,    # Fiat 500 -> "Icons: the Vespa, the Fiat 500 ..."
-    47: -1,   # Naples-plague painting -> "The 1630 plague devastated the northern cities"
+    92: 1,    # Fiat 500 -> "Icons: the Vespa, the Fiat 500 ..."
+    49: -1,   # Naples-plague painting -> "The 1630 plague devastated the northern cities"
 }
 # When each picture pairs with its own bullet: map pictures (sorted top-to-bottom)
 # to the ANIMATED bullet index they fade in with. Overrides FIG_GROUP for the slide.

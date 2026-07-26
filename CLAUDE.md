@@ -369,6 +369,12 @@ artifact.
   (a mislabeled place, artwork, or person; a note contradicting the
   slide), flag it in chat with the evidence and wait for my
   confirmation; report such findings as proposals, never as done.
+  **Exception — obvious spelling mistakes:** unambiguous misspellings
+  (e.g. "Ceasar" → "Caesar", "recieve" → "receive") may be fixed
+  directly, including in titles; report the fix afterward. This covers
+  only typos where the intended word is beyond doubt — anything that
+  changes a name, date, or substantive claim still requires asking
+  first.
 - When editing slides, **preserve the existing visual style** (fonts,
   colors, master slide layout, header/footer) unless I explicitly
   ask to change it.
@@ -440,6 +446,15 @@ slide. My preferences:
   "name the buildings as you point". If the audience's attention needs
   directing, write the words I would actually say ("Look at the map with
   me…", "Take a moment with these images…").
+- **No lecture-management phrases.** Never announce what the narration is
+  about to do or frame it as a favor to the audience — no "Let me walk you
+  through/down/around…", "let me give you the story behind them", "let me
+  pull this together", "What I want you to notice is…", "The theme I want
+  you to hold onto is…". Go straight to the substance instead ("The
+  structure on the slide has 3 layers.", "Here is the story behind
+  them.", "At the top left is…"). Plain signposting ("First…", "Here is
+  the point…") and sanctioned attention-directing imperatives ("Look at
+  the map with me…") remain fine.
 - **Substance over gloss.** When a note compresses a major development into
   one clause (e.g. "by 500 BC Rome had absorbed them"), give it 2–3
   sentences of real, well-established detail on the process instead. Only

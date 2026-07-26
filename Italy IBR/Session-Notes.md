@@ -13,10 +13,23 @@ Original source (untouched): **`Class 1.pptx`** (4:3, 123 slides).
 
 ## Resume here (start of next session)
 
-- **Status:** deck is **133 slides** (new backup 133 = Roman-roads map), opens
-  cleanly. The 2026-07-23 session-3 edits (see below) are **local, not yet
-  committed**. This folder lives at `Teaching/Italy IBR/`.
+- **Status:** deck is **140 slides**, opens cleanly, all work committed and
+  pushed (last session 2026-07-26). This folder lives at `Teaching/Italy IBR/`.
   The single design/build rulebook is `Teaching/CLAUDE.md`.
+- **Current display map:** 21 = hand-inserted Caesar slide; 22 = Empire-length
+  poll; 25 = Golden Period; 37 = hand-inserted social-capital bridge (leads to
+  Guiso et al. at 38–39); 52 = Featured-Research divider (Giorcelli–Moser),
+  53 = copyright-question content slide (user swapped these); 102–106 = case
+  block (Lavazza 102/103, GBU 105/106); 110 = Thank You; 111–140 = backups
+  (113 = Presentation Topics, Lavazza chip struck out in red).
+- **Workflow reminders proven this stretch:** whenever the user inserts /
+  swaps slides by hand, shift/swap the display-keyed config in BOTH
+  `_notes_data.py` and `_animate.py` (NOTES/BACKUP/ANECDOTE keys + SKIP sets +
+  FIG_GROUP); before any `_add_notes.py apply`, run the full deck-vs-data
+  sync check and ADOPT hand-edited notes into `_notes_data.py` (caught user
+  edits on notes 15, 20, 51, 106 this way); a replaced picture usually drops
+  out of its animation beat — rebuild that slide's timing with
+  `AN.timing_xml` (picture + caption + its bullet on one beat).
 - **The deck is the source of truth** (edited in place via OOXML; never
   round-trip through python-pptx — it strips poll `tags` + null links). Only
   the **reusable engine scripts** remain in the folder (the one-off build
@@ -47,6 +60,53 @@ Original source (untouched): **`Class 1.pptx`** (4:3, 123 slides).
     slides **49 / 100 / 101** reveal their image clusters on a single click.
 
 ---
+
+## 2026-07-26 – case answers, new slides 21 + 37, hand-edit integration, notes voice pass
+
+- **Case-discussion answers** added to notes 103 (Lavazza: stay-Italian vs.
+  adapt with the Lavazza-Professional 2-brand middle path; Starbucks/Milan
+  mirror-image = cultural embeddedness; Factory 1895 question candidates) and
+  105 (GBU: good/bad/ugly sorting from case p. 1; deepest-roots vs.
+  government-fixable split, Renzi referendum epilogue). Matched the user's
+  reworded GBU question 2 ("what could a government realistically fix").
+- **New slide 21 (Caesar, user-inserted):** styled both artworks (Camuccini
+  1806 painting — user re-pasted the correct image; Ferrucci bust c. 1512–14,
+  Met), captions beneath each, detailed assassination + rise-of-Caesar note.
+  Display shift +1 from 21 in both engine scripts. "Ceasar" typo fixed after
+  user approved a standing CLAUDE.md exception for unambiguous misspellings.
+- **New slide 37 (social-capital bridge, user-inserted):** picture styled,
+  note ties the 3 panels (regulation/taxation/courts → social capital) to the
+  Guiso–Sapienza–Zingales paper next. Display shift +1 from 37. Page-number
+  scan: all footer numbers are live slidenum fields (only 1, 2, Thank-You
+  unnumbered, intentional).
+- **Notes content:** 17 Etruscans-vs-Latins (incl. Posth et al. 2021 aDNA);
+  20 Republic institutions (Senate seats: censors, life tenure, de-facto
+  hereditary nobiles, "new man"); 23 Octavian vs. Antony & Cleopatra
+  (Philippi, Actium, Egypt annexed); 24 Pantheon (Agrippa→Hadrian, oculus,
+  609 AD church, Raphael + first 2 kings); 26 publicani expanded (societates,
+  partes, lex Claudia 218 BC, NT "publican"); 32 Normans + top-down South
+  (Roger II 1130, template through 1806) and long-run divide (Putnam →
+  Guiso et al.).
+- **Voice rule:** all "Let me walk you…"/"I want you to…" lecture-management
+  phrasing purged from every note (8 instances); "No lecture-management
+  phrases" rule added to Teaching/CLAUDE.md.
+- **Slide edits:** 5 + 44 + 45 + 3 + 93 new/replaced pics styled (rounded +
+  shadow; 44/45/93 rebeat so pic + caption + bullet co-reveal; 45 got
+  "Venetian Arsenal" caption); 16 "Passed on…" demoted to 20 pt sub-bullet;
+  32 North/South point moved into a gold takeaway bar (timing rebuilt, bar =
+  final click); 34 new Venice pic styled + new one-line bullet "Milan a
+  leading commune – Turin under Savoy rule" (verified: Milan yes, Turin
+  Savoy); 62 emigration photo styled + "Italian emigration" caption,
+  co-revealing with the last bullet; 113 Lavazza chip struck out with 2 red
+  C00000 lines; 52↔53 user swap mirrored in notes keys + SKIP_FEATURED.
+- **Hand-edits adopted into `_notes_data.py`:** notes 15 (caveat wording +
+  "Twenty-8"→"28"), 20 (user's institutions note), 51 (new Napoleon-at-Lonato
+  anecdote), 106 (paragraph split). One incident: a chained apply briefly
+  overwrote note 15 before the adopt — restored from the same-minute backup;
+  lesson: run the sync check and STOP before applying.
+- **Slide 101 sourcing:** 156,000 Italian emigrants 2024 verified against
+  ISTAT "Migrazioni…Anni 2023/2024" (June 2025 release) — full citation in
+  the sourcing block above the 2026-07-24 section.
 
 ## 2026-07-24 – summary-slide "why" bullets, slide-45 header fix, check-first rule
 
@@ -157,6 +217,17 @@ Original source (untouched): **`Class 1.pptx`** (4:3, 123 slides).
     from roughly 20× to 60×. So "~28×" is the defensible textbook number,
     best presented as "land cost more per mile by an order of magnitude,
     roughly thirty times" — which is how the slide uses it.
+- **Slide 101 sourcing — the "156,000 Italians emigrated in 2024" figure.**
+  - **Full citation:** ISTAT, "Migrazioni interne e internazionali della
+    popolazione residente – Anni 2023/2024" (report + press release,
+    published June 2025). Expatriations of **Italian citizens** in 2024:
+    **156,000**, up 36.5% from 114,000 in 2023 — the highest value recorded
+    since 2000, above even the Great-Recession peaks. Total cancellations
+    for abroad (incl. foreign citizens) were ~191,000 in 2024. Top
+    destinations: Germany 12.8%, Spain 12.1%, UK 11.9%.
+    https://www.istat.it/comunicato-stampa/migrazioni-interne-e-internazionali-della-popolazione-residente-anni-2023-2024/
+  - The slide's source line "ISTAT (2024)" refers to the data year; the
+    release itself is 2025.
 - **Full notes revision pass (all 109 notes):** extracted the notes from the
   DECK (so hand edits were the base), revised via subagent, wrote back into
   `_notes_data.py` (NOTES/BACKUP dicts rebuilt) and re-applied. 37 notes
