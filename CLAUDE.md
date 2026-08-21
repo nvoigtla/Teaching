@@ -51,10 +51,18 @@ For work in this folder, you are assisting with **teaching materials**
   formula / definition slide, or a quiz prompt.
 - **Filled boxes and callouts get rounded edges + a soft shade.** Any
   filled box — a concept / "Convention" callout, a takeaway bar, a
-  link / "button" box, a back button — uses slightly rounded corners
-  and a soft drop shadow so it reads as a lifted card. (Kept flat, no
-  rounding/shadow: the navy top bar, the thin rules and gold accent
-  strips, and table-cell number highlights.)
+  link / "button" box, a back button, and the **header cells of
+  two-column / multi-column comparisons** ("Cournot" / "Bertrand" bars
+  and the like) — uses slightly rounded corners and a soft drop shadow
+  so it reads as a lifted card. (Kept flat, no rounding/shadow: the navy
+  top bar, the thin rules and gold accent strips, and table-cell number
+  highlights.) **Build-script trap:** the reused Module-3 helper layer
+  contains a legacy flat `_add_filled_box` next to
+  `_add_rounded_filled_box`; calling the flat one for content boxes is
+  how flat headers keep slipping in. In build scripts, treat
+  `_add_rounded_filled_box` as the ONLY helper for content-filled boxes
+  and audit any remaining `_add_filled_box` call sites (they are almost
+  always wrong outside chrome internals).
 - **A figure's shade is part of the figure — group them.** Pictures
   carry their own drop shadow directly, so they need nothing extra. But
   PowerPoint can't put a shadow on a table or chart frame
@@ -99,6 +107,25 @@ For work in this folder, you are assisting with **teaching materials**
 - **Use real-world examples** wherever possible – named companies,
   named industries, identifiable events. Generic "Firm A and Firm B"
   examples should be a last resort.
+- **Case buildup: chronology first, resolution second.** When a
+  mini-case spans two slides, the FIRST slide builds up the situation
+  as it unfolded – the facts, the stakes, the two sides – and ends by
+  flagging the feature that will matter ("the definition of the market
+  would turn out to be crucial for the case"), WITHOUT anticipating
+  the outcome. The SECOND slide then shows how the case was resolved
+  or decided, with the resolution as the final beat (and the final
+  animation click). Never reveal the ending on the setup slide.
+- **Case resolutions get the gold takeaway bar.** The outcome line of
+  a mini-case ("the court blocks the deal…") is set as a gold rounded
+  takeaway bar (~19 pt bold navy text), revealed as the slide's final
+  animation click – the visual counterpart of the chronology-first
+  rule above.
+- **State the provenance of litigation/filing numbers.** When a figure
+  comes from a court case or regulatory filing, say how it surfaced
+  (internal ordinary-course documents produced in the investigation
+  vs. company disclosure vs. press reports) – on-slide when it carries
+  pedagogical weight, otherwise in the speaker notes. Never put a
+  press-reported magnitude on a slide without marking it "reported".
 - **Data visualization should be clean and uncluttered.** Strip out
   chart junk (gridlines, legends that duplicate labels, unnecessary
   axes). Highlight the one element the audience should notice.
@@ -228,6 +255,12 @@ are the additional layout rules.)
   running prose keep normal punctuation.
 - **Captions: small (11–13 pt), italic, gray, centered** – the same
   treatment for every image attribution.
+- **Box/callout text floor: 18 pt.** Text inside boxes and callouts
+  (teaching cards, quote boxes, diagram boxes, timeline labels) is at
+  least 18 pt; chart-internal labels at least 16 pt. Only photo
+  attribution and source captions stay at caption size (11–13 pt
+  italic gray). If 18 pt does not fit, shorten the text or grow the
+  box – don't shrink the font.
 
 ## Figures, charts, and tables – native, not screenshots
 **Standing rule: reproduce every table, chart, and equation as a native,
@@ -255,6 +288,16 @@ artifact.
 - **Each curve gets its own tight bounding box** hugging just that curve –
   never one big box spanning the plot (overlapping full-plot boxes are
   impossible to grab and drag).
+- **Curves must be economically exact, not just suggestive.** Every marked
+  point, intersection, or guide must lie mathematically on the curves it
+  annotates: a marked Q* sits at the TRUE intersection of the two curves
+  (compute it – e.g. solve the Bézier numerically – never eyeball it, and
+  make sure the curves actually cut through each other there); dots sit
+  exactly on their lines; a dashed guide through declining values passes
+  exactly through those values; an annotation arrow ends ON the curve it
+  points to (evaluate the curve, don't approximate). When a curve and a
+  marker disagree, fix the geometry, not the label. Audit every chart
+  slide for this before handing a deck over.
 - **Bars** = gold-fill / navy-edge rectangles. **Markers** = small oval /
   rectangle / triangle shapes, a distinct shape per series (color alone
   isn't enough for handout printing).
@@ -299,6 +342,16 @@ artifact.
   centered on the picture) – never floating at the bottom of the slide or
   drifting away from the figure they describe. If a picture moves or
   resizes, its caption moves with it.
+- **A picture and its caption/source line are ONE object — group them.**
+  Any caption, source, or attribution text box that belongs to a picture
+  (the footer line beneath it, or a title line above it) is merged with
+  the picture into a single PowerPoint group (`<p:grpSp>`, group
+  `off/ext` = the pair's bounding box, `chOff/chExt` equal to `off/ext`),
+  so the pair always moves, resizes, and animates together. Build scripts
+  should do this in a deck-wide post-processing pass (match a picture to
+  any small all-italic ≤13 pt text box sitting within ~0.3" of its edge
+  and horizontally centered on it). Grouping invalidates existing
+  animations on the slide — re-run the animation build afterward.
 
 ## Visual hierarchy: boxes, arrows, bridges
 - **Filled boxes = primary content nodes** (a key concept, rule, definition)
@@ -342,10 +395,72 @@ artifact.
   edge anchored in the corner; measure the label in Calibri Bold, don't
   guess.
 - **Convention callout** – see "Concept-explanation textboxes" above.
+- **Quote callout** – verbatim quotes (CEO memos, court opinions,
+  named executives) go in the cream convention box: italic quote
+  (≥18 pt) followed by a bold "— attribution" line one step smaller.
+- **Practice-Video link box** – the deck-standard chrome for links to
+  practice videos: rounded rect (~28% corner) with a **vertical gray
+  gradient fill** (schemeClr bg1 lumMod 65% → 95% → 65%, linear 90°,
+  scaled), **gold 1.75 pt border**, soft drop shadow, and a gold "▶" play
+  glyph followed by the navy bold label (single shape — text lives inside
+  the rect). **Default position: bottom-right corner, overlaying the
+  footer** (left 6.92", top 6.83", 5.85 × 0.58" — the slide-24 reference
+  position); draw it AFTER the footer so it sits on top of rules and
+  page number, and in front of any chart elements. On dedicated
+  video-index slides (e.g., "Cournot: Computation") larger centered boxes
+  mid-slide are fine; everywhere else use the default corner position.
 - **Concept maps / outline anchors** – a network-graph overview slide at the
   start of each major section, returned to at transitions; the section
   divider highlights the current section (cream band, navy / gold badge,
   others dimmed).
+
+## Module-Outline / Agenda Slides (numbered-circle format)
+The standard for a module's outline slides — the descriptive overview near
+the front, the section agendas at each transition, the wrap-up / post-work
+slides, and the summary closer. Finalized on Module 2 (2026-08-16, adopted
+from CT's format + Nico's band and spacing rules); apply IDENTICALLY in
+other modules. Reference implementation: `make_m2_outline` in
+`Module 2/_build_Module2InClass.py` — copy it and swap the item list.
+
+- **Data**: one module-level list of ~6 `(title, description)` pairs; the
+  description is one plain-language line.
+- **Chrome**: normal content chrome. Top-bar tag `Module N · Outline`
+  (summary closer: `Module N · Summary`); action title "Outline of
+  Module N" (closer: "Module N: Summary").
+- **Item row — identical on every agenda slide**:
+  - Gold (`E09F3E`) circle Ø 0.58" at x = 1.15", y = row_y + 0.02";
+    the item number centered in it, Calibri **25 pt bold NAVY**
+    (`0B2B4E`); no circle outline, no shadow.
+  - ONE text box at x = 2.05", y = row_y, w = 11.0": paragraph 1 = the
+    title, Calibri **25 pt bold navy** (first letter capitalized);
+    paragraph 2 (only when shown) = the description, Calibri **22 pt
+    gray** (`555B66`). Space-before 0 on both paragraphs; no bullets.
+- **Uniform pitch — reserve the description row on EVERY item**, shown or
+  not: title row 0.42" + description row 0.38" + gap 0.11" → pitch
+  0.91" per item. Center the block vertically between y 1.60" and
+  7.02". Result: item positions are pixel-identical across all agenda
+  slides of the deck, so nothing jumps between consecutive slides.
+- **Description visibility**: the descriptive overview and the summary
+  closer show ALL descriptions; every other agenda slide shows the
+  description ONLY for the current topic(s).
+- **Current-topic band** (section agendas only — never on the overview
+  or the summary): cream (`FDF6E6`) rounded rectangle BEHIND
+  circle + title + description: x 0.90", y row_y − 0.06", w 12.15",
+  h 0.92", corner adjustment 0.35, gold border 1.0 pt, soft drop
+  shadow. One band per highlighted item; no fading of the other items.
+- **Pointer / link boxes** (post-work videos, problem set, teaching
+  notes): gold-bordered rounded outlined box (white fill, navy bold
+  14–15 pt, corner 0.20, soft shadow), two lines — the links line,
+  then `On BL under "Module N Post-Work"` — at bottom-right overlaying
+  the footer (x ≈ 8.15", y 6.68", w ≈ 4.9", h 0.72"), drawn AFTER the
+  footer so it sits in front. **Exception:** when the LAST item is
+  highlighted (its band reaches the bottom-right corner), raise the box
+  to y 5.30", beside the empty reserved row of the previous item.
+- **Grouping pass**: exclude the bands from the box+text grouping rule
+  (a filled roundRect wider than ~10" is a layout band, not a callout).
+- **Animation**: agenda slides are static (in the SKIP set); wrap-up
+  slides may reveal the link box (and any note box) on their own
+  clicks.
 
 ## Working with .pptx Files
 - PowerPoint files are **binary**, so VS Code visual diffs do not
@@ -738,6 +853,41 @@ taped video) follows one idea at a time. Calibrated defaults:
   effect count and targets via PowerPoint COM
   (`Slide.TimeLine.MainSequence`), confirm the file opens in PowerPoint,
   and have me eyeball the slideshow. Work in verified batches.
+- **Reuse the animation engine, don't rewrite it.** `_animate.py` (first
+  built for Italy IBR, adapted for Module 7) is the proven generator: it
+  emits timing XML byte-pattern identical to what PowerPoint itself writes
+  (verified by diffing against a native `MainSequence.AddEffect` save).
+  Per-slide story plans use a small selector language (`t:PREFIX` /
+  `t:PREFIX#n` / `pic:N` / `cxn:N` / `osp:N` / `pr:BOX:st:end`); anything
+  not selected stays visible from the start, which is exactly how chart
+  axes/ticks stay static. Run it as a rerunnable post-build pass.
+- **Animation-engine gotchas (learned on Module 7):**
+  - A single effect targeting a MULTI-paragraph range (`pRg st≠end`) gets
+    re-expanded by PowerPoint into one effect per paragraph on separate
+    CLICKS. To reveal a text section as one beat, emit one effect per
+    paragraph inside the same click group (first `clickEffect`, rest
+    `withEffect`).
+  - Verify CLICK STRUCTURE, not just effect counts: iterate
+    `MainSequence.Item(i).Timing.TriggerType` (1 = on-click, 2 =
+    with-previous) and compare on-click counts to the plan.
+  - Detect chrome by GEOMETRY (top-bar/rule/footer bands, page-number
+    position), never by shape name — python-pptx names content shapes
+    "Rectangle N" too, so name-based chrome rules eat payoff cells and
+    callouts.
+  - `t:` text selectors match first-unused in document order — order
+    "50 units" before "50" in a beat list, and use `t:PREFIX#n` when the
+    same tick label ("200") appears several times on one chart.
+- **The slideshow renderer is a SEPARATE surface — verify it too.** The
+  editing canvas, PNG export, and COM slideshow *stepping* can all pass
+  while the real full-screen Slide Show crashes ("The slide failed to open
+  properly" — and the failing slide may be ANY slide in the deck, since
+  add-ins scan the whole deck at show start; the banner just surfaces on
+  the current slide). I CAN see what the user sees: open the deck via COM
+  with a visible window, run `SlideShowSettings.Run()`, and screenshot the
+  `screenClass` window via `PrintWindow` (flag 2 for DirectX content);
+  classify pass/fail by pixel and bisect with `sldIdLst`-subset copies.
+  After any media/OOXML surgery, run at least one full-deck slideshow
+  probe before handing the deck over.
 
 ## Drafting Workflow for Slide Content
 - For new slide content or substantial restructuring, **first draft
@@ -753,6 +903,22 @@ taped video) follows one idea at a time. Calibrated defaults:
   - Outline: `[Slides Name] - outline.md`
   - Deck: `[Slides Name].pptx`
   - Backup: `[Slides Name]_backup_YYYY-MM-DD.pptx`
+
+## Example-Candidates Workflow (new real-world examples)
+When I ask for fresh, current examples for a module's concepts:
+- Research with parallel agents against primary / tier-1 sources
+  (filings, court documents, official data, tier-1 press); separate
+  confirmed from press-reported figures explicitly.
+- Deliver a separate review deck named `Module X - Example
+  Candidates.pptx` – one slide per candidate: concept tag in the top
+  bar, fact bullets, a cream teaching-angle card (with the proposed
+  visual), a gold "Discussion:" prompt, and a source line; full URLs
+  and confirmed-vs-reported flags go in the speaker notes.
+- Mark press-reported figures "reported" on the slide itself; list in
+  the notes exactly what must be re-verified before adoption.
+- I pick the winners; only then do candidates graduate into the main
+  deck with the full visual treatment (images, native charts,
+  animations, renumbering via the pipeline).
 
 ## Folder Structure
 - Each distinct course gets its own subfolder under `Teaching\`
@@ -870,6 +1036,15 @@ taped video) follows one idea at a time. Calibrated defaults:
 - **When in doubt about wording, lean toward the original.** The new
   deck is a reformat of my own pedagogical material; rewriting prose
   is not the goal and risks introducing subtle changes I may not want.
+- **Copied text keeps its run formatting — italics, bold, underline.**
+  When porting text from the original slides, carry over the
+  character-level emphasis on each run (bold, italic, underline —
+  also strikethrough and colored words), not just the words. This
+  emphasis is deliberate pedagogy (the stressed word in a definition,
+  the underlined contrast), and flattening it to plain text loses
+  meaning. When rebuilding via a script, extract the original's run
+  properties from the slide XML and reproduce them run by run; don't
+  retype from a text-only dump.
 - **Speaker notes:** preserve substantive notes from the original
   verbatim; only rewrite when the original notes are sparse, missing,
   or contradicted by the slide content (per the existing
@@ -1003,10 +1178,88 @@ python-pptx, integer EMUs only, one master.)
   path segment element is `<a:lnTo>`, not `<a:lineTo>`; inside `<a:ln>` the
   child order is fill → dash → join (put `<a:round/>` after `<a:solidFill>`);
   `<a:prstGeom>` sits after `<a:xfrm>` and before the fill.
+- **Inside `<a:rPr>`, `<a:solidFill>` must come BEFORE `<a:latin>`** (schema
+  order: ln → fill → effects → … → latin/ea/cs). A fill APPENDED after the
+  font elements is silently ignored by PowerPoint — text renders in the
+  default color with no error. When post-processing runs (e.g. coloring
+  OMML runs), `insert(0, fill)`, never `SubElement`-append.
+- **A PowerPoint save hides OMML shapes from python-pptx.** When I save the
+  deck in PowerPoint, every textbox containing OMML math gets wrapped in
+  `mc:AlternateContent` — python-pptx then no longer enumerates those shapes,
+  so a hand-edit diff reports them as phantom deletions. Treat missing OMML
+  boxes as save artifacts; confirm real hand-edits via COM slide renders or
+  the raw slide XML, never via python-pptx enumeration alone.
+- **Check for `~$<deck>.pptx` lock files before COM automation.** A lock file
+  means I have that deck open in PowerPoint — do NOT kill `POWERPNT`
+  processes then (the "kill stale POWERPNT" advice above applies only when no
+  deck is open); open presentations read-only alongside instead.
+- **A PollEverywhere slide's NOTES are part of the poll mechanism — splice
+  them with the slide.** The PollEv add-in scans the whole deck at SLIDESHOW
+  start, finds its `__PE_POLL_EMBED_ID` tag, and reads the poll data from
+  that slide's notes ("Poll Title: Do not modify the notes…" + the poll
+  URL). A poll slide whose tag is present but whose notes part is missing
+  crashes the slideshow renderer DECK-WIDE — the error surfaces as "The
+  slide failed to open properly" on slide 1, while the editing canvas,
+  exports, and COM slideshow stepping all look fine. When splicing poll
+  slides, always carry slide XML + tags part + image + the NOTES part
+  together. Debug technique that found this: drive the real slideshow via
+  COM, screenshot the `screenClass` window via PrintWindow, and bisect with
+  `sldIdLst`-subset decks.
+- **My hand-edits often arrive as scaled groups.** PowerPoint hand-edits come
+  as `grpSp` with `off/ext` differing from `chOff/chExt`; decode each child
+  to its RENDERED position (`off + (child − chOff) × ext/chExt`) and port
+  into the build script as ungrouped shapes at those coordinates — grouping
+  is redone wholesale in the phase-3 grouping/animation pass. Also diff
+  speaker notes separately (a shape diff won't catch notes edits), and
+  remember table-internal formatting (cell fills, per-run colors/italics) is
+  invisible to a shape-level diff — do a render comparison for table slides.
+- **My hand-edits can include ANIMATION re-choreography — diff `<p:timing>`
+  too.** Once a deck has builds, "adopt all my changes" covers the click
+  order, beat composition, and which shapes I demoted to static. Extract my
+  timing per slide (parse mainSeq → per-click effect lists, resolving
+  `spid`s to shape signatures of type + position + text, since ids differ
+  across rebuilds), translate the beats into the `_animate.py` per-slide
+  plan, and VERIFY by extracting the rebuilt deck's timing and diffing the
+  signature sequences against mine — accept only a beat-for-beat match.
+  Never regenerate animations from the generic guidelines when the source
+  deck carries my hand-tuned choreography.
+- **Close every hand-edit port with an AUTOMATED member-level geometry
+  diff — never sign off from a visual read of the dump.** Transcribing
+  coordinates from a dump by hand is how a resized group member slips
+  through (a region rect inside a group kept its old height while the
+  dump plainly showed my new one): the eye pattern-matches to the value
+  already in the build script. The closing check is a script that decodes
+  EVERY shape in both decks to rendered inches — including group children
+  via the chOff/chExt transform — matches shapes by type + text (after
+  normalizing PowerPoint's math-italic codepoints 𝑃→P to avoid phantom
+  mismatches on OMML), and compares position AND size to ~0.01".
+  "Adopted" means that diff prints clean, the same way the timing check
+  must be beat-for-beat and the slideshow probe must PASS.
+- **Company logos:** fetch from Wikimedia Commons via
+  `Special:FilePath/<File>.svg?width=N` (the server rasterizes SVG → PNG);
+  Wikipedia's REST page-summary API helps locate a company's logo file. Store
+  under the module's `_source_images/_logo_*.png` and keep them flat (logo
+  exception: no rounding, no shadow).
+- **Photos from Wikimedia Commons:** search via the Commons API
+  (`action=query&list=search&srnamespace=6`), download the top ~3 hits per
+  query at low width, and VISUALLY REVIEW before choosing — searches
+  misfire ("Coach store" returns trains, "Albertsons" returns Publix
+  conversions). Re-download the chosen file at ≥1400 px into the module's
+  `_source_images/web_*.jpg` (BUILD INPUTS — never delete). Caption
+  "Photo: Wikimedia Commons" on-slide; record the exact `File:` titles in
+  the speaker notes.
 - **After I hand-edit the canonical .pptx, edit it in place** with
   python-pptx (swap an image blob, remove a paragraph) within one call, then
   copy back – don't rebuild from scripts. If reads intermittently fail
   (corrupt central directory), ask me to re-save and retry.
+- **Bash-heredoc Python scripts lose one backslash level on this machine.**
+  A `\\n` in Python source inside a Bash heredoc arrives as `\n` (and a
+  lone `\` becomes a line-continuation error), so exact-string matches
+  against the build script silently fail or the script won't parse. Any
+  edit script whose match strings contain backslashes (`\\n` line breaks
+  in box labels, regex escapes) must be WRITTEN TO A .py FILE with the
+  Write tool and executed by path — never piped through a heredoc.
+  Alternative for tiny cases: build the backslash with `chr(92)`.
 
 ### Phase order: rebuilding a module from its old deck (build.py FIRST)
 The phases run in this order and it is **not reversible**:
@@ -1023,6 +1276,19 @@ The phases run in this order and it is **not reversible**:
   live-content slide, or doing OOXML surgery, while build.py isn't complete
   for all slides freezes build.py prematurely – confirm the build.py pass is
   finished for every slide first.
+- **PREFERRED (Module 7 pattern): make phase 3 a RERUNNABLE pipeline instead
+  of freezing build.py.** Keep every phase-3 step as its own script run
+  after each rebuild — `_build_ModuleX.py` → `_splice_media.py` (polls /
+  videos from sidecar files) → `_animate.py all apply` — so build.py stays
+  the source of truth forever and hand-edit porting keeps working through
+  phase 3. Requirements that make this safe: splices start from fresh build
+  output (nothing accumulates); hand-inserted live content is preserved as
+  verbatim sidecar files (`_handoff_*.xml` / `.txt` / images — BUILD INPUTS,
+  never delete); each pass is idempotent. Heavy embedded media (e.g. an
+  11 MB video) goes behind an opt-in flag (`--with-video`) used only for
+  the final teaching copy, so the working deck and its git commits stay
+  small. Only fall back to the freeze-then-surgery flow when content truly
+  can't be scripted or sidecar'd.
 
 ### File naming
 - **Revised deck:** `Module X - Revised.pptx` (canonical, in-place-edited).
@@ -1042,3 +1308,14 @@ redundant captions / labels / source lines; stock photos and clip art;
 emojis anywhere on the slide; trailing periods on bullets; "Page X of N"
 footers / watermarks / "Confidential" stamps; multiple slide-layout masters
 in one deck.
+
+## Standing Authority Within Module Subfolders
+Claude has full authority to create, modify, move, and delete files
+inside each module's subfolder (e.g. `405 Slide Revisions 2026\Module 2\`,
+`Module 3\`, `Italy IBR\`) without asking — build scripts, decks, images,
+notes, temp files. Outside a module subfolder, and for these regardless
+of location, confirmation is still required:
+- deleting or overwriting **source/input decks** (the original .pptx
+  files a rebuild starts from);
+- git commits and pushes (per the session-end ritual);
+- any change to CLAUDE.md files or settings.
