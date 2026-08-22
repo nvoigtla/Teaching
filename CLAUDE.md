@@ -465,12 +465,11 @@ other modules. Reference implementation: `make_m2_outline` in
 ## Working with .pptx Files
 - PowerPoint files are **binary**, so VS Code visual diffs do not
   work for them.
-- Before making any edits to a .pptx file, **create a timestamped
-  backup**: e.g., `slides_backup_2026-05-11.pptx`. Keep it in the
-  same folder until I confirm I'm satisfied with the new version.
-- **Only the two most recent backups are kept.** When you create a new
-  backup, automatically delete any older ones for that deck, so at most
-  the two newest backup files remain in the folder at any time.
+- Before making any edits to a .pptx file, **roll the backups** as
+  described in the universal CLAUDE.md: overwrite `Deck_t-2.pptx` with
+  the old `Deck_t-1.pptx`, overwrite `Deck_t-1.pptx` with the outgoing
+  `Deck.pptx`, then write the new `Deck.pptx`. The two previous
+  versions stay in the same folder; the oldest drops off.
 - For substantive edits (rewording, restructuring, adding slides),
   **summarize the proposed changes in chat first** in a clear list
   before touching the file. Wait for my confirmation before applying.
@@ -902,7 +901,7 @@ taped video) follows one idea at a time. Calibrated defaults:
 - If I give you an initial slide deck, use that deck's name. Otherise, ask me for a "Slides Name."
   - Outline: `[Slides Name] - outline.md`
   - Deck: `[Slides Name].pptx`
-  - Backup: `[Slides Name]_backup_YYYY-MM-DD.pptx`
+  - Previous versions: `[Slides Name]_t-1.pptx`, `[Slides Name]_t-2.pptx`
 
 ## Example-Candidates Workflow (new real-world examples)
 When I ask for fresh, current examples for a module's concepts:
@@ -1295,8 +1294,9 @@ The phases run in this order and it is **not reversible**:
 - **Per-module build script:** `_build_ModuleX.py` (the one-time scaffold;
   add a STALE banner once it's frozen).
 - **Source images** live in that module's `Images/` subfolder.
-- **Backups:** `Module X - Revised_backup_YYYY-MM-DD.pptx` (keep only the two
-  newest, per the .pptx rules above).
+- **Previous versions:** `Module X - Revised_t-1.pptx` and
+  `Module X - Revised_t-2.pptx` (rolled before each edit, per the .pptx
+  rules above).
 - For ad-hoc / non-module decks, the drafting-workflow naming applies.
 
 ### Things to avoid on every slide
