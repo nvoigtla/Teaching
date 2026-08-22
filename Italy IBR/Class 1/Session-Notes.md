@@ -14,7 +14,7 @@ Original source (untouched): **`Class 1.pptx`** (4:3, 123 slides).
 ## Resume here (start of next session)
 
 - **Status:** deck is **140 slides**, opens cleanly, all work committed and
-  pushed (last session 2026-07-26). This folder lives at `Teaching/Italy IBR/`.
+  pushed (last session 2026-07-26). This folder lives at `Teaching/Italy IBR/Class 1/` (moved 2026-08-22 when the course folder was reorganized: Class 1 finished; `../Class 2/` created for the next deck).
   The single design/build rulebook is `Teaching/CLAUDE.md`.
 - **Current display map:** 21 = hand-inserted Caesar slide; 22 = Empire-length
   poll; 25 = Golden Period; 37 = hand-inserted social-capital bridge (leads to
