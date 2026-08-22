@@ -1,5 +1,24 @@
 # Module 7 (Managerial Economics 405) – Session Notes
 
+## 2026-08-20 – Agenda slides retrofitted to numbered-circle format
+
+**One-line summary.** `make_module_outline` in `_build_Module7.py` was
+replaced with the Module-2 numbered-circle implementation (Teaching
+CLAUDE.md "Module-Outline / Agenda Slides"); new module-level
+`M7_OUTLINE` = Nico's approved flat 6-item list with one-line
+descriptions (Collusion / Cournot / Bertrand / Differentiated Goods /
+Strategic Thinking / Classic Games). The legacy `part_idx`/`sub_idx`
+call-site signature is kept and mapped onto the flat index (part 0
+subs 0–3 → items 1–4; part 1 subs 0–1 → items 5–6); the page-4
+overview call now passes `descriptions=True` (all descriptions shown);
+section agendas at 11/17/29/38/48/55 band + describe only the current
+item. Full pipeline rerun (build → splice → animate; click counts
+match the documented plans), agenda renders verified, slideshow probe
+PASS. Backup: `Module 7 - Revised_backup_2026-08-20.pptx` (kept with
+`..._2026-08-14`).
+
+---
+
 ## 2026-08-14 – Nico's slides 40–47 hand edits adopted (3 gates green)
 
 **One-line summary.** Side-path pass #18: all hand edits in slides

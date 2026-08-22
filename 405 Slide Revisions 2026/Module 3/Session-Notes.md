@@ -1,5 +1,28 @@
 # Module 3 (Managerial Economics 405) – Session Notes
 
+## 2026-08-20 – Agenda slides retrofitted to numbered-circle format
+
+**One-line summary.** The 5 agenda/divider slides (displays 8, 13, 31,
+41, 62) were converted to the Module-2 numbered-circle outline format
+(Teaching CLAUDE.md "Module-Outline / Agenda Slides"), with Nico's
+approved flat 5-item list + descriptions (Production Function / Short
+Run / Long Run / Cost Concepts / Scale & Scope). Since the build script
+is FROZEN, this was in-place OOXML surgery via **`_retrofit_agenda.py`**
+(rerunnable): it imports Module 2's `make_m2_outline` helper layer,
+generates the 5 replacement slides in a temp deck, and transplants each
+`<p:spTree>` into the canonical deck (notes and rels untouched; none of
+the slides had animations). Highlights: 8 → items 1–3 banded (Part 1
+divider), 13 → item 2, 31 → item 3, 41 → items 4–5, 62 → item 5.
+**Slide titles were replaced** with the spec title "Outline of Module 3"
+(old titles: "Part 1: Production", "Part 1.b: Short Run – Hiring
+Decisions", "Part 1.c: Long Run", "Part 2: Costs", "Part 2.2: Economies
+of Scale and Scope") and the tag with "Module 3 · Outline" — flagged to
+Nico. Footer numbers on these 5 slides are now live slidenum fields.
+Verified: deck reopens (79 slides), renders correct, slideshow probe.
+Backup: `Module 3 - Revised_backup_2026-08-20.pptx`.
+
+---
+
 ## 2026-05-21 – Module 3 slides 42 – 46 redesign + hand-edit ports
 
 **One-line summary.** Heavy redesign on the cost-types slide (42), the
