@@ -50,12 +50,23 @@ CT_TAGS = ('application/vnd.openxmlformats-officedocument.'
 CT_NOTES = ('application/vnd.openxmlformats-officedocument.'
             'presentationml.notesSlide+xml')
 
-# new-deck display -> source-deck display (Module 1: 3 PollEv slides)
-# displays shifted 2026-08-20 for the AC-solution + copper inserts
+# new-deck display -> (source deck, source display).
+# Displays shifted 2026-08-22 for the poll-pair + backup inserts (the deck
+# is now 99 slides). "IC" = the original In Class deck; "WS" = the newly
+# uploaded "In Class with Solutions" deck, which carries 5 extra PollEv
+# activities (the Econ&Coffee pair + a results-view slide per poll, each
+# with its own __PE_POLL_EMBED_ID).
+SOLUTIONS = HERE / "Module 1 - In Class with Solutions.pptx"
+SOURCES = {"IC": ORIGINAL, "WS": SOLUTIONS}
 SPLICE_MAP = {
-    22: 22,     # heatwaves / AC demand poll
-    25: 24,     # diamond-demand poll (wording update pending in PollEv)
-    45: 39,     # flip-a-house economic-profit poll
+    7: ("WS", 7),     # Econ & Coffee weekend-slot poll (question)
+    8: ("WS", 8),     # Econ & Coffee weekend-slot poll (results view)
+    24: ("IC", 22),   # heatwaves / AC demand poll
+    25: ("WS", 25),   # heatwaves / AC demand poll (results view)
+    28: ("IC", 24),   # diamond-demand poll (wording update pending in PollEv)
+    29: ("WS", 29),   # diamond-demand poll (results view)
+    49: ("IC", 39),   # flip-a-house economic-profit poll
+    50: ("WS", 46),   # flip-a-house poll (results view)
 }
 
 
@@ -106,9 +117,10 @@ def _copy_part_tree(src, src_name, disp, new_parts, tgt_names,
 
 
 def splice(deck_path):
-    src = zipfile.ZipFile(ORIGINAL)
-    src_parts = display_to_part(src)
-    src_names = set(src.namelist())
+    sources = {}
+    for key, path in SOURCES.items():
+        z = zipfile.ZipFile(path)
+        sources[key] = (z, display_to_part(z))
 
     tmp = deck_path.with_suffix('.splice_tmp.pptx')
     with zipfile.ZipFile(deck_path) as tgt:
@@ -126,7 +138,8 @@ def splice(deck_path):
                                      r'\.xml$', n)), None)
     assert notes_master, "built deck has no notesMaster part"
 
-    for disp, s_disp in sorted(SPLICE_MAP.items()):
+    for disp, (src_key, s_disp) in sorted(SPLICE_MAP.items()):
+        src, src_parts = sources[src_key]
         t_part = tgt_parts[disp - 1]
         t_base = t_part.split('/')[-1]
         t_rels = ET.fromstring(items['ppt/slides/_rels/%s.rels' % t_base])
@@ -224,8 +237,8 @@ def splice(deck_path):
         ET.register_namespace('', NS_REL)
         items['ppt/slides/_rels/%s.rels' % t_base] = ET.tostring(
             out, xml_declaration=True, encoding='UTF-8')
-        print('spliced display %d <- source %d (%s)'
-              % (disp, s_disp, s_base))
+        print('spliced display %d <- %s source %d (%s)'
+              % (disp, src_key, s_disp, s_base))
 
     # content types
     ET.register_namespace('', NS_CT)

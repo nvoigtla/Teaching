@@ -28,6 +28,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
+from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.oxml.ns import qn
 from pptx.util import Cm, Inches, Pt
 
@@ -2316,6 +2317,7 @@ TAG_OPP      = "Module 1 · In Class · Opportunity Costs"
 TAG_SUNK     = "Module 1 · In Class · Sunk Costs"
 TAG_CBA      = "Module 1 · In Class · Cost-Benefit and Marginal Analysis"
 TAG_WRAP     = "Module 1 · Wrap-Up"
+TAG_BACKUP   = "Module 1 · Backup"
 TAG_V1       = "Module 1 · Video 1 · Introduction"
 TAG_V2       = "Module 1 · Video 2 · Markets"
 TAG_V3       = "Module 1 · Video 3 · Supply and Demand"
@@ -2849,6 +2851,8 @@ def slide_06_office_hours(prs):
             ("TA will send out doodle poll", 1),
         ],
         size=22, sub_size=20, line_spacing_pts=9,
+        # hand-tweaked from 1.60/5.35 on 2026-08-20 (Nico moved the box)
+        bullets_top=Inches(2.21), bullets_height=Inches(4.13),
     )
     _highlight_texts(slide, ["Tuesdays at 4pm + Biweekly on weekends"])
     return slide
@@ -5519,6 +5523,329 @@ def slide_copper_market(prs):
 
 
 # ==========================================================================
+# 2026-08-22 additions from "Module 1 - In Class with Solutions.pptx":
+# 5 more PollEv stubs (Econ&Coffee pair + 3 results-view slides, each its
+# own PollEv activity) and the 7-slide BACKUP section (displays 93-99)
+# with jump links from slides 2/9/12/17 and back pills.
+# ==========================================================================
+
+def slide_poll_coffee_q(prs):
+    return make_stub(prs, 7, TAG_LOG,
+                     "Poll: Econ & Coffee weekend slot", STUB_POLL)
+
+
+def slide_poll_coffee_results(prs):
+    return make_stub(prs, 8, TAG_LOG,
+                     "Poll results: Econ & Coffee weekend slot", STUB_POLL)
+
+
+def slide_poll_ac_results(prs):
+    return make_stub(prs, 25, TAG_SD,
+                     "Poll results: heatwaves and AC demand", STUB_POLL)
+
+
+def slide_poll_diamonds_results(prs):
+    return make_stub(prs, 29, TAG_SD,
+                     "Poll results: diamond demand", STUB_POLL)
+
+
+def slide_poll_flip_results(prs):
+    return make_stub(prs, 50, TAG_OPP,
+                     "Poll results: flip-a-house profit", STUB_POLL)
+
+
+def _draw_footer_nonum(slide):
+    """Footer chrome without a page number (backup slides carry none)."""
+    _add_rect(slide, 0, Inches(7.15), SLIDE_W, Inches(0.02), RULE)
+    _add_rect(slide, MARGIN, Inches(7.135), GOLD_W, Inches(0.05), GOLD)
+    _add_text(slide, MARGIN, Inches(7.20), Inches(11), Inches(0.32),
+              FOOTER_TEXT, size=12, color=GRAY)
+
+
+def _add_back_pill(slide, target_slide):
+    """Navy '← Back' pill, lower-right (deck-standard position), jumping
+    back to the slide that links here. Drawn AFTER the footer."""
+    shp = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
+                                 Inches(11.72), Inches(6.60),
+                                 Inches(1.55), Inches(0.46))
+    try:
+        shp.adjustments[0] = 0.5
+    except Exception:
+        pass
+    shp.fill.solid()
+    shp.fill.fore_color.rgb = NAVY
+    shp.line.fill.background()
+    shp.shadow.inherit = False
+    _add_drop_shadow(shp)
+    tf = shp.text_frame
+    tf.word_wrap = False
+    tf.margin_left = 0
+    tf.margin_right = 0
+    tf.margin_top = 0
+    tf.margin_bottom = 0
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.CENTER
+    r = p.add_run()
+    r.text = "← Back"
+    r.font.name = "Calibri"
+    r.font.size = Pt(16)
+    r.font.bold = True
+    r.font.color.rgb = WHITE
+    shp.click_action.target_slide = target_slide
+    return shp
+
+
+def _add_click_overlay(slide, left, top, width, height, target_slide):
+    """Invisible (100%-transparent-filled) rectangle carrying a
+    jump-to-slide action. Run-level hyperlinks are unusable for styled
+    text: this machine's PowerPoint renders hyperlinked runs UNDERLINED
+    regardless of u="none" — verified 2026-08-22 against a native
+    PowerPoint save, whose own no-underline hyperlink run also renders
+    underlined. Transparent-fill (not noFill) keeps the interior
+    hit-testable in the slideshow."""
+    shp = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE,
+                                 int(left), int(top),
+                                 int(width), int(height))
+    shp.fill.solid()
+    shp.fill.fore_color.rgb = WHITE
+    srgb = shp._element.spPr.find(qn('a:solidFill') + '/' + qn('a:srgbClr'))
+    alpha = srgb.makeelement(qn('a:alpha'), {'val': '0'})
+    srgb.append(alpha)
+    shp.line.fill.background()
+    shp.shadow.inherit = False
+    shp.click_action.target_slide = target_slide
+    return shp
+
+
+def slide_93_backup_divider(prs):
+    slide = _blank_slide(prs)
+    _add_text(slide, 0, Inches(3.00), SLIDE_W, Inches(1.1), "BACKUP",
+              size=54, bold=True, color=NAVY, font="Calibri",
+              align=PP_ALIGN.CENTER)
+    _add_rect(slide, int((SLIDE_W - Inches(4.0)) / 2), Inches(4.25),
+              Inches(4.0), 54864, GOLD)
+    _add_rect(slide, 0, Inches(7.15), SLIDE_W, Inches(0.02), RULE)
+    _add_rect(slide, MARGIN, Inches(7.135), GOLD_W, Inches(0.05), GOLD)
+    return slide
+
+
+def slide_94_backup_leaders(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_BACKUP)
+    _draw_action_title(slide, "Do National Leaders Matter?")
+    # Econometrica header (Ottinger & Voigtländer 2025) + econimate still
+    _add_media_image(slide, "ws63_image57.png",
+                     left=Inches(0.65), top=Inches(1.55),
+                     width=Inches(7.0), rounded=False, shadow=True)
+    _add_media_image(slide, "ws63_image58.png",
+                     left=Inches(7.75), top=Inches(3.55),
+                     width=Inches(5.2), rounded=False, shadow=True)
+    box = _add_hierarchical_bullets(
+        slide, left=Inches(0.65), top=Inches(4.30),
+        width=Inches(6.4), height=Inches(1.9),
+        items=[
+            ([("Economist Article", {'underline': True, 'bold': True}),
+              ("  ▶", {'color': GOLD, 'bold': True})], 0, {}),
+            ([("econimate Video (YouTube)",
+               {'underline': True, 'bold': True}),
+              ("  ▶", {'color': GOLD, 'bold': True})], 0, {}),
+        ],
+        size=22, line_spacing_pts=12)
+    box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+    _link_runs(slide, {
+        "Economist Article":
+            "https://www.economist.com/graphic-detail/2021/02/20/"
+            "data-on-inbred-nobles-support-a-leader-driven-theory-of-history",
+        "econimate Video (YouTube)":
+            "https://www.youtube.com/watch?v=sOB5hmEXjdE",
+    })
+    _draw_footer_nonum(slide)
+    _add_back_pill(slide, prs.slides[1])          # -> display 2
+    _set_notes(slide, (
+        "Backup on my paper with Sebastian Ottinger, “History's "
+        "Masters: The Effect of European Monarchs on State Performance” "
+        "(Econometrica, January 2025). Using a millennium of European "
+        "monarchs, we show that rulers' ability affected the performance "
+        "of their states. The Economist covered the paper, and econimate "
+        "made a short explainer video — both linked on the slide. "
+        "The back button returns to the Introduction slide."))
+    return slide
+
+
+def slide_95_backup_happiness(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_BACKUP)
+    _draw_action_title(
+        slide, "Economics and a Common Critique: Does Money Buy Happiness?")
+    box = _add_hierarchical_bullets(
+        slide, left=MARGIN, top=Inches(1.50),
+        width=Inches(6.5), height=Inches(0.6),
+        items=[("The Easterlin Paradox (1974):", 0)],
+        size=24, line_spacing_pts=0)
+    box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+    _add_media_image(slide, "ws64_image59.png",
+                     left=Inches(3.02), top=Inches(2.40),
+                     width=Inches(7.3), rounded=False, shadow=True)
+    _draw_footer_nonum(slide)
+    _set_notes(slide, (
+        "First of two backup slides on money and happiness. Easterlin "
+        "(1974) found that within a country at a point in time richer "
+        "people report being happier, but average happiness did not seem "
+        "to rise with GNP across countries — the “Easterlin "
+        "paradox.” The next slide shows the Stevenson–Wolfers "
+        "(2008) evidence that revisits this with better data."))
+    return slide
+
+
+def slide_96_backup_sw2008(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_BACKUP)
+    _draw_action_title(slide, "Stevenson and Wolfers (2008)")
+    _add_media_image(slide, "ws65_image60.jpeg",
+                     left=Inches(3.90), top=Inches(1.50),
+                     height=Inches(5.40), rounded=False, shadow=True)
+    _draw_footer_nonum(slide)
+    _add_back_pill(slide, prs.slides[11])         # -> display 12
+    _set_notes(slide, (
+        "Stevenson and Wolfers (2008) revisit the Easterlin paradox with "
+        "richer cross-country data: life satisfaction rises with income "
+        "both across and within countries, with no clear satiation point. "
+        "The back button returns to the Homo Economicus slide."))
+    return slide
+
+
+def slide_97_backup_anderson(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_BACKUP)
+    _draw_action_title(slide, "Related Work by Anderson Faculty")
+    _add_media_image(slide, "ws66_goodlife_crop.png",
+                     left=Inches(2.20), top=Inches(1.65),
+                     width=Inches(8.9), rounded=False, shadow=True)
+    box = _add_hierarchical_bullets(
+        slide, left=Inches(2.20), top=Inches(5.35),
+        width=Inches(9.4), height=Inches(1.2),
+        items=[
+            ("Note Dan Benjamin’s class “MGMT 298D-25 – "
+             "Precision Healthcare”", 0),
+            ("Applies concepts from (behavioral) economics", 1),
+        ],
+        size=22, sub_size=20, line_spacing_pts=6)
+    box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+    _draw_footer_nonum(slide)
+    _add_back_pill(slide, prs.slides[11])         # -> display 12
+    slide._element.set('show', '0')               # hidden in the source deck
+    _set_notes(slide, (
+        "Hidden backup: Anderson faculty work related to the "
+        "money-and-happiness debate — Daniel Benjamin and co-authors' "
+        "research on measuring well-being beyond GDP. His elective "
+        "MGMT 298D-25 (Precision Healthcare) applies concepts from "
+        "behavioral economics."))
+    return slide
+
+
+def slide_98_backup_portland(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_BACKUP)
+    _draw_action_title(slide, "People Respond to Incentives")
+    _add_media_image(slide, "ws67_image62.png",
+                     left=Inches(0.90), top=Inches(1.62),
+                     width=Inches(4.7), rounded=True, shadow=True)
+    _add_text(slide, Inches(0.90), Inches(6.00), Inches(4.7), Inches(0.3),
+              "Portland Street, Southampton, UK", size=12, italic=True,
+              color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
+    box = _add_hierarchical_bullets(
+        slide, left=Inches(6.00), top=Inches(1.90),
+        width=Inches(7.0), height=Inches(2.0),
+        items=[
+            ("Property tax:", 0, {'bold': True}),
+            ([("Based on ", {}),
+              ("the number of windows", {'bold': True})], 1, {}),
+            ("England and Wales (1696 – 1851)", 1),
+        ],
+        size=24, sub_size=22, line_spacing_pts=8)
+    box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+    _add_media_image(slide, "ws67_image63.png",
+                     left=Inches(7.30), top=Inches(4.05),
+                     width=Inches(4.2), rounded=False, shadow=True)
+    _draw_footer_nonum(slide)
+    _add_back_pill(slide, prs.slides[8])          # -> display 9
+    _set_notes(slide, (
+        "This picture provides an excellent example on how to think like "
+        "an economist. Do you notice anything strange? Some of the windows "
+        "are missing, right? What could be going on? You may think that "
+        "this is an error – maybe a terrible architect designed this "
+        "building and skipped some windows. No, that’s not it. You "
+        "may guess that this is a weird architectural style you had not "
+        "heard about. Maybe the missing windows are a symbol for "
+        "something, right? No, that’s not it either.\n\n"
+        "So, what is it? Taxes, of course.\n\n"
+        "In 1696, England introduced a property tax that was based on the "
+        "number of windows. If your home has more than 10 windows, you "
+        "have to pay more in taxes. The more windows, the higher the tax "
+        "bill. This tax was intended to be a progressive tax: richer would "
+        "pay more in taxes, because they tend to live in bigger houses, "
+        "with more windows. This tax was also practical: a government "
+        "employee could just walk to the front of your house, count the "
+        "number of windows, and that is all of the information needed. No "
+        "need to find out the number of bedrooms or bathrooms, or to "
+        "figure out how much your home is worth.\n\n"
+        "This tax had a terrible drawback though: it was easy to avoid. "
+        "If you keep the number of windows below 10, you do not need to "
+        "pay as much in taxes. This is the reason why many homes "
+        "constructed in England during this period did not have as many "
+        "windows. And homeowners would go as far as boarding up some of "
+        "the existing windows to avoid the tax.\n\n"
+        "Whoever came up with the idea for the windows tax did not think "
+        "like an economist. By the end of this course, I hope you will "
+        "not make the same mistake."))
+    return slide
+
+
+def slide_99_backup_prices(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_BACKUP)
+    _draw_action_title(slide, "Can These Prices be Optimal?")
+    _add_media_image(slide, "ws68_fares_top_crop.png",
+                     left=Inches(2.17), top=Inches(1.42),
+                     width=Inches(9.0), rounded=False, shadow=True)
+    _add_media_image(slide, "ws68_fares_bot_crop.png",
+                     left=Inches(2.17), top=Inches(4.50),
+                     width=Inches(9.0), rounded=False, shadow=True)
+    _draw_footer_nonum(slide)
+    _add_back_pill(slide, prs.slides[16])         # -> display 17
+    _set_notes(slide, (
+        "Two Lufthansa bookings for the same November 2024 dates: on top, "
+        "Los Angeles–Istanbul return connecting in Frankfurt "
+        "($4,627 total); below, the nonstop Los Angeles–Frankfurt "
+        "return — the Frankfurt legs are the same flights. Compare "
+        "the totals in class and ask whether pricing like this can be "
+        "optimal. The back button returns to the class agenda."))
+    return slide
+
+
+def wire_backup_links(prs):
+    """Jump links from the main slides into the backup section. Runs after
+    all slides exist. Slide 2 and 9 reuse their gold ▶ glyphs; slides
+    12 and 17 get a pointer pill."""
+    sl = lambda d: prs.slides[d - 1]
+    # invisible hotspots over the existing bullet line + gold ▶ glyph
+    # (positions from the rendered layout; re-check after any font pass)
+    _add_click_overlay(sl(2), Inches(0.28), Inches(4.42),
+                       Inches(9.95), Inches(0.58), sl(94))
+    _add_click_overlay(sl(9), Inches(0.28), Inches(3.82),
+                       Inches(11.60), Inches(0.58), sl(98))
+    shp = _add_ps_pointer(sl(12), left=Inches(8.55), top=Inches(6.58),
+                          label="Backup: Does money buy happiness?",
+                          width=Inches(4.5), height=Inches(0.5))
+    shp.click_action.target_slide = sl(95)
+    shp = _add_ps_pointer(sl(17), left=Inches(0.40), top=Inches(6.55),
+                          label="Backup: Can these prices be optimal?",
+                          width=Inches(4.7), height=Inches(0.5))
+    shp.click_action.target_slide = sl(99)
+
+
+# ==========================================================================
 # Build orchestration
 # ==========================================================================
 
@@ -5533,87 +5860,101 @@ def build(out_path=None):
     slide_04_logistics2(prs)                                       #  4
     slide_05_logistics3(prs)                                       #  5
     slide_06_office_hours(prs)                                     #  6
-    slide_07_why_econ(prs)                                         #  7
-    slide_08_models(prs)                                           #  8
-    slide_09_find_model(prs)                                       #  9
-    slide_10_homo_economicus(prs)                                  # 10
-    slide_11_hedgehogs(prs)                                        # 11
-    slide_12_making_most_1(prs)                                    # 12
-    slide_13_making_most_2(prs)                                    # 13
-    slide_14_teaching_philosophy(prs)                              # 14
-    make_roadmap(prs, 15)                                          # 15
-    slide_16_outline(prs)                                          # 16
-    slide_17_outline_now(prs)                                      # 17
-    slide_18_recall_market_def(prs)                                # 18
-    slide_19_adm(prs)                                              # 19
-    slide_20_netflix(prs)                                          # 20
-    slide_21_heatwaves(prs)                                        # 21
-    slide_22_poll_ac(prs)                                          # 22
-    slide_ac_solution(prs)                                         # 23 NEW
-    slide_23_swiftonomics(prs)                                     # 24
-    slide_24_poll_diamonds(prs)                                    # 25
-    slide_25_swift_solution(prs)                                   # 26
-    slide_26_tea(prs)                                              # 27
-    slide_27_tea_market(prs)                                       # 28
-    slide_28_disasters(prs)                                        # 29
-    slide_29_avocado_clip(prs)                                     # 30
-    slide_30_avocado_bullets(prs)                                  # 31
-    slide_31_avocado_market(prs)                                   # 32
-    slide_32_steps(prs)                                            # 33
-    slide_33_wheat(prs)                                            # 34
-    slide_34_la_case(prs)                                          # 35
-    slide_35_la_market(prs)                                        # 36
-    slide_copper_case(prs)                                         # 37 NEW
-    slide_copper_market(prs)                                       # 38 NEW
-    slide_36_outline_opp(prs)                                      # 39
-    slide_37_opp_costs(prs)                                        # 40
-    slide_38_fruit_table(prs)                                      # 41
-    slide_39_present(prs)                                          # 42
-    slide_40_mba_cost(prs)                                         # 43
-    slide_41_flip_house(prs)                                       # 44
-    slide_42_poll_flip(prs)                                        # 45
-    slide_43_flip_solution(prs)                                    # 46
-    slide_44_another_opp(prs)                                      # 47
-    slide_45_child_cost(prs)                                       # 48
-    slide_46_child_penalty(prs)                                    # 49
-    slide_47_us_2022(prs)                                          # 50
-    slide_48_outline_sunk(prs)                                     # 51
-    slide_49_sunk_costs(prs)                                       # 52
-    slide_50_sunk_examples(prs)                                    # 53
-    slide_51_concorde(prs)                                         # 54
-    slide_52_sunk_takeaway(prs)                                    # 55
-    slide_53_outline_cba(prs)                                      # 56
-    slide_54_cba(prs)                                              # 57
-    slide_55_exercise(prs)                                         # 58
-    slide_56_continuous(prs)                                       # 59
-    slide_57_summary(prs)                                          # 60
-    slide_58_next_steps(prs)                                       # 61
-    slide_59_v1_title(prs)                                         # 62
-    slide_60_v1_roadmap(prs)                                       # 63
-    slide_61_v1_outline(prs)                                       # 64
-    slide_62_v2_title(prs)                                         # 65
-    slide_63_v2_outline(prs)                                       # 66
-    slide_64_v2_market_def(prs)                                    # 67
-    slide_65_v2_netflix(prs)                                       # 68
-    slide_66_v2_actors(prs)                                        # 69
-    slide_67_v3_title(prs)                                         # 70
-    slide_68_v3_outline(prs)                                       # 71
-    slide_69_v3_ds_analysis(prs)                                   # 72
-    slide_70_v3_demand_def(prs)                                    # 73
-    slide_71_v3_ceteris_paribus(prs)                               # 74
-    slide_72_v3_demand_curve(prs)                                  # 75
-    slide_73_v3_move_vs_shift_d(prs)                               # 76
-    slide_74_v3_flour(prs)                                         # 77
-    slide_75_v3_supply_curve(prs)                                  # 78
-    slide_76_v3_move_vs_shift_s(prs)                               # 79
-    slide_77_v4_title(prs)                                         # 80
-    slide_78_v4_outline(prs)                                       # 81
-    slide_79_v4_mechanism(prs)                                     # 82
-    slide_80_v4_terminology(prs)                                   # 83
-    slide_81_v4_shift_demand(prs)                                  # 84
-    slide_82_v4_shift_supply(prs)                                  # 85
-    slide_83_v4_shift_both(prs)                                    # 86
-    slide_84_shift_table(prs)                                      # 87
+    slide_poll_coffee_q(prs)                                       #  7 NEW poll
+    slide_poll_coffee_results(prs)                                 #  8 NEW poll
+    slide_07_why_econ(prs)                                         #  9
+    slide_08_models(prs)                                           # 10
+    slide_09_find_model(prs)                                       # 11
+    slide_10_homo_economicus(prs)                                  # 12
+    slide_11_hedgehogs(prs)                                        # 13
+    slide_12_making_most_1(prs)                                    # 14
+    slide_13_making_most_2(prs)                                    # 15
+    slide_14_teaching_philosophy(prs)                              # 16
+    make_roadmap(prs, 17)                                          # 17
+    slide_16_outline(prs)                                          # 18
+    slide_17_outline_now(prs)                                      # 19
+    slide_18_recall_market_def(prs)                                # 20
+    slide_19_adm(prs)                                              # 21
+    slide_20_netflix(prs)                                          # 22
+    slide_21_heatwaves(prs)                                        # 23
+    slide_22_poll_ac(prs)                                          # 24
+    slide_poll_ac_results(prs)                                     # 25 NEW poll
+    slide_ac_solution(prs)                                         # 26
+    slide_23_swiftonomics(prs)                                     # 27
+    slide_24_poll_diamonds(prs)                                    # 28
+    slide_poll_diamonds_results(prs)                               # 29 NEW poll
+    slide_25_swift_solution(prs)                                   # 30
+    slide_26_tea(prs)                                              # 31
+    slide_27_tea_market(prs)                                       # 32
+    slide_28_disasters(prs)                                        # 33
+    slide_29_avocado_clip(prs)                                     # 34
+    slide_30_avocado_bullets(prs)                                  # 35
+    slide_31_avocado_market(prs)                                   # 36
+    slide_32_steps(prs)                                            # 37
+    slide_33_wheat(prs)                                            # 38
+    slide_34_la_case(prs)                                          # 39
+    slide_35_la_market(prs)                                        # 40
+    slide_copper_case(prs)                                         # 41
+    slide_copper_market(prs)                                       # 42
+    slide_36_outline_opp(prs)                                      # 43
+    slide_37_opp_costs(prs)                                        # 44
+    slide_38_fruit_table(prs)                                      # 45
+    slide_39_present(prs)                                          # 46
+    slide_40_mba_cost(prs)                                         # 47
+    slide_41_flip_house(prs)                                       # 48
+    slide_42_poll_flip(prs)                                        # 49
+    slide_poll_flip_results(prs)                                   # 50 NEW poll
+    slide_43_flip_solution(prs)                                    # 51
+    slide_44_another_opp(prs)                                      # 52
+    slide_45_child_cost(prs)                                       # 53
+    slide_46_child_penalty(prs)                                    # 54
+    slide_47_us_2022(prs)                                          # 55
+    slide_48_outline_sunk(prs)                                     # 56
+    slide_49_sunk_costs(prs)                                       # 57
+    slide_50_sunk_examples(prs)                                    # 58
+    slide_51_concorde(prs)                                         # 59
+    slide_52_sunk_takeaway(prs)                                    # 60
+    slide_53_outline_cba(prs)                                      # 61
+    slide_54_cba(prs)                                              # 62
+    slide_55_exercise(prs)                                         # 63
+    slide_56_continuous(prs)                                       # 64
+    slide_57_summary(prs)                                          # 65
+    slide_58_next_steps(prs)                                       # 66
+    slide_59_v1_title(prs)                                         # 67
+    slide_60_v1_roadmap(prs)                                       # 68
+    slide_61_v1_outline(prs)                                       # 69
+    slide_62_v2_title(prs)                                         # 70
+    slide_63_v2_outline(prs)                                       # 71
+    slide_64_v2_market_def(prs)                                    # 72
+    slide_65_v2_netflix(prs)                                       # 73
+    slide_66_v2_actors(prs)                                        # 74
+    slide_67_v3_title(prs)                                         # 75
+    slide_68_v3_outline(prs)                                       # 76
+    slide_69_v3_ds_analysis(prs)                                   # 77
+    slide_70_v3_demand_def(prs)                                    # 78
+    slide_71_v3_ceteris_paribus(prs)                               # 79
+    slide_72_v3_demand_curve(prs)                                  # 80
+    slide_73_v3_move_vs_shift_d(prs)                               # 81
+    slide_74_v3_flour(prs)                                         # 82
+    slide_75_v3_supply_curve(prs)                                  # 83
+    slide_76_v3_move_vs_shift_s(prs)                               # 84
+    slide_77_v4_title(prs)                                         # 85
+    slide_78_v4_outline(prs)                                       # 86
+    slide_79_v4_mechanism(prs)                                     # 87
+    slide_80_v4_terminology(prs)                                   # 88
+    slide_81_v4_shift_demand(prs)                                  # 89
+    slide_82_v4_shift_supply(prs)                                  # 90
+    slide_83_v4_shift_both(prs)                                    # 91
+    slide_84_shift_table(prs)                                      # 92
+    slide_93_backup_divider(prs)                                   # 93 BACKUP
+    slide_94_backup_leaders(prs)                                   # 94 BACKUP
+    slide_95_backup_happiness(prs)                                 # 95 BACKUP
+    slide_96_backup_sw2008(prs)                                    # 96 BACKUP
+    slide_97_backup_anderson(prs)                                  # 97 BACKUP (hidden)
+    slide_98_backup_portland(prs)                                  # 98 BACKUP
+    slide_99_backup_prices(prs)                                    # 99 BACKUP
+
+    wire_backup_links(prs)
 
     out = Path(out_path) if out_path else OUT_DIR / "Module 1 - Revised.pptx"
     prs.save(str(out))

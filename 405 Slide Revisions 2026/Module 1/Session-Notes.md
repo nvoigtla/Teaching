@@ -1,46 +1,85 @@
 # Session Notes — Module 1 (combined In-Class + Videos deck)
 
-## PENDING (2026-08-20 ~1:15 PM — in progress, resume here after /compact)
+## PENDING (updated 2026-08-22 — deck is now 99 slides)
 
-Nico's open requests on **Module 1 - Revised.pptx** (87 slides):
-1. **Hand-edit port (diff DONE, port PENDING):** slide 1 = no diff
-   (comic already in script). Slide 6 = bullets box moved by hand to
-   top 2.21", height 4.13" (was 1.60"/5.35") — port into
-   `slide_06_office_hours` in `_build_Module1.py` with a hand-tweak
-   comment. Diff tool: `_diff_slides.py <displays>` (canonical vs
-   `Module 1 - Revised_test.pptx` side build, already built). Backup
-   made: `Module 1 - Revised_backup_2026-08-20c.pptx` (kept: b, c).
-2. **Font-upsize rule, slides 1–10 first** (then Nico reviews; only
-   after convergence add the rule to Teaching CLAUDE.md — NOT yet):
+Nico's open requests on **Module 1 - Revised.pptx**:
+1. **Font-upsize rule, first batch** (then Nico reviews; only after
+   convergence add the rule to Teaching CLAUDE.md — NOT yet):
    whenever bullet font < 28pt and space allows, enlarge up to 28pt
    main / 24pt sub. Proposed fitting rule: for each bullet box try
    (28/24) → (26/24) → (24/22), keep the largest pair whose PIL-
    measured wrapped height (Calibri, with 12/3pt spacing-before)
    fits the box height with ~5% headroom and no line >2 lines;
    sibling boxes on a slide get equal sizes; slide 6 must fit
-   Nico's hand-set box (2.21"/4.13").
-3. **Slide 8 (Economic Models) full-bleed rebuild:** integrate Nico's
-   attached background image (hiker+map+mountains+model-map, the
-   text-free variant) as background; overlay EDITABLE text exactly
-   like his attached mock: 3 bullet lines top-left (bold navy key
-   phrases), navy circle icons per line (head-bulb / quotes / map),
-   "THE REAL WORLD" and "THE MODEL (A MAP)" labels right, navy
-   takeaway bar bottom-right with compass icon: "Find a model that "
-   white + "matches your needs." gold. UNBLOCKED: Nico saved both
-   images as `Image_Hiker_Mountain_with_text` and
-   `Image_Hiker_Mountain_no_text` (locate them — likely the Module 1
-   folder; extension unknown; use the no-text one as background, the
-   with-text one as the layout reference).
-   Also DONE meanwhile: all 8 session learnings adopted — 6 added to
-   Teaching CLAUDE.md (case-resolution gold bar, provenance rule,
-   18pt box floor, quote callout, example-candidates workflow,
-   Commons photo workflow) and a NEW project-level CLAUDE.md created
-   at `405 Slide Revisions 2026\CLAUDE.md` (adoption protocol, file
-   naming, pipeline).
-4. After porting + font pass: run full pipeline (`_build_Module1.py`
-   → `_splice_media.py` → `_group_pass.py` → `_animate.py all apply`),
-   verify via `_verify_anim.ps1` (87 slides, counts within), render-
-   check slides 1–10, slideshow probe. Delete `_test` deck when done.
+   Nico's hand-set box (2.21"/4.13"). Nico's "slides 1–10" refer to
+   the pre-insert numbering — that's now displays 1–12 (7–8 are
+   spliced polls, nothing to resize there). NOTE: the click-overlay
+   hotspots on slides 2 and 9 (`wire_backup_links`) are positioned
+   for the CURRENT font sizes — recheck them after the font pass.
+2. **Economic Models full-bleed rebuild — now display 10** (was 8):
+   integrate Nico's background image (hiker+map+mountains, text-free
+   variant) as background; overlay EDITABLE text exactly like his
+   mock: 3 bullet lines top-left (bold navy key phrases), navy circle
+   icons per line (head-bulb / quotes / map), "THE REAL WORLD" and
+   "THE MODEL (A MAP)" labels right, navy takeaway bar bottom-right
+   with compass icon: "Find a model that " white + "matches your
+   needs." gold. Images saved as `Image_Hiker_Mountain_with_text` /
+   `_no_text` (in `_source_images/`, .png). Update the slide's
+   animation plan afterward (PLANS key 8 pre-shift → 10).
+
+## 2026-08-22 — backup section + missing poll slides (deck 87 → 99)
+
+Nico uploaded **"Module 1 - In Class with Solutions.pptx"** (68 slides,
+his FEMBA variant) and asked to add everything the rebuild had missed.
+Findings: all Solution slides were already adopted (AC #26, Swift #30,
+flip-house #51) and the Kleven child-penalty chart too (#54). Missing
+were (a) FIVE PollEv slides — a new "Econ & Coffee weekend slot" poll
+pair after Office Hours, plus a results-view slide per existing poll
+(each its own __PE_POLL_EMBED_ID) — and (b) the 7-slide BACKUP section
+with its jump links. All added; pipeline rerun; verified.
+
+New display map (old-87 → new-99): 1–6 same; 7–22 → +2; 23–25 → +3;
+26–45 → +4; 46–87 → +5. New slides: 7/8 (Econ&Coffee poll pair),
+25/29/50 (results views for AC / diamonds / flip polls), 93–99 =
+BACKUP divider, National Leaders (Econometrica 2025), Money-Buy-
+Happiness (Easterlin), Stevenson-Wolfers 2008, Anderson Faculty
+(HIDDEN, as in source), Portland Street windows tax, Lufthansa fares.
+Links: 2→94, 9→98, 12→95 (pointer pill), 17→99 (pointer pill); back
+pills 94→2, 96→12, 97→12, 98→9, 99→17 (95 has none, flows to 96, as
+in the source). Slide-6 hand-edit ported (bullets_top 2.21"/4.13" with
+dated comment); full-deck geometry diff showed no other hand-edits;
+`_test` deck deleted. Backups rolled to `_t-1`/`_t-2`.
+
+Implementation notes:
+- `_splice_media.py` SPLICE_MAP entries are now (source deck, display):
+  "IC" = In Class, "WS" = In Class with Solutions (also 4:3, same
+  +1.667" shift). `_group_pass.py` SPLICED and `_animate.py` skips /
+  PLANS renumbered via `_m1_shift_key2`; `_verify_anim.ps1` table
+  renumbered (still 65 animated slides — ALL COUNTS MATCH; slideshow
+  probe incl. all-new polls + backups PASSED).
+- **Hyperlinked text runs render UNDERLINED on this machine regardless
+  of u="none"** (verified against a native PowerPoint save — even
+  PowerPoint's own no-underline hyperlink run renders underlined).
+  Slide-jump affordances therefore use SHAPES: invisible 100%-
+  transparent-fill overlay rects on slides 2/9 (over the existing
+  gold ▶ lines), `_add_ps_pointer` pills on 12/17, navy back pills
+  (`_add_back_pill`) on the backup slides.
+- Backup screenshots with baked-in red-circle annotations were cropped
+  from 2400px slideshow exports of the WS deck
+  (`_source_images/ws66_goodlife_crop.png`, `ws68_fares_*_crop.png`);
+  plain images extracted verbatim (`ws63_*`, `ws64_*`, `ws65_*`,
+  `ws67_*`).
+
+Flags for Nico (not changed, awaiting word):
+- WS slide 26 (heatwaves SOLUTION) also shows a flour-shortage
+  clipping + "other examples of right-shifts" bullets that our native
+  AC-solution slide (#26) doesn't have (flour appears in Video 3,
+  display 82). Add to #26?
+- WS backup "National Leaders" carried stale speaker notes (hedgehog
+  text) — wrote fresh notes instead; Portland notes ported verbatim.
+- WS deck uses the FEMBA TA email; deck keeps TA405.EMBA2@gmail.com.
+- Spliced poll slides carry the source's static page-number text
+  (e.g. "46" on display 50) — cosmetic, pre-existing behavior.
 
 ## 2026-08-20 (round 3) — "Module 1 - Example Candidates.pptx" (14 slides)
 

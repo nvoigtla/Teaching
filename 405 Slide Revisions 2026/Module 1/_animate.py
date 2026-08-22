@@ -304,6 +304,36 @@ PLANS[38] = [   # copper market (MW #66): setup, D shift, S shift, flat P
 ]
 
 
+# ---------------------------------------------------------------------------
+# 2026-08-22 inserts (deck now 99 slides): Econ&Coffee poll pair (7-8),
+# poll results-view slides (25, 29, 50), BACKUP section (93-99). Shift
+# the 87-deck keys, then extend the skip sets. Backup slides are static
+# per the Animations rule; all 8 poll slides are spliced media.
+# ---------------------------------------------------------------------------
+def _m1_shift_key2(k):
+    if k >= 46:
+        return k + 5
+    if k >= 26:
+        return k + 4
+    if k >= 23:
+        return k + 3
+    if k >= 7:
+        return k + 2
+    return k
+
+
+PLANS = {_m1_shift_key2(k): v for k, v in PLANS.items()}
+FIG_GROUP = {_m1_shift_key2(k): v for k, v in FIG_GROUP.items()}
+STATIC = {_m1_shift_key2(k): v for k, v in STATIC.items()}
+SKIP_TITLE = {_m1_shift_key2(k) for k in SKIP_TITLE} | {93}
+SKIP_AGENDA = {_m1_shift_key2(k) for k in SKIP_AGENDA}
+SKIP_MEDIA = ({_m1_shift_key2(k) for k in SKIP_MEDIA}
+              | {7, 8, 25, 29, 50})
+SKIP_STATIC = ({_m1_shift_key2(k) for k in SKIP_STATIC}
+               | set(range(94, 100)))
+SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
+
+
 def q(ns, t):
     return "{%s}%s" % (ns, t)
 
@@ -620,7 +650,7 @@ def main():
              for s in pres.find(q(P, "sldIdLst"))]
 
     if sel == ["all"] or not sel:
-        todo = [d for d in range(1, 88) if d not in SKIP]
+        todo = [d for d in range(1, len(order) + 1) if d not in SKIP]
     else:
         todo = [int(x) for x in sel]
 

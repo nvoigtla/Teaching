@@ -35,7 +35,7 @@ M = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
 
-SPLICED = {22, 25, 45}      # shifted 2026-08-20 (AC + copper inserts)
+SPLICED = {7, 8, 24, 25, 28, 29, 49, 50}   # shifted 2026-08-22 (poll pairs)
 
 
 def q(ns, t):

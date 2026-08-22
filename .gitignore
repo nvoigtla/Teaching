@@ -18,7 +18,10 @@ __pycache__/
 # Office temp lockfiles
 ~$*
 
-# PowerPoint timestamped backups (kept locally per the backup convention,
-# but never committed) and in-place build temp files
+# Office timestamped + rolling backups (kept locally per the backup
+# convention, but never committed) and in-place build temp files
 *_backup_*.pptx
+*_backup_*.docx
+*_t-1.pptx
+*_t-2.pptx
 *.pptx.tmp
