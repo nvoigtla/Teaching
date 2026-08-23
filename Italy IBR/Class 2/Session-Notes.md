@@ -17,7 +17,8 @@ build log lives in `../Class 1/Session-Notes.md`.
 - **Status:** deck built (16 slides); presentations are identified by **group
   number only** and run **in ascending group order**. Opens cleanly in
   PowerPoint, animations verified via COM, full-screen slideshow probed (no
-  renderer failure). **Not yet committed** – awaiting Nico's go-ahead.
+  renderer failure). Committed, pushed, and the folder cleaned up
+  (2026-08-22) – Class 2 is done.
 - **No open questions.** Poll: Nico updates it himself. Garbled tech/AI
   statement: fixed at the source. PRO/CONTRA sides: settled (see below).
   Committed and pushed 2026-08-22.
@@ -286,6 +287,29 @@ there is no instructor narration to pace a build against.
   returns a non-empty sequence (triggers 1,2,2,1); the other 15 report static.
 - Slideshow-probed 7 / 9 / 11: each shows its full content at entry (headers,
   cards, logo, brief card), where slide 7 previously opened with chrome only.
+
+### 2026-08-22 (wrap-up) – Class 2 declared done, folder cleaned
+
+- **Class 2 is finished.** Cleanup pass over the folder: nothing was removed
+  that the project needs to resume – every remaining file is the deck itself,
+  a pipeline script, or a build input.
+- **Deleted:** `Assigned Groups and Grades_t-1.xlsx` and `_t-2.xlsx` (commit
+  `e87baa8`), and in the parent folder `Presentation Topics -- Italy_t-1.xlsx`
+  (commit `c8b9d50`). All three stay recoverable from git history.
+- **Kept, deliberately:** `Class 2.pptx` (the 2023 original – `_splice_poll.py`
+  reads the poll slide, its tags, image, and notes out of it),
+  `UCLA Italy 2026 - Itinerary Latest.pdf` (input to `_make_itinerary.py`),
+  `_source_images/`, all four pipeline scripts, and `_slideshow_probe.ps1`
+  (reusable verification tool, not a one-off diagnostic – confirmed by Nico).
+- **New standing rule** in the universal `CLAUDE.md` (OneDrive master, reached
+  through the `d:\Claude Code\CLAUDE.md` symlink): a
+  **"Cleaning Up a Finished Project"** section. Test for every file – would it
+  be needed to pick the project back up tomorrow? Rolling `_t-1` / `_t-2`
+  backups, render/probe folders, `__pycache__`, lock files, one-off scripts,
+  `_test` / `_temp` copies, and superseded drafts go; deliverables, pipeline,
+  build inputs, and notes stay. Exception: the **Referee Reports** folder is
+  emptied completely after each report (final output committed first, cleanup
+  as its own commit).
 
 ## Open items
 
