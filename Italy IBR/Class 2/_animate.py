@@ -13,14 +13,12 @@ Rules applied (Teaching CLAUDE.md):
   - Bullet slides: the FIRST top-level bullet (with its sub-bullets) shows with
     the slide; the build starts from the second.
   - A box and the text inside it are one shape here, so each callout is one beat.
-  - Debate slides: left column, then right column, then the takeaway bar last
-    (columns are ordered by group number, so the lower group reveals first).
-  - Company slides: the logo panel is the slide's subject and stays visible;
-    the brief card and the visit card build.
-  - Static (no animation): title, roadmap/agenda, poll, dividers, Thank You,
-    and the backup slides.
+  - Static (no animation): everything except slide 3. The title, roadmap/agenda,
+    poll, dividers, Thank You and backup slides never animated; the debate and
+    company slides (7-13) were built step by step until Nico asked for them to
+    land complete, which is how the presentation half of the deck now behaves.
 
-Run:  python _animate.py all apply      (or a slide list, e.g. "7 8")
+Run:  python _animate.py all apply      (or a slide list, e.g. "3")
 Verify click STRUCTURE (not just effect counts) via PowerPoint COM:
 MainSequence.Item(i).Timing.TriggerType -- 1 = on click, 2 = with previous.
 """
@@ -47,20 +45,12 @@ SKIP = {1, 2, 4, 5, 6, 14, 15, 16}
 #            visible with the slide).
 # "beats":   explicit list of beats; each beat is a list of shape names revealed
 #            together on one click.
-# The presentations run in GROUP order, so debates and companies interleave:
-#   7 debate (Groups 1 & 3) | 8 Kering (2) | 9 debate (4 & 7)
-#   10 Prada (5) | 11 Inter (6) | 12 Pirelli (8) | 13 EssilorLuxottica (9)
-_DEBATE = dict(beats=[["Hdr1", "Card1"], ["Hdr2", "Card2"], ["Takeaway"]])
-_COMPANY = dict(beats=[["BriefCard"], ["VisitCard"]])
+# Slides 7 onward carry NO animations (Nico, 2026-08-22): once the class hands
+# over to the students, everything on a presentation slide should be on screen
+# from the moment it appears.  They are deliberately left OUT of SKIP so that a
+# rerun still strips any timing a previous pass may have written.
 PLAN = {
     3:  dict(bullets="TextBox 6"),
-    7:  _DEBATE,
-    8:  _COMPANY,
-    9:  _DEBATE,
-    10: _COMPANY,
-    11: _COMPANY,
-    12: _COMPANY,
-    13: _COMPANY,
 }
 
 

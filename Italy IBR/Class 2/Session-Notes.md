@@ -55,16 +55,19 @@ python _animate.py all apply # injects <p:timing> builds
 | 4 | **PollEverywhere** – "I will arrive at the hotel in Milan" | static (spliced) |
 | 5 | Divider – Presentations and Debates | static |
 | 6 | Today's Line-Up – 9 Presentations, in group order | static (agenda) |
-| 7 | Debate – Italy and the EU / the Euro (Grp 1 CONTRA / Grp 3 PRO) | 3 clicks |
-| 8 | Kering – Group 2 | 2 clicks |
-| 9 | Debate – Italy's Future in Tech and AI (Grp 4 PRO / Grp 7 CONTRA) | 3 clicks |
-| 10 | Prada Group – Group 5 | 2 clicks |
-| 11 | Inter Milan FC – Group 6 | 2 clicks |
-| 12 | Pirelli – Group 8 | 2 clicks |
-| 13 | EssilorLuxottica – Group 9 | 2 clicks |
+| 7 | Debate – Italy and the EU / the Euro (Grp 1 CONTRA / Grp 3 PRO) | static |
+| 8 | Kering – Group 2 | static |
+| 9 | Debate – Italy's Future in Tech and AI (Grp 4 PRO / Grp 7 CONTRA) | static |
+| 10 | Prada Group – Group 5 | static |
+| 11 | Inter Milan FC – Group 6 | static |
+| 12 | Pirelli – Group 8 | static |
+| 13 | EssilorLuxottica – Group 9 | static |
 | 14 | Thank You! | static |
 | 15 | Backup Slides divider | static |
 | 16 | Trip Schedule (Sep 6 – 11) – itinerary + ← Back to 3 | static |
+
+**Slide 3 is the only animated slide in the deck** – 2 clicks on its bullets.
+Everything from slide 7 on lands complete (Nico, 2026-08-22).
 
 Page numbers are live `slidenum` fields on 13 of 16 slides; title, poll and
 Thank-You are deliberately unnumbered (Class 1 convention).
@@ -264,6 +267,24 @@ behind"), triggers still 1,2,1,2,1, column order still ascending by group.
   script (the `\` line-continuation inside a match string), so the match
   silently failed. Per `Teaching/CLAUDE.md`, edit scripts containing backslashes
   must be written to a `.py` file with the Write tool and run by path.
+
+### 2026-08-22 (final) – animations dropped from slide 7 on
+
+Nico's last note: no animations from slide 7 forward. Once the class hands over
+to the students, a presentation slide should be complete the moment it appears –
+there is no instructor narration to pace a build against.
+
+- `PLAN` in `_animate.py` is now just `{3: dict(bullets="TextBox 6")}`. The
+  debate beats (`Hdr1/Card1` → `Hdr2/Card2` → `Takeaway`) and the company beats
+  (`BriefCard` → `VisitCard`) are gone.
+- Slides 7–13 are deliberately kept **out of** `SKIP` rather than added to it, so
+  a rerun still strips any `<p:timing>` an earlier pass may have written. They
+  report "0 click-beats", which is the intended outcome, not a failure.
+- Deck-wide effect count is now 4 effects on one slide (was 18 click-beats over
+  8 slides). Verified by walking `MainSequence` on all 16 slides: only slide 3
+  returns a non-empty sequence (triggers 1,2,2,1); the other 15 report static.
+- Slideshow-probed 7 / 9 / 11: each shows its full content at entry (headers,
+  cards, logo, brief card), where slide 7 previously opened with chrome only.
 
 ## Open items
 
