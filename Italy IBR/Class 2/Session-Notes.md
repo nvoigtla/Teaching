@@ -276,8 +276,8 @@ behind"), triggers still 1,2,1,2,1, column order still ascending by group.
    2026-08-22**: Group 4 argues the optimistic side. See the session entry below.
 4. ~~Group 8's roster looks short~~ – **confirmed fine by Nico (2026-08-22)**;
    no name is missing from the sheet.
-5. **Push is pending.** `git push origin main` was denied by the permission
-   classifier; retry once Nico allows it (or he pushes from `Teaching/`).
+5. ~~Push is pending~~ – **pushed 2026-08-22**: `43817e2` (rebuild) and
+   `b2f243b` (review-pass fixes) are on `origin/main`.
 6. **Optional:** the itinerary picture is now 7.14 × 5.44" – with Saturday gone
    the grid is squarer, so at the maximum height the chrome allows it no longer
    spans the slide width (dead margins left and right). The table text is the
