@@ -1,0 +1,4 @@
+# Throwaway PowerPoint renders from the verification passes (COM Slide.Export
+# and the slideshow PrintWindow probe). Regenerate them any time with
+# _slideshow_probe.ps1 or a COM export; never worth committing.
+_probe/

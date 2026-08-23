@@ -37,7 +37,8 @@ python _animate.py all apply # injects <p:timing> builds
   the `screenClass` window via `PrintWindow` (flag 2). Run after any OOXML
   surgery; the editing canvas and PNG export can pass while the show fails.
 - Render to PNG for eyeballing: PowerPoint COM `Slide.Export` (no LibreOffice
-  on this machine). Outputs land in `_probe/`.
+  on this machine). Outputs land in `_probe/`, which is **git-ignored** and safe
+  to delete – the folder's `.gitignore` covers it.
 - `_make_itinerary.py` regenerates `_source_images/itinerary_2026.png` from the
   PDF, applying the two edits described in the 2026-08-22 entry below. Run it
   before `_build_Class2.py` if the itinerary PDF is ever replaced.
