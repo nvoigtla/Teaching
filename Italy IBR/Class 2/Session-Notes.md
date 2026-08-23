@@ -2,7 +2,7 @@
 
 Continuity log for Class 2 of the International Business Residential (Italy).
 Course: **MGMTEX 421 – International Business Residential in Italy** (trip to
-Milan & Turin, Sep 6 – 12, 2026). Audience wording everywhere: "executives
+Milan & Turin, Sep 6 – 11, 2026 (flights home the 12th)). Audience wording everywhere: "executives
 pursuing an MBA at UCLA Anderson."
 
 Canonical deck: **`Class 2 - Revised.pptx`** (16 slides, widescreen 13.33 × 7.5",
@@ -38,9 +38,12 @@ python _animate.py all apply # injects <p:timing> builds
   surgery; the editing canvas and PNG export can pass while the show fails.
 - Render to PNG for eyeballing: PowerPoint COM `Slide.Export` (no LibreOffice
   on this machine). Outputs land in `_probe/`.
+- `_make_itinerary.py` regenerates `_source_images/itinerary_2026.png` from the
+  PDF, applying the two edits described in the 2026-08-22 entry below. Run it
+  before `_build_Class2.py` if the itinerary PDF is ever replaced.
 - Build inputs in `_source_images/` – **never delete**: `itinerary_2026.png`
-  (crop of the Legacy Ventures PDF, 2434 × 1546) and the five company logos
-  pulled from Wikimedia Commons.
+  (generated, 2028 × 1546) and the five company logos pulled from Wikimedia
+  Commons.
 
 ## Deck map (display numbers)
 
@@ -51,7 +54,7 @@ python _animate.py all apply # injects <p:timing> builds
 | 3 | Logistics – The Schedule from Here ("Schedule" → 16) | 2 clicks |
 | 4 | **PollEverywhere** – "I will arrive at the hotel in Milan" | static (spliced) |
 | 5 | Divider – Presentations and Debates | static |
-| 6 | Today's Line-Up – 7 presentations, in group order | static (agenda) |
+| 6 | Today's Line-Up – 9 Presentations, in group order | static (agenda) |
 | 7 | Debate – Italy and the EU / the Euro (Grp 1 CONTRA / Grp 3 PRO) | 3 clicks |
 | 8 | Kering – Group 2 | 2 clicks |
 | 9 | Debate – Italy's Future in Tech and AI (Grp 4 PRO / Grp 7 CONTRA) | 3 clicks |
@@ -61,7 +64,7 @@ python _animate.py all apply # injects <p:timing> builds
 | 13 | EssilorLuxottica – Group 9 | 2 clicks |
 | 14 | Thank You! | static |
 | 15 | Backup Slides divider | static |
-| 16 | Trip Schedule (Sep 6 – 12) – itinerary + ← Back to 3 | static |
+| 16 | Trip Schedule (Sep 6 – 11) – itinerary + ← Back to 3 | static |
 
 Page numbers are live `slidenum` fields on 13 of 16 slides; title, poll and
 Thank-You are deliberately unnumbered (Class 1 convention).
@@ -227,6 +230,41 @@ Verified: slide 9 shape text read back via COM (`Hdr1` PRO · Group 4 →
 `Card1` "already on a good path"; `Hdr2` CONTRA · Group 7 → `Card2` "lagging far
 behind"), triggers still 1,2,1,2,1, column order still ascending by group.
 
+### 2026-08-22 (review pass) – Nico's comments applied
+
+- **"9 Presentations", not 7.** Slide 6's title is now "Today's Line-Up –
+  9 Presentations" (9 groups present across the 7 slots, since each debate pairs
+  two groups). For consistency the same count was corrected on slide 2's roadmap
+  band ("9 group presentations – in order of group number") and in the speaker
+  notes on slides 1, 2, 5 and 6 – leaving "Seven" on slide 2 would have
+  contradicted slide 6. Slide 6's note now spells out the 9-groups / 7-slots
+  relationship.
+- **Trip dated Sep 6 – 11 throughout** (the 12th is the flight home): slide 3's
+  bullet and slide 16's title. Slide 3's note adds "flights home on Saturday the
+  12th" so the 12th is not simply lost.
+- **Itinerary regenerated** by a new script, `_make_itinerary.py`:
+  - **Wednesday 11.00 – 12.30 is now Eataly** (uncertainty resolved). Done
+    without re-typing any text: the time line and the "Eataly / Food & Beverage"
+    block are lifted out of the render as image patches, the cell interior is
+    cleared with the cell's own background colour, and the two patches are pasted
+    back as a vertically centred stack. The table's own font (Metropolis), the
+    cyan company colour and the bold sector line are therefore preserved exactly,
+    and "Dolce&Gabbana / Luxury Fashion / or" is gone.
+  - **Saturday column dropped** – the crop now stops on the Friday|Saturday
+    rule, which becomes the new right border.
+  - Nothing is hard-coded: vertical/horizontal rules are found by scanning for
+    dark rows and columns, the target cell is identified by the rules that
+    bracket the "Dolce&Gabbana" text span, and all text positions come from the
+    PDF's own spans via PyMuPDF. Asserts fail loudly if the PDF changes shape.
+  - New image is 2028 × 1546 (aspect 1.312 vs 1.574 before), placed
+    7.14 × 5.44" centred at x 3.10, y 1.36.
+- Re-verified: 16 slides, click structure unchanged (3 = 1,2,2,1 · 7 = 1,2,1,2,1
+  · 8 = 1,1 · 9 = 1,2,1,2,1 · 10–13 = 1,1), slideshow probe clean on 4 / 6 / 9 / 16.
+- **Gotcha re-learned:** a Bash heredoc ate one backslash level in a patch
+  script (the `\` line-continuation inside a match string), so the match
+  silently failed. Per `Teaching/CLAUDE.md`, edit scripts containing backslashes
+  must be written to a `.py` file with the Write tool and run by path.
+
 ## Open items
 
 1. ~~The poll is stale~~ – **Nico updates the PollEverywhere activity himself**
@@ -236,7 +274,12 @@ behind"), triggers still 1,2,1,2,1, column order still ascending by group.
    below.
 3. ~~PRO / CONTRA ↔ Team A / B for the tech-AI debate~~ – **settled
    2026-08-22**: Group 4 argues the optimistic side. See the session entry below.
-4. **Group 8 has only 2 members** (Dickinson, Medley) against 5–6 elsewhere.
-   Flagging in case a name is missing from the sheet.
-5. **Commit and push** the deck, the three pipeline scripts, `_source_images/`
-   and this file – awaiting Nico's confirmation.
+4. ~~Group 8's roster looks short~~ – **confirmed fine by Nico (2026-08-22)**;
+   no name is missing from the sheet.
+5. **Push is pending.** `git push origin main` was denied by the permission
+   classifier; retry once Nico allows it (or he pushes from `Teaching/`).
+6. **Optional:** the itinerary picture is now 7.14 × 5.44" – with Saturday gone
+   the grid is squarer, so at the maximum height the chrome allows it no longer
+   spans the slide width (dead margins left and right). The table text is the
+   same physical size as before; rebuilding the schedule as a NATIVE PowerPoint
+   table is the only way to fill the width and enlarge the text.

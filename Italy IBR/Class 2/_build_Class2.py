@@ -342,7 +342,7 @@ LINEUP = [
 ROADMAP = [
     "Logistics – the schedule from here",
     "Arrival in Milan – a quick poll",
-    "Seven group presentations – in order of group number",
+    "9 group presentations – in order of group number",
 ]
 
 NOTES = {}
@@ -414,7 +414,7 @@ def main():
                            2000, color=GRAY)], algn="ctr")]),
     ] + footer(page=False))
     notes(s[0], "Welcome back. This is our second class, and today the class is "
-                "yours: seven groups present, and we debate. Two broad-topic "
+                "yours: 9 groups present, and we debate. Two broad-topic "
                 "debates and five of the companies we will visit in Milan and "
                 "Turin. I will keep time and moderate, and we close by looking "
                 "ahead to the trip itself.")
@@ -441,7 +441,7 @@ def main():
     put(s[1], rm)
     notes(s[1], "Here is the plan. First the logistics from here to Milan, then a "
                 "quick poll on when you arrive, and then the main event: the "
-                "seven group presentations. Two of them are head-to-head debates "
+                "9 group presentations. Two of them are head-to-head debates "
                 "on broad questions about the Italian economy, and five are "
                 "company presentations on firms we will actually walk into "
                 "during the trip.")
@@ -458,7 +458,7 @@ def main():
              bullet=2, spc_bef=300),
         para([run("Followed by discussion", 2400)], bullet=2, spc_bef=300),
         para([run("Max. 20 minutes per topic", 2400)], bullet=2, spc_bef=300),
-        para([run("Trip to Italy: Sep 6 – 12 – Milan & Turin   (", 2800),
+        para([run("Trip to Italy: Sep 6 – 11 – Milan & Turin   (", 2800),
               run("Schedule", 2800, u=True, link=sched_rid),
               run(")", 2800)], bullet=1, spc_bef=1200),
         para([run("Note: casual dress code", 2400)], bullet=2, spc_bef=300),
@@ -471,8 +471,9 @@ def main():
     notes(s[2], "Three things on timing. Today each group gives a 2 to 3 minute "
                 "executive summary of the video you already submitted, and then "
                 "we open it up; I will cap each topic at 20 minutes so everyone "
-                "gets the floor. The trip runs September 6 to 12, Milan first and "
-                "then Turin, and the full day-by-day schedule is on the last "
+                "gets the floor. The trip runs September 6 to 11, Milan first and "
+                "then Turin, with flights home on Saturday the 12th. The full "
+                "day-by-day schedule is on the last "
                 "slide if you click through. Dress code is casual throughout, and "
                 "do get melatonin before you fly. We meet once more on October 4 "
                 "to debrief and talk through your reports.")
@@ -484,12 +485,12 @@ def main():
                       algn="ctr")]),
         rect("Rectangle 4", E(5.165), E(4.20), E(3.00), E(0.05), GOLD),
     ] + footer(idx=5))
-    notes(s[3], "Now over to you. Seven presentations, in the order on the next "
+    notes(s[3], "Now over to you. 9 groups present, in the order on the next "
                 "slide.")
 
     # -------------------------------------------------------- 5  line-up
     put(s[4], top_bar("Presentations and Debates")
-        + title_block("Today’s Line-Up – Seven Presentations")
+        + title_block("Today’s Line-Up – 9 Presentations")
         + footer(idx=6))
     y0, pitch, bh = E(1.86), E(0.70), E(0.58)
     lu = []
@@ -509,9 +510,10 @@ def main():
                           [para([run(who, 1800, b=1, color=GRAY)], algn="r")],
                           anchor="ctr", autofit=False))
     put(s[4], lu)
-    notes(s[4], "This is the running order, and it follows the sign-up sheet. We "
-                "start with the two debates, where two groups argue opposite "
-                "sides of the same question, and then move to the five company "
+    notes(s[4], "This is the running order, and it follows the group numbers "
+                "from the sign-up sheet. 9 groups present across 7 slots: 2 of "
+                "the slots are head-to-head debates, where two groups argue "
+                "opposite sides of the same question, and 5 are company "
                 "presentations. Each company group introduces the firm and then "
                 "makes the case for or against investing in it.")
 
@@ -634,10 +636,12 @@ def main():
 
     # ------------------------------------------------- 15 trip schedule
     put(s[14], top_bar("Backup")
-        + title_block("Trip Schedule (Sep 6 – 12)")
+        + title_block("Trip Schedule (Sep 6 – 11)")
         + footer(idx=16))
-    ih = E(5.42)
-    iw = int(ih * 2434 / 1546)
+    from PIL import Image as _Im
+    _iw, _ih = _Im.open(os.path.join(IMG, "itinerary_2026.png")).size
+    ih = E(5.44)                       # max that clears the rule and the source line
+    iw = int(ih * _iw / _ih)
     ix = (SLIDE_W - iw) // 2
     picture(s[14], os.path.join(IMG, "itinerary_2026.png"),
             ix, E(1.36), iw, ih, flat=True)
@@ -648,14 +652,14 @@ def main():
                 [para([run("Itinerary: Legacy Ventures, “UCLA Italy 2026”",
                            1200, i=1, color=GRAY)], algn="ctr")]),
     ])
-    notes(s[14], "This is the full week. Milan Sunday through Wednesday, then we "
-                 "coach over to Turin on Thursday morning. The company sessions "
-                 "are the ones five of the groups are presenting on today: "
-                 "Pirelli and EssilorLuxottica and Prada on Tuesday, Kering and "
-                 "Inter on Wednesday, then Lavazza and Carioca in Turin, and "
-                 "Stellantis and LeapFactory on Friday. Bocconi opens the week "
-                 "on Monday morning, and the Wednesday late-morning slot is "
-                 "still being settled between Dolce&Gabbana and Eataly.")
+    notes(s[14], "This is the full week, Sunday the 6th through Friday the "
+                 "11th. Milan Sunday through Wednesday, then we coach over to "
+                 "Turin on Thursday morning. The company sessions are the ones "
+                 "5 of the groups are presenting on today: Pirelli and "
+                 "EssilorLuxottica and Prada on Tuesday, Kering and Inter on "
+                 "Wednesday, then Lavazza and Carioca in Turin, and Stellantis "
+                 "and LeapFactory on Friday. Bocconi opens the week on Monday "
+                 "morning, and the Wednesday late-morning slot is Eataly.")
 
     prs.save(OUT)
     print("wrote %s - %d slides" % (OUT, len(prs.slides._sldIdLst)))
