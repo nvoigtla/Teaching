@@ -298,6 +298,16 @@ artifact.
   points to (evaluate the curve, don't approximate). When a curve and a
   marker disagree, fix the geometry, not the label. Audit every chart
   slide for this before handing a deck over.
+- **A marginal-cost curve that explicitly includes opportunity cost must be
+  drawn UPWARD-SLOPING.** Whenever the chart labels the curve "MC (incl.
+  opportunity cost)" – or the slide otherwise says the cost of one more
+  unit counts the forgone next-best use – the curve rises with quantity,
+  never flat and never falling. The best alternative uses are given up
+  first, so each additional unit sacrifices a less valuable but still
+  positive alternative. A flat MC is correct only when the slide means
+  out-of-pocket cost alone. When the slope changes, recompute every marked
+  optimum (e.g. the Q* where MPV = MC) as the true intersection with the
+  sloped line, per the exactness rule above.
 - **Bars** = gold-fill / navy-edge rectangles. **Markers** = small oval /
   rectangle / triangle shapes, a distinct shape per series (color alone
   isn't enough for handout printing).
@@ -494,6 +504,12 @@ other modules. Reference implementation: `make_m2_outline` in
   ask to change it.
 - When adding new slides, **match the layout of the surrounding
   slides** so the deck feels coherent.
+- **A backup link always sits in the lower-right corner.** When a slide
+  carries more than one link, the backup / jump-to-slide link takes the
+  lower-right corner; a podcast, article, or other external link goes
+  wherever it fits best visually — centred in the space that is left, or
+  attached to the bullet it belongs to. (Module 1 slide 12 is the
+  reference: backup pill in the corner, podcast link centred to its left.)
 - **"Back" navigation buttons go in the lower-right corner.** Any
   jump-back button (e.g., on a backup/detail slide that a content slide
   links to) is a navy rounded-rect pill with white bold "← Back",
@@ -738,6 +754,22 @@ taped video) follows one idea at a time. Calibrated defaults:
 - **Chrome stays put.** The top bar, section tag, title, thin rule, footer,
   page number, and a chart's axes and axis labels are visible from the
   start and are never animated.
+- **Two figures on one slide should not overlap at all — and if they must,
+  the later one has to cover the earlier one completely.** First try to
+  size and place them so they sit apart: shrinking both and stacking them
+  is the better answer whenever the slide has room (the fox and the
+  hedgehog on Module 1 slide 13 were fixed this way). The coverage
+  requirement applies only where the figures genuinely overlap, i.e. where
+  a build deliberately paints successive versions of the SAME figure on
+  the same spot (Module 1's LA-to-SF map sequence, the two-stage copper
+  figure). There, size and place each revealed figure so its bounding box
+  contains every figure revealed before it: a printed handout shows the
+  final state, so an uncovered strip of an earlier figure reads as a messy
+  fringe. Check the whole chain, not just the last pair — figure 2 must
+  cover figure 1, and figure 3 must cover both. When they differ in aspect
+  ratio, grow the later figure (keeping its own proportions) rather than
+  cropping or stretching it, and re-check that it still sits inside the
+  content area.
 - **Build the content, one step per click:**
   - Text slides: reveal one bullet (top-level point) per click.
   - Charts / diagrams: reveal the pieces one at a time, and reveal each
@@ -957,6 +989,19 @@ When I ask for fresh, current examples for a module's concepts:
   multi-letter acronyms (MRPL, MPL, MC, TFC). Single-letter variables
   (Q, K, L, w) stay italic by default. This matches journal-style
   notation and is the cue economists expect.
+- **Indexed symbols get a real subscript: italic letter, subscript
+  index.** Write P₀, Q₁, D₂, S′ the way TeX would set `$P_0$` — the
+  letter italic, the index a true subscript. Outside formulas use
+  PowerPoint's own subscript (an OOXML `baseline` on the index run),
+  not a raised-looking digit typed inline and not a Unicode subscript
+  character. This applies everywhere the symbol appears: chart axis
+  labels, curve labels, table cells, and mentions inside running bullet
+  text ("the market clears at a higher price P₁"). Any letter standing
+  for a price, quantity, or curve is italic even without an index.
+  Module 1's build does this in a deck-wide pass over every text run
+  (`apply_symbol_subscripts`), keyed to the letters P, Q, D and S so
+  ordinary text is never touched — copy that approach rather than
+  editing label call sites one by one.
 - **TeX style, always.** Anything beyond `a = b + c` is OMML / Cambria
   Math, never plain text or Calibri math.
 - **Stacked fractions for ratios** (e.g. %ΔQ / %ΔP); inline `/` only inside
