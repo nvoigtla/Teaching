@@ -9,7 +9,16 @@ pairs that belong together into <p:grpSp> groups (Teaching CLAUDE.md):
                            the graphicFrame (chart/table) on top of it;
   3. picture+caption     — a picture + the small all-italic (≤16 pt)
                            text box sitting directly beneath it (multi-
-                           picture captions group all pictures they span).
+                           picture captions group all pictures they span);
+  4. label+link button   — a text label + the action-button link marker
+                           sitting just to its right, on the slides in
+                           LINK_LABEL_SLIDES. Scoped to an explicit list
+                           because the same geometry on slides 2 / 9 would
+                           swallow the whole bullet box, which has to keep
+                           animating paragraph by paragraph.
+  5. chart curve+label   — on the slides in CHART_GROUPS, each named label
+                           is grouped with its nearest connector, matching
+                           the grouping in Nico's original slides.
 
 Detection is geometric, never by shape name. Spliced slides (polls +
 Excel embed) are never touched. Groups get off/ext = the members'
@@ -28,7 +37,9 @@ from pathlib import Path
 from lxml import etree as ET
 
 HERE = Path(__file__).parent
-DECK = HERE / "Module 1 - Revised.pptx"
+import sys as _sys
+_a = [x for x in _sys.argv[1:] if not x.startswith("-")]
+DECK = Path(_a[0]) if _a else HERE / "Module 1 - Revised.pptx"
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 P = "http://schemas.openxmlformats.org/presentationml/2006/main"
 M = "http://schemas.openxmlformats.org/officeDocument/2006/math"
@@ -36,6 +47,62 @@ R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
 
 SPLICED = {7, 8, 24, 25, 28, 29, 49, 50}   # shifted 2026-08-22 (poll pairs)
+
+# Rule 4 (2026-08-23): slides where a text label and its action-button
+# link marker must move and reveal as ONE object. Display 12's podcast
+# label is revealed on its own animation click, so the button has to ride
+# with it instead of sitting there from the start.
+# 12 = podcast label + Sound button AND the jump pill + its button;
+# 17 = the jump pill + its button. Deliberately NOT the backup
+# slides: display 94's two link labels share one bullets box, so a
+# containment match there would swallow the box with only the first
+# of its two buttons.
+LINK_LABEL_SLIDES = {12, 17}
+
+# Rule 5 (2026-08-23): display 36's avocado chart adopts the grouping of
+# Nico's original slide 30 — each initial curve with its label, and each
+# equilibrium guide with its axis label(s). Each inner list is one group;
+# every label in it is paired with its nearest unused connector.
+CHART_GROUPS = {
+    36: {
+        "D":  ["sdcurve:D", "sdlabel:D"],
+        "S":  ["sdcurve:S", "sdlabel:S"],
+        "Q0": ["sdguide:v:0", "sdxlab:Q0"],
+        "Q1": ["sdguide:h:1", "sdguide:v:1", "sdxlab:Q1", "sdylab:PPeak"],
+        "Q2": ["sdguide:v:2", "sdxlab:Q2"],
+    },
+    # 79: Nico grouped the ice-cream picture with its header (2026-08-23)
+    79: {
+        "cones": ["sdlabel:cones", "sdpic:cones"],
+    },
+    # 81: his two hand-made groups — the D' set and the Q3 set
+    81: {
+        "Dp": ["sdcurve:Dp", "sdlabel:Dp", "sdarrow:ii", "sdlabel:ii"],
+        "Q3": ["sdguide:v:Q3", "sdguide:h:Q3", "sdxlab:Q3"],
+    },
+    # 82: the AI-chips slide. No Q2 set — Nico removed those guides.
+    82: {
+        # (the picture+caption pair is grouped by rule 3, which carries
+        # the sdpic: name through as sdgroup:chips)
+        "D":     ["sdcurve:D", "sdlabel:D"],
+        "Dp":    ["sdcurve:Dp", "sdlabel:Dp", "sdarrow:shift"],
+        "Q1":    ["sdguide:h:P1", "sdguide:v:Q1", "sdylab:P1",
+                  "sdxlab:Q1"],
+    },
+    # 84: Nico's four hand-made groups (2026-08-23). The S' set carries
+    # the ii) arrow and label; the Q3 guides ride with it.
+    84: {
+        "i":  ["sdarrow:i", "sdlabel:i"],
+        "P2": ["sdguide:h:P2", "sdguide:v:Q2", "sdylab:P2", "sdxlab:Q2"],
+        "P1": ["sdguide:h:P1", "sdguide:v:Q1", "sdylab:P1", "sdxlab:Q1"],
+        "Sp": ["sdcurve:Sp", "sdlabel:Sp", "sdarrow:ii", "sdlabel:ii",
+               "sdguide:h:Q3", "sdguide:v:Q3", "sdxlab:Q3"],
+    },
+}
+ACTION_BUTTON_PRSTS = {
+    "actionButtonSound", "actionButtonDocument", "actionButtonMovie",
+    "actionButtonEnd", "actionButtonBeginning", "actionButtonInformation",
+}
 
 
 def q(ns, t):
@@ -68,6 +135,12 @@ def has_text(el):
         if t.text and t.text.strip():
             return True
     return False
+
+
+def text_of(el):
+    parts = [x.text or "" for x in el.iter(q(A, "t"))]
+    parts += [x.text or "" for x in el.iter(q(M, "t"))]
+    return " ".join("".join(parts).split())
 
 
 def prst_of(el):
@@ -181,6 +254,12 @@ def process_slide(tree, disp):
             continue
         # M1: skip large hosting panels (e.g. the Homo-Economicus cream
         # panel holds several text blocks + images — not a callout pair)
+        # an outline agenda band spans the slide — layout, not a callout
+        # (Teaching/CLAUDE.md, Module-Outline section). 11.5" clears the
+        # 12.15" band while keeping the 10.5" "Important" callout on the
+        # shift-table slide.
+        if box["b"][2] > 11.5 * EMU:
+            continue
         if box["b"][3] > 2.5 * EMU:
             continue
         for txt in info:
@@ -241,13 +320,90 @@ def process_slide(tree, disp):
                 m["el"]))
             els = [m["el"] for m in members] + [cap["el"]]
             els.sort(key=lambda e: list(spTree).index(e))
-            make_group(spTree, els, gid)
+            grp3 = make_group(spTree, els, gid)
+            # carry an sdpic: name through to the group so animation plans
+            # can address it as sdgroup:<key> (2026-08-23)
+            for e in els:
+                c3 = e.find(".//" + q(P, "cNvPr"))
+                nm3 = c3.get("name") if c3 is not None else ""
+                if nm3 and nm3.startswith("sdpic:"):
+                    g3 = grp3.find(".//" + q(P, "cNvPr"))
+                    if g3 is not None:
+                        g3.set("name", "sdgroup:" + nm3.split(":", 1)[1])
+                    break
             for e in els:
                 used.add(id(e))
             gid += 1
             n_groups += 1
             print("  s%02d rule3 %d pic(s)+caption grouped"
                   % (disp, len(els) - 1))
+
+    # --- rule 4: link label + its action button -------------------------
+    if disp in LINK_LABEL_SLIDES:
+        for btn in info:
+            if (id(btn["el"]) in used or btn["tag"] != "sp"
+                    or btn["prst"] not in ACTION_BUTTON_PRSTS):
+                continue
+            bx, by, bw, bh = btn["b"]
+            bcx, bcy = bx + bw / 2, by + bh / 2
+            best = None
+            for lab in info:
+                if (id(lab["el"]) in used or lab is btn
+                        or lab["tag"] != "sp" or not lab["text"]):
+                    continue
+                lx, ly, lw, lh = lab["b"]
+                # the button either abuts the box or, when the label is
+                # centred in a box wider than its text, sits inside it
+                slack = 0.60 * EMU
+                if (lx - slack <= bcx <= lx + lw + slack
+                        and ly - slack <= bcy <= ly + lh + slack):
+                    area = lw * lh
+                    if best is None or area < best[0]:
+                        best = (area, lab)
+            if best is None:
+                continue
+            els = sorted([best[1]["el"], btn["el"]],
+                         key=lambda e: list(spTree).index(e))
+            make_group(spTree, els, gid)
+            for e in els:
+                used.add(id(e))
+            gid += 1
+            n_groups += 1
+            print("  s%02d rule4 label+link-button grouped" % disp)
+
+    # --- rule 5: chart curve/guide + its label (paired by name) --------
+    spec_map = CHART_GROUPS.get(disp)
+    if spec_map:
+        by_name = {}
+        for c in spTree:
+            if ET.QName(c).localname not in ("sp", "cxnSp", "pic"):
+                continue
+            cnv = c.find(".//" + q(P, "cNvPr"))
+            if cnv is None or id(c) in used:
+                continue
+            nm = cnv.get("name") or ""
+            if nm.startswith(("sdcurve:", "sdlabel:", "sdguide:",
+                              "sdxlab:", "sdylab:", "sdarrow:",
+                              "sdpic:", "sdcap:")):
+                by_name[nm] = c
+        for key, names in spec_map.items():
+            els = [by_name[n] for n in names if n in by_name]
+            missing = [n for n in names if n not in by_name]
+            if missing:
+                print("  s%02d rule5 %s: MISSING %s" % (disp, key, missing))
+            if len(els) < 2:
+                continue
+            els.sort(key=lambda e: list(spTree).index(e))
+            grp = make_group(spTree, els, gid)
+            gcnv = grp.find(".//" + q(P, "cNvPr"))
+            if gcnv is not None:
+                gcnv.set("name", "sdgroup:%s" % key)
+            for e in els:
+                used.add(id(e))
+            gid += 1
+            n_groups += 1
+            print("  s%02d rule5 sdgroup:%s <- %s"
+                  % (disp, key, ", ".join(names)))
     return n_groups
 
 

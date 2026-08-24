@@ -4,7 +4,8 @@ import sys
 import zipfile
 from lxml import etree as ET
 
-HERE = r"c:\Users\nvoigtla\Claude Code\Teaching\405 Slide Revisions 2026\Module 1"
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 P = "http://schemas.openxmlformats.org/presentationml/2006/main"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"

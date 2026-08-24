@@ -13,7 +13,7 @@ Reuses the Module 1 helper layer (import side effects: defs only).
 """
 from _build_Module1 import (
     CREAM, FADED, GOLD, GOLD_W, GRAY, MARGIN, NAVY, RED, RULE, RULE_W,
-    SLIDE_H, SLIDE_W, WHITE, STEEL, GREEN_BR, GREEN_MB, BLUE_PED,
+    SLIDE_H, SLIDE_W, WHITE, STEEL, GREEN_DK, BLUE_PED,
     Inches, Pt, PP_ALIGN, MSO_ANCHOR, MSO_SHAPE, Presentation, Path,
     _add_hierarchical_bullets, _add_rect, _add_text, _add_slidenum_field,
     _blank_slide, _draw_action_title, _draw_top_bar_tc, _add_drop_shadow,
@@ -636,11 +636,11 @@ def exp_united_chart(prs, page_num):
     _fig_axes(slide, fig, y_title="$ per flight", x_title="Flights",
               label_size=16)
     # MR of flights, ranked: y = 8.9167 - 0.8333x
-    _fig_line(slide, fig, (0.5, 8.5), (9.5, 1.0), color=GREEN_MB,
+    _fig_line(slide, fig, (0.5, 8.5), (9.5, 1.0), color=GREEN_DK,
               weight_pt=2.75)
     _add_text(slide, fig.x(1.6), fig.y(7.35), Inches(2.9), Inches(0.32),
               "MR of flights (ranked)", size=16, bold=True, italic=True,
-              color=GREEN_MB, font="Calibri")
+              color=GREEN_DK, font="Calibri")
     # MC before / after (labels on the empty left side of the plot)
     _fig_line(slide, fig, (0, 3.2), (9.7, 3.2), color=NAVY,
               weight_pt=2.25, dash='dash')
@@ -761,12 +761,12 @@ def exp_dram_sd(prs, page_num):
     _fig_line(slide, fig1, (0.6, 6.4), (6.4, 0.6), color=GOLD,
               weight_pt=2.5)
     _fig_curve_label(slide, fig1, 6.55, 1.0, "D", color=GOLD)
-    _fig_line(slide, fig1, (3.6, 8.4), (9.6, 2.4), color=GREEN_BR,
+    _fig_line(slide, fig1, (3.6, 8.4), (9.6, 2.4), color=GREEN_DK,
               weight_pt=2.5, dash='dash')
-    _fig_curve_label(slide, fig1, 9.15, 3.1, "D’", color=GREEN_BR)
+    _fig_curve_label(slide, fig1, 9.15, 3.1, "D’", color=GREEN_DK)
     _add_arrow(slide, (fig1.x(3.4), fig1.y(4.4)),
                (fig1.x(4.9), fig1.y(5.6)),
-               color=GREEN_BR, weight_pt=2.0, head=True)
+               color=GREEN_DK, weight_pt=2.0, head=True)
     _fig_ylab(slide, fig1, 2.56, "P0", size=14)
     _fig_ylab(slide, fig1, 6.56, "P1", size=14)
 

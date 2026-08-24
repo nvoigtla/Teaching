@@ -121,14 +121,18 @@ PLANS = {
         ["pr:From December 2016:1:1"],
         ["pr:From December 2016:2:2"],
     ],
-    31: [  # market for avocados: setup, demand craze, dry-weather peak, S2
-        ["cxn:8", "t:D#2", "cxn:10", "t:S#1", "cxn:2", "cxn:3",
-         "t:P2 = P0", "t:Q0"],
-        ["pr:Demand curve::0:0", "cxn:9", "t:D#3", "cxn:13"],
-        ["pr:Demand curve::1:1", "cxn:11", "t:S#2", "cxn:14",
-         "cxn:4", "cxn:5", "t:PPeak", "t:Q1"],
-        ["pr:Demand curve::2:2", "cxn:12", "t:S#3", "cxn:6", "cxn:7",
-         "t:Q2"],
+    31: [  # market for avocados — Nico's original choreography
+           # (In Class slide 30), 10 clicks, addressed by shape name.
+        ["n:sdgroup:D", "n:sdgroup:S"],              # 1 initial D and S
+        ["n:sdguide:h:0", "n:sdgroup:Q0"],           # 2 P0 guide + Q0
+        ["pr:Demand curve::0:0"],                    # 3 demand-craze bullet
+        ["n:sdcurve:D1", "n:sdlabel:D1"],            # 4 D shifts out
+        ["pr:Demand curve::1:1"],                    # 5 dry-weather bullet
+        ["n:sdcurve:S1", "n:sdlabel:S1", "n:sdarrow:0"],   # 6 S left
+        ["n:sdgroup:Q1"],                            # 7 PPeak / Q1 set
+        ["pr:Demand curve::2:2"],                    # 8 pest-control bullet
+        ["n:sdcurve:S2", "n:sdlabel:S2", "n:sdarrow:1"],   # 9 S back right
+        ["n:sdguide:h:2", "n:sdgroup:Q2", "n:sdylab:P2 = P0"],  # 10 P2 + Q2
     ],
     33: [  # wheat: chart static; war line, red callout, grain line, green
         ["cxn:0", "t:War begins"],
@@ -215,31 +219,38 @@ PLANS = {
         ["t:WORKERS", "t:Choose a job"],
         ["t:FIRMS", "t:Employ workers"],
     ],
-    71: [  # ceteris paribus: want-to-know + cones static; assume; the list
+    71: [  # ceteris paribus — Nico's 2026-08-23 choreography: the grouped
+           # header+cones panel first, then "assume", then the list
+        ["n:sdgroup:cones"],
         ["pr:Want to know::1:1"],
         ["pr:Want to know::2:7"],
     ],
     72: [  # demand curve: def box static; statement + D curve together
         ["t:The demand curve is", "cxn:2", "t:D#2"],
     ],
-    73: [  # movement vs shift (D): D + P1/Q1 static; i) movement; ii) shift
+    73: [  # movement vs shift (D) — Nico's 2026-08-23 choreography:
+           # i) movement, then the ii) text, then the D' group, then the
+           # Q3 group (which carries his new horizontal dashed segment)
         ["pr:Distinguish between::1:1", "cxn:7", "t:i)", "cxn:4", "cxn:5",
          "t:P2", "t:Q2"],
-        ["pr:Distinguish between::2:3", "cxn:8", "t:D#3", "t:ii)",
-         "cxn:10", "cxn:9", "t:Q3"],
+        ["pr:Distinguish between::2:3"],
+        ["n:sdgroup:Dp"],
+        ["n:sdgroup:Q3"],
     ],
-    74: [  # flour: question static; clipping + quote; badge
-        ["pic:0", "t:“The Coronavirus"],
-        ["osp:3", "t:In-Class Discussion"],
+    74: [  # AI and the demand for chips (2026-08-23): photo, then the
+           # starting demand curve at P1, then the outward shift to D’
+        ["pr:Firms are racing:1:1", "n:sdpic:chips"],
+        ["n:sdgroup:D", "n:sdgroup:Q1"],
+        ["n:sdgroup:Dp"],
     ],
     75: [  # supply curve: def box static; statement + S curve together
         ["t:Upward sloping", "cxn:2", "t:S"],
     ],
-    76: [  # movement vs shift (S): S + P1/Q1 static; i) movement; ii) shift
-        ["pr:Distinguish between::1:1", "cxn:7", "t:i)", "cxn:4", "cxn:5",
-         "t:P2", "t:Q2"],
-        ["pr:Distinguish between::2:3", "cxn:8", "t:S#2", "t:ii)",
-         "cxn:10", "cxn:9", "t:Q3"],
+    76: [  # movement vs shift (S) — Nico's 2026-08-23 choreography:
+           # S with its starting point (P1, Q1) static; then i) movement
+           # with the new (P2, Q2) guides; then the whole S' set.
+        ["pr:Distinguish between::1:2", "n:sdgroup:i", "n:sdgroup:P2"],
+        ["pr:Distinguish between::3:4", "n:sdgroup:Sp"],
     ],
     79: [  # market mechanism: eq bullet + curves + eq point; P1 story; P2
         ["pr:Market equilibrium::0:0", "cxn:6", "t:D", "cxn:7", "t:S",
@@ -430,9 +441,16 @@ def shape_info(el, kinds):
     txt = (txt + " " + " ".join(t.text or ""
                                 for t in el.iter(q(M, "t")))).strip()
     txt = " ".join(txt.split())      # normalize run-boundary whitespace
+    # runs are joined with a space above, which splits symbols the
+    # subscript pass broke into "P" + "0". Keep a concatenated variant so
+    # t:/pr: selectors can still name them (2026-08-23).
+    tight = "".join(t.text or "" for t in el.iter(q(A, "t")))
+    tight = (tight + "".join(t.text or "" for t in el.iter(q(M, "t"))))
+    tight = " ".join(tight.split())
     info = {
         "id": int(cnv.get("id")), "name": cnv.get("name") or "",
         "tag": tag, "x": x, "y": y, "w": w, "h": h, "text": txt,
+        "tight": tight,
         "paras": paras,
         "bul0": sum(1 for (_, l, ne) in paras if l == 0 and ne),
     }
@@ -466,8 +484,8 @@ def collect_shapes(spTree):
                 x, y = int(o.get("x")) / EMU, int(o.get("y")) / EMU
             shapes.append({"id": int(cnv.get("id")), "name": "",
                            "tag": "graphicFrame", "x": x, "y": y,
-                           "w": 0, "h": 0, "text": "", "paras": [],
-                           "bul0": 0,
+                           "w": 0, "h": 0, "text": "", "tight": "",
+                           "paras": [], "bul0": 0,
                            "idx": "gf:%d" % kinds.setdefault("gf", 0)})
             kinds["gf"] += 1
             continue
@@ -502,7 +520,8 @@ def resolve(sel, shapes, used):
         rest = sel.split(":", 1)[1]
         prefix, st, end = rest.rsplit(":", 2)
         for s in shapes:
-            if s["text"].startswith(prefix):
+            if (s["text"].startswith(prefix)
+                    or s.get("tight", "").startswith(prefix)):
                 # one effect per paragraph, so PowerPoint keeps them in
                 # this click group (a single multi-para range effect
                 # gets re-expanded into separate clicks on open)
@@ -517,13 +536,23 @@ def resolve(sel, shapes, used):
             body, n = body.rsplit("#", 1)
             nth = int(n)
         matches = [s for s in shapes
-                   if s["text"].strip().startswith(body)]
+                   if (s["text"].strip().startswith(body)
+                       or s.get("tight", "").strip().startswith(body))]
         if nth is not None:
             if len(matches) < nth:
                 raise KeyError(sel)
             return (matches[nth - 1]["id"], None), None
         for s in matches:
             if s["id"] not in used:
+                used.add(s["id"])
+                return (s["id"], None), None
+        raise KeyError(sel)
+    if sel.startswith("n:"):
+        # exact shape-name selector (names emitted by _sd_chart and the
+        # grouping pass) — immune to index shifts from grouping
+        want = sel[2:]
+        for s in shapes:
+            if s["name"] == want and s["id"] not in used:
                 used.add(s["id"])
                 return (s["id"], None), None
         raise KeyError(sel)

@@ -1,8 +1,9 @@
 # Full-screen slideshow probe: run the real Slide Show and capture the
 # screenClass window via PrintWindow on selected slides.
-param([int[]]$Slides = @(1, 22, 24, 42, 55, 84))
-$folder = "c:\Users\nvoigtla\Claude Code\Teaching\405 Slide Revisions 2026\Module 1"
-$deck = Join-Path $folder "Module 1 - Revised.pptx"
+param([int[]]$Slides = @(1, 2, 9, 12, 17, 24, 94, 98),
+      [string]$Deck = "Module 1 - Revised.pptx")
+$folder = $PSScriptRoot
+$deck = Join-Path $folder $Deck
 $outDir = Join-Path $folder "_probe"
 New-Item -ItemType Directory -Force $outDir | Out-Null
 

@@ -1,8 +1,17 @@
 # Session Notes — Module 1 (combined In-Class + Videos deck)
 
-## PENDING (updated 2026-08-22 — deck is now 99 slides)
+## PENDING (updated 2026-08-23 — deck is 99 slides)
 
 Nico's open requests on **Module 1 - Revised.pptx**:
+0. **Podcast URL for display 12** — the Sound button is a marker until
+   he supplies the link (one line in `_build_Module1.py`).
+0b. **Display 31's speaker note mentions lithium, not tea** — the WSJ
+   lithium link was kept underneath the new tea notes; it looks like it
+   drifted onto the wrong slide. Awaiting his word.
+0c. **Slide 82** — the AI-accelerator image has no attribution line;
+   add one if the source needs crediting. Title ("AI and the Demand
+   for Computer Chips") and the dropped In-Class-Discussion badge are
+   mine, not his.
 1. **Font-upsize rule, first batch** (then Nico reviews; only after
    convergence add the rule to Teaching CLAUDE.md — NOT yet):
    whenever bullet font < 28pt and space allows, enlarge up to 28pt
@@ -26,6 +35,97 @@ Nico's open requests on **Module 1 - Revised.pptx**:
    needs." gold. Images saved as `Image_Hiker_Mountain_with_text` /
    `_no_text` (in `_source_images/`, .png). Update the slide's
    animation plan afterward (PLANS key 8 pre-shift → 10).
+
+## 2026-08-23 — link symbols, hand-edit ports, subscripts, outlines, notes
+
+**One-line summary.** A long iterative pass over `Module 1 - Revised.pptx`
+(still 99 slides): replaced the gold ▶ link glyphs with PowerPoint action
+buttons, ported ~15 rounds of Nico's hand-edits, darkened the deck's green
+everywhere, converted all nine outline slides to the Module 2
+numbered-circle format, added a deck-wide symbol-subscript pass, replaced
+the COVID/flour slide with an AI-and-chips example, and gave every one of
+the 99 slides speaker notes.
+
+### Deck changes, in the order they were asked for
+- **Link symbols.** The gold ▶ / ➜ glyphs are gone deck-wide. Backup jumps
+  use `actionButtonEnd` (navy face, white glyph, 0.434 × 0.210" — 30%
+  smaller than the first cut); external links use the same family keyed to
+  what they open: `actionButtonSound` (podcast, display 12),
+  `actionButtonDocument` (Economist article, 94), `actionButtonMovie`
+  (econimate video, 94), all navy. The back button reverted to the original
+  plain navy "← Back" pill after a detour — see the CLAUDE.md rule.
+- **Invisible click overlays removed.** Transparent rects over the bullet
+  boxes on displays 2 and 9 were why Nico could not select the text; the
+  action button is now the click target itself.
+- **Hand-edits ported** (all with dated comments in the build script):
+  slide 1 comic raised to y 162547 EMU; display 11 third map enlarged;
+  13 fox/hedgehog shrunk and stacked; 15 Einstein sub-bullet deleted and
+  the block re-centred; 23 both figures raised clear of the footer; 26
+  arrow + D′ label moved; 78 definition callout moved up; 79 cones panel
+  grouped + his 3-click build; 81 D′ label / ii) arrow / ii) label moved,
+  a new horizontal dashed segment, two groups, his 4-click build; 84 the
+  P1↔P2 / Q1↔Q2 relabelling (the movement along S starts at the LOWER
+  price — the build had it inverted), i)/ii) repositioned, a new dashed
+  segment, four groups, his 2-click build; 89/90 arrow and label positions;
+  92 reworded and hidden.
+- **Slide 36 (avocados).** Rebuilt to Nico's original 10-click
+  choreography from `Module 1 - In Class.pptx` slide 30, with his grouping
+  of curves and labels. Fixed a real defect: the two shift arrows were on
+  the WRONG beats (S→S1 fired with the demand shift, S→S2 with S1).
+- **Green.** `#00B050` is gone from both decks; `GREEN_DK = #007A33` is the
+  only green left. `GREEN_BR` and `GREEN_MB` were retired outright.
+- **Symbols.** `apply_symbol_subscripts()` is a deck-wide build pass that
+  splits any P/Q/D/S symbol followed by an index into an italic base run
+  plus a true subscript run (66 paragraphs). Keyed to those four letters
+  so ordinary text is untouched.
+- **Slide 82** replaces the COVID/flour example: AI and the demand for
+  chips, Nico's `AI_Accelerator_Chips` image, D → D′ outward shift, no
+  supply curve (Video 3 has not reached equilibrium yet) and no Q2 guides
+  (they would suggest the price stays constant).
+- **Outline slides.** All nine now use the Module 2 numbered-circle format
+  via a `make_m1_outline` copied from `make_m2_outline`, over a new
+  6-item `M1_OUTLINE`. Item rows are pixel-identical across slides
+  (rows from y 1.635", pitch 0.910"); bands all (0.900", 12.150 × 0.900").
+- **Speaker notes.** `FILL_NOTES` (58 entries) + `apply_fill_notes()` fills
+  every slide that had none. It never overwrites existing notes, which is
+  what keeps the source-ported notes and — critically — the eight
+  PollEverywhere payload notes intact. Verified byte-for-byte.
+
+### Toolchain changes worth knowing
+- **Shape names drive grouping and animation now.** `_sd_chart` and the
+  hand-built charts name their shapes (`sdcurve:D`, `sdguide:h:Q3`,
+  `sdarrow:ii`, `sdpic:chips`, …); `_group_pass.py` rule 5 pairs them by
+  name from `CHART_GROUPS` and names the group `sdgroup:<key>`;
+  `_animate.py` gained an `n:<name>` selector. This replaced a
+  nearest-connector heuristic that silently grouped slide 36's "D" label
+  with the *S2* curve — names removed that whole class of error.
+- `_group_pass.py` also gained rule 4 (label + link button) and a
+  width guard so outline bands (12.15") are not treated as callouts,
+  while the 10.5" "Important" box on display 92 still groups.
+- `_animate.py`: `t:`/`pr:` selectors now match a concatenated-run variant
+  as well, because the subscript split turned "P0" into "P 0".
+- Path-independence fixes: `_diff_slides.py`, `_verify_anim.ps1`,
+  `_slideshow_probe.ps1` and `_export_probe.ps1` all take a deck argument
+  and use `$PSScriptRoot`.
+- New audit helpers: `_diff_all.py` (full-deck member-level hand-edit
+  diff), `_check_jumps.py`, `_scan_glyphs.py`, `_audit_overlays.py`,
+  `_audit_notes.py`, `_extract_timing.py` (pull a slide's click structure
+  out of any deck — this is how his choreography was adopted),
+  `_shape_idx.py`, `_dump_edits.py`, `_sheet_probe.py`, `_crop_probe.py`.
+
+### Rules added to `Teaching/CLAUDE.md` (all at his request)
+1. Overlay coverage — two figures should not overlap at all where the slide
+   has room; where a build paints successive versions of the SAME figure,
+   the later one must fully contain the earlier.
+2. A backup link always sits in the lower-right corner; a podcast/article
+   link goes wherever it fits best.
+3. Indexed symbols get a real subscript, italic letter.
+
+### Verification, every round
+`_verify_anim.ps1` (COM click-count check, all 65 animated slides) +
+`_check_jumps.py` + a full-screen `_slideshow_probe.ps1` run including a
+live PollEv slide. Hand-edits were always captured with `_diff_all.py`
+against a side-path build BEFORE rebuilding.
 
 ## 2026-08-22 — backup section + missing poll slides (deck 87 → 99)
 

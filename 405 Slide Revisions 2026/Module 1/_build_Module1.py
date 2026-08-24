@@ -26,7 +26,7 @@ from pptx.chart.data import CategoryChartData, XyChartData
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
-from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.shapes import MSO_SHAPE, MSO_SHAPE_TYPE
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.oxml.ns import qn
@@ -2298,7 +2298,10 @@ import uuid
 CREAM = RGBColor(0xFD, 0xF6, 0xE6)
 RED = RGBColor(0xC0, 0x00, 0x00)           # source red (C00000)
 RED_FF = RGBColor(0xFF, 0x00, 0x00)        # source bright red (FF0000)
-GREEN_BR = RGBColor(0x00, 0xB0, 0x50)      # source bright green (shifts)
+GREEN_DK = RGBColor(0x00, 0x7A, 0x33)      # the deck's shift green
+                                           # (2026-08-23, Nico: the
+                                           # source bright green was
+                                           # too light everywhere)
 BLUE_PED = RGBColor(0x00, 0x70, 0xC0)      # source blue (S', excess supply)
 STEEL = RGBColor(0x95, 0xB3, 0xD7)         # source light-blue supply curve
 DARKRED = RGBColor(0xA2, 0x16, 0x2A)       # source MC bar red
@@ -2557,14 +2560,19 @@ def _fig_line(slide, fig, p0, p1, *, color=NAVY, weight_pt=2.5, dash=None,
 
 def _fig_guide(slide, fig, pt, *, color=GRAY, to_x=True, to_y=True,
                weight_pt=1.25, dash='dash'):
-    """Dashed guide lines from a point to both axes."""
+    """Dashed guide lines from a point to both axes. Returns
+    (horizontal, vertical) so callers can name/group them."""
     x, y = pt
+    h = v = None
     if to_y:
-        _add_arrow(slide, (fig.x(0), fig.y(y)), (fig.x(x), fig.y(y)),
-                   color=color, weight_pt=weight_pt, head=False, dash=dash)
+        h = _add_arrow(slide, (fig.x(0), fig.y(y)), (fig.x(x), fig.y(y)),
+                       color=color, weight_pt=weight_pt, head=False,
+                       dash=dash)
     if to_x:
-        _add_arrow(slide, (fig.x(x), fig.y(y)), (fig.x(x), fig.y(0)),
-                   color=color, weight_pt=weight_pt, head=False, dash=dash)
+        v = _add_arrow(slide, (fig.x(x), fig.y(y)), (fig.x(x), fig.y(0)),
+                       color=color, weight_pt=weight_pt, head=False,
+                       dash=dash)
+    return h, v
 
 
 def _fig_ylab(slide, fig, yv, label, *, color=NAVY, size=18, bold=False,
@@ -2672,6 +2680,129 @@ def _link_runs(slide, mapping):
 # Problem-Set pointer (generic label per the Module-2 decision)
 # --------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------
+# Slide-jump link symbol (2026-08-23, Nico)
+# --------------------------------------------------------------------------
+# The ORIGINAL deck marked its backup jumps with PowerPoint action
+# buttons — actionButtonEnd going in, actionButtonBeginning coming back —
+# in white fill with a thin black outline. We keep that geometry (the
+# glyph is drawn by the preset, so it always points the right way) and
+# only recolour it into the deck palette: GOLD fill, NAVY glyph + hairline
+# border. The preset draws its glyph in the LINE colour, which is why the
+# border is navy rather than gold.
+#
+# The button IS the click target, so the old 100%-transparent overlay
+# rectangles are gone. Those sat on top of the bullet text box and made
+# it impossible to select or drag the text in the editor — the symptom
+# Nico hit on slide 2.
+
+# The preset shades its glyph from the shape FILL (darkenLess) and only
+# strokes it with the line colour, so a WHITE face renders the triangle
+# grey, not navy — verified 2026-08-23 against a render. An all-navy
+# symbol therefore means a navy face with the glyph knocked out in white.
+JUMP_BTN_FILL = NAVY          # backup-jump symbol: navy only (Nico)
+JUMP_BTN_GLYPH = WHITE        # glyph knocked out of the navy face
+EXT_BTN_FILL = NAVY           # 2026-08-23: external markers go navy too,
+EXT_BTN_GLYPH = WHITE         # matching the jump buttons (Nico)
+
+
+def _add_jump_button(slide, target_slide, *, left, top,
+                     width=Inches(0.434), height=Inches(0.210), back=False):
+    """Standalone action button carrying a jump-to-slide action.
+    back=False -> points right (into the backup section);
+    back=True  -> points left (unused since the back pills reverted to
+    plain '← Back' text)."""
+    shp = slide.shapes.add_shape(
+        MSO_SHAPE.ACTION_BUTTON_BEGINNING if back
+        else MSO_SHAPE.ACTION_BUTTON_END,
+        int(left), int(top), int(width), int(height))
+    shp.fill.solid()
+    shp.fill.fore_color.rgb = JUMP_BTN_FILL
+    shp.line.color.rgb = JUMP_BTN_GLYPH
+    shp.line.width = Pt(1.0)
+    shp.shadow.inherit = False
+    _add_drop_shadow(shp)
+    shp.click_action.target_slide = target_slide
+    return shp
+
+
+EXT_LINK_SHAPES = {
+    "sound": MSO_SHAPE.ACTION_BUTTON_SOUND,        # podcast / audio
+    "document": MSO_SHAPE.ACTION_BUTTON_DOCUMENT,  # article / paper
+    "movie": MSO_SHAPE.ACTION_BUTTON_MOVIE,        # video
+}
+
+
+def _add_ext_link_button(slide, kind, *, left, top, url=None,
+                         width=Inches(0.60), height=Inches(0.30)):
+    """External-link marker in the same action-button family as the
+    slide-jump buttons, but keyed to WHAT it opens rather than to a
+    direction — so an audio, an article and a video are told apart at a
+    glance (2026-08-23, replaces the gold ▶ glyphs)."""
+    shp = slide.shapes.add_shape(EXT_LINK_SHAPES[kind],
+                                 int(left), int(top),
+                                 int(width), int(height))
+    shp.fill.solid()
+    shp.fill.fore_color.rgb = EXT_BTN_FILL
+    shp.line.color.rgb = EXT_BTN_GLYPH
+    shp.line.width = Pt(1.25)
+    shp.shadow.inherit = False
+    _add_drop_shadow(shp)
+    if url:
+        shp.click_action.hyperlink.address = url
+    return shp
+
+
+def _add_jump_pill(slide, target_slide, *, left, top, width, label,
+                   height=Inches(0.5), back=False, fill=None,
+                   text_color=None, border=None, size=15):
+    """Labelled jump affordance: a rounded pill carrying the label and the
+    jump, with the action button seated in a reserved left inset (also
+    clickable). Forward pills are white with a gold border and navy text;
+    back pills are navy with white text."""
+    fill = WHITE if fill is None else fill
+    text_color = NAVY if text_color is None else text_color
+    pill = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
+                                  int(left), int(top),
+                                  int(width), int(height))
+    try:
+        pill.adjustments[0] = 0.28
+    except Exception:
+        pass
+    pill.fill.solid()
+    pill.fill.fore_color.rgb = fill
+    if border is None:
+        pill.line.fill.background()
+    else:
+        pill.line.color.rgb = border
+        pill.line.width = Pt(1.5)
+    pill.shadow.inherit = False
+    _add_drop_shadow(pill)
+    btn_w, btn_h = Inches(0.35), Inches(0.196)
+    inset = Inches(0.13)
+    tf = pill.text_frame
+    tf.word_wrap = False
+    tf.margin_left = int(inset + btn_w + Inches(0.09))
+    tf.margin_right = Inches(0.07)
+    tf.margin_top = 0
+    tf.margin_bottom = 0
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.LEFT
+    r = p.add_run()
+    r.text = label
+    r.font.name = "Calibri"
+    r.font.size = Pt(size)
+    r.font.bold = True
+    r.font.color.rgb = text_color
+    pill.click_action.target_slide = target_slide
+    btn = _add_jump_button(slide, target_slide,
+                           left=int(left + inset),
+                           top=int(top + (height - btn_h) / 2),
+                           width=btn_w, height=btn_h, back=back)
+    return pill, btn
+
+
 def _add_ps_pointer(slide, *, left, top, label="Problem Set 1",
                     width=Inches(2.5), height=Inches(0.5)):
     shp = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
@@ -2711,7 +2842,8 @@ def slide_01_title(prs):
     # economics comic strip from the original title slide (kept per Nico
     # 2026-08-20; flat clipping with a soft shadow)
     _add_media_image(slide, "ic_s01_rId3.png",
-                     left=Inches(2.22), top=Inches(0.45),
+                     left=Inches(2.22), top=162547,
+                     # hand-tweaked from Inches(0.45) on 2026-08-23
                      width=Inches(8.90), rounded=False, shadow=True)
     _add_text(slide, Inches(0.9), Inches(3.18), SLIDE_W - Inches(1.8),
               Inches(1.35),
@@ -2747,8 +2879,9 @@ def slide_02_introduction(prs):
             ("BA in Economics and Environmental Engineering in Berlin/Germany", 1),
             ("MSc in Environmental Engineering and Technology Policy from MIT", 1),
             ("PhD in Economics in Barcelona", 1),
-            ([("My research: Why are some countries so rich and others so poor?  ", {}),
-              ("▶", {'color': GOLD, 'bold': True})], 0, {}),
+            # the backup jump button is wired in wire_backup_links()
+            ("My research: Why are some countries so rich and others so poor?",
+             0),
             ("Contact information", 0),
             ([("Email: ", {}),
               ("nico.v@ucla.edu", {'underline': True})], 1, {}),
@@ -2868,9 +3001,9 @@ def slide_07_why_econ(prs):
         [
             ("Make better decisions as managers (and as consumers, "
              "students, etc.)", 0),
-            ([("To understand, anticipate, contest, and make economic "
-               "arguments  ", {}),
-              ("▶", {'color': GOLD, 'bold': True})], 0, {}),
+            # the backup jump button is wired in wire_backup_links()
+            ("To understand, anticipate, contest, and make economic "
+             "arguments", 0),
             ("Provides the foundation for most of the MBA program "
              "(e.g., finance, marketing, strategy)", 0),
         ],
@@ -2937,9 +3070,12 @@ def slide_09_find_model(prs):
         _add_media_image(slide, "ic_s09_rId4.png",
                          left=Inches(8.05), top=Inches(2.00),
                          width=Inches(4.60), rounded=True)
+        # hand-tweaked 2026-08-23: enlarged from left 8.02" / width 4.65"
+        # so the last map fully covers the two painted under it (handout
+        # rule — see the Animations section of Teaching/CLAUDE.md)
         _add_media_image(slide, "ic_s09_rId5.png",
-                         left=Inches(8.02), top=Inches(1.95),
-                         width=Inches(4.65), rounded=True)
+                         left=7018559, top=Inches(1.95),
+                         width=4566889, rounded=True)
 
     return content_slide(
         prs, 9, TAG_MODELS, "Find a Model That Matches Your Needs",
@@ -3026,18 +3162,23 @@ def slide_10_homo_economicus(prs):
     _add_media_image(slide, "ic_s10_rId5.png",
                      left=Inches(11.75), top=Inches(0.62),
                      width=Inches(1.02), rounded=False, shadow=False)
-    box = slide.shapes.add_textbox(int(Inches(2.35)), int(Inches(6.35)),
-                                   int(Inches(8.6)), int(Inches(0.45)))
+    box = slide.shapes.add_textbox(int(Inches(0.28)), int(Inches(6.35)),
+                                   int(Inches(7.89)), int(Inches(0.45)))
     tf = box.text_frame
     tf.word_wrap = False
     p = tf.paragraphs[0]
     p.alignment = PP_ALIGN.CENTER
-    r1 = p.add_run(); r1.text = "Podcast: Who is Homo Economicus?  "
+    r1 = p.add_run(); r1.text = "Podcast: Who is Homo Economicus?"
     r1.font.name = "Calibri"; r1.font.size = Pt(20)
     r1.font.bold = True; r1.font.color.rgb = NAVY
-    r2 = p.add_run(); r2.text = "▶"
-    r2.font.name = "Calibri"; r2.font.size = Pt(20)
-    r2.font.bold = True; r2.font.color.rgb = GOLD
+    # 2026-08-23 (Nico): the backup link owns the lower-right corner, so
+    # the podcast link is centred in the space left of it. Box centre
+    # 4.225" puts the 4.208"-wide label (PIL / Calibri Bold 20 pt) at
+    # 2.121"-6.329", and its Sound button at 6.449"-7.049" — clear of the
+    # backup pill, which starts at 8.99". No URL in the source deck, so
+    # the button is a marker until Nico supplies the podcast link.
+    _add_ext_link_button(slide, "sound",
+                         left=Inches(6.449), top=Inches(6.421))
 
     _draw_footer(slide, FOOTER_TEXT, 10)
     _set_notes(slide, (
@@ -3066,12 +3207,15 @@ def slide_10_homo_economicus(prs):
 
 def slide_11_hedgehogs(prs):
     def extras(slide):
+        # hand-tweaked 2026-08-23: both shrunk (from 4.15" / 4.40") and
+        # stacked so fox and hedgehog sit apart. Two different animals, so
+        # the later one is NOT meant to cover the earlier one.
         _add_media_image(slide, "ic_s11_rId3.png",
                          left=Inches(7.95), top=Inches(1.55),
-                         width=Inches(4.15), rounded=False, shadow=False)
+                         width=2565636, rounded=False, shadow=False)
         _add_media_image(slide, "ic_s11_rId4.png",
-                         left=Inches(8.15), top=Inches(2.90),
-                         width=Inches(4.40), rounded=False, shadow=False)
+                         left=7109999, top=3698004,
+                         width=2725117, rounded=False, shadow=False)
 
     return content_slide(
         prs, 11, TAG_INTRO, "Economists as Hedgehogs",
@@ -3169,16 +3313,15 @@ def slide_13_making_most_2(prs):
             ([("I will always explain the ", {}),
               ("economic intuition", {'italic': True, 'underline': True}),
               (" behind the math", {})], 1, {}),
-            ([("Try explaining core concepts to others (", {}),
-              ("“If you can’t explain it to a six-year-old, you don’t "
-               "understand it yourself.”  ", {'italic': True}),
-              ("Albert Einstein)", {})], 1, {}),
             ("Learn from & with your peers", 0),
             ("Also: Actively use AI tools to deepen your insights. "
              "Challenge AI!", 1),
             ("You will not be allowed to use AI in exams", 1),
         ],
         size=24, sub_size=22, line_spacing_pts=10,
+        # 2026-08-23: the "explain it to a six-year-old" line was deleted
+        # (it is not an Einstein quote); block re-centred by hand
+        bullets_top=2095743, bullets_height=3626634,
     )
 
 
@@ -3294,142 +3437,125 @@ def make_roadmap(prs, page_num, *, tag=None):
 # Outline of Module 1 — one maker for all 9 outline slides
 # --------------------------------------------------------------------------
 
-M1_VIDEOS_BLOCK = ("Videos 1–4:", "Economics Fundamentals",
-                   [("markets", "Markets"),
-                    ("ds", "Demand and Supply"),
-                    ("eq", "Equilibrium")])
-M1_INCLASS_BLOCK = ("In class:", "Basic Principles of Economic Thinking",
-                    [("opp", "Economic costs include opportunity costs"),
-                     ("sunk", "Ignore sunk costs"),
-                     ("cba", "Use cost-benefit and marginal analysis")])
-
-
-def make_m1_outline(prs, page_num, *, tag=None, order="videos_first",
-                    headers=True, video_header="Videos 1–4:",
-                    highlight=None, faded_blocks=(), now_line=False,
-                    ps_pointer=False, parent_bold=None,
-                    active_blocks=()):
-    """Outline of Module 1.
-
-    order: 'videos_first' (in-class deck) or 'inclass_first' (video decks).
-    headers: render the bold-underlined block headers.
-    highlight: sub-item key ('markets','ds','eq','opp','sunk','cba') or
-        'now' — gets bold navy on a cream band; when set, every other
-        line renders FADED unless listed in parent_bold.
-    faded_blocks: block names ('videos','inclass') rendered faded even
-        without a highlight.
-    now_line: insert "Now: A few mini-cases and applications" between the
-        blocks (slide 17 pattern) — it is the highlight when
-        highlight == 'now'.
-    parent_bold: set of block names whose parent line stays bold navy
-        even in highlight mode (source slides 33/44/49 keep 'Basic
-        Principles of Economic Thinking' bold).
-    """
-    slide = _blank_slide(prs)
-    _draw_top_bar_tc(slide, tag or TAG_OUTLINE)
-    _draw_action_title(slide, "Outline of Module 1")
-
-    parent_bold = parent_bold or set()
-    blocks = [("videos", M1_VIDEOS_BLOCK), ("inclass", M1_INCLASS_BLOCK)]
-    if order == "inclass_first":
-        blocks = [("inclass", M1_INCLASS_BLOCK), ("videos", M1_VIDEOS_BLOCK)]
-
-    y = Inches(1.75)
-    header_h = Inches(0.44)
-    item_h = Inches(0.48)
-    sub_h = Inches(0.42)
-    block_gap = Inches(0.28)
-
-    def _color_for(block_name, is_current, kind):
-        # kind: 'header' | 'item' | 'sub'
-        if highlight is None:
-            return FADED if block_name in faded_blocks else NAVY
-        if is_current or block_name in active_blocks:
-            return NAVY
-        if kind in ('item', 'header') and block_name in parent_bold:
-            return NAVY
-        return FADED
-
-    for block_name, (header, item, subs) in blocks:
-        if headers:
-            hdr_color = _color_for(block_name, False, 'header')
-            hdr_text = video_header if block_name == "videos" else header
-            _add_text(slide, MARGIN + Inches(0.25), y, Inches(11.5),
-                      header_h, hdr_text, size=22, bold=True,
-                      underline=True, color=hdr_color, font="Calibri")
-            y += header_h
-        item_color = _color_for(block_name, False, 'item')
-        item_bold = (highlight is None and block_name not in faded_blocks) \
-            or block_name in parent_bold or block_name in active_blocks
-        _add_text(slide, MARGIN + Inches(0.55), y, Inches(11.2), item_h,
-                  item, size=24, bold=item_bold, color=item_color,
-                  font="Calibri")
-        y += item_h
-        for key, sub in subs:
-            is_cur = (highlight == key)
-            color = _color_for(block_name, is_cur, 'sub')
-            if is_cur:
-                band = slide.shapes.add_shape(
-                    MSO_SHAPE.ROUNDED_RECTANGLE,
-                    int(MARGIN + Inches(0.85)), int(y - Inches(0.03)),
-                    int(Inches(7.6)), int(sub_h + Inches(0.06)))
-                band.adjustments[0] = 0.5
-                band.fill.solid()
-                band.fill.fore_color.rgb = CREAM
-                band.line.color.rgb = GOLD
-                band.line.width = Pt(1.0)
-                band.shadow.inherit = False
-                _add_drop_shadow(band)
-            _add_hierarchical_bullets(
-                slide, left=MARGIN + Inches(1.05), top=y,
-                width=Inches(10.6), height=sub_h,
-                items=[(sub, 0, {'size': 22, 'bold': is_cur,
-                                 'color': color})],
-                size=22, line_spacing_pts=0)
-            y += sub_h
-        # "Now: mini-cases" line goes between the blocks (after videos)
-        if now_line and block_name == "videos":
-            y += Inches(0.10)
-            if highlight == 'now':
-                band = slide.shapes.add_shape(
-                    MSO_SHAPE.ROUNDED_RECTANGLE,
-                    int(MARGIN + Inches(0.35)), int(y - Inches(0.03)),
-                    int(Inches(8.2)), int(item_h + Inches(0.04)))
-                band.adjustments[0] = 0.5
-                band.fill.solid()
-                band.fill.fore_color.rgb = CREAM
-                band.line.color.rgb = GOLD
-                band.line.width = Pt(1.0)
-                band.shadow.inherit = False
-                _add_drop_shadow(band)
-            _add_text(slide, MARGIN + Inches(0.55), y, Inches(11.2),
-                      item_h, "Now: A few mini-cases and applications",
-                      size=24, bold=True, color=NAVY, font="Calibri")
-            y += item_h
-        y += block_gap
-
-    if ps_pointer:
-        _add_ps_pointer(slide, left=Inches(9.7), top=Inches(2.35))
-
-    _draw_footer(slide, FOOTER_TEXT, page_num)
-    return slide
-
-
-
-# ==========================================================================
-#  BATCH B — slides 16–35: outlines, markets, S/D mini-cases (+ MW imports)
-# ==========================================================================
-
 RED_MW = RGBColor(0xD5, 0x1A, 0x1A)        # MW's ▼ red
 
 
+M1_OUTLINE = [
+    ("Markets",
+     "Video 2: what a market is, and how far it extends"),
+    ("Demand and supply",
+     "Video 3: how buyers and sellers each respond to price"),
+    ("Equilibrium",
+     "Video 4: where demand meets supply, and what moves it"),
+    ("Economic costs include opportunity costs",
+     "In class: the value of the best alternative you gave up"),
+    ("Ignore sunk costs",
+     "In class: money already spent should not drive the next decision"),
+    ("Use cost-benefit and marginal analysis",
+     "In class: compare the benefit of the next unit with its cost"),
+]
+
+
+def make_m1_outline(prs, page_num, *, tag=None, title="Outline of Module 1",
+                   descriptions=False, highlight_idx=None,
+                   highlight_set=None, ps_pointer=False):
+    """Module outline in the format converged on for Module 2 (2026-08-23,
+    Nico): gold 0.58" circle at x 1.15 with a 25 pt bold navy number, the
+    item title 25 pt bold navy and its description 22 pt gray beside it.
+    Every item RESERVES the description row, so item positions are
+    pixel-identical on every agenda slide; the description text shows only
+    for the current topic(s), or for all of them when descriptions=True.
+    Section agendas put a cream band with a gold border behind the current
+    item (no band on the descriptive overview)."""
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, tag or TAG_OUTLINE)
+    _draw_action_title(slide, title)
+
+    hi = set()
+    if highlight_idx is not None:
+        hi.add(highlight_idx)
+    if highlight_set:
+        hi.update(highlight_set)
+    if descriptions:
+        hi = set(range(len(M1_OUTLINE)))
+
+    title_h = Inches(0.42)
+    desc_h = Inches(0.38)
+    gap = Inches(0.11)
+    pitch = title_h + desc_h + gap
+    total = pitch * len(M1_OUTLINE) - gap
+    top = Inches(1.60)
+    bottom = Inches(7.02)
+    y = int(top + max(0, (bottom - top - total) // 2))
+
+    last_hi_y = None
+    for i, (item, desc) in enumerate(M1_OUTLINE):
+        if not descriptions and i in hi:
+            last_hi_y = y
+            band = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE, int(Inches(0.90)),
+                int(y - Inches(0.06)), int(Inches(12.15)),
+                int(title_h + desc_h + Inches(0.10)))
+            try:
+                band.adjustments[0] = 0.35
+            except Exception:
+                pass
+            band.fill.solid()
+            band.fill.fore_color.rgb = CREAM
+            band.line.color.rgb = GOLD
+            band.line.width = Pt(1.0)
+            band.shadow.inherit = False
+            _add_drop_shadow(band)
+        circ = slide.shapes.add_shape(
+            MSO_SHAPE.OVAL, int(Inches(1.15)), int(y + Inches(0.02)),
+            int(Inches(0.58)), int(Inches(0.58)))
+        circ.fill.solid()
+        circ.fill.fore_color.rgb = GOLD
+        circ.line.fill.background()
+        circ.shadow.inherit = False
+        tf = circ.text_frame
+        tf.margin_left = 0
+        tf.margin_right = 0
+        tf.margin_top = 0
+        tf.margin_bottom = 0
+        para = tf.paragraphs[0]
+        para.alignment = PP_ALIGN.CENTER
+        run = para.add_run()
+        run.text = str(i + 1)
+        run.font.size = Pt(25)
+        run.font.bold = True
+        run.font.color.rgb = NAVY
+        run.font.name = "Calibri"
+        rows = [([(item[0].upper() + item[1:],
+                   {'bold': True, 'size': 25, 'color': NAVY})], 0,
+                 {'bullet_style': 'none', 'space_before_pts': 0})]
+        if i in hi:
+            rows.append(([(desc, {'size': 22, 'color': GRAY})], 0,
+                         {'bullet_style': 'none', 'space_before_pts': 0}))
+        _add_hierarchical_bullets(
+            slide, Inches(2.05), y, Inches(11.0), title_h + desc_h,
+            rows, size=25, line_spacing_pts=0)
+        y = int(y + pitch)
+
+    _draw_footer(slide, FOOTER_TEXT, page_num)
+    if ps_pointer:
+        # pointer box bottom-right over the footer, drawn last so it sits
+        # in front; raised when the band reaches that corner
+        ptr_y = Inches(6.68)
+        if last_hi_y is not None and last_hi_y > Inches(5.6):
+            ptr_y = Inches(5.30)
+        _add_ps_pointer(slide, left=Inches(10.55), top=ptr_y)
+    return slide
+
+
 def slide_16_outline(prs):
-    return make_m1_outline(prs, 16, ps_pointer=True)
+    return make_m1_outline(prs, 16, descriptions=True,
+                           ps_pointer=True)
 
 
 def slide_17_outline_now(prs):
-    return make_m1_outline(prs, 17, highlight='now', now_line=True,
-                           active_blocks=('videos',))
+    # the three video topics are done; the in-class trio is next
+    return make_m1_outline(prs, 17, highlight_set={3, 4, 5})
 
 
 # --------------------------------------------------------------------------
@@ -3509,11 +3635,13 @@ def slide_21_heatwaves(prs):
     _draw_action_title(slide,
                        "How Can Heatwaves Affect the Demand for ACs?")
     # LA Times headline clipping (flat) + AC-households map
+    # both hand-tweaked 2026-08-23 (from top 1.62" / 3.85") so the lower
+    # figure stops clear of the footer rule at 7.15"
     _add_media_image(slide, "ic_s21_rId3.png",
-                     left=Inches(1.55), top=Inches(1.62),
+                     left=Inches(1.55), top=1288504,
                      width=Inches(10.25), rounded=False, shadow=True)
     _add_media_image(slide, "ic_s21_rId2.png",
-                     left=Inches(4.35), top=Inches(3.85),
+                     left=Inches(4.35), top=3202270,
                      width=Inches(4.65), rounded=False, shadow=True)
     _draw_footer(slide, FOOTER_TEXT, 21)
     _add_pollbreak_badge(slide)
@@ -3622,27 +3750,42 @@ def slide_26_tea(prs):
 
 
 def _sd_chart(slide, fig, curves, points, xlabels, ylabels, arrows=(),
-              guide_color=GREEN_BR):
+              guide_color=GREEN_DK):
     """Generic native S/D chart: curves = list of (p0, p1, color, dash,
     label, label_pos); points = list of logical intersections that get
     dashed guides; xlabels/ylabels = [(val, text)] axis labels."""
+    # 2026-08-23: every shape gets a stable name (sdcurve/sdlabel/
+    # sdguide/sdxlab/sdylab/sdarrow) so the grouping pass and the
+    # per-slide animation plans can address it without relying on
+    # connector indices, which shift as soon as anything is grouped.
+    def _nm(shape, name):
+        if shape is not None:
+            try:
+                shape.name = name
+            except Exception:
+                pass
+        return shape
+
     _fig_axes(slide, fig)
-    for pt in points:
-        _fig_guide(slide, fig, pt, color=guide_color)
+    for i, pt in enumerate(points):
+        h, v = _fig_guide(slide, fig, pt, color=guide_color)
+        _nm(h, "sdguide:h:%d" % i)
+        _nm(v, "sdguide:v:%d" % i)
     for p0, p1, color, dash, label, lpos in curves:
-        _fig_line(slide, fig, p0, p1, color=color, weight_pt=2.75,
-                  dash=dash)
+        _nm(_fig_line(slide, fig, p0, p1, color=color, weight_pt=2.75,
+                      dash=dash), "sdcurve:%s" % (label or "?"))
         if label:
-            _fig_curve_label(slide, fig, lpos[0], lpos[1], label,
-                             color=color)
+            _nm(_fig_curve_label(slide, fig, lpos[0], lpos[1], label,
+                                 color=color), "sdlabel:%s" % label)
     for val, text in xlabels:
-        _fig_xlab(slide, fig, val, text, size=16)
+        _nm(_fig_xlab(slide, fig, val, text, size=16), "sdxlab:%s" % text)
     for val, text in ylabels:
-        _fig_ylab(slide, fig, val, text, size=16)
-    for a0, a1, color in arrows:
-        _add_arrow(slide, (fig.x(a0[0]), fig.y(a0[1])),
-                   (fig.x(a1[0]), fig.y(a1[1])),
-                   color=color, weight_pt=2.0, head=True)
+        _nm(_fig_ylab(slide, fig, val, text, size=16), "sdylab:%s" % text)
+    for i, (a0, a1, color) in enumerate(arrows):
+        _nm(_add_arrow(slide, (fig.x(a0[0]), fig.y(a0[1])),
+                       (fig.x(a1[0]), fig.y(a1[1])),
+                       color=color, weight_pt=2.0, head=True),
+            "sdarrow:%d" % i)
 
 
 def slide_27_tea_market(prs):
@@ -3836,13 +3979,13 @@ def slide_33_wheat(prs):
     _add_arrow(slide, (x_war, y_top), (x_war, y_bot),
                color=RED_FF, weight_pt=2.25, head=False)
     _add_arrow(slide, (x_grain, y_top + int(img_h) * 0.06), (x_grain, y_bot),
-               color=GREEN_BR, weight_pt=2.25, head=False)
+               color=GREEN_DK, weight_pt=2.25, head=False)
     _add_text(slide, x_war - Inches(1.85), y_top - Inches(0.05),
               Inches(1.75), Inches(0.3), "War begins", size=14, bold=True,
               color=RED_FF, font="Calibri", align=PP_ALIGN.RIGHT)
     _add_text(slide, x_grain + Inches(0.10), y_top + int(img_h) * 0.06,
               Inches(2.6), Inches(0.55), "Black sea grain agreement",
-              size=14, bold=True, color=GREEN_BR, font="Calibri")
+              size=14, bold=True, color=GREEN_DK, font="Calibri")
 
     # Callouts under the chart
     box1 = slide.shapes.add_textbox(int(Inches(3.4)), int(Inches(6.15)),
@@ -3858,12 +4001,12 @@ def slide_33_wheat(prs):
     p = tf.paragraphs[0]; p.alignment = PP_ALIGN.CENTER
     r = p.add_run(); r.text = "Supply shifts right  ➜  P falls"
     r.font.name = "Calibri"; r.font.size = Pt(16); r.font.bold = True
-    r.font.color.rgb = GREEN_BR
+    r.font.color.rgb = GREEN_DK
     _add_arrow(slide, (Inches(5.1), Inches(6.15)), (x_war, y_bot),
                color=RED_FF, weight_pt=1.5, head=True)
     _add_arrow(slide, (Inches(10.2), Inches(6.15)),
                (x_grain + Inches(0.3), y_bot),
-               color=GREEN_BR, weight_pt=1.5, head=True)
+               color=GREEN_DK, weight_pt=1.5, head=True)
 
     _draw_footer(slide, FOOTER_TEXT, 34)
     return slide
@@ -3952,13 +4095,10 @@ def slide_35_la_market(prs):
 
 GREEN_CELL = RGBColor(0x92, 0xD0, 0x50)     # fruit-table value fill
 RED_CELL = RGBColor(0xFF, 0x50, 0x50)       # fruit-table opp-cost fill
-GREEN_MB = RGBColor(0x00, 0xB0, 0x50)       # MB line green (source)
 
 
 def slide_36_outline_opp(prs):
-    return make_m1_outline(prs, 39, headers=False, highlight='opp',
-                           parent_bold=('inclass',),
-                           faded_blocks=('videos',), tag=TAG_OPP)
+    return make_m1_outline(prs, 39, highlight_idx=3, tag=TAG_OPP)
 
 
 def slide_37_opp_costs(prs):
@@ -4243,9 +4383,7 @@ def slide_47_us_2022(prs):
 # --------------------------------------------------------------------------
 
 def slide_48_outline_sunk(prs):
-    return make_m1_outline(prs, 51, headers=False, highlight='sunk',
-                           parent_bold=('inclass',),
-                           faded_blocks=('videos',), tag=TAG_SUNK)
+    return make_m1_outline(prs, 51, highlight_idx=4, tag=TAG_SUNK)
 
 
 def slide_49_sunk_costs(prs):
@@ -4340,9 +4478,7 @@ def slide_52_sunk_takeaway(prs):
 # --------------------------------------------------------------------------
 
 def slide_53_outline_cba(prs):
-    return make_m1_outline(prs, 56, headers=False, highlight='cba',
-                           parent_bold=('inclass',),
-                           faded_blocks=('videos',), tag=TAG_CBA)
+    return make_m1_outline(prs, 56, highlight_idx=5, tag=TAG_CBA)
 
 
 def slide_54_cba(prs):
@@ -4520,7 +4656,7 @@ def slide_56_continuous(prs):
               Inches(2.6), Inches(0.62), "Quantity\n(of good or activity)",
               size=16, bold=True, italic=True, color=NAVY, font="Calibri")
     # MB: y = 9 - x ; MC: y = 1 + 0.75x ; intersection (4.57, 4.43)
-    _fig_line(slide, fig, (0.5, 8.5), (7.5, 1.5), color=GREEN_MB,
+    _fig_line(slide, fig, (0.5, 8.5), (7.5, 1.5), color=GREEN_DK,
               weight_pt=2.75)
     _fig_line(slide, fig, (0.5, 1.375), (8.5, 7.375), color=RED,
               weight_pt=2.75)
@@ -4532,7 +4668,7 @@ def slide_56_continuous(prs):
               align=PP_ALIGN.CENTER)
     _add_text(slide, fig.x(7.6), fig.y(1.7), Inches(2.6), Inches(0.35),
               "MB (Marginal Benefit)", size=18, bold=True, italic=True,
-              color=GREEN_MB, font="Calibri")
+              color=GREEN_DK, font="Calibri")
     _add_text(slide, fig.x(6.9), fig.y(7.7), Inches(2.6), Inches(0.35),
               "MC (Marginal Cost)", size=18, bold=True, italic=True,
               color=RED, font="Calibri")
@@ -4625,8 +4761,7 @@ def slide_60_v1_roadmap(prs):
 
 
 def slide_61_v1_outline(prs):
-    return make_m1_outline(prs, 64, tag=TAG_V1, order="inclass_first",
-                           headers=True, video_header="Videos:")
+    return make_m1_outline(prs, 64, tag=TAG_V1, descriptions=True)
 
 
 # ---- Video 2 (62–66) ------------------------------------------------------
@@ -4636,8 +4771,7 @@ def slide_62_v2_title(prs):
 
 
 def slide_63_v2_outline(prs):
-    return make_m1_outline(prs, 66, tag=TAG_V2, order="inclass_first",
-                           headers=False, highlight='markets')
+    return make_m1_outline(prs, 66, tag=TAG_V2, highlight_idx=0)
 
 
 def slide_64_v2_market_def(prs):
@@ -4733,8 +4867,7 @@ def slide_67_v3_title(prs):
 
 
 def slide_68_v3_outline(prs):
-    return make_m1_outline(prs, 71, tag=TAG_V3, order="inclass_first",
-                           headers=False, highlight='ds')
+    return make_m1_outline(prs, 71, tag=TAG_V3, highlight_idx=1)
 
 
 def slide_69_v3_ds_analysis(prs):
@@ -4787,7 +4920,8 @@ def slide_70_v3_demand_def(prs):
         slide,
         "the relationship between the quantity of a good that consumers "
         "are willing to buy and the price of the good, ",
-        top=Inches(3.35), height=Inches(1.5), size=24)
+        # hand-tweaked 2026-08-23 from left 1.35" / top 3.35"
+        left=1417320, top=1422849, height=Inches(1.5), size=24)
     _draw_footer(slide, FOOTER_TEXT, 73)
     _set_notes(slide, DEMAND_DEF_NOTE)
     return slide
@@ -4795,14 +4929,19 @@ def slide_70_v3_demand_def(prs):
 
 def slide_71_v3_ceteris_paribus(prs):
     def extras(slide):
-        _add_text(slide, Inches(8.05), Inches(1.95), Inches(4.6),
-                  Inches(0.62),
-                  "Things are not held constant between these two cones",
-                  size=16, bold=True, color=NAVY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
-        _add_media_image(slide, "v3_s05_rId3.png",
-                         left=Inches(8.25), top=Inches(2.60),
-                         width=Inches(4.25), rounded=True)
+        # named so _group_pass.py can merge the header with the picture
+        # (Nico grouped them by hand on 2026-08-23)
+        hdr = _add_text(slide, Inches(8.05), Inches(1.95), Inches(4.6),
+                        Inches(0.62),
+                        "Things are not held constant between these two "
+                        "cones",
+                        size=16, bold=True, color=NAVY, font="Calibri",
+                        align=PP_ALIGN.CENTER)
+        hdr.name = "sdlabel:cones"
+        pic = _add_media_image(slide, "v3_s05_rId3.png",
+                               left=Inches(8.25), top=Inches(2.60),
+                               width=Inches(4.25), rounded=True)
+        pic.name = "sdpic:cones"
 
     slide = content_slide(
         prs, 74, TAG_V3,
@@ -4876,20 +5015,39 @@ def slide_73_v3_move_vs_shift_d(prs):
         _add_text(slide, fig.x(2.55), fig.y(7.6), Inches(0.6), Inches(0.3),
                   "i)", size=18, bold=True, italic=True, color=RED,
                   font="Calibri")
-        _fig_line(slide, fig, (3.6, 8.4), (9.7, 2.3), color=GREEN_BR,
-                  weight_pt=2.75, dash='dash')
-        _fig_curve_label(slide, fig, 9.35, 2.9, "D’", color=GREEN_BR)
-        _fig_guide(slide, fig, (7.5, 4.5), to_y=False, color=GRAY)
-        _add_arrow(slide, (fig.x(5.3), fig.y(5.3)), (fig.x(6.4), fig.y(6.0)),
-                   color=GREEN_BR, weight_pt=2.0, head=True)
-        _add_text(slide, fig.x(6.0), fig.y(6.9), Inches(0.7), Inches(0.3),
-                  "ii)", size=18, bold=True, italic=True, color=GREEN_BR,
-                  font="Calibri")
+        # 2026-08-23 (Nico): darker green throughout, D’ label / ii)
+        # arrow / ii) label repositioned by hand, and a new horizontal
+        # dashed segment carrying P1 out to Q3. The D’ set and the Q3 set
+        # are each grouped (names below drive _group_pass.py rule 5).
+        dprime = _fig_line(slide, fig, (3.6, 8.4), (9.7, 2.3),
+                           color=GREEN_DK, weight_pt=2.75, dash='dash')
+        dprime.name = "sdcurve:Dp"
+        dplab = _fig_curve_label(slide, fig, 9.6070, 2.9284, "D’",
+                                 color=GREEN_DK)
+        dplab.name = "sdlabel:Dp"
+        _, q3v = _fig_guide(slide, fig, (7.5, 4.5), to_y=False, color=GRAY)
+        if q3v is not None:
+            q3v.name = "sdguide:v:Q3"
+        # the new segment: P1 level, from Q1 across to Q3
+        q3h = _add_arrow(slide, (fig.x(4.5), fig.y(4.5)),
+                         (fig.x(7.5), fig.y(4.5)),
+                         color=GRAY, weight_pt=1.25, head=False,
+                         dash='dash')
+        q3h.name = "sdguide:h:Q3"
+        arr = _add_arrow(slide, (fig.x(4.7488), fig.y(4.6852)),
+                         (fig.x(5.8488), fig.y(5.3852)),
+                         color=GREEN_DK, weight_pt=2.0, head=True)
+        arr.name = "sdarrow:ii"
+        iilab = _add_text(slide, fig.x(4.8488), fig.y(5.8716), Inches(0.7),
+                          Inches(0.3),
+                          "ii)", size=18, bold=True, italic=True,
+                          color=GREEN_DK, font="Calibri")
+        iilab.name = "sdlabel:ii"
         _fig_ylab(slide, fig, 4.5, "P1", size=16)
         _fig_ylab(slide, fig, 6.5, "P2", size=16)
         _fig_xlab(slide, fig, 4.5, "Q1", size=16)
         _fig_xlab(slide, fig, 2.5, "Q2", size=16)
-        _fig_xlab(slide, fig, 7.5, "Q3", size=16)
+        _fig_xlab(slide, fig, 7.5, "Q3", size=16).name = "sdxlab:Q3"
 
     return content_slide(
         prs, 76, TAG_V3, "The Market Demand Curve",
@@ -4899,7 +5057,8 @@ def slide_73_v3_move_vs_shift_d(prs):
             ([("i) Movement along D:", {'italic': True, 'color': RED}),
               (" changes in quantity demanded when price changes, ", {}),
               ("all else constant", {'italic': True})], 0, {}),
-            ([("ii) Shift in Demand:", {'italic': True, 'color': GREEN_BR}),
+            ([("ii) Shift in Demand:",
+               {'italic': True, 'color': GREEN_DK}),
               (" changes in demand due to non-price factors", {})], 0, {}),
             ([("e.g. higher income shifts the demand curve to the right "
                "(from ", {}),
@@ -4912,38 +5071,72 @@ def slide_73_v3_move_vs_shift_d(prs):
     )
 
 
-def slide_74_v3_flour(prs):
-    slide = _blank_slide(prs)
-    _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "COVID and Demand for Flour")
-    box = _add_hierarchical_bullets(
-        slide, left=MARGIN, top=Inches(1.60),
-        width=RULE_W, height=Inches(0.95),
-        items=[("While in quarantine, many people started to bake. How did "
-                "the COVID lockdown affect the demand for flour?", 0)],
-        size=24, line_spacing_pts=0)
-    box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-    _add_media_image(slide, "v3_s08_rId2.png",
-                     left=Inches(2.05), top=Inches(2.85),
-                     width=Inches(4.35), rounded=False, shadow=True)
-    quote = slide.shapes.add_textbox(int(Inches(6.85)), int(Inches(3.35)),
-                                     int(Inches(5.6)), int(Inches(2.0)))
-    tf = quote.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    r = p.add_run()
-    r.text = "“The Coronavirus Baking Boom Has Made It Hard to Find Flour.”"
-    r.font.name = "Calibri"; r.font.size = Pt(22)
-    r.font.italic = True; r.font.color.rgb = NAVY
-    p2 = tf.add_paragraph()
-    r2 = p2.add_run()
-    r2.text = "- TIME (May 13, 2020)"
-    r2.font.name = "Calibri"; r2.font.size = Pt(16)
-    r2.font.italic = True; r2.font.color.rgb = GRAY
-    _add_discussion_break(slide, text="In-Class Discussion",
-                          width=Inches(4.8))
-    _draw_footer(slide, FOOTER_TEXT, 77)
-    return slide
+def slide_74_v3_ai_chips(prs):
+    """Replaces the COVID/flour example (2026-08-23, Nico): the AI build-out
+    as a non-price factor shifting the demand for chips outward. Deliberately
+    no supply curve — Video 3 has not reached market equilibrium yet."""
+    def extras(slide):
+        # Nico's own image, dropped into _source_images on 2026-08-23
+        # (converted from .webp — python-pptx cannot embed webp). No
+        # source credit: it is not a Wikimedia Commons photo.
+        pic = _add_media_image(slide, "AI_Accelerator_Chips.png",
+                               left=Inches(0.95), top=Inches(3.70),
+                               width=Inches(5.30), rounded=True)
+        pic.name = "sdpic:chips"
+
+        fig = SimpleFig(8.1, 6.40, 4.3, 4.05, 10, 10)
+        _fig_axes(slide, fig, label_size=16)
+        # D: y = 9 - x ; D': y = 12 - x (a parallel outward shift), so at
+        # the price P1 = 4.5 the quantity demanded goes from 4.5 to 7.5
+        gh, gv = _fig_guide(slide, fig, (4.5, 4.5), color=GRAY)
+        if gh is not None:
+            gh.name = "sdguide:h:P1"
+        if gv is not None:
+            gv.name = "sdguide:v:Q1"
+        d = _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD,
+                      weight_pt=2.75)
+        d.name = "sdcurve:D"
+        _fig_curve_label(slide, fig, 8.05, 1.35, "D",
+                         color=GOLD).name = "sdlabel:D"
+        dp = _fig_line(slide, fig, (3.6, 8.4), (9.7, 2.3), color=GREEN_DK,
+                       weight_pt=2.75, dash='dash')
+        dp.name = "sdcurve:Dp"
+        _fig_curve_label(slide, fig, 9.6070, 2.9284, "D’",
+                         color=GREEN_DK).name = "sdlabel:Dp"
+        # 2026-08-23 (Nico): no Q2 guides here. Holding the price fixed
+        # while the quantity moves out would suggest the price does not
+        # change, and this slide has no supply curve to settle that.
+        arr = _add_arrow(slide, (fig.x(4.7488), fig.y(4.6852)),
+                         (fig.x(5.8488), fig.y(5.3852)),
+                         color=GREEN_DK, weight_pt=2.0, head=True)
+        arr.name = "sdarrow:shift"
+        _fig_ylab(slide, fig, 4.5, "P1", size=16).name = "sdylab:P1"
+        _fig_xlab(slide, fig, 4.5, "Q1", size=16).name = "sdxlab:Q1"
+
+    return content_slide(
+        prs, 77, TAG_V3, "AI and the Demand for Computer Chips",
+        [
+            ("Firms are racing to build the capacity to train and run AI "
+             "models", 0),
+            ("Demand for AI accelerator chips is rising dramatically",
+             0),
+        ],
+        size=24, sub_size=22, line_spacing_pts=16,
+        bullets_width=Inches(6.6), bullets_top=Inches(1.60),
+        bullets_height=Inches(1.85),
+        extras=extras,
+        notes=(
+            "The AI build-out is a textbook non-price factor. Nothing about "
+            "the price of a chip changed; what changed is how badly firms "
+            "want them, because training and running AI models takes large "
+            "numbers of specialised processors. So the whole demand curve "
+            "moves out, from D to D prime. Read it at a fixed price: at P1 "
+            "the quantity demanded goes from Q1 to Q2. Note that there is "
+            "no supply curve here yet — we are still looking at demand on "
+            "its own, and we will put the two sides together in Video 4. "
+            "That is also why the chart does not mark a new quantity: "
+            "without supply we cannot say what happens to the price."),
+    )
 
 
 SUPPLY_DEF_NOTE = (
@@ -4993,29 +5186,58 @@ def slide_76_v3_move_vs_shift_s(prs):
         fig = SimpleFig(8.1, 6.40, 4.3, 4.05, 10, 10)
         _fig_axes(slide, fig, label_size=16)
         # S: y = x + 1 ; movement (4.5,5.5) -> (3,4); S': y = x - 1.5
-        _fig_guide(slide, fig, (4.5, 5.5), color=GRAY)
-        _fig_guide(slide, fig, (3, 4), color=GRAY)
+        h2, v2 = _fig_guide(slide, fig, (4.5, 5.5), color=GRAY)
+        if h2 is not None:
+            h2.name = "sdguide:h:P2"
+        if v2 is not None:
+            v2.name = "sdguide:v:Q2"
+        h1, v1 = _fig_guide(slide, fig, (3, 4), color=GRAY)
+        if h1 is not None:
+            h1.name = "sdguide:h:P1"
+        if v1 is not None:
+            v1.name = "sdguide:v:Q1"
         _fig_line(slide, fig, (1, 2), (7.5, 8.5), color=STEEL,
                   weight_pt=2.75)
         _fig_curve_label(slide, fig, 7.7, 8.9, "S", color=NAVY)
-        _fig_line(slide, fig, (3, 4), (4.5, 5.5), color=RED, weight_pt=4.5)
-        _add_text(slide, fig.x(2.9), fig.y(5.6), Inches(0.6), Inches(0.3),
-                  "i)", size=18, bold=True, italic=True, color=RED,
-                  font="Calibri")
-        _fig_line(slide, fig, (2.5, 1), (9.6, 8.1), color=GREEN_BR,
-                  weight_pt=2.75, dash='dash')
-        _fig_curve_label(slide, fig, 9.4, 8.6, "S’", color=GREEN_BR)
-        _fig_guide(slide, fig, (7, 5.5), to_y=False, color=GRAY)
-        _add_arrow(slide, (fig.x(5.6), fig.y(6.4)), (fig.x(6.8), fig.y(6.4)),
-                   color=GREEN_BR, weight_pt=2.0, head=True)
-        _add_text(slide, fig.x(6.0), fig.y(7.2), Inches(0.7), Inches(0.3),
-                  "ii)", size=18, bold=True, italic=True, color=GREEN_BR,
-                  font="Calibri")
-        _fig_ylab(slide, fig, 5.5, "P1", size=16)
-        _fig_ylab(slide, fig, 4.0, "P2", size=16)
-        _fig_xlab(slide, fig, 4.5, "Q1", size=16)
-        _fig_xlab(slide, fig, 3.0, "Q2", size=16)
-        _fig_xlab(slide, fig, 7.0, "Q3", size=16)
+        _fig_line(slide, fig, (3, 4), (4.5, 5.5), color=RED,
+                  weight_pt=4.5).name = "sdarrow:i"
+        # hand-tweaked 2026-08-23 (from 2.9, 5.6)
+        i_lab = _add_text(slide, fig.x(3.0512), fig.y(5.1481), Inches(0.6),
+                          Inches(0.3),
+                          "i)", size=18, bold=True, italic=True, color=RED,
+                          font="Calibri")
+        i_lab.name = "sdlabel:i"
+        _fig_line(slide, fig, (2.5, 1), (9.6, 8.1), color=GREEN_DK,
+                  weight_pt=2.75, dash='dash').name = "sdcurve:Sp"
+        _fig_curve_label(slide, fig, 9.4, 8.6, "S’",
+                         color=GREEN_DK).name = "sdlabel:Sp"
+        _, q3v = _fig_guide(slide, fig, (7, 5.5), to_y=False, color=GRAY)
+        if q3v is not None:
+            q3v.name = "sdguide:v:Q3"
+        # new 2026-08-23: carries P2 across from Q2 to Q3
+        q3h = _add_arrow(slide, (fig.x(4.5), fig.y(5.5)),
+                         (fig.x(7.0), fig.y(5.5)),
+                         color=GRAY, weight_pt=1.25, head=False,
+                         dash='dash')
+        q3h.name = "sdguide:h:Q3"
+        # arrow + label hand-tweaked 2026-08-23 (from 5.6->6.8 at 6.4,
+        # and label at 6.0, 7.2)
+        _add_arrow(slide, (fig.x(5.7860), fig.y(6.0815)),
+                   (fig.x(6.9860), fig.y(6.0815)),
+                   color=GREEN_DK, weight_pt=2.0,
+                   head=True).name = "sdarrow:ii"
+        _add_text(slide, fig.x(6.1860), fig.y(6.8815), Inches(0.7),
+                  Inches(0.3),
+                  "ii)", size=18, bold=True, italic=True, color=GREEN_DK,
+                  font="Calibri").name = "sdlabel:ii"
+        # 2026-08-23 (Nico): the movement along S runs from the LOWER
+        # price to the higher one, so (4.0, 3.0) is point 1 and
+        # (5.5, 4.5) is point 2 — the labels used to be the other way up.
+        _fig_ylab(slide, fig, 5.5, "P2", size=16).name = "sdylab:P2"
+        _fig_ylab(slide, fig, 4.0, "P1", size=16).name = "sdylab:P1"
+        _fig_xlab(slide, fig, 4.5, "Q2", size=16).name = "sdxlab:Q2"
+        _fig_xlab(slide, fig, 3.0, "Q1", size=16).name = "sdxlab:Q1"
+        _fig_xlab(slide, fig, 7.0, "Q3", size=16).name = "sdxlab:Q3"
 
     return content_slide(
         prs, 79, TAG_V3, "The Market Supply Curve",
@@ -5025,11 +5247,15 @@ def slide_76_v3_move_vs_shift_s(prs):
             ([("i) Movement along S:", {'italic': True, 'color': RED}),
               (" changes in quantity supplied when price changes, ", {}),
               ("all else constant", {'italic': True})], 0, {}),
-            ([("ii) Shifts in S:", {'italic': True, 'color': GREEN_BR}),
+            # 2026-08-23 (Nico): sub-bullet under i), same format as the
+            # sub-bullet under ii)
+            ("Existing firms supply more when prices rise", 1),
+            ([("ii) Shifts in S:", {'italic': True, 'color': GREEN_DK}),
               (" changes in supply; e.g. a shift to the right (from ", {}),
               ("S", {'italic': True}), (" to ", {}),
               ("S′", {'italic': True}), (")", {})], 0, {}),
-            ("Example: better technology, lower input prices", 1),
+            ("Example: better technology, lower input prices, new firms "
+             "enter the market", 1),
         ],
         size=24, sub_size=22, line_spacing_pts=16,
         bullets_width=Inches(6.6),
@@ -5044,8 +5270,7 @@ def slide_77_v4_title(prs):
 
 
 def slide_78_v4_outline(prs):
-    return make_m1_outline(prs, 81, tag=TAG_V4, order="inclass_first",
-                           headers=False, highlight='eq')
+    return make_m1_outline(prs, 81, tag=TAG_V4, highlight_idx=2)
 
 
 def slide_79_v4_mechanism(prs):
@@ -5168,9 +5393,9 @@ def _v4_shift_chart(slide, *, d_shift=False, s_shift=False):
               weight_pt=2.75)
     _fig_curve_label(slide, fig, 9.1, 9.4, "S", color=NAVY)
     if d_shift:
-        _fig_line(slide, fig, (3.4, 8.6), (10.6, 1.4), color=GREEN_BR,
+        _fig_line(slide, fig, (3.4, 8.6), (10.6, 1.4), color=GREEN_DK,
                   weight_pt=2.75, dash='dash')
-        _fig_curve_label(slide, fig, 10.7, 1.9, "D’", color=GREEN_BR)
+        _fig_curve_label(slide, fig, 10.7, 1.9, "D’", color=GREEN_DK)
     if s_shift:
         _fig_line(slide, fig, (3.4, 0.9), (10.9, 8.4), color=BLUE_PED,
                   weight_pt=2.75, dash='dash')
@@ -5205,10 +5430,11 @@ def slide_81_v4_shift_demand(prs):
     def extras(slide):
         _v4_header(slide, [("SHIFT IN DEMAND", {})])
         fig = _v4_shift_chart(slide, d_shift=True)
-        _add_arrow(slide, (fig.x(5.6), fig.y(5.0)), (fig.x(7.0), fig.y(6.0)),
-                   color=GREEN_BR, weight_pt=2.0, head=True)
+        # hand-tweaked 2026-08-23 (from logical 5.6,5.0 -> 7.0,6.0)
+        _add_arrow(slide, (9208767, 4715447), (9667492, 4309110),
+                   color=GREEN_DK, weight_pt=2.0, head=True)
         _add_text(slide, fig.x(7.2), fig.y(3.4), Inches(1.5), Inches(0.6),
-                  "Shift in\ndemand", size=13, bold=True, color=GREEN_BR,
+                  "Shift in\ndemand", size=13, bold=True, color=GREEN_DK,
                   font="Calibri")
 
     return content_slide(
@@ -5238,9 +5464,11 @@ def slide_82_v4_shift_supply(prs):
     def extras(slide):
         _v4_header(slide, [("SHIFT IN SUPPLY", {})])
         fig = _v4_shift_chart(slide, s_shift=True)
-        _add_arrow(slide, (fig.x(6.2), fig.y(6.6)), (fig.x(7.8), fig.y(6.0)),
+        # arrow + label hand-tweaked 2026-08-23 (from logical
+        # 6.2,6.6 -> 7.8,6.0 and label at 6.3, 7.7)
+        _add_arrow(slide, (9634727, 3729609), (10044302, 4099941),
                    color=BLUE_PED, weight_pt=2.0, head=True)
-        _add_text(slide, fig.x(6.3), fig.y(7.7), Inches(1.4), Inches(0.6),
+        _add_text(slide, 9861803, 3551301, Inches(1.4), Inches(0.6),
                   "Shift in\nsupply", size=13, bold=True, color=BLUE_PED,
                   font="Calibri")
 
@@ -5398,15 +5626,17 @@ def slide_84_shift_table(prs):
     r2.text = ("As a general rule, when ")
     r3 = p.add_run(); r3.text = "both"
     r4 = p.add_run()
-    r4.text = (" curves shift at the same time, we will know with "
-               "certainty the direction of change of either the "
-               "equilibrium price or quantity, but never both.")
+    # reworded by Nico 2026-08-23
+    r4.text = (" curves shift the effect on equilibrium price and "
+               "quantity depends on how much the curves shift.")
     for r in (r2, r3, r4):
         r.font.name = "Calibri"; r.font.size = Pt(16)
         r.font.italic = True; r.font.color.rgb = NAVY
     r3.font.underline = True
 
     _draw_footer(slide, FOOTER_TEXT, 87)
+    # hidden by Nico 2026-08-23 (kept in the deck, skipped in the show)
+    slide._element.set("show", "0")
     _set_notes(slide, (
         "Adopted from Melanie Wasserman's Module 1 deck: the four "
         "single-curve shifts and their price/quantity effects, plus the "
@@ -5431,18 +5661,21 @@ def slide_ac_solution(prs):
         _fig_axes(slide, fig, label_size=16)
         _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD, weight_pt=2.75)
         _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=GOLD)
-        _fig_line(slide, fig, (3.4, 8.6), (10.0, 2.0), color=GREEN_BR,
+        _fig_line(slide, fig, (3.4, 8.6), (10.0, 2.0), color=GREEN_DK,
                   weight_pt=2.75, dash='dash')
-        _fig_curve_label(slide, fig, 9.65, 2.6, "D’", color=GREEN_BR)
-        _add_arrow(slide, (fig.x(4.6), fig.y(5.4)), (fig.x(6.0), fig.y(6.2)),
-                   color=GREEN_BR, weight_pt=2.0, head=True)
+        # label + arrow hand-tweaked 2026-08-23 (from 9.65/2.6 and
+        # 5.4->6.2; the D’ curve itself Nico left where it was)
+        _fig_curve_label(slide, fig, 9.939, 2.7346, "D’", color=GREEN_DK)
+        _add_arrow(slide, (fig.x(4.6), fig.y(4.8308)),
+                   (fig.x(6.0), fig.y(5.6308)),
+                   color=GREEN_DK, weight_pt=2.0, head=True)
 
     return content_slide(
         prs, 23, TAG_SD, "Shifts of the Demand Curve for AC",
         [
             ([("The heatwaves should cause the demand curve to ", {}),
               ("shift outward (to the right)",
-               {'bold': True, 'color': GREEN_BR})], 0,
+               {'bold': True, 'color': GREEN_DK})], 0,
              {'bullet_style': 'none'}),
         ],
         size=26, sub_size=24, line_spacing_pts=0,
@@ -5564,7 +5797,11 @@ def _draw_footer_nonum(slide):
 
 def _add_back_pill(slide, target_slide):
     """Navy '← Back' pill, lower-right (deck-standard position), jumping
-    back to the slide that links here. Drawn AFTER the footer."""
+    back to the slide that links here. Drawn AFTER the footer.
+
+    2026-08-23: briefly carried an actionButtonBeginning chip; reverted to
+    the original plain-text pill per Nico. The action-button family is used
+    for the FORWARD jumps and the external-link markers only."""
     shp = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
                                  Inches(11.72), Inches(6.60),
                                  Inches(1.55), Inches(0.46))
@@ -5645,11 +5882,11 @@ def slide_94_backup_leaders(prs):
         slide, left=Inches(0.65), top=Inches(4.30),
         width=Inches(6.4), height=Inches(1.9),
         items=[
-            ([("Economist Article", {'underline': True, 'bold': True}),
-              ("  ▶", {'color': GOLD, 'bold': True})], 0, {}),
+            # runs-list form: underline is a run-level option only
+            ([("Economist Article",
+               {'underline': True, 'bold': True})], 0, {}),
             ([("econimate Video (YouTube)",
-               {'underline': True, 'bold': True}),
-              ("  ▶", {'color': GOLD, 'bold': True})], 0, {}),
+               {'underline': True, 'bold': True})], 0, {}),
         ],
         size=22, line_spacing_pts=12)
     box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
@@ -5660,6 +5897,17 @@ def slide_94_backup_leaders(prs):
         "econimate Video (YouTube)":
             "https://www.youtube.com/watch?v=sOB5hmEXjdE",
     })
+    # Document / Movie buttons after the two link labels. x from the
+    # label ends in Calibri Bold 22 pt (3.244" / 4.567", text origin
+    # 0.65" + 0.375" marL); y-centres 4.981" / 5.514" measured off the
+    # outgoing gold glyphs in a 1500 px render.
+    _add_ext_link_button(
+        slide, "document", left=Inches(3.364), top=Inches(4.831),
+        url="https://www.economist.com/graphic-detail/2021/02/20/"
+            "data-on-inbred-nobles-support-a-leader-driven-theory-of-history")
+    _add_ext_link_button(
+        slide, "movie", left=Inches(4.687), top=Inches(5.364),
+        url="https://www.youtube.com/watch?v=sOB5hmEXjdE")
     _draw_footer_nonum(slide)
     _add_back_pill(slide, prs.slides[1])          # -> display 2
     _set_notes(slide, (
@@ -5826,28 +6074,445 @@ def slide_99_backup_prices(prs):
 
 def wire_backup_links(prs):
     """Jump links from the main slides into the backup section. Runs after
-    all slides exist. Slide 2 and 9 reuse their gold ▶ glyphs; slides
-    12 and 17 get a pointer pill."""
+    all slides exist. Slides 2 and 9 get a bare right-pointing action
+    button at the end of the linked bullet line; slides 12 and 17 get a
+    labelled jump pill with the same button in its left inset.
+
+    2026-08-23: the invisible click overlays are gone. A transparent
+    rectangle on top of the bullet box swallowed every click in that band,
+    so the text box could not be selected or dragged in the editor. The
+    action button is now the click target itself.
+
+    The x positions below are the measured end of each linked line
+    (PIL / Calibri: 9.72" at 24 pt, 11.20" at 28 pt, both from a text
+    origin of 0.28" + 0.375" marL); the y positions are the line centres
+    from the rendered layout. Re-check both after any font pass."""
     sl = lambda d: prs.slides[d - 1]
-    # invisible hotspots over the existing bullet line + gold ▶ glyph
-    # (positions from the rendered layout; re-check after any font pass)
-    _add_click_overlay(sl(2), Inches(0.28), Inches(4.42),
-                       Inches(9.95), Inches(0.58), sl(94))
-    _add_click_overlay(sl(9), Inches(0.28), Inches(3.82),
-                       Inches(11.60), Inches(0.58), sl(98))
-    shp = _add_ps_pointer(sl(12), left=Inches(8.55), top=Inches(6.58),
-                          label="Backup: Does money buy happiness?",
-                          width=Inches(4.5), height=Inches(0.5))
-    shp.click_action.target_slide = sl(95)
-    shp = _add_ps_pointer(sl(17), left=Inches(0.40), top=Inches(6.55),
-                          label="Backup: Can these prices be optimal?",
-                          width=Inches(4.7), height=Inches(0.5))
-    shp.click_action.target_slide = sl(99)
+    _add_jump_button(sl(2), sl(94), left=Inches(9.80), top=Inches(4.555),
+                     width=Inches(0.434), height=Inches(0.210))
+    _add_jump_button(sl(9), sl(98), left=Inches(11.28), top=Inches(3.941),
+                     width=Inches(0.490), height=Inches(0.238))
+    # A backup link always takes the lower-RIGHT corner (Nico,
+    # 2026-08-23); where a slide also carries a podcast / article link,
+    # that one is placed wherever it fits best — on display 12 it is
+    # centred in the space to the left.
+    _add_jump_pill(sl(12), sl(95), left=Inches(8.99), top=Inches(6.58),
+                   width=Inches(4.06), height=Inches(0.5),
+                   label="Backup: Does money buy happiness?",
+                   border=GOLD)
+    # 2026-08-23: a backup link that is separate from the slide's own
+    # text belongs in the lower RIGHT (Nico). 13.05" content edge - 4.10".
+    _add_jump_pill(sl(17), sl(99), left=Inches(8.95), top=Inches(6.55),
+                   width=Inches(4.10), height=Inches(0.5),
+                   label="Backup: Can these prices be optimal?",
+                   border=GOLD)
 
 
 # ==========================================================================
 # Build orchestration
 # ==========================================================================
+
+# --------------------------------------------------------------------------
+# Economic symbols: italic letter + true subscript (2026-08-23, Nico)
+# --------------------------------------------------------------------------
+# "Whenever we have P0, Q0, etc, use subscript for the number ... any
+# letters that symbolize price, quantity, etc need to be in italics, like
+# in formulas."  Rather than touching ~40 label call sites, this runs as a
+# deck-wide pass over every slide text run: any P / Q / D / S symbol
+# followed by an index (a digit, or "Peak") is split into an italic base
+# run and a subscript index run. The base letters are restricted to
+# P, Q, D and S so ordinary text ("Module 1", "Fall 2026") is never touched.
+
+SYMBOL_RE = re.compile(r"([PQDS])([\u2032\u2019']?)([0-9]|Peak)(?![A-Za-z0-9])")
+SUBSCRIPT_BASELINE = "-25000"      # what PowerPoint writes for subscript
+
+
+def _split_symbol_runs(para):
+    """Rewrite the runs of one paragraph so every P/Q/D/S symbol carries an
+    italic base and a subscript index."""
+    changed = False
+    for run in list(para.runs):
+        text = run.text or ""
+        if not SYMBOL_RE.search(text):
+            continue
+        pieces = []            # (text, is_subscript)
+        pos = 0
+        for m in SYMBOL_RE.finditer(text):
+            if m.start() > pos:
+                pieces.append((text[pos:m.start()], False))
+            pieces.append((m.group(1) + m.group(2), False))
+            pieces.append((m.group(3), True))
+            pos = m.end()
+        if pos < len(text):
+            pieces.append((text[pos:], False))
+        if len(pieces) < 2:
+            continue
+        r_el = run._r
+        rPr = r_el.find(qn('a:rPr'))
+        anchor = r_el
+        for i, (txt, is_sub) in enumerate(pieces):
+            if i == 0:
+                run.text = txt
+                if rPr is not None:
+                    rPr.set('i', '1')
+                continue
+            new_r = copy.deepcopy(r_el)
+            for t_el in new_r.findall(qn('a:t')):
+                t_el.text = txt
+            npr = new_r.find(qn('a:rPr'))
+            if npr is not None:
+                npr.set('i', '1')
+                if is_sub:
+                    npr.set('baseline', SUBSCRIPT_BASELINE)
+                else:
+                    npr.attrib.pop('baseline', None)
+            anchor.addnext(new_r)
+            anchor = new_r
+        changed = True
+    return changed
+
+
+def apply_symbol_subscripts(prs):
+    """Deck-wide: italic base + subscript index for every P/Q/D/S symbol."""
+    n = 0
+    for slide in prs.slides:
+        for shp in slide.shapes:
+            for tf in _iter_text_frames(shp):
+                for para in tf.paragraphs:
+                    if _split_symbol_runs(para):
+                        n += 1
+    return n
+
+
+def _iter_text_frames(shp):
+    if shp.has_text_frame:
+        yield shp.text_frame
+    if shp.shape_type == MSO_SHAPE_TYPE.GROUP:
+        for child in shp.shapes:
+            for tf in _iter_text_frames(child):
+                yield tf
+    if getattr(shp, "has_table", False) and shp.has_table:
+        for row in shp.table.rows:
+            for cell in row.cells:
+                yield cell.text_frame
+
+
+# --------------------------------------------------------------------------
+# Speaker notes for the slides whose builders do not set their own
+# (2026-08-23). Applied by apply_fill_notes() at the end of build(); a
+# slide that already has notes is left alone, so source-ported notes and
+# the PollEverywhere payload notes are never overwritten.
+# --------------------------------------------------------------------------
+
+FILL_NOTES = {
+    1: "Welcome to Module 1. This module lays the foundation for the whole "
+       "course: what a market is, how supply and demand set prices, and "
+       "the three principles I want you to carry into every business "
+       "decision. Let me start with a few words about myself and about how "
+       "the class will run.",
+    2: "A little about me. I trained as an environmental engineer before "
+       "moving into economics, and my research asks why some countries are "
+       "rich and others poor. That question is really about incentives and "
+       "institutions, which is the same machinery we will use on business "
+       "decisions in this course. My email is on the slide, and it is the "
+       "right address for anything conceptual.",
+    3: "Rafael is our TA and he is your first stop for anything "
+       "procedural: problem sets, practice exercises and Achieve. "
+       "Everything else lives on BruinLearn, including slides, handouts, "
+       "the optional math review and the videos, and every class is "
+       "recorded and livestreamed. Find those materials before the first "
+       "problem set is due.",
+    4: "The textbook is Goolsbee, Levitt and Syverson, fourth edition. "
+       "Achieve is optional but useful if you want extra practice with "
+       "worked feedback, and the direct link is on the slide. I will also "
+       "post a weekly reading or podcast, and I am always glad to get "
+       "suggestions from you.",
+    5: "Five problem sets, worked in the study groups you have been "
+       "assigned to, with the due dates on the class calendar. The grade "
+       "weights are on the slide: midterm 35 percent, final 40 percent, "
+       "problem sets 25 percent. Use AI freely while you are studying, but "
+       "not in the exams.",
+    6: "Send procedural questions to the TA and conceptual ones to me. The "
+       "Econ and Coffee sessions are informal Zoom conversations where we "
+       "start with concepts from class and then take problem-set "
+       "questions. The TA also runs a recorded review session each week.",
+    15: "You will get more out of this course by deciding where to invest "
+        "your time, so set a realistic goal and hold to it. Focus on the "
+        "intuition first. The math in this course is not hard, and I will "
+        "always explain the economics behind it. Use your peers and use AI "
+        "to push on your understanding, remembering that the exams are on "
+        "your own.",
+    17: "Here is the shape of the whole course. We are in part one, the "
+        "basic principles and the economic way of thinking, and it feeds "
+        "everything that follows: value and demand, then supply and cost, "
+        "then markets, pricing and strategy. Keep this map in mind, "
+        "because I will come back to it at each transition.",
+    18: "These are the six topics of Module 1. The first three come from "
+        "the videos: what a market is, how demand and supply work, and how "
+        "they meet at an equilibrium. The last three are the principles we "
+        "work through together in class. Problem Set 1 covers this "
+        "material.",
+    19: "You have watched the videos, so markets, demand and supply, and "
+        "equilibrium are behind us. What we do together today is the three "
+        "principles highlighted here, opportunity cost, sunk cost and "
+        "marginal analysis, together with a set of mini-cases that put the "
+        "supply-and-demand framework to work.",
+    20: "A quick recall from Video 2. The practical test for whether two "
+        "products sit in the same market is simple: if the price of the "
+        "other product changes, does demand for yours move? That question "
+        "is not academic. It decides antitrust cases, and we look at one "
+        "next.",
+    21: "In the 1990s ADM wanted to buy Clinton Corn Processing, and the "
+        "Department of Justice objected because both had large shares of "
+        "corn syrup. Everything turned on the market definition. DOJ said "
+        "the market was corn syrup; ADM argued it was sweeteners more "
+        "broadly, including sugar and artificial sweeteners, and used "
+        "exactly the price test we just saw. ADM won in court, which is "
+        "the lesson: defining the market is not a technicality, it is the "
+        "case.",
+    22: "Now try it yourselves. Is Netflix competing in online streaming, "
+        "or in all film and television including theatres, or in all "
+        "entertainment that competes for your evening? Each answer implies "
+        "a different set of competitors and a different view of Netflix's "
+        "market power, and there is no single right answer. That is the "
+        "point.",
+    23: "A Los Angeles heatwave, and a map of how many households have air "
+        "conditioning. Before we draw anything, I want your instinct: what "
+        "does a heatwave do to the market for air conditioners? Answer in "
+        "the poll and we will see whether the class agrees.",
+    31: "Tea is a clean example of both curves moving at once during "
+        "Covid. People stuck at home drank more tea, and at the same time "
+        "growing and shipping it got harder. Hold on to the two forces "
+        "separately, because on the next slide we put them into one "
+        "diagram.\n"
+        "Note: Use this article starting in 2023: "
+        "https://www.wsj.com/articles/lithium-prices-soar-turbocharged-by-"
+        "electric-vehicle-demand-and-scant-supply-11639334956",
+    32: "This is the same market drawn twice. Demand shifted out because "
+        "people at home drank more tea, and supply shifted in because of "
+        "bad weather, labor shortages and port closures. Both shifts push "
+        "the price up, which is why the price increase here is "
+        "unambiguous while the change in quantity is not.",
+    33: "Think about the empty shelves you saw during the pandemic, or "
+        "before a storm. Standard supply and demand says the price should "
+        "rise until the market clears, so why do we see shortages instead? "
+        "Part of the answer is that sellers worry about being seen as "
+        "unfair, and that constraint is itself an economic force.",
+    34: "Here is the news coverage that sets up the avocado case. Read the "
+        "headline and hold one question in mind: what could make a price "
+        "double and then halve inside a single year?",
+    35: "The numbers are striking. From December 2016 to June 2017 the "
+        "price of Mexican Hass avocados more than doubled, and from July "
+        "to November 2017 it halved again. That pattern needs no special "
+        "theory. Supply and demand handles it, as long as we are careful "
+        "about which curve moves when.",
+    36: "Three moves, in order. Demand shifted out with the guacamole and "
+        "avocado-toast craze, taking us to D1. Then dry weather produced a "
+        "meager crop and supply shifted left to S1, which is where the "
+        "peak price comes from. Finally better pest control and the "
+        "high-yielding half of the two-year cycle pushed supply back out "
+        "to S2, so the price returned to where it started while the "
+        "quantity ended much higher.",
+    37: "Here is the recipe I want you to use every time. Name the shock, "
+        "decide whether it hits demand or supply, then draw both curves "
+        "before and after. Most mistakes in this course come from skipping "
+        "the middle step.",
+    38: "Apply the recipe to wheat. When the war began a major exporter "
+        "was cut off, supply shifted left and the price jumped. When the "
+        "Black Sea grain agreement reopened the export route, supply "
+        "shifted back out and the price fell. Same market, two shocks, "
+        "both on the supply side.",
+    39: "Between September 2021 and September 2025, inflation-adjusted "
+        "home prices in Los Angeles fell about 5 percent while the number "
+        "of sales fell about 40 percent. A small price move next to a huge "
+        "quantity move is a clue: this cannot be one curve shifting on its "
+        "own. Work out which two curves moved, and in which direction, "
+        "before we draw it.\n"
+        "Source: https://www.redfin.com/city/11203/CA/Los-Angeles/"
+        "housing-market",
+    43: "We move now to the first of the three principles: economic costs "
+        "include opportunity costs. This is the idea that costs you never "
+        "write a check for still count.",
+    44: "The opportunity cost of a choice is the value of the next best "
+        "alternative you gave up. Economists count that alongside the "
+        "money actually spent, which is why the full economic cost is the "
+        "explicit cost plus the implicit one. Accountants see only the "
+        "explicit part, and that difference is where a great many bad "
+        "decisions live.",
+    45: "A deliberately simple case. Given these alternatives, the "
+        "opportunity cost of the one you pick is the value of the best one "
+        "you did not. Notice that it depends on your own preferences, so "
+        "two people facing identical options can face different "
+        "opportunity costs.",
+    46: "Three presents, each priced at 30 dollars, but worth different "
+        "amounts to the person receiving them. The money cost is "
+        "identical, so the whole decision turns on the value forgone. This "
+        "is opportunity cost in its purest form.",
+    47: "Now turn it on yourselves. Tuition is the explicit cost, but for "
+        "most of you the larger number is the income and the career "
+        "progress given up while studying. And here is a genuine question: "
+        "does a remote or part-time option change that calculation?",
+    48: "Here is the set-up. Buy the house for 500k, put in another 100k "
+        "and a full year of your own time, and expect to sell for 700k. "
+        "The alternative is a consulting job paying 150k that you cannot "
+        "do at the same time. Before you answer the poll, be careful about "
+        "which of those numbers belongs in the economic profit.",
+    52: "There is one more opportunity cost hiding in that problem. The "
+        "500k of capital could have been invested elsewhere and earned a "
+        "return. Whether you count it depends on where the money came "
+        "from, which is exactly the kind of judgment I want you to make "
+        "explicit. There is a podcast on this, and we can pick it up at "
+        "Econ and Coffee.",
+    55: "The same pattern appears in US data estimated for 2022. The shape "
+        "of the earnings path around the birth of a first child is "
+        "strikingly similar across countries, which tells you this is not "
+        "a quirk of one labor market. Every one of those forgone earnings "
+        "is an opportunity cost.",
+    56: "On to the second principle. Sunk costs are the ones you cannot "
+        "get back, and the rule is to leave them out of the decision in "
+        "front of you. It sounds obvious, and it is very hard to do.",
+    57: "A sunk cost is one that has been paid and cannot be recovered. "
+        "Because nothing you decide now can change it, it should not enter "
+        "the decision at all. The hard part is psychological rather than "
+        "analytical: walking away feels like admitting waste.",
+    58: "Everyday versions are easy to find. Finishing dessert because the "
+        "dinner was a fixed price, going to the gym because you paid for "
+        "the year, skiing in bad weather because the ticket cannot be "
+        "returned. Firms do the same thing with license fees and "
+        "advertising already spent. We come back to this in Module 3.",
+    59: "Concorde is the classic case. It was a genuine engineering "
+        "triumph, New York to London in under three hours and a source of "
+        "national pride for Air France and British Airways, and it lost "
+        "enormous amounts of money. It never recovered its development "
+        "cost and in the end did not even cover operating costs. Once that "
+        "was clear the rational decision was to stop, and the pride is "
+        "precisely what made stopping so hard.",
+    60: "The rule is forward-looking. You cannot change the past, so "
+        "optimize from here. Sunk costs usually show up because something "
+        "unforeseen changed the right answer, and when that happens you "
+        "re-optimize as though the money had never been spent.",
+    61: "The third principle, and the one you will use most often: "
+        "cost-benefit and marginal analysis. The question is never whether "
+        "an activity is worth doing in the abstract, but whether the next "
+        "unit of it is worth doing.",
+    62: "The objective is to maximize net benefit, total benefit minus "
+        "total cost. To find it you compare at the margin: the extra "
+        "benefit from one more unit against the extra cost of that unit, "
+        "opportunity costs included. Take the extra unit while marginal "
+        "benefit exceeds marginal cost, and stop where the two are equal. "
+        "MB equals MC is a rule you will meet in every module of this "
+        "course.",
+    63: "Let us do it with hours of exercise. The first hour carries a "
+        "large net benefit, the second less, and by the fourth hour "
+        "marginal benefit and marginal cost are equal, which is where you "
+        "are indifferent. A fifth hour would cost more than it is worth, "
+        "so four is the optimum. Notice that we never asked whether "
+        "exercise is good, only whether the next hour is.",
+    64: "The same logic drawn continuously, which is how you will see it "
+        "for the rest of the course. Marginal benefit slopes down, "
+        "marginal cost slopes up, and the optimum sits where they cross. "
+        "Whenever this picture appears, it is the MB equals MC rule again.",
+    65: "That is Module 1. Markets, supply and demand, and the equilibrium "
+        "where they meet gave us the framework, and the three principles "
+        "gave us the discipline. Economists count implicit costs where "
+        "accountants do not, sunk costs get ignored, and decisions are "
+        "made at the margin. Everything that follows builds on those "
+        "ideas.",
+    67: "This is the first of four short videos for Module 1. In this one "
+        "I introduce the module and show how the pieces fit together.",
+    68: "The same course map as in class. We are in part one, the basic "
+        "principles and the economic way of thinking, and it is the "
+        "foundation for value and demand, for supply and cost, and then "
+        "for markets and pricing.",
+    69: "Here are the six topics of Module 1 with a one-line description "
+        "of each. The first three are covered in the videos, so you can "
+        "watch them at your own pace. The last three are what we work "
+        "through together in class.",
+    70: "Video 2 is about markets: what a market is, and how you decide "
+        "where its boundaries lie.",
+    71: "Markets is the topic of this video. The question sounds simple "
+        "and is not: which products, and which places, belong in the same "
+        "market as yours?",
+    72: "A company has to know three things about its market: who its "
+        "customers are, who its competitors are, both actual and "
+        "potential, and how far the market extends. The practical test for "
+        "the product boundary is whether a price change elsewhere moves "
+        "demand for your product. The geographic boundary varies "
+        "enormously: a coffee shop in Venice competes with the next "
+        "street, gasoline retail with the next few miles, gold with the "
+        "whole world.",
+    73: "Think about Netflix before class. Is the market online streaming, "
+        "all films, or all entertainment? And did Covid change the answer, "
+        "when theatres closed and streaming was the only option? Come with "
+        "a view, because we will argue about it.",
+    74: "Three kinds of actor, each with an objective. Consumers maximize "
+        "utility from goods and services under a limited income. Workers "
+        "choose jobs, trading off pay against leisure and flexibility. "
+        "Firms hire those workers to produce for those consumers, and aim "
+        "to maximize profit. Almost every model in this course is some "
+        "combination of these three.",
+    75: "Video 3 covers supply and demand, the workhorse framework of the "
+        "whole course.",
+    76: "This video is about demand and supply: how buyers and sellers "
+        "each respond to price, and how to tell a movement along a curve "
+        "from a shift of the curve itself.",
+    77: "The question is how supply and demand together set the price and "
+        "the quantity traded. The range of application is enormous: how "
+        "growth in China affects the price of oil, of textiles, of "
+        "electric cars. Once you can draw the two curves, you can reason "
+        "about almost any market.",
+    81: "This is the distinction students most often get wrong, so it is "
+        "worth slowing down. A movement along D is a response to price "
+        "with everything else held constant: the price rises from P1 to "
+        "P2 and the quantity demanded falls from Q1 to Q2. A shift of D is "
+        "caused by something other than price, such as higher income, and "
+        "it moves the whole curve out to D prime, so at the same price P1 "
+        "the quantity demanded is now Q3. Same curve, two very different "
+        "events.",
+    84: "The mirror image on the supply side. A movement along S is the "
+        "response to price alone: the price rises from P1 to P2 and "
+        "existing firms supply more, from Q1 to Q2. A shift of S comes "
+        "from something else, such as better technology, cheaper inputs, "
+        "or new firms entering, and it moves the whole curve out to S "
+        "prime, so at the same price P2 the quantity supplied is Q3.",
+    85: "Video 4 brings the two sides together: market equilibrium, and "
+        "what happens when either curve moves.",
+    86: "Equilibrium is the topic here: where demand meets supply, what "
+        "makes the market get there, and what happens when one of the "
+        "curves shifts.",
+    88: "Four terms you will need. The equilibrium, or market-clearing, "
+        "price is the one at which quantity supplied equals quantity "
+        "demanded. The market mechanism is the tendency for price to move "
+        "until that happens. Above that price there is excess supply, "
+        "below it excess demand, which is a shortage. Keep the words "
+        "straight and the diagrams become much easier.",
+    93: "Everything from here is backup material: slides I keep for "
+        "questions that come up in class, and the targets of the links "
+        "earlier in the deck. Nothing after this point is part of the main "
+        "flow.",
+}
+
+# these two carry a source link in their existing notes, which the new
+# text above reproduces -- so they are allowed to overwrite
+FILL_NOTES_OVERWRITE = {31, 39}
+
+
+def apply_fill_notes(prs):
+    """Fill in notes for slides whose builders set none. Existing notes
+    are never overwritten (except the two above), which keeps the
+    source-ported notes and the PollEverywhere payload notes intact."""
+    n = 0
+    for disp, text in FILL_NOTES.items():
+        slide = prs.slides[disp - 1]
+        if disp not in FILL_NOTES_OVERWRITE:
+            if slide.has_notes_slide:
+                existing = slide.notes_slide.notes_text_frame.text or ""
+                if existing.strip():
+                    continue
+        _set_notes(slide, text)
+        n += 1
+    return n
+
 
 def build(out_path=None):
     prs = Presentation()
@@ -5935,7 +6600,7 @@ def build(out_path=None):
     slide_71_v3_ceteris_paribus(prs)                               # 79
     slide_72_v3_demand_curve(prs)                                  # 80
     slide_73_v3_move_vs_shift_d(prs)                               # 81
-    slide_74_v3_flour(prs)                                         # 82
+    slide_74_v3_ai_chips(prs)                                      # 82
     slide_75_v3_supply_curve(prs)                                  # 83
     slide_76_v3_move_vs_shift_s(prs)                               # 84
     slide_77_v4_title(prs)                                         # 85
@@ -5955,10 +6620,14 @@ def build(out_path=None):
     slide_99_backup_prices(prs)                                    # 99 BACKUP
 
     wire_backup_links(prs)
+    n_notes = apply_fill_notes(prs)
+    n_sym = apply_symbol_subscripts(prs)
 
     out = Path(out_path) if out_path else OUT_DIR / "Module 1 - Revised.pptx"
     prs.save(str(out))
-    print(f"saved {out} — {len(prs.slides._sldIdLst)} slides")
+    print(f"saved {out} — {len(prs.slides._sldIdLst)} slides "
+          f"({n_sym} paragraph(s) with subscripted symbols, "
+          f"{n_notes} slide(s) given fill-in notes)")
     return out
 
 
