@@ -4797,6 +4797,169 @@ def slide_64_v2_market_def(prs):
     )
 
 
+# --------------------------------------------------------------------------
+# Displays 73-74 — Tapestry-Capri market-definition mini-case
+# --------------------------------------------------------------------------
+# Nico copied these in from "Module 1 - Example Candidates.pptx" (slides 2
+# and 3) on 2026-08-23 and animated them. Ported here so build.py stays the
+# source of truth; his choreography lives in _animate.py PLANS 73/74.
+
+def _photo_caption(slide, left, top, width,
+                   text="Photos: Wikimedia Commons"):
+    return _add_text(slide, left, top, width, Inches(0.28), text,
+                     size=11, italic=True, color=GRAY, font="Calibri",
+                     align=PP_ALIGN.CENTER)
+
+
+def _quote_box(slide, left, top, width, height, quote, attribution, *,
+               size=18):
+    """Verbatim quote in the cream convention box (Teaching CLAUDE.md)."""
+    return _add_convention_box(
+        slide, left, top, width, height,
+        runs=[(quote, {'italic': True, 'size': size}),
+              ("   \u2014 " + attribution,
+               {'bold': True, 'size': max(size - 2, 16),
+                'newline': True})],
+        align=PP_ALIGN.LEFT)
+
+
+def slide_tapestry_case(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_V2)
+    _draw_action_title(slide, "Market Definition Mini-Case: Tapestry\u2013Capri")
+    box = _add_hierarchical_bullets(
+        slide, left=MARGIN, top=Inches(1.50), width=Inches(8.0),
+        height=Inches(5.3),
+        items=[
+            ("Aug 2023: Tapestry (Coach, Kate Spade) agrees to buy Capri "
+             "(Michael Kors, Versace) for $8.5B", 0),
+            ([("The definition of the market", {'bold': True}),
+              (" would turn out to be crucial for the case:", {})], 0, {}),
+            ([("FTC: the market is ", {}),
+              ("\u201caccessible luxury\u201d handbags", {'color': RED}),
+              (" \u2014 roughly $100 to under $1,000", {})], 1, {}),
+            ([("The firms: the market is ", {}),
+              ("all handbags", {'color': RED}),
+              (" \u2014 from fast fashion to Herm\u00e8s \u2014 and entry "
+               "is easy", {})], 1, {}),
+        ],
+        size=24, sub_size=22, line_spacing_pts=16,
+        sub_line_spacing_pts=8)
+    box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+    _add_media_image(slide, "web_coach.jpg",
+                     left=Inches(8.55), top=Inches(1.70),
+                     width=Inches(3.67), rounded=True)
+    _add_media_image(slide, "web_michaelkors.jpg",
+                     left=Inches(8.75), top=Inches(4.30),
+                     width=Inches(3.27), rounded=True)
+    _photo_caption(slide, Inches(8.55), Inches(6.80), Inches(3.67))
+    _draw_footer(slide, FOOTER_TEXT, 73)
+    _set_notes(slide, (
+        "In August 2023 Tapestry, which owns Coach and Kate Spade, agreed "
+        "to buy Capri, which owns Michael Kors and Versace, for 8.5 "
+        "billion dollars. The whole case then turned on one question: what "
+        "is the market? The FTC said it was \u201caccessible luxury\u201d "
+        "handbags, roughly 100 dollars to just under a thousand, where "
+        "these brands sit almost on top of each other. The firms said the "
+        "market was all handbags, from fast fashion to Herm\u00e8s, where "
+        "their combined share looks small and entry is easy. Hold that "
+        "disagreement in mind, because the next slide shows which side the "
+        "companies' own documents supported.\n"
+        "Case record: FTC administrative suit filed 22 April 2024; "
+        "preliminary injunction granted by Judge Jennifer Rochon, "
+        "S.D.N.Y., 24 October 2024; merger agreement terminated 13 "
+        "November 2024. The defense called the FTC's market "
+        "\u201cgerrymandered\u201d; the court found the accessible-luxury "
+        "segment real, pointing to distinct prices, customers, "
+        "discounting and outlet distribution. Photos: Wikimedia Commons "
+        "(Coach store, Tenmaya Fukuyama; Michael Kors store, Rehoboth "
+        "Beach DE)."))
+    return slide
+
+
+def slide_tapestry_evidence(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_V2)
+    _draw_action_title(slide,
+                       "The Firms' Own Documents Drew the Market Boundary")
+    # price-tier ladder
+    y0, h0 = Inches(1.55), Inches(1.30)
+    _add_rounded_filled_box(slide, Inches(0.75), y0, Inches(3.55), h0,
+                            "Mass market\nunder $100",
+                            fill=FADED, text_color=WHITE, size=19)
+    _add_rounded_filled_box(
+        slide, Inches(4.55), y0, Inches(4.25), h0,
+        "\u201cAccessible luxury\u201d\n$100 \u2013 under $1,000\n"
+        "Coach \u00b7 Kate Spade \u00b7 Michael Kors",
+        fill=GOLD, text_color=NAVY, size=18)
+    _add_rounded_filled_box(slide, Inches(9.05), y0, Inches(3.55), h0,
+                            "True luxury\n$1,000+ \u00b7 LV \u00b7 "
+                            "Herm\u00e8s \u00b7 Chanel",
+                            fill=FADED, text_color=WHITE, size=19)
+    # (the gold "the FTC's market ..." line that sat here was deleted by
+    #  Nico on 2026-08-23; the point is in the speaker notes)
+    _add_text(slide, MARGIN, Inches(3.32), RULE_W, Inches(0.35),
+              "Combined Tapestry + Capri share of \u201caccessible "
+              "luxury\u201d handbags:", size=18, bold=True, color=NAVY,
+              font="Calibri", align=PP_ALIGN.CENTER)
+    cards = [("59%", "FTC's expert (third-party data)"),
+             ("77%", "Capri's internal documents"),
+             ("83%", "Tapestry's internal data")]
+    for i, (num, lab) in enumerate(cards):
+        x = Inches(1.35 + i * 3.65)
+        shp = _add_outlined_box(slide, x, Inches(3.72), Inches(3.35),
+                                Inches(1.10), "", rounded=True,
+                                shadow=True, line=GOLD, line_w=1.5)
+        tf = shp.text_frame
+        para = tf.paragraphs[0]
+        # _add_outlined_box seeds an empty run; drop it so the card has
+        # exactly the two runs Nico's version has
+        for stale in list(para.runs):
+            stale._r.getparent().remove(stale._r)
+        r1 = para.add_run(); r1.text = num + "   "
+        r1.font.name = "Calibri"; r1.font.size = Pt(30)
+        r1.font.bold = True; r1.font.color.rgb = NAVY
+        r2 = para.add_run(); r2.text = lab
+        r2.font.name = "Calibri"; r2.font.size = Pt(18)
+        r2.font.color.rgb = GRAY
+    _add_text(slide, MARGIN, Inches(4.92), RULE_W, Inches(0.30),
+              "(figures from documents the companies had to hand over in "
+              "the merger review \u2014 not leaked)", size=18, italic=True,
+              color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
+    _quote_box(slide, MARGIN + Inches(0.35), Inches(5.34),
+               RULE_W - Inches(0.7), Inches(1.00),
+               "\u201cBottom line, saying we're in the same market with "
+               "true luxury is a joke. \u2026 Nobody says \u2018should I "
+               "buy a LV bag or a Coach bag?\u2019\u201d",
+               "internal Tapestry message cited by the court")
+    _add_rounded_filled_box(
+        slide, Inches(0.90), Inches(6.44), Inches(11.53), Inches(0.60),
+        "Oct 2024: the court sides with the FTC and blocks the deal "
+        "\u2014 merger abandoned Nov 2024",
+        fill=GOLD, text_color=NAVY, size=19, bold=True, corner_pct=0.18)
+    _draw_footer(slide, FOOTER_TEXT, 74)
+    _set_notes(slide, (
+        "This is where the case was decided. The three cards are the same "
+        "quantity \u2014 the combined share of accessible-luxury handbags "
+        "\u2014 computed three ways: about 59 percent by the FTC's "
+        "economic expert using largely third-party data, 77 percent in "
+        "Capri's own internal documents, and 83 percent from Tapestry's "
+        "own internal data. Note where those last two came from: "
+        "ordinary-course documents the companies had to produce in the "
+        "merger review, not leaks. And the internal message at the bottom "
+        "is the firms' own people rejecting the very market definition "
+        "their lawyers were arguing for. In October 2024 the court sided "
+        "with the FTC and blocked the deal, and the merger was abandoned "
+        "the following month.\n"
+        "One more detail worth knowing: \u201caccessible luxury\u201d was "
+        "the firms' own term, used extensively in SEC filings and investor "
+        "presentations, and it disappeared from their vocabulary once the "
+        "FTC sued. Sources: Judge Rochon's opinion, S.D.N.Y., 24 October "
+        "2024 (share figures at 97); Clifford Chance and MoFo case "
+        "notes."))
+    return slide
+
+
 def slide_65_v2_netflix(prs):
     def extras(slide):
         _add_media_image(slide, "v2_s04_rId4.png",
@@ -6088,21 +6251,21 @@ def wire_backup_links(prs):
     origin of 0.28" + 0.375" marL); the y positions are the line centres
     from the rendered layout. Re-check both after any font pass."""
     sl = lambda d: prs.slides[d - 1]
-    _add_jump_button(sl(2), sl(94), left=Inches(9.80), top=Inches(4.555),
+    _add_jump_button(sl(2), sl(96), left=Inches(9.80), top=Inches(4.555),
                      width=Inches(0.434), height=Inches(0.210))
-    _add_jump_button(sl(9), sl(98), left=Inches(11.28), top=Inches(3.941),
+    _add_jump_button(sl(9), sl(100), left=Inches(11.28), top=Inches(3.941),
                      width=Inches(0.490), height=Inches(0.238))
     # A backup link always takes the lower-RIGHT corner (Nico,
     # 2026-08-23); where a slide also carries a podcast / article link,
     # that one is placed wherever it fits best — on display 12 it is
     # centred in the space to the left.
-    _add_jump_pill(sl(12), sl(95), left=Inches(8.99), top=Inches(6.58),
+    _add_jump_pill(sl(12), sl(97), left=Inches(8.99), top=Inches(6.58),
                    width=Inches(4.06), height=Inches(0.5),
                    label="Backup: Does money buy happiness?",
                    border=GOLD)
     # 2026-08-23: a backup link that is separate from the slide's own
     # text belongs in the lower RIGHT (Nico). 13.05" content edge - 4.10".
-    _add_jump_pill(sl(17), sl(99), left=Inches(8.95), top=Inches(6.55),
+    _add_jump_pill(sl(17), sl(101), left=Inches(8.95), top=Inches(6.55),
                    width=Inches(4.10), height=Inches(0.5),
                    label="Backup: Can these prices be optimal?",
                    border=GOLD)
@@ -6497,14 +6660,21 @@ FILL_NOTES = {
 FILL_NOTES_OVERWRITE = {31, 39}
 
 
+def _m1_disp_shift(k):
+    """2026-08-23: the two Tapestry slides were inserted at displays
+    73-74, so every display from 73 on moved down by two."""
+    return k + 2 if k >= 73 else k
+
+
 def apply_fill_notes(prs):
     """Fill in notes for slides whose builders set none. Existing notes
     are never overwritten (except the two above), which keeps the
     source-ported notes and the PollEverywhere payload notes intact."""
     n = 0
-    for disp, text in FILL_NOTES.items():
+    for key, text in FILL_NOTES.items():
+        disp = _m1_disp_shift(key)
         slide = prs.slides[disp - 1]
-        if disp not in FILL_NOTES_OVERWRITE:
+        if key not in FILL_NOTES_OVERWRITE:
             if slide.has_notes_slide:
                 existing = slide.notes_slide.notes_text_frame.text or ""
                 if existing.strip():
@@ -6591,6 +6761,8 @@ def build(out_path=None):
     slide_62_v2_title(prs)                                         # 70
     slide_63_v2_outline(prs)                                       # 71
     slide_64_v2_market_def(prs)                                    # 72
+    slide_tapestry_case(prs)                                       # 73 NEW
+    slide_tapestry_evidence(prs)                                   # 74 NEW
     slide_65_v2_netflix(prs)                                       # 73
     slide_66_v2_actors(prs)                                        # 74
     slide_67_v3_title(prs)                                         # 75

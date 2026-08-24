@@ -5,14 +5,15 @@ $folder = $PSScriptRoot
 $deck = Join-Path $folder $Deck
 
 # expected on-click counts (renumbered 2026-08-22 for the poll-pair +
-# backup inserts; deck now 99 slides, same 65 animated slides)
+# backup inserts, then the 2 Tapestry slides on 2026-08-23;
+# deck is 101 slides with 67 animated)
 $expected = @{
     2=2; 3=1; 4=2; 5=3; 6=3; 9=2; 10=3; 11=2; 12=3; 13=2; 14=1; 15=2;
     16=1; 20=3; 21=5; 22=4; 23=1; 26=1; 27=1; 30=2; 31=1; 32=6; 33=2;
     35=2; 36=10; 37=2; 38=4; 39=4; 40=4; 41=2; 42=4; 44=2; 45=3; 46=1;
     47=2; 48=2; 51=1; 52=2; 53=2; 55=2; 57=1; 58=1; 59=2; 60=3; 62=4;
-    63=7; 64=3; 65=2; 66=2; 72=5; 73=5; 74=2; 77=2; 79=3; 80=1; 81=4;
-    82=3; 83=1; 84=2; 87=3; 88=3; 89=3; 90=3; 91=4; 92=1
+    63=7; 64=3; 65=2; 66=2; 72=5; 73=3; 74=7; 75=5; 76=2; 79=2; 81=3;
+    82=1; 83=4; 84=3; 85=1; 86=2; 89=3; 90=3; 91=3; 92=3; 93=4; 94=1
 }
 
 $pp = New-Object -ComObject PowerPoint.Application
@@ -36,5 +37,5 @@ for ($i = 1; $i -le $pres.Slides.Count; $i++) {
 }
 Write-Host "slides: $($pres.Slides.Count)"
 $pres.Close()
-if ($bad -eq 0) { Write-Host "ALL CLICK COUNTS MATCH (65 animated slides)" }
+if ($bad -eq 0) { Write-Host "ALL CLICK COUNTS MATCH (67 animated slides)" }
 else { Write-Host "$bad slides off" }

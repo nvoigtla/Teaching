@@ -57,6 +57,8 @@ SPLICED = {7, 8, 24, 25, 28, 29, 49, 50}   # shifted 2026-08-22 (poll pairs)
 # slides: display 94's two link labels share one bullets box, so a
 # containment match there would swallow the box with only the first
 # of its two buttons.
+OUTLINE_SLIDES = {18, 19, 43, 56, 61, 69, 71, 78, 88}
+
 LINK_LABEL_SLIDES = {12, 17}
 
 # Rule 5 (2026-08-23): display 36's avocado chart adopts the grouping of
@@ -72,16 +74,16 @@ CHART_GROUPS = {
         "Q2": ["sdguide:v:2", "sdxlab:Q2"],
     },
     # 79: Nico grouped the ice-cream picture with its header (2026-08-23)
-    79: {
+    81: {
         "cones": ["sdlabel:cones", "sdpic:cones"],
     },
     # 81: his two hand-made groups — the D' set and the Q3 set
-    81: {
+    83: {
         "Dp": ["sdcurve:Dp", "sdlabel:Dp", "sdarrow:ii", "sdlabel:ii"],
         "Q3": ["sdguide:v:Q3", "sdguide:h:Q3", "sdxlab:Q3"],
     },
     # 82: the AI-chips slide. No Q2 set — Nico removed those guides.
-    82: {
+    84: {
         # (the picture+caption pair is grouped by rule 3, which carries
         # the sdpic: name through as sdgroup:chips)
         "D":     ["sdcurve:D", "sdlabel:D"],
@@ -91,7 +93,7 @@ CHART_GROUPS = {
     },
     # 84: Nico's four hand-made groups (2026-08-23). The S' set carries
     # the ii) arrow and label; the Q3 guides ride with it.
-    84: {
+    86: {
         "i":  ["sdarrow:i", "sdlabel:i"],
         "P2": ["sdguide:h:P2", "sdguide:v:Q2", "sdylab:P2", "sdxlab:Q2"],
         "P1": ["sdguide:h:P1", "sdguide:v:Q1", "sdylab:P1", "sdxlab:Q1"],
@@ -255,10 +257,10 @@ def process_slide(tree, disp):
         # M1: skip large hosting panels (e.g. the Homo-Economicus cream
         # panel holds several text blocks + images — not a callout pair)
         # an outline agenda band spans the slide — layout, not a callout
-        # (Teaching/CLAUDE.md, Module-Outline section). 11.5" clears the
-        # 12.15" band while keeping the 10.5" "Important" callout on the
-        # shift-table slide.
-        if box["b"][2] > 11.5 * EMU:
+        # (Teaching/CLAUDE.md, Module-Outline section). Scoped to the
+        # outline slides rather than a width threshold: the Tapestry quote
+        # box on display 74 is 12.08" wide and DOES need grouping.
+        if disp in OUTLINE_SLIDES and box["b"][2] > 10.0 * EMU:
             continue
         if box["b"][3] > 2.5 * EMU:
             continue

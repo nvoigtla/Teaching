@@ -75,7 +75,9 @@ PLANS = {
         ["pr:Do you need to drive:4:5", "pic:2"],
     ],
     10: [  # homo economicus: panel static; row 1, row 2, podcast label
-        ["pic:0", "t:Homo Economicus"],
+           # 2026-08-23 (Nico): pic:0 dropped from the first beat, so the
+           # Homo-Economicus icon cluster is visible from the start
+        ["t:Homo Economicus"],
         ["pic:1", "t:Real Human"],
         ["t:Podcast: Who is Homo"],
     ],
@@ -343,6 +345,45 @@ SKIP_MEDIA = ({_m1_shift_key2(k) for k in SKIP_MEDIA}
 SKIP_STATIC = ({_m1_shift_key2(k) for k in SKIP_STATIC}
                | set(range(94, 100)))
 SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
+
+
+# ---------------------------------------------------------------------------
+# 2026-08-23 insert: Nico copied the two Tapestry-Capri slides in from the
+# Example Candidates deck at displays 73-74, so everything from 73 on moves
+# down by two. Shift the 99-deck keys, then register the two new plans.
+# ---------------------------------------------------------------------------
+def _m1_shift_key3(k):
+    return k + 2 if k >= 73 else k
+
+
+PLANS = {_m1_shift_key3(k): v for k, v in PLANS.items()}
+FIG_GROUP = {_m1_shift_key3(k): v for k, v in FIG_GROUP.items()}
+STATIC = {_m1_shift_key3(k): v for k, v in STATIC.items()}
+SKIP_TITLE = {_m1_shift_key3(k) for k in SKIP_TITLE}
+SKIP_AGENDA = {_m1_shift_key3(k) for k in SKIP_AGENDA}
+SKIP_MEDIA = {_m1_shift_key3(k) for k in SKIP_MEDIA}
+SKIP_STATIC = {_m1_shift_key3(k) for k in SKIP_STATIC}
+SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
+
+# Nico's choreography for the two new slides, read out of his deck with
+# _extract_timing.py. Display 73: the setup bullets one at a time, photos
+# static. Display 74: the price ladder builds left to right (the mass-market
+# card is static), then the three share cards with the provenance line
+# riding the middle one, then the internal quote, then the court decision.
+PLANS[73] = [
+    ["pr:Aug 2023:1:1"],
+    ["pr:Aug 2023:2:2"],
+    ["pr:Aug 2023:3:3"],
+]
+PLANS[74] = [
+    ["t:\u201cAccessible luxury\u201d"],
+    ["t:True luxury"],
+    ["t:Combined Tapestry", "t:59%"],
+    ["t:77%", "t:(figures from documents"],
+    ["t:83%"],
+    ["t:\u201cBottom line"],
+    ["t:Oct 2024:"],
+]
 
 
 def q(ns, t):

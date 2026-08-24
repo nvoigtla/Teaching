@@ -121,6 +121,37 @@ the 99 slides speaker notes.
    link goes wherever it fits best.
 3. Indexed symbols get a real subscript, italic letter.
 
+### Late evening — Tapestry insert (deck 99 -> 101) + slide 12
+- Nico copied the two Tapestry-Capri slides out of `Module 1 - Example
+  Candidates.pptx` (slides 2-3) into the deck at **displays 73-74** and
+  animated them. Ported into `_build_Module1.py` as
+  `slide_tapestry_case` / `slide_tapestry_evidence` (from
+  `exp_tapestry_case` / `exp_tapestry_evidence`) rather than spliced, so
+  build.py stays the source of truth and future style passes reach them.
+  His edits adopted: the gold "the FTC's market ..." line deleted, the
+  quote box grouped with its text, and his choreography (73: three
+  clicks on the setup bullets; 74: seven clicks - ladder, share cards
+  with the provenance line riding the 77% card, internal quote, court
+  decision). MY changes on top: the candidates chrome swapped for
+  `TAG_V2` + the normal footer, and the two photos grouped with their
+  shared caption.
+- **Everything from display 73 on shifted +2**, via `_m1_shift_key3` in
+  `_animate.py` and `_m1_disp_shift` in the build script (FILL_NOTES
+  keys). Backup jump targets are now 96 / 97 / 100 / 101. Deck is 101
+  slides with 67 animated. `_group_pass.py`'s outline-band guard is now
+  scoped to `OUTLINE_SLIDES` by number instead of a width threshold -
+  the old 11.5" rule would have blocked the 12.08" Tapestry quote box
+  from grouping.
+- **Slide 12**: Nico dropped `pic:0` from the first animation beat, so
+  the Homo-Economicus icon cluster is visible from the start. Adopted in
+  `PLANS[10]`.
+- **Open finding on slide 12**: the remaining effect on beat 1 targets
+  the slide TITLE, not the panel heading - the `t:Homo Economicus`
+  selector matches the action title first in document order. The slide
+  therefore opens with no title, which the Animations rule
+  ("chrome stays put") forbids. Awaiting his call: drop that beat
+  (row 1 fully static, 2 clicks) or retarget it at the panel heading.
+
 ### Verification, every round
 `_verify_anim.ps1` (COM click-count check, all 65 animated slides) +
 `_check_jumps.py` + a full-screen `_slideshow_probe.ps1` run including a
