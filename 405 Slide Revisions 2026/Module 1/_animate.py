@@ -74,10 +74,13 @@ PLANS = {
         ["pr:Do you need to drive:2:3", "pic:1"],
         ["pr:Do you need to drive:4:5", "pic:2"],
     ],
-    10: [  # homo economicus: panel static; row 1, row 2, podcast label
-           # 2026-08-23 (Nico): pic:0 dropped from the first beat, so the
-           # Homo-Economicus icon cluster is visible from the start
-        ["t:Homo Economicus"],
+    10: [  # homo economicus: panel + the whole Homo-Economicus row are
+           # static; row 2, then the podcast label.
+           # 2026-08-23 (Nico): he dropped pic:0 from the first beat, and
+           # the only effect left on it targeted the slide TITLE (the
+           # t: selector matched the action title before the panel
+           # heading) - so the slide opened untitled. Beat removed
+           # entirely: chrome stays put, and row 1 is fully static.
         ["pic:1", "t:Real Human"],
         ["t:Podcast: Who is Homo"],
     ],

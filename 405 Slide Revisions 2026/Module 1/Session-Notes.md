@@ -145,12 +145,17 @@ the 99 slides speaker notes.
 - **Slide 12**: Nico dropped `pic:0` from the first animation beat, so
   the Homo-Economicus icon cluster is visible from the start. Adopted in
   `PLANS[10]`.
-- **Open finding on slide 12**: the remaining effect on beat 1 targets
-  the slide TITLE, not the panel heading - the `t:Homo Economicus`
-  selector matches the action title first in document order. The slide
-  therefore opens with no title, which the Animations rule
-  ("chrome stays put") forbids. Awaiting his call: drop that beat
-  (row 1 fully static, 2 clicks) or retarget it at the panel heading.
+- **Slide 12 title bug, resolved.** After his edit the only effect left
+  on beat 1 targeted the slide TITLE, not the panel heading: the
+  `t:Homo Economicus` selector matches the action title first in
+  document order, so the slide opened untitled. Nico: "don't animate the
+  title on slide 12" - the beat was removed outright, which also matches
+  his own edit (he had already made the row-1 icon static, and the row-1
+  text always was). Slide 12 is now 2 clicks: Real Human row, then the
+  podcast label; the title and the whole Homo-Economicus row are static.
+  Worth remembering: a `t:` selector in a custom plan BYPASSES
+  `is_chrome`, so a prefix that also matches the action title will
+  silently animate chrome.
 
 ### Verification, every round
 `_verify_anim.ps1` (COM click-count check, all 65 animated slides) +
