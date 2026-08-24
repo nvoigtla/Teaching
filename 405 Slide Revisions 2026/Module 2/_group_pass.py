@@ -39,8 +39,47 @@ M = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
 
-SPLICED = {4, 5, 11, 12, 13, 33, 34, 38, 39, 43, 44, 50, 51,
-           62, 63, 70, 71}
+SPLICED = {4, 5, 11, 12, 13, 32, 33, 37, 38, 42, 43, 49, 50,
+           61, 62, 69, 70}
+
+# --------------------------------------------------------------------------
+# Explicit groups ported from Nico's hand-edits (2026-08-23).  The
+# geometric rules above only know callout/shade/caption patterns; these
+# are the pairings he made by hand in PowerPoint.  Members are matched by
+# their rendered (x, y) in INCHES to 0.01" among the top-level shapes of
+# that slide, then grouped in document order.
+# --------------------------------------------------------------------------
+MANUAL_GROUPS = {
+    9: [   # the whole demand-curve mini figure = one object
+        [(9.350, 2.570), (9.350, 6.050), (8.979, 2.285),
+         (11.800, 6.150), (9.590, 3.080), (12.155, 5.357)],
+    ],
+    18: [  # MB = MC anchor star + its label
+        [(9.750, 3.000), (10.240, 3.630)],
+    ],
+    20: [  # aggregation: each "=" with the aggregate dot it produces,
+           # all four "+" signs as one beat, aggregate legend swatch+label
+        [(3.790, 2.856), (4.291, 2.961)],
+        [(5.038, 3.714), (5.955, 3.819)],
+        [(6.286, 4.573), (7.619, 4.678)],
+        [(2.958, 2.856), (3.790, 3.714), (4.622, 4.573), (5.454, 5.431)],
+        [(7.534, 5.431), (9.283, 5.536)],
+        [(9.550, 2.870), (9.820, 2.790)],
+    ],
+    21: [  # demand-shift figure: each shifted curve + its arrow + label
+        [(7.791, 1.920), (8.254, 2.645), (9.226, 3.395)],   # rising
+        [(6.928, 2.331), (7.708, 2.881), (7.188, 3.653)],   # falling
+    ],
+}
+
+# Manual groups applied AFTER the geometric rules, so a member may itself
+# be a group that rule 1 just built (slide 19: the MPV convention callout
+# nests inside a group with the arrow that points at the curve).
+MANUAL_GROUPS_POST = {
+    19: [
+        [(5.500, 2.870), (4.092, 3.850)],
+    ],
+}
 for _a in _args:
     if _a.startswith("--spliced="):
         SPLICED = {int(x) for x in _a.split("=", 1)[1].split(",")}
@@ -56,6 +95,8 @@ def bbox(el):
         xf = el.find(q(P, "xfrm"))
     else:
         sppr = el.find(q(P, "spPr"))
+        if sppr is None:
+            sppr = el.find(q(P, "grpSpPr"))
         xf = sppr.find(q(A, "xfrm")) if sppr is not None else None
     if xf is None:
         return None
@@ -123,9 +164,14 @@ def contains(outer, inner, slack=0.08 * EMU):
             and iy + ih <= oy + oh + slack)
 
 
-def make_group(spTree, members, gid):
-    """Wrap members (document-order list of elements) in a p:grpSp at the
-    first member's tree position."""
+def make_group(spTree, members, gid, anchor="first"):
+    """Wrap members (document-order list of elements) in a p:grpSp.
+
+    ``anchor`` picks the tree position of the new group: "first" (the
+    historical behaviour of rules 1-3) or "last", which is what
+    PowerPoint itself does — the group takes the z-order of the topmost
+    member.  Manual groups use "last" so a rebuild reproduces Nico's
+    hand-made groups shape-for-shape."""
     boxes = [bbox(m) for m in members]
     x0 = min(b[0] for b in boxes)
     y0 = min(b[1] for b in boxes)
@@ -149,14 +195,62 @@ def make_group(spTree, members, gid):
         e = ET.SubElement(xf, q(A, tag))
         e.set(a1, str(v1))
         e.set(a2, str(v2))
-    # move grp to the first member's position, then move members inside
-    first = members[0]
+    # move grp to the anchor member's position, then move members inside
+    at = members[0] if anchor == "first" else members[-1]
     spTree.remove(grp)
-    first.addprevious(grp)
+    at.addprevious(grp)
     for m in members:
         spTree.remove(m)
         grp.append(m)
     return grp
+
+
+def apply_manual_groups(spTree, disp, gid, post=False):
+    """Group the explicit member sets in MANUAL_GROUPS[disp].  Members are
+    addressed by rendered (x, y) in inches; unlike the geometric rules
+    this also reaches connectors (cxnSp), which carry the chart curves
+    and axes.  With ``post=True`` it reads MANUAL_GROUPS_POST and may also
+    take an existing grpSp as a member (nested groups).
+    Returns (n_groups, next_gid, used_ids)."""
+    specs = (MANUAL_GROUPS_POST if post else MANUAL_GROUPS).get(disp)
+    if not specs:
+        return 0, gid, set()
+    tags = ("sp", "pic", "graphicFrame", "cxnSp")
+    if post:
+        tags += ("grpSp",)
+    n = 0
+    used = set()
+    # snapshot the candidates ONCE and keep the references: matching by
+    # id() against elements pulled fresh from spTree each pass is unsafe,
+    # because lxml frees and RECYCLES proxy ids, so an already-consumed id
+    # can spuriously match an untouched shape.
+    cands = [c for c in spTree if ET.QName(c).localname in tags]
+    for spec in specs:
+        members = []
+        for want_x, want_y in spec:
+            hit = None
+            for c in cands:
+                if id(c) in used:
+                    continue
+                b = bbox(c)
+                if b is None:
+                    continue
+                if (abs(b[0] / EMU - want_x) < 0.011
+                        and abs(b[1] / EMU - want_y) < 0.011):
+                    hit = c
+                    break
+            assert hit is not None, (
+                "s%02d manual group: no shape at (%.3f, %.3f)"
+                % (disp, want_x, want_y))
+            members.append(hit)
+            used.add(id(hit))
+        members.sort(key=lambda e: cands.index(e))
+        make_group(spTree, members, gid, anchor="last")
+        gid += 1
+        n += 1
+        print("  s%02d manual%s group of %d"
+              % (disp, " post" if post else "", len(members)))
+    return n, gid, used
 
 
 def process_slide(tree, disp):
@@ -176,8 +270,7 @@ def process_slide(tree, disp):
     for pr in tree.iter(q(P, "cNvPr")):
         max_id = max(max_id, int(pr.get("id")))
     gid = max_id + 100
-    used = set()
-    n_groups = 0
+    n_groups, gid, used = apply_manual_groups(spTree, disp, gid)
 
     # rule 1: bare filled roundRect + contained text box
     for box in info:
@@ -254,6 +347,8 @@ def process_slide(tree, disp):
             n_groups += 1
             print("  s%02d rule3 %d pic(s)+caption grouped"
                   % (disp, len(els) - 1))
+    n_post, gid, _ = apply_manual_groups(spTree, disp, gid, post=True)
+    n_groups += n_post
     return n_groups
 
 

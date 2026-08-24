@@ -31,6 +31,9 @@ from pathlib import Path
 HERE = Path(__file__).parent
 ORIGINAL = HERE / "Module 2 - In Class with Solutions.pptx"
 
+from _notes_m2 import SPLICED_NOTES
+
+NS_A = 'http://schemas.openxmlformats.org/drawingml/2006/main'
 NS_P = 'http://schemas.openxmlformats.org/presentationml/2006/main'
 NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 NS_REL = 'http://schemas.openxmlformats.org/package/2006/relationships'
@@ -51,12 +54,13 @@ CT_NOTES = ('application/vnd.openxmlformats-officedocument.'
             'presentationml.notesSlide+xml')
 
 # new-deck display -> source-deck display
-# new-deck displays shifted +1 from 14 on (bookend insert, 2026-08-15)
+# 2026-08-15: displays shifted +1 from 14 on (bookend insert);
+# 2026-08-23: bookend deleted by Nico, so the shift is back to zero
 SPLICE_MAP = {
     4: 4, 5: 5, 11: 11, 12: 12, 13: 13,
-    33: 30, 34: 31, 38: 35, 39: 36,
-    43: 40, 44: 41, 50: 46, 51: 47,
-    62: 57, 63: 58, 70: 64, 71: 65,
+    32: 30, 33: 31, 37: 35, 38: 36,
+    42: 40, 43: 41, 49: 46, 50: 47,
+    61: 57, 62: 58, 69: 64, 70: 65,
 }
 
 
@@ -66,6 +70,61 @@ def display_to_part(z):
     relmap = {r.get('Id'): r.get('Target') for r in rels}
     sldlst = pres.find('{%s}sldIdLst' % NS_P)
     return ['ppt/' + relmap[s.get(R_ID)].lstrip('/') for s in sldlst]
+
+
+X_SHIFT_PT = X_SHIFT_EMU / 12700.0     # 120 pt — same recentering shift
+
+
+def _with_notes_text(data, text):
+    """Write ``text`` into the body placeholder of a copied notes part.
+
+    Used only for slide 13 (the live Excel embed), which is spliced in
+    from the original deck and therefore cannot get its notes from the
+    build script.  POLL slides must never come through here: their notes
+    carry the PollEverywhere payload and are copied verbatim.
+    """
+    if not text:
+        return data
+    tree = ET.fromstring(data)
+    for sp in tree.iter('{%s}sp' % NS_P):
+        ph = sp.find('.//{%s}ph' % NS_P)
+        if ph is None or ph.get('type') != 'body':
+            continue
+        tx = sp.find('{%s}txBody' % NS_P)
+        if tx is None:
+            continue
+        for p in tx.findall('{%s}p' % NS_A):
+            tx.remove(p)
+        for para in text.split('\n\n'):
+            p = ET.SubElement(tx, '{%s}p' % NS_A)
+            r = ET.SubElement(p, '{%s}r' % NS_A)
+            rPr = ET.SubElement(r, '{%s}rPr' % NS_A)
+            rPr.set('lang', 'en-US')
+            rPr.set('dirty', '0')
+            t = ET.SubElement(r, '{%s}t' % NS_A)
+            t.text = para
+        break
+    return ET.tostring(tree, xml_declaration=True, encoding='UTF-8')
+
+
+def _shift_vml(data):
+    """Recenter the legacy VML shapes of an OLE embed by the same amount
+    as the slide's <a:off x>.
+
+    PowerPoint pairs a <p:oleObj spid="_x0000_sNNNN"> with the VML shape
+    of that id.  When only the graphicFrame moves, the pair no longer
+    coincides and PowerPoint renders the VML shape as a SEPARATE picture
+    lying on top of the OLE frame — which swallows the double-click, so
+    the embedded workbook can no longer be opened (Nico, slide 13,
+    2026-08-23).  Shifting the VML `left:` in lockstep keeps them one
+    object.
+    """
+    txt = data.decode('utf-8')
+
+    def bump(m):
+        return 'left:%gpt' % (float(m.group(1)) + X_SHIFT_PT)
+
+    return re.sub(r'left:(-?[\d.]+)pt', bump, txt).encode('utf-8')
 
 
 def _copy_part_tree(src, src_name, disp, new_parts, tgt_names,
@@ -79,6 +138,8 @@ def _copy_part_tree(src, src_name, disp, new_parts, tgt_names,
         return new_name
     ext = src_name.split('.')[-1].lower()
     data = src.read(src_name)
+    if ext == 'vml':
+        data = _shift_vml(data)
     new_parts[new_name] = data
     if folder == 'tags':
         ct_overrides.append(('/' + new_name, CT_TAGS))
@@ -175,7 +236,8 @@ def splice(deck_path):
                 # copy the SOURCE notes part (poll mechanism lives there)
                 src_notes = 'ppt/' + tgt_rel.replace('../', '')
                 new_notes = 'ppt/notesSlides/pe%02d_notes.xml' % disp
-                new_parts[new_notes] = src.read(src_notes)
+                new_parts[new_notes] = _with_notes_text(
+                    src.read(src_notes), SPLICED_NOTES.get(disp))
                 nrels = ET.Element('{%s}Relationships' % NS_REL)
                 e = ET.SubElement(nrels, '{%s}Relationship' % NS_REL)
                 e.set('Id', 'rId1')
@@ -211,8 +273,18 @@ def splice(deck_path):
             rel_target = '../%s/%s' % (folder, new_name.split('/')[-1])
             rid_map[old_id] = add_rel(typ, rel_target)
 
-        for old, new in rid_map.items():
-            slide_xml = slide_xml.replace('"%s"' % old, '"%s"' % new)
+        # SINGLE-PASS remap.  A sequential replace() per entry clobbers
+        # itself whenever the id space overlaps: on slide 13 the old
+        # rId6 (EMF preview) became rId4, and the later rId4 -> rId6 pass
+        # rewrote that same string, leaving the OLE fallback <a:blip>
+        # pointing at the notes part.  PowerPoint then could not draw the
+        # embed's preview and fell back to the loose VML picture, which
+        # sat on top of the object and swallowed the double-click
+        # (Nico: "I cannot open the underlying excel file", 2026-08-23).
+        slide_xml = re.sub(
+            r'"(rId\d+)"',
+            lambda m: '"%s"' % rid_map.get(m.group(1), m.group(1)),
+            slide_xml)
 
         # center 4:3 content on the 16:9 canvas (string-level edit; an
         # ElementTree round-trip would break mc:AlternateContent)
@@ -220,6 +292,13 @@ def splice(deck_path):
             r'<a:off x="(-?\d+)"',
             lambda m: '<a:off x="%d"' % (int(m.group(1)) + X_SHIFT_EMU),
             slide_xml)
+        # ...but NOT the spTree's own <p:grpSpPr> transform: the blanket
+        # regex hits it too, and while the modern renderer ignores it
+        # (ext = 0), the legacy VML path on the slide-13 OLE embed honours
+        # it and shifts the whole slide a second time (2026-08-23).
+        slide_xml = re.sub(
+            r'(<p:grpSpPr><a:xfrm><a:off x=")(-?\d+)(")',
+            lambda m: '%s0%s' % (m.group(1), m.group(3)), slide_xml)
 
         # slide 13 (live Excel): the title/number placeholders carry no
         # xfrm and inherit the stub layout's default spots — pin the

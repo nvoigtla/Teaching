@@ -50,7 +50,10 @@ SKIP_TITLE = {1}
 SKIP_AGENDA = {6, 7, 8, 25}          # roadmap + outline/section agendas
 SKIP_MEDIA = {4, 5, 11, 12, 13, 32, 33, 37, 38, 42, 43, 49, 50,
               61, 62, 69, 70}        # PollEv pairs + live Excel slide
-SKIP_STATIC = {48}                   # single-thought poll setup (Q=10−P)
+SKIP_STATIC = {48,                   # single-thought poll setup (Q=10−P)
+               16, 17}                # Gates quote + Inglehart panel —
+                                      # Nico removed the builds by hand
+                                      # (2026-08-23)
 SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 
 # figures ride on this animated-bullet index by default (0 = first
@@ -71,11 +74,12 @@ STATIC = {
 # Custom story plans (selector language in the header docstring)
 # ---------------------------------------------------------------------------
 PLANS = {
-    9: [   # law of demand (Nico's boxed sections, 2026-08-15):
-        # assumption box static; law box + D-curve; reasons build
-        ["grp:1", "cxn:2", "t:D"],
-        ["pr:Reasons:0:0"],
-        ["pr:Reasons:1:2"],
+    9: [   # law of demand (Nico's boxed sections, 2026-08-15; re-cut by
+        # hand 2026-08-23): assumption box static; law box; then the whole
+        # demand-curve figure as one grouped object; reasons in one beat
+        ["grp:1"],
+        ["grp:2"],
+        ["pr:Reasons:0:2"],
     ],
     15: [  # staircase: bar + price + label per click; guide + takeaway last
         ["osp:3", "t:$12", "t:MPV of 1st slice"],
@@ -85,35 +89,52 @@ PLANS = {
         ["t:MPV of 5th slice", "t:$0"],
         ["cxn:2", "t:Diminishing Marginal Personal Value"],
     ],
-    18: [  # consumer optimization (2026-08-16 boxed redesign):
-        # recall box static; decision box; MB=MC star last (star after
-        # the rule it abstracts)
+    18: [  # consumer optimization (2026-08-16 boxed redesign; re-cut by
+        # hand 2026-08-23): recall box static, then the MB = MC star as
+        # the general rule, then the MPV version of it as the payoff
+        ["grp:2"],
         ["grp:1"],
-        ["osp:3", "t:MB = MC"],
     ],
-    19: [  # movies: MPV curve+labels, MC, Q*, callout last
+    19: [  # movies, re-cut by hand 2026-08-23: MPV curve + its labels,
+        # then the "MPV is the demand curve" callout (now grouped with its
+        # arrow), then the upward-sloping MC, then Q*
         ["osp:3", "t:MPV#1", "t:MPV diminishes"],
+        ["grp:0"],
         ["cxn:2", "t:MC (incl."],
         ["cxn:3", "t:Q*"],
-        ["grp:0", "cxn:4"],
     ],
-    20: [  # aggregation: consumer 1, consumer 2 (+ plus signs), aggregate
-        ["cxn:2", "osp:3", "osp:6", "osp:9", "osp:12", "osp:15",
+    20: [  # aggregation, re-cut by hand 2026-08-23: consumer 1, consumer
+        # 2, the plus signs, then one horizontal sum per row (each "="
+        # grouped with the aggregate dot it produces), aggregate curve last
+        ["cxn:2", "osp:3", "osp:5", "osp:7", "osp:9", "osp:11",
          "t:Consumer 1 demand"],
-        ["cxn:3", "osp:4", "osp:7", "osp:10", "osp:13", "osp:16",
-         "t:Consumer 2 demand", "t:+#1", "t:+#2", "t:+#3", "t:+#4"],
-        ["cxn:4", "osp:5", "osp:8", "osp:11", "osp:14", "osp:17",
-         "t:Aggregate demand", "t:=#1", "t:=#2", "t:=#3", "t:=#4"],
+        ["cxn:3", "osp:4", "osp:6", "osp:8", "osp:10", "osp:12",
+         "t:Consumer 2 demand"],
+        ["grp:3"],
+        ["grp:0", "grp:5"],
+        ["grp:1"],
+        ["grp:2"],
+        ["grp:4"],
+        ["cxn:4"],
     ],
-    21: [  # factors: related-goods block + cartoon, then one per click
-        ["pr:Income:1:4", "pic:0"],
+    21: [  # factors, re-cut by hand 2026-08-23: the demand-shift figure
+        # first (falling, then rising — each curve with its own arrow and
+        # label as one group), then the bullets one at a time, with the
+        # cartoon riding on the Ryanair sub-bullet
+        ["grp:1"],
+        ["grp:0"],
+        ["pr:Income:0:0"],
+        ["pr:Income:1:3"],
+        ["pr:Income:4:4", "pic:0"],
         ["pr:Income:5:5"],
         ["pr:Income:6:6"],
         ["pr:Income:7:7"],
         ["pr:Income:8:8"],
         ["t:Anything else?"],
     ],
-    22: [  # snob news: Ferrari panel (+source), then Birkin panel
+    22: [  # snob news: the concept box, then Ferrari panel (+source),
+        # then Birkin panel
+        ["grp:0"],
         ["pic:0", "pic:1", "t:Source: The Wall Street"],
         ["pic:2", "pic:3"],
     ],
@@ -286,23 +307,11 @@ PLANS = {
 
 
 # ---------------------------------------------------------------------------
-# 2026-08-15 bookend insert at display 14: the config above uses the
-# PRE-bookend numbering; shift every key >= 14 by +1 here. The new
-# slide 14 (law-of-demand recap) is static.
+# 2026-08-15 a bookend law-of-demand recap was inserted at display 14 and
+# the config above (PRE-bookend numbering) was shifted +1 from 14 on.
+# 2026-08-23 Nico deleted that slide again, so the config numbering is
+# live as written and no shift is applied.
 # ---------------------------------------------------------------------------
-def _shifted_set(ss):
-    return {k + 1 if k >= 14 else k for k in ss}
-
-
-def _shifted_dict(dd):
-    return {(k + 1 if k >= 14 else k): v for k, v in dd.items()}
-
-
-SKIP = _shifted_set(SKIP) | {14}
-FIG_GROUP = _shifted_dict(FIG_GROUP)
-STATIC = _shifted_dict(STATIC)
-PLANS = _shifted_dict(PLANS)
-PLANS_PRE = _shifted_dict(PLANS_PRE)
 
 
 def q(ns, t):
@@ -620,7 +629,7 @@ def main():
              for s in pres.find(q(P, "sldIdLst"))]
 
     if sel == ["all"] or not sel:
-        todo = [d for d in range(1, 78) if d not in SKIP]
+        todo = [d for d in range(1, len(order) + 1) if d not in SKIP]
     else:
         todo = [int(x) for x in sel]
 

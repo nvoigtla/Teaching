@@ -1,5 +1,266 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
+## 2026-08-23 (third pass) — Speaker notes on every slide
+
+**One-line summary.** Every one of the 76 slides now carries speaker
+notes; nothing that was already substantive was overwritten, and the
+PollEverywhere notes were left untouched.
+
+### What was written
+- **41 slides had no notes at all** and got new ones: 1, 2, 3, 6, 7, 8,
+  9, 10, 13, 14, 19, 20, 23, 24, 25, 30, 31, 34, 36, 39, 40, 46, 47, 48,
+  51, 53, 54, 55, 56, 58, 59, 60, 63, 64, 65, 67, 68, 71, 74, 75, 76.
+- **5 slides had a stub** (a citation, a URL, a one-liner) and were
+  expanded, with the original line kept at the end of the note: 17
+  (Inglehart citation), 27 (Netflix / Practice Video 1 pointer), 35
+  (YouTube link), 41 (WSJ Amazon–Hachette URL), 44 ("Rounding to the
+  closest integer").
+- **14 slides kept their notes verbatim** — the substantive ones ported
+  from Nico's original deck plus the ones drafted earlier: 15, 16, 18,
+  21, 22, 26, 28, 29, 45, 52, 57, 66, 72, 73.
+- **16 PollEverywhere slides untouched** (4, 5, 11, 12, 32, 33, 37, 38,
+  42, 43, 49, 50, 61, 62, 69, 70). Their notes ARE the poll mechanism —
+  the add-in reads the poll URL out of them at slideshow start, and a
+  rewritten notes part crashes the renderer deck-wide.
+
+Style follows the Teaching CLAUDE.md default: 2–4 sentences in spoken
+voice, the concrete example named (Gjelina pizza, LADWP water at −0.4,
+CorePower Yoga, Amazon vs. Hachette, Uber, Rivian R3, Target vs.
+Walmart, movie tickets and popcorn), and the hand-off to the next slide.
+Worked slides carry the full arithmetic so the notes stand alone as
+student guidance when the deck is uploaded.
+
+### Mechanics
+- New BUILD INPUT `_notes_m2.py` holds `NOTES` (display number → text)
+  and `SPLICED_NOTES`. `build()` applies `NOTES` at the very end, only to
+  slides that do not already set notes of their own, so the per-slide
+  `_set_notes` calls stay authoritative.
+- **Slide 13 needs the splice route.** It is spliced in from the original
+  deck, so its notes part is replaced wholesale; `_splice_media.py` now
+  has `_with_notes_text()`, which writes `SPLICED_NOTES[disp]` into the
+  copied notes part's body placeholder. Poll slides never go through it.
+- Gotchas hit on the way: `xml.etree`'s `tostring()` has no `standalone`
+  keyword (lxml does), and — the documented one — **a bash heredoc eats
+  one backslash level**, so `
+
+` inside the patch script arrived as
+  real newlines and broke five string literals. Write patch scripts to a
+  .py file with the Write tool, as the Teaching CLAUDE.md says.
+
+### Verification
+- Notes audit: all 76 slides carry notes; PowerPoint COM confirms every
+  slide has ≥ 40 characters on its notes page.
+- Member-level geometry diff vs. the previous deck: 46 slides differ and
+  **every one of them differs only in NOTES** — no geometry moved.
+- Click-by-click timing diff: **all 76 slides identical**.
+- Deck opens clean, 76 slides; slideshow probe on 1/4/13/22/32/49/76:
+  PASS, with all three sampled live poll slides still rendering.
+
+
+## 2026-08-23 (later) — Second hand-edit round: slides 16, 19, 21, 22, 23
+
+**One-line summary.** Adopted Nico's second pass of hand-edits (16, 19,
+21, 23), added the snob-effect explainer box to 22, and wrote the new
+upward-sloping-MC rule into the Teaching CLAUDE.md.
+
+### Adopted hand-edits
+- **Slide 16 (Gates).** The last leftover effect is gone — the slide is
+  now fully static (moved from PLANS into `SKIP_STATIC`).
+- **Slide 19 (optimal movies).** THE substantive change: the MC line is
+  now **upward-sloping**, from fig (0.4173, 0.4884) to (8.3778, 4.3360),
+  because the curve is labelled "incl. opportunity cost". The MC label
+  moved to (8.676, 4.322). The "MPV is the demand curve" callout was
+  resized to 3.800 x 1.028 at (5.500, 2.870) (text padding scaled to
+  0.173 / 0.108) and **grouped with the gold arrow** that points at the
+  curve, so the two reveal as one beat. New build order: MPV curve +
+  labels → the callout group → MC + its label → Q*.
+  **Q* recomputed** as the true Bézier/MC intersection against the sloped
+  line (q* = 4.8234, x = 6.441"). Nico's hand-placed guide was at 6.468",
+  so the drop line and the "Q*" label each shifted 0.027" left — below
+  visual threshold, and required by the "curves must be economically
+  exact" rule.
+- **Slide 21 (factors affecting demand).** The demand-shift figure was
+  redrawn and moved up beside the bullets: `SimpleFig(6.876, 4.003, 2.6,
+  2.2, 10, 10)`; base D now (1.4769, 9.0) → (8.2, 1.6); the two shifted
+  curves keep their dashed style but each got a short **diagonal** gold
+  arrow off the base curve; labels re-worded to "Rising demand" /
+  "Falling demand" and moved beside their own curve (11 pt italic gray,
+  boxes 1.600 x 0.185 and 1.126 x 0.185). Cartoon moved to (10.400,
+  3.831); "Anything else?" to (4.066, 6.473). Each shifted curve + arrow
+  + label is ONE group. New 10-click build: falling panel → rising panel
+  → then the bullets one at a time (p0 now animates too), cartoon riding
+  on the Ryanair sub-bullet, "Anything else?" last.
+- **Slide 23 (network effects).** Screenshot nudged to (3.200, 3.050).
+
+### New work
+- **Slide 22 — snob-effect explainer box.** Cream convention callout
+  above the two WSJ clippings: "**Snob effect:** exclusivity is part of
+  the value, so demand falls as more people own the good", 18 pt,
+  centered, at (1.717, 1.400), 9.900 x 0.520. Both panels shifted down
+  0.20" to make room. Revealed on its own first click, then the Ferrari
+  panel, then the Birkin panel.
+  Two sizing constraints drove the width: the line must not wrap (text
+  measured with PIL on Calibri / Calibri Bold = 9.11"), and the box must
+  stay **under 10"** or `_group_pass` rule 1 treats it as a layout band
+  and refuses to group it with its text.
+- **Teaching CLAUDE.md — new standing rule** (Nico's instruction): a
+  marginal-cost curve that explicitly includes opportunity cost is drawn
+  UPWARD-SLOPING (best alternatives are given up first); a flat MC is
+  only correct for out-of-pocket cost alone; and when the slope changes,
+  recompute every marked optimum as the true intersection.
+
+### Tooling
+- `_group_pass.py`: new `MANUAL_GROUPS_POST` pass that runs AFTER the
+  geometric rules and may take an existing `grpSp` as a member — needed
+  for slide 19, where the callout group nests inside a group with the
+  arrow. `bbox()` now also reads `grpSpPr`.
+- **lxml gotcha fixed:** the manual-group matcher tracked consumed
+  shapes by `id(element)` while pulling elements fresh from `spTree` each
+  pass. lxml frees and RECYCLES proxy ids, so a consumed id spuriously
+  matched an untouched shape and slide 21's second group failed to
+  resolve. It now snapshots the candidate list once and keeps the
+  references.
+- `_dump_cxn.py`: prints connector ENDPOINTS (flipH/flipV-aware) in
+  rendered inches, descending into groups — the tool that made the
+  redrawn slide-21 figure portable back into figure units.
+
+### Verification
+- Member-level geometry diff: slides 19, 21, 23 reproduce the hand-edits
+  exactly (only PowerPoint spell-check run splits remain, plus the
+  deliberate 0.027" Q* correction on 19); 22 differs by the new box and
+  the 0.20" panel shift.
+- Click-by-click timing diff: **73 of 76 slides identical**; the three
+  flagged are 19 and 21 (0.001" rounding in the printed geometry — the
+  beat sequences match shape-for-shape) and 22 (the new box beat).
+- COM click check: 16 = 0 effects, 19 = 4 clicks, 21 = 10 clicks,
+  22 = 3 clicks, 23 = 2 clicks.
+- Deck opens clean, 76 slides, 51 animated; slide 13 still 4 shapes with
+  the working OLE embed.
+- Slideshow probe on 1/13/16/19/21/22/23/32/76: PASS.
+
+
+## 2026-08-23 — Hand-edit adoption round on In-Class slides 1–20 (deck now 76 slides)
+
+**One-line summary.** Ported every hand-edit Nico made to slides 1–20 of
+`Module 2 - In Class Revised.pptx` back into the pipeline (geometry,
+text, grouping, animation choreography), fixed the broken slide-13 Excel
+embed, replaced the whole pizza on slide 10 with a single slice, added
+the MPV/MB note to slide 18, and gave the slide-19 MPV curve a shade.
+
+### Hand-edits found and adopted (canonical numbering)
+Surfaced with a member-level geometry diff (`_diff_all.py`, copied from
+Module 1) plus a new click-by-click timing diff (`_dump_timing.py` /
+`_timing_all.py`) against a side-path rebuild.
+
+- **Bookend slide deleted.** Nico removed the law-of-demand recap that
+  had been inserted at display 14 in the CT cross-check round. Deck 77
+  → **76 slides**; every pipeline config renumbered back to the
+  pre-bookend numbering (build-script page numbers, `SPLICE_MAP`,
+  `SPLICED`, `SKIP_*`, `PLANS`). The `_shifted_dict/_shifted_set` block
+  in `_animate.py` is gone — the config numbering is live as written
+  again, and the `slide_NN_*` function names line up with display
+  numbers once more.
+- **Slide 9.** "Price" axis label moved to (8.979, 2.285); the whole
+  demand-curve mini figure (2 axis connectors + Price + Quantity +
+  D-curve + "D") grouped into ONE object. Build re-cut to 3 clicks:
+  law-of-demand box → the figure group → all three "Reasons"
+  paragraphs on one click.
+- **Slide 16 (Gates).** Build reduced to a single click that reveals
+  only the oversized quote glyph; the quote text and the portrait are
+  static.
+- **Slide 17 (Inglehart).** Animation removed entirely — slide 17 added
+  to `SKIP_STATIC`.
+- **Slide 18.** The Module-1 recall line corrected to "Marginal benefit
+  (MB) … = Marginal Cost (MC)"; the decision header now reads "Optimal
+  consumption decision: We use “MPV”" with MPV in red. MB = MC star
+  grouped with its label. Build order REVERSED vs. the old plan: star
+  first, then the MPV rule.
+- **Slide 19.** "MPV" curve label moved to (10.700, 6.059); "is" in the
+  convention callout is now bold as well as underlined.
+- **Slide 20.** Six hand-made groups adopted: each "=" sign grouped with
+  the aggregate dot it produces (4×), all four "+" signs as one group,
+  and the aggregate legend swatch+label. Build re-cut to 8 clicks —
+  consumer 1, consumer 2, the plus signs, then one horizontal sum per
+  row, aggregate curve last.
+
+### New work this session
+- **Slide 10 — one slice, not a whole pizza.** `_mk_slice.py` (BUILD
+  INPUT generator) cuts a 56° wedge out of the same Gjelina photo
+  (`_source_images/image14.jpeg`), upsamples 2.5× with an unsharp pass,
+  and writes `_source_images/pizza_slice.png` (RGBA, transparent
+  background). Placed at (4.890, 3.100), 3.55" wide, `rounded=False`
+  (the wedge is not rectangular) with the standard soft shade.
+- **Slide 13 — the Excel embed is openable again.** TWO bugs, both in
+  `_splice_media.py`:
+  1. **Rel-ID remap collision.** The old per-entry
+     `slide_xml.replace('"rIdA"', '"rIdB"')` loop clobbered itself: old
+     rId6 (the EMF preview) was rewritten to rId4, and the later
+     rId4 → rId6 pass rewrote that same string, so the OLE fallback
+     `<a:blip>` ended up pointing at the NOTES part. PowerPoint could
+     not draw the embed's preview. Now a single-pass `re.sub` over
+     `"rIdN"`.
+  2. **VML shape left behind by the recentering shift.** `X_SHIFT_EMU`
+     moved the OLE `graphicFrame` +1.667" but not the legacy VML shape
+     the `p:oleObj spid` points at. With the two no longer coincident,
+     PowerPoint rendered the VML as a SEPARATE picture lying on top of
+     the OLE frame — that picture is what swallowed the double-click.
+     `_shift_vml()` now moves `left:NNpt` by the same 120 pt.
+  Also: the blanket `<a:off x>` regex was hitting the spTree's own
+  `<p:grpSpPr>` transform. Harmless for the modern renderer (ext = 0)
+  but the legacy VML path honours it and shifted the whole slide a
+  second time — reset to 0 after the shift.
+  Result: slide 13 has 4 shapes (was 5), the Pizza Demand chart renders
+  as the OLE object itself, and `OLEFormat.Object` resolves with Edit /
+  Open verbs.
+- **Slide 18 notes.** Added the MPV-vs-MB note Nico asked for (same
+  concept; MPV is MB specific to consumption).
+- **Slide 19 MPV curve shade.** `_add_cubic_curve` result now gets
+  `_add_drop_shadow(blur 3 pt, dist 2 pt, 40 % alpha)`.
+
+### Tooling added (reusable)
+- `_diff_slides.py` / `_diff_all.py` — member-level geometry+text+notes
+  diff, canonical vs. `..._test.pptx` (copied from Module 1, retargeted).
+- `_dump_timing.py` / `_timing_all.py` — click-by-click choreography
+  diff, resolving `spid` → shape signature so it survives rebuilds.
+- `_dump1.py`, `_dump_runs.py`, `_rawshape.py` — shape / run / raw-XML
+  dumpers used to pin down run-level emphasis changes.
+- `_slideshow_probe.ps1` — full-screen slideshow probe (from Module 1).
+- `_group_pass.py` gained `MANUAL_GROUPS` (explicit member sets matched
+  by rendered inches, reaching connectors too) and a `make_group(...,
+  anchor="last")` mode — PowerPoint anchors a new group at the TOPMOST
+  member's z-position, and matching that is what made the slide-20
+  document order reproduce exactly.
+- `_animate.py`'s `todo` range is derived from the slide count instead
+  of the hardcoded `range(1, 78)` (it crashed silently after printing,
+  leaving the deck un-animated, when the count dropped to 76).
+
+### Verification
+- Member-level geometry diff over all 76 slides: the only differences
+  vs. Nico's deck are the three intended changes (slide 10 pizza, slide
+  13 shape count, slide 18 notes) plus PowerPoint save artifacts
+  (spell-check `err="1"` run splits, dropped empty `rPr`, autofit
+  height recomputation).
+- Click-by-click timing diff: **74 of 76 slides identical**; the two
+  flagged are slide 10 (pizza geometry) and slide 16 (our engine emits
+  the lone effect as `clickEffect` where PowerPoint left a
+  `withEffect` — same on-click behaviour).
+- COM click-structure check on 9/16/17/18/19/20 matches the plan.
+- Deck opens clean in PowerPoint, 76 slides, 52 animated.
+- Full-screen slideshow probe on 1/4/9/10/13/18/19/20/32/76: PASS — both
+  live PollEv slides render, the Excel chart renders, no failure banner.
+
+### Open questions for Nico
+1. **Slide 16.** The deck carried a single leftover `withEffect` on the
+   quote glyph (the text and portrait effects had been deleted). Adopted
+   verbatim as a 1-click reveal of the glyph — say the word if the slide
+   was meant to be fully static.
+2. **Slide 18 build order** now shows the MB = MC star BEFORE the MPV
+   rule, which inverts the Teaching CLAUDE.md rule that the star follows
+   the concrete rule it abstracts. Adopted as hand-edited.
+3. **"Shade" on the MPV curve** read as the deck's standard soft drop
+   shadow. If shading the AREA under the curve was meant, say so.
+
+
 ## 2026-08-16 — Video Part rebuild (Videos 1–3, 57 slides)
 
 Built `Module 2 - Video Part Revised.pptx` from the 40-slide 4:3

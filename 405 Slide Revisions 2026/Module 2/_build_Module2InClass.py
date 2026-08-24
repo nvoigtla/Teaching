@@ -2940,7 +2940,9 @@ def slide_09_law_of_demand(prs, page_num=9):
     # native demand-curve mini figure (right column)
     fig = SimpleFig(9.35, 6.05, 3.0, 3.3, 10, 10)
     _fig_axes(slide, fig)
-    _add_text(slide, Inches(fig.l - 0.72), Inches(fig.b - fig.h - 0.52),
+    # hand-tweaked from (fig.l-0.72, fig.b-fig.h-0.52) = (8.630, 2.230)
+    # on 2026-08-23
+    _add_text(slide, Inches(8.979), Inches(2.285),
               Inches(1.4), Inches(0.32), "Price", size=16, bold=True,
               italic=True, color=NAVY, font="Calibri")
     _add_text(slide, Inches(fig.l + fig.w - 0.55), Inches(fig.b + 0.10),
@@ -2973,9 +2975,14 @@ def slide_10_more_customers(prs):
               (" of the slice", {})], 0, {}),
         ],
         size=24, sub_size=22)
-    # pizza enlarged + recentered per Nico's hand edit (2026-08-15)
-    _add_media_image(slide, "image14.jpeg", left=Inches(3.770),
-                     top=Inches(3.053), width=Inches(5.250))
+    # pizza enlarged + recentered per Nico's hand edit (2026-08-15);
+    # 2026-08-23: show ONE SLICE, not the whole pie — pizza_slice.png is
+    # a wedge cut out of the same Gjelina photo by _mk_slice.py (square-
+    # ish, so the width shrinks from 5.250" to keep the visual weight)
+    # the wedge is not rectangular, so no rounded corners — just the shade
+    _add_media_image(slide, "pizza_slice.png", left=Inches(4.890),
+                     top=Inches(3.100), width=Inches(3.550),
+                     rounded=False, shadow=True)
     _draw_footer(slide, FOOTER_TEXT, 10)
     _add_pollbreak_badge(slide)
     return slide
@@ -3002,7 +3009,7 @@ def slide_14_existing_buy_more(prs):
         size=28, sub_size=24)
     _add_media_image(slide, "image14.jpeg", left=Inches(7.30),
                      top=Inches(1.95), width=Inches(4.45))
-    _draw_footer(slide, FOOTER_TEXT, 15)
+    _draw_footer(slide, FOOTER_TEXT, 14)
     return slide
 
 
@@ -3084,7 +3091,7 @@ def slide_15_multiunit(prs):
         "Principle of Diminishing Marginal Utility. That is, the demand "
         "curve is downward sloping because you get satiated as you consume "
         "more and more pizza."))
-    _draw_footer(slide, FOOTER_TEXT, 16)
+    _draw_footer(slide, FOOTER_TEXT, 15)
     return slide
 
 
@@ -3134,7 +3141,7 @@ def slide_16_gates(prs):
         "results from one specific study, but these findings are robust "
         "across hundreds of studies that have been conducted in almost "
         "every country."))
-    _draw_footer(slide, FOOTER_TEXT, 17)
+    _draw_footer(slide, FOOTER_TEXT, 16)
     return slide
 
 
@@ -3155,11 +3162,19 @@ def slide_17_inglehart(prs):
               "Source: Inglehart (2018)", size=12, italic=True, color=GRAY,
               font="Calibri", align=PP_ALIGN.CENTER)
     _set_notes(slide, (
+        "The same diminishing pattern shows up far away from pizza. This "
+        "is Inglehart's cross-country evidence on income and life "
+        "satisfaction: satisfaction climbs steeply as income rises from "
+        "low levels, then flattens out. Moving from very poor to "
+        "comfortable changes a great deal; the next increment of income "
+        "at an already high level changes much less. That is diminishing "
+        "marginal personal value again, measured on a very different "
+        "scale from a slice of pizza.\n\n"
         "Source: Cultural Evolution — People's Motivations are Changing, "
         "and Reshaping the World. Online publication date: March 2018, pp "
         "140-172. Ronald F. Inglehart, University of Michigan, Ann Arbor. "
         "https://doi.org/10.1017/9781108613880.009"))
-    _draw_footer(slide, FOOTER_TEXT, 18)
+    _draw_footer(slide, FOOTER_TEXT, 17)
     return slide
 
 
@@ -3182,10 +3197,11 @@ def slide_18_consumer_opt(prs):
         [
             ("Remember from Module 1: Optimization in general:", 0,
              {'bold': True, 'bullet_style': 'none'}),
+            # 2026-08-23 (Nico): the Module-1 rule is MB = MC, not MB = MPV
             ([("Marginal benefit (", {}), ("MB", {'color': RED}),
               (") of an extra unit of a good/service = Marginal "
-               "Personal Value (", {}),
-              ("MPV", {'color': RED}), (")", {})], 0, {}),
+               "Cost (", {}),
+              ("MC", {'color': RED}), (")", {})], 0, {}),
             ([("Marginal cost (", {}), ("MC", {'color': RED}),
               (") includes:", {})], 0, {}),
             ("Price of the good or service", 1),
@@ -3198,9 +3214,13 @@ def slide_18_consumer_opt(prs):
                       line_w=1.25, rounded=True, shadow=True,
                       corner_pct=0.08)
     _add_hierarchical_bullets(
-        slide, Inches(0.75), Inches(4.78), Inches(8.15), Inches(2.00),
+        # height hand-tweaked from 2.00 on 2026-08-23 (autofit)
+        slide, Inches(0.75), Inches(4.78), Inches(8.15), Inches(1.86),
         [
-            ("Optimal consumption decision:", 0,
+            # 2026-08-23 (Nico): flag that consumption uses MPV, not MB
+            ([("Optimal consumption decision:", {}),
+              (" We use “", {}), ("MPV", {'color': RED}),
+              ("”", {})], 0,
              {'bold': True, 'bullet_style': 'none'}),
             ([("Choose quantity where ", {}),
               ("MPV = MC", {'bold': True, 'color': RED})], 0, {}),
@@ -3212,7 +3232,16 @@ def slide_18_consumer_opt(prs):
         size=22, sub_size=20, line_spacing_pts=9)
     _add_anchor_burst(slide, Inches(9.75), Inches(3.00), Inches(2.80),
                       Inches(2.80), "MB = MC", top_size=26)
-    _draw_footer(slide, FOOTER_TEXT, 19)
+    # notes requested by Nico, 2026-08-23 (MPV vs. MB)
+    _set_notes(slide, (
+        "This is the same optimization rule as in Module 1, now applied "
+        "to a consumer. One change in wording: instead of marginal "
+        "benefit (MB) we write marginal personal value (MPV). It is the "
+        "same concept – MPV is MB specific to consumption, the value the "
+        "buyer places on one more unit. So “buy up to the point "
+        "where MPV = MC” is the consumption version of MB = MC, "
+        "which is why the anchor star sits next to the rule."))
+    _draw_footer(slide, FOOTER_TEXT, 18)
     return slide
 
 
@@ -3241,33 +3270,53 @@ def slide_19_movies(prs):
         return ((1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b
                 + 3 * (1 - t) * t * t * c + t ** 3 * d)
 
-    _add_cubic_curve(slide, (fig.x(_b0[0]), fig.y(_b0[1])),
-                     (fig.x(_b1[0]), fig.y(_b1[1])),
-                     (fig.x(_b2[0]), fig.y(_b2[1])),
-                     (fig.x(_b3[0]), fig.y(_b3[1])),
-                     color=NAVY, weight_pt=4.0)
-    _add_text(slide, fig.x(8.6), fig.y(0.5) - Inches(0.42), Inches(1.0),
+    _mpv_curve = _add_cubic_curve(
+        slide, (fig.x(_b0[0]), fig.y(_b0[1])),
+        (fig.x(_b1[0]), fig.y(_b1[1])),
+        (fig.x(_b2[0]), fig.y(_b2[1])),
+        (fig.x(_b3[0]), fig.y(_b3[1])),
+        color=NAVY, weight_pt=4.0)
+    # soft shade on the MPV curve (Nico, 2026-08-23)
+    _add_drop_shadow(_mpv_curve, blur="38100", dist="25400",
+                     direction="2700000", alpha="40000")
+    # label hand-tweaked from (fig.x(8.6), fig.y(0.5)-0.42) = (9.840,
+    # 5.915) on 2026-08-23
+    _add_text(slide, Inches(10.700), Inches(6.059), Inches(1.0),
               Inches(0.4), "MPV", size=20, bold=True, italic=True,
               color=NAVY, font="Calibri")
-    # MC horizontal line (red)
-    _add_arrow(slide, (fig.x(0.35), fig.y(2.6)), (fig.x(9.4), fig.y(2.6)),
+    # MC line (red).  UPWARD-SLOPING because the label says the curve
+    # includes opportunity cost: each extra movie crowds out the next-best
+    # use of an hour, and the best alternatives go first (Nico's hand
+    # redraw, 2026-08-23 — now a standing rule in the Teaching CLAUDE.md).
+    _mc0, _mc1 = (0.4173, 0.4884), (8.3778, 4.3360)
+    _add_arrow(slide, (fig.x(_mc0[0]), fig.y(_mc0[1])),
+               (fig.x(_mc1[0]), fig.y(_mc1[1])),
                color=RED, weight_pt=2.5, head=False)
-    _add_text(slide, fig.x(6.4), fig.y(2.6) - Inches(0.46), Inches(3.6),
+    # label hand-placed above the right end of the MC line (2026-08-23)
+    _add_text(slide, Inches(8.676), Inches(4.322), Inches(3.6),
               Inches(0.4), "MC (incl. opportunity cost)", size=18,
               italic=True, color=RED, font="Calibri")
-    # Q* drop line at the TRUE MPV/MC crossing (solve the Bézier for
-    # y = 2.6 — the marked Q* must sit at the actual intersection)
+    # Q* drop line at the TRUE MPV/MC crossing — solve the Bézier against
+    # the sloped MC line (the marked Q* must sit at the actual
+    # intersection, per the "curves must be economically exact" rule)
+    _mc_slope = (_mc1[1] - _mc0[1]) / (_mc1[0] - _mc0[0])
+
+    def _gap(t):
+        xs = _bez(t, _b0[0], _b1[0], _b2[0], _b3[0])
+        ys = _bez(t, _b0[1], _b1[1], _b2[1], _b3[1])
+        return ys - (_mc0[1] + _mc_slope * (xs - _mc0[0]))
+
     lo, hi = 0.0, 1.0
-    for _ in range(60):
+    for _ in range(80):
         mid = (lo + hi) / 2
-        ys = _bez(mid, _b0[1], _b1[1], _b2[1], _b3[1])
-        if ys > 2.6:
+        if _gap(mid) > 0:
             lo = mid
         else:
             hi = mid
     t_star = (lo + hi) / 2
     qstar = _bez(t_star, _b0[0], _b1[0], _b2[0], _b3[0])
-    _add_arrow(slide, (fig.x(qstar), fig.y(2.6)), (fig.x(qstar), fig.y(0)),
+    vstar = _bez(t_star, _b0[1], _b1[1], _b2[1], _b3[1])
+    _add_arrow(slide, (fig.x(qstar), fig.y(vstar)), (fig.x(qstar), fig.y(0)),
                color=NAVY, weight_pt=1.5, head=False, dash="dash")
     _add_text(slide, fig.x(qstar) - Inches(0.3), Inches(fig.b + 0.08),
               Inches(0.6), Inches(0.35), "Q*", size=20, bold=True,
@@ -3277,9 +3326,14 @@ def slide_19_movies(prs):
     _add_text(slide, Inches(5.7), Inches(1.85), Inches(6.9), Inches(0.4),
               "MPV diminishes as more and more movies have been watched",
               size=18, color=NAVY, font="Calibri")
+    # box resized + moved up by hand on 2026-08-23 (was 5.55, 3.05,
+    # 4.4 x 1.15 with the default 0.20/0.12 text padding)
     _add_convention_box(
-        slide, Inches(5.55), Inches(3.05), Inches(4.4), Inches(1.15),
-        runs=[("MPV ", {'bold': True}), ("is", {'underline': True}),
+        slide, Inches(5.500), Inches(2.870), Inches(3.800), Inches(1.028),
+        pad_h=Inches(0.173), pad_v=Inches(0.108),
+        # "is" bolded as well as underlined (Nico, 2026-08-23)
+        runs=[("MPV ", {'bold': True}),
+              ("is", {'bold': True, 'underline': True}),
               (" the demand curve ", {'bold': True}),
               ("(strictly speaking, the “inverse” demand curve, "
                "but economists are not very precise about this)",
@@ -3292,7 +3346,7 @@ def slide_19_movies(prs):
     _add_arrow(slide, (Inches(5.50), Inches(3.85)),
                (fig.x(_ax), fig.y(_ay)), color=GOLD, weight_pt=2.0,
                head=True)
-    _draw_footer(slide, FOOTER_TEXT, 20)
+    _draw_footer(slide, FOOTER_TEXT, 19)
     return slide
 
 
@@ -3355,7 +3409,7 @@ def slide_20_aggregation(prs):
                   label, size=18, bold=(color is GREEN), color=color,
                   font="Calibri")
         ly = int(ly + Inches(0.42))
-    _draw_footer(slide, FOOTER_TEXT, 21)
+    _draw_footer(slide, FOOTER_TEXT, 20)
     return slide
 
 
@@ -3426,29 +3480,44 @@ def slide_21_factors(prs):
             ("Network effects", 0),
         ],
         size=24, sub_size=22, line_spacing_pts=12)
-    _add_media_image(slide, "image20.png", left=Inches(9.15),
-                     top=Inches(1.65), width=Inches(2.35))
-    # mini demand-shift figure (CT adoption): D shifts right / left
-    fig = SimpleFig(9.15, 6.75, 2.6, 2.2, 10, 10)
+    # cartoon moved to the lower-right corner (Nico, 2026-08-23; was
+    # 9.15, 1.65)
+    _add_media_image(slide, "image20.png", left=Inches(10.400),
+                     top=Inches(3.831), width=Inches(2.35))
+    # mini demand-shift figure (CT adoption): D shifts right / left.
+    # Nico redrew it by hand on 2026-08-23 — the figure moved up beside
+    # the bullets (was anchored at 9.15, 6.75), the two shifted curves
+    # each got a short diagonal arrow off the base curve, and the labels
+    # became "Rising demand" / "Falling demand" beside their own curve.
+    # Each shifted curve + its arrow + its label is ONE group (see
+    # MANUAL_GROUPS in _group_pass.py), revealed on one click.
+    fig = SimpleFig(6.876, 4.003, 2.6, 2.2, 10, 10)
     _fig_axes(slide, fig, weight_pt=1.5)
-    _add_arrow(slide, (fig.x(1.2), fig.y(8.6)), (fig.x(8.2), fig.y(1.6)),
+    _add_arrow(slide, (fig.x(1.4769), fig.y(9.0)), (fig.x(8.2), fig.y(1.6)),
                color=NAVY, weight_pt=2.25, head=False)
-    _add_arrow(slide, (fig.x(3.4), fig.y(9.0)), (fig.x(9.6), fig.y(2.8)),
+    # right-shift panel: dashed curve, arrow, label (emitted together so
+    # the grouping pass finds them adjacent and in this order)
+    _add_arrow(slide, (fig.x(3.5192), fig.y(9.4682)),
+               (fig.x(9.7538), fig.y(3.2636)),
                color=GRAY, weight_pt=1.5, head=False, dash="dash")
+    _add_arrow(slide, (fig.x(5.3), fig.y(5.0136)),
+               (fig.x(6.4654), fig.y(6.1727)),
+               color=GOLD, weight_pt=2.0, head=True)
+    _add_text(slide, Inches(9.226), Inches(3.395), Inches(1.600),
+              Inches(0.185), "Rising demand", size=11,
+              italic=True, color=GRAY, font="Calibri")
+    # left-shift panel
     _add_arrow(slide, (fig.x(0.2), fig.y(7.6)), (fig.x(6.2), fig.y(0.6)),
                color=GRAY, weight_pt=1.5, head=False, dash="dash")
-    _add_arrow(slide, (fig.x(4.9), fig.y(6.6)), (fig.x(6.7), fig.y(6.6)),
+    _add_arrow(slide, (fig.x(4.3231), fig.y(5.1)),
+               (fig.x(3.2), fig.y(4.1)),
                color=GOLD, weight_pt=2.0, head=True)
-    _add_arrow(slide, (fig.x(3.5), fig.y(3.3)), (fig.x(1.7), fig.y(3.3)),
-               color=GOLD, weight_pt=2.0, head=True)
-    _add_text(slide, Inches(fig.l + fig.w * 0.52), Inches(fig.b + 0.06),
-              Inches(1.6), Inches(0.3), "demand rises", size=11,
-              italic=True, color=GRAY, font="Calibri")
-    _add_text(slide, Inches(fig.l - 1.35), Inches(fig.b + 0.06),
-              Inches(1.6), Inches(0.3), "demand falls", size=11,
+    _add_text(slide, Inches(7.188), Inches(3.653), Inches(1.126),
+              Inches(0.185), "Falling demand", size=11,
               italic=True, color=GRAY, font="Calibri",
               align=PP_ALIGN.RIGHT)
-    _add_outlined_box(slide, Inches(3.05), Inches(6.42), Inches(2.6),
+    # moved right by hand on 2026-08-23 (was 3.05, 6.42)
+    _add_outlined_box(slide, Inches(4.066), Inches(6.473), Inches(2.6),
                       Inches(0.48), "Anything else?", line=NAVY,
                       text_color=NAVY, size=16, bold=True, rounded=True,
                       shadow=True, corner_pct=0.25)
@@ -3515,7 +3584,7 @@ def slide_21_factors(prs):
         "affects my propensity to demand the good, either negatively "
         "(snob) or positively (bandwagon). In modern economics these "
         "effects are called network effects."))
-    _draw_footer(slide, FOOTER_TEXT, 22)
+    _draw_footer(slide, FOOTER_TEXT, 21)
     return slide
 
 
@@ -3527,18 +3596,30 @@ def slide_22_snob_news(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_LAW)
     _draw_action_title(slide, "The Snob Effect in the News")
+    # one-line reminder of the concept above the two clippings (Nico,
+    # 2026-08-23); both panels shifted down 0.20" to make room
+    # width measured with PIL on Calibri/Calibri Bold at 18 pt (9.11" of
+    # text, so 9.50" of text box) — the line must not wrap, and the box
+    # has to stay under the 10" "layout band" threshold that makes
+    # _group_pass rule 1 skip a filled roundRect
+    _add_convention_box(
+        slide, Inches(1.717), Inches(1.400), Inches(9.900), Inches(0.520),
+        runs=[("Snob effect: ", {'bold': True}),
+              ("exclusivity is part of the value, so demand falls as "
+               "more people own the good", {})],
+        size=18, align=PP_ALIGN.CENTER)
     # left panel: Ferrari (headline above photo)
     _add_media_image(slide, "ct_snob_image7.png", left=Inches(0.75),
-                     top=Inches(1.85), width=Inches(5.6),
+                     top=Inches(2.05), width=Inches(5.6),
                      rounded=False, shadow=False)
     _add_media_image(slide, "ct_snob_image6.jpg", left=Inches(1.30),
-                     top=Inches(3.15), width=Inches(4.5))
+                     top=Inches(3.35), width=Inches(4.5))
     # right panel: Birkin (headline above photo)
     _add_media_image(slide, "ct_snob_image9.png", left=Inches(7.10),
-                     top=Inches(1.95), width=Inches(5.4),
+                     top=Inches(2.15), width=Inches(5.4),
                      rounded=False, shadow=False)
     _add_media_image(slide, "ct_snob_image8.jpg", left=Inches(7.75),
-                     top=Inches(3.55), width=Inches(4.1))
+                     top=Inches(3.75), width=Inches(4.1))
     _add_text(slide, MARGIN, Inches(6.78), Inches(6.0), Inches(0.3),
               "Source: The Wall Street Journal (2025)", size=12,
               italic=True, color=GRAY, font="Calibri")
@@ -3550,7 +3631,7 @@ def slide_22_snob_news(prs):
         "does the same with the Birkin bag. Exclusivity itself is what "
         "customers are paying for: high demand by others would reduce "
         "the appeal."))
-    _draw_footer(slide, FOOTER_TEXT, 23)
+    _draw_footer(slide, FOOTER_TEXT, 22)
     return slide
 
 
@@ -3571,9 +3652,10 @@ def slide_23_network_effects(prs):
             ("Winner-take-all", 0),
         ],
         size=26, line_spacing_pts=10)
-    _add_media_image(slide, "image21.jpg", left=Inches(1.65),
-                     top=Inches(3.35), width=Inches(10.0))
-    _draw_footer(slide, FOOTER_TEXT, 24)
+    # nudged right and up by hand on 2026-08-23 (was 1.65, 3.35)
+    _add_media_image(slide, "image21.jpg", left=Inches(3.200),
+                     top=Inches(3.050), width=Inches(10.0))
+    _draw_footer(slide, FOOTER_TEXT, 23)
     return slide
 
 
@@ -3583,7 +3665,7 @@ def slide_23_network_effects(prs):
 
 def slide_24_remember(prs):
     return make_content_bulleted(
-        prs, 25, TAG_LAW, "Remember About Demand",
+        prs, 24, TAG_LAW, "Remember About Demand",
         [
             ("Represents the willingness to pay by all actual or "
              "potential customers for a good/service", 0),
@@ -3646,7 +3728,7 @@ def slide_26_generic_elasticity(prs):
         "it will conserve its original form, it will not adapt. So, you "
         "can think of elasticity like the ability to adapt to external "
         "forces."))
-    _draw_footer(slide, FOOTER_TEXT, 27)
+    _draw_footer(slide, FOOTER_TEXT, 26)
     return slide
 
 
@@ -3712,8 +3794,17 @@ def slide_27_netflix(prs):
               "Netflix U.S. Standard plan · Source: Netflix price "
               "announcements", size=11, italic=True, color=GRAY,
               font="Calibri", align=PP_ALIGN.CENTER)
-    _set_notes(slide, "Will be answered in Practice Video 1 for Module 2")
-    _draw_footer(slide, FOOTER_TEXT, 28)
+    _set_notes(slide, (
+        "Why we need elasticity at all. Netflix raises its U.S. standard "
+        "plan price regularly – the chart tracks it from $7.99 to "
+        "$17.99. Every one of those increases faced the same two "
+        "questions: how many subscribers will we lose, and will revenue "
+        "go up or down? Notice those are different questions with "
+        "different answers, and elasticity is the single number that "
+        "links them. The revenue side is worked through in Module 2, "
+        "Practice Video 1.\n\n"
+        "Will be answered in Practice Video 1 for Module 2"))
+    _draw_footer(slide, FOOTER_TEXT, 27)
     return slide
 
 
@@ -3767,7 +3858,7 @@ def slide_28_what_is_elasticity(prs):
         "calculated elasticity is just a number. Example: You can "
         "directly compare the elasticity of demand for Sara Lee products "
         "to the elasticity of demand for gasoline."))
-    _draw_footer(slide, FOOTER_TEXT, 29)
+    _draw_footer(slide, FOOTER_TEXT, 28)
     return slide
 
 
@@ -3820,7 +3911,7 @@ def slide_29_three_types(prs):
         "percentage change in whatever is driving it — the good's own "
         "price, the customer's income, or the price of another good. We "
         "start with the own-price elasticity."))
-    _draw_footer(slide, FOOTER_TEXT, 30)
+    _draw_footer(slide, FOOTER_TEXT, 29)
     return slide
 
 
@@ -3853,7 +3944,7 @@ def slide_30_own_price(prs):
               (" ↓ )", {})], 0, {}),
         ],
         size=26, sub_size=24)
-    _draw_footer(slide, FOOTER_TEXT, 31)
+    _draw_footer(slide, FOOTER_TEXT, 30)
     return slide
 
 
@@ -3886,7 +3977,7 @@ def slide_31_water(prs):
     _add_arrow(slide, (Inches(8.9), Inches(4.57)),
                (Inches(8.9), Inches(4.93)), color=NAVY, weight_pt=2.5,
                head=True)
-    _draw_footer(slide, FOOTER_TEXT, 32)
+    _draw_footer(slide, FOOTER_TEXT, 31)
     _add_pollbreak_badge(slide)
     return slide
 
@@ -3927,7 +4018,7 @@ def slide_34_water_solution(prs):
                       width=Inches(6.8), height=Inches(0.55),
                       fill=GOLD, text_color=NAVY, size=18, bold=True,
                       rounded=True, shadow=True)
-    _draw_footer(slide, FOOTER_TEXT, 35)
+    _draw_footer(slide, FOOTER_TEXT, 34)
     return slide
 
 
@@ -3971,9 +4062,19 @@ def slide_35_categories(prs):
                (Inches(8.45), Inches(2.25)), color=GOLD, weight_pt=1.75,
                head=True)
     _set_notes(slide, (
+        "Three categories, and they are defined on the absolute value so "
+        "the minus sign does not trip you up. Inelastic means the "
+        "absolute value is below 1: quantity moves proportionally less "
+        "than price, as with water at −0.4. Elastic means the "
+        "absolute value is above 1: quantity moves proportionally more, "
+        "as with the yoga lessons at about −6. Unit-elastic is the "
+        "knife-edge case at exactly −1, where the two percentage "
+        "changes offset each other. These labels matter because, as we "
+        "will see, they decide whether a price increase raises or lowers "
+        "revenue.\n\n"
         "Video link: https://www.youtube.com/watch?v=dmgFP0qteBU&t=32s "
         "(watch until around 3:00)"))
-    _draw_footer(slide, FOOTER_TEXT, 36)
+    _draw_footer(slide, FOOTER_TEXT, 35)
     return slide
 
 
@@ -3998,7 +4099,7 @@ def slide_36_yoga(prs):
         size=26)
     _add_media_image(slide, "image32.jpeg", left=Inches(2.65),
                      top=Inches(3.95), width=Inches(8.0))
-    _draw_footer(slide, FOOTER_TEXT, 37)
+    _draw_footer(slide, FOOTER_TEXT, 36)
     _add_pollbreak_badge(slide)
     return slide
 
@@ -4040,7 +4141,7 @@ def slide_39_yoga_solution(prs):
              "falls", 1),
         ],
         size=26, sub_size=24)
-    _draw_footer(slide, FOOTER_TEXT, 40)
+    _draw_footer(slide, FOOTER_TEXT, 39)
     return slide
 
 
@@ -4094,7 +4195,7 @@ def slide_40_method1(prs):
                       Inches(0.5), "→  Problem Set 2", line=GOLD,
                       text_color=NAVY, size=18, bold=True, rounded=True,
                       shadow=True, corner_pct=0.25)
-    _draw_footer(slide, FOOTER_TEXT, 41)
+    _draw_footer(slide, FOOTER_TEXT, 40)
     return slide
 
 
@@ -4126,9 +4227,17 @@ def slide_41_ebooks(prs):
                      top=Inches(1.55), width=Inches(1.6),
                      rounded=False, shadow=False)
     _set_notes(slide, (
+        "This is an elasticity argument made in public, during Amazon's "
+        "2014 pricing dispute with the publisher Hachette. Amazon claimed "
+        "its internal data showed an e-book priced at $9.99 sells nearly "
+        "twice as many copies as the same book at $14.99, and concluded "
+        "that total revenue is higher at the lower price – “at "
+        "$9.99, the total pie is bigger.” That is a claim about "
+        "elastic demand, and you can now check it. Compute the implied "
+        "elasticity using $14.99 as the initial price.\n\n"
         "https://www.wsj.com/articles/amazon-calls-for-hachette-to-cut-"
         "e-book-prices-1406675179"))
-    _draw_footer(slide, FOOTER_TEXT, 42)
+    _draw_footer(slide, FOOTER_TEXT, 41)
     _add_pollbreak_badge(slide)
     return slide
 
@@ -4183,8 +4292,18 @@ def slide_44_ebooks_solution(prs):
             {'color': RED, 'bold': True})], 0,
           {'bullet_style': 'none'})],
         size=26)
-    _set_notes(slide, "Rounding to the closest integer")
-    _draw_footer(slide, FOOTER_TEXT, 45)
+    _set_notes(slide, (
+        "Going from $14.99 to $9.99 is a price change of about "
+        "−33%, and the quantity roughly doubles, so +100%. Divide "
+        "and you get an elasticity of about −3. That is well below "
+        "−1, so demand for these e-books is elastic, which is "
+        "exactly what Amazon's “bigger pie” claim requires: "
+        "with elastic demand a price cut raises total revenue. Worth "
+        "noting where the number came from – it rests on Amazon's "
+        "own internal sales data as reported at the time, not on an "
+        "independent estimate.\n\n"
+        "Rounding to the closest integer"))
+    _draw_footer(slide, FOOTER_TEXT, 44)
     return slide
 
 
@@ -4233,7 +4352,7 @@ def slide_45_megamillions(prs):
         "One caution: these are very large changes, and Method 1 is an "
         "approximation that works best for small ones — so treat −0.47 "
         "as a rough number."))
-    _draw_footer(slide, FOOTER_TEXT, 46)
+    _draw_footer(slide, FOOTER_TEXT, 45)
     return slide
 
 
@@ -4298,7 +4417,7 @@ def slide_46_method2(prs):
             ("For a linear demand curve, the slope is constant", 0),
         ],
         size=24, sub_size=22, line_spacing_pts=10)
-    _draw_footer(slide, FOOTER_TEXT, 47)
+    _draw_footer(slide, FOOTER_TEXT, 46)
     return slide
 
 
@@ -4353,7 +4472,7 @@ def slide_47_point_steps(prs):
             {'bold': True, 'color': RED})], 0,
           {'bullet_style': 'none'})],
         size=16)
-    _draw_footer(slide, FOOTER_TEXT, 48)
+    _draw_footer(slide, FOOTER_TEXT, 47)
     return slide
 
 
@@ -4380,7 +4499,7 @@ def slide_48_from_demand_fn(prs):
             ("text", "What is its elasticity of demand at this point?",
              {'size': 26, 'bold': True}),
         ])
-    _draw_footer(slide, FOOTER_TEXT, 49)
+    _draw_footer(slide, FOOTER_TEXT, 48)
     _add_pollbreak_badge(slide)
     return slide
 
@@ -4432,7 +4551,7 @@ def slide_51_qp_solution(prs):
                           'color': RGBColor(0x00, 0x70, 0xC0)})], 0,
           {'bullet_style': 'none'})],
         size=26)
-    _draw_footer(slide, FOOTER_TEXT, 52)
+    _draw_footer(slide, FOOTER_TEXT, 51)
     return slide
 
 
@@ -4532,7 +4651,7 @@ def slide_52_linear_elasticity(prs):
         "because it is rising from zero. At the intersection with the "
         "x-axis, the price is zero, so P/Q = 0, and the elasticity of "
         "demand is also zero."))
-    _draw_footer(slide, FOOTER_TEXT, 53)
+    _draw_footer(slide, FOOTER_TEXT, 52)
     return slide
 
 
@@ -4542,7 +4661,7 @@ def slide_52_linear_elasticity(prs):
 
 def slide_53_insight(prs):
     return make_content_bulleted(
-        prs, 54, TAG_OWN,
+        prs, 53, TAG_OWN,
         "Important Insight (Elaborated in Module 2 Videos 1+2)",
         [
             ([("Firms should ", {}),
@@ -4594,7 +4713,7 @@ def slide_54_uber(prs):
     _add_media_image(slide, "image52.png", left=Inches(9.45),
                      top=Inches(5.85), width=Inches(2.6),
                      rounded=False, shadow=False)
-    _draw_footer(slide, FOOTER_TEXT, 55)
+    _draw_footer(slide, FOOTER_TEXT, 54)
     return slide
 
 
@@ -4651,7 +4770,7 @@ def slide_55_special_cases(prs):
     _add_math_equation(
         slide, Inches(10.05), Inches(2.45), Inches(2.4), Inches(0.6),
         _oED() + _omml_text(' = 0'), size_pt=20, color=NAVY)
-    _draw_footer(slide, FOOTER_TEXT, 56)
+    _draw_footer(slide, FOOTER_TEXT, 55)
     return slide
 
 
@@ -4679,7 +4798,7 @@ def slide_56_determinants(prs):
         size=24, sub_size=22)
     _add_media_image(slide, "image53.png", left=Inches(6.55),
                      top=Inches(1.65), width=Inches(4.7))
-    _draw_footer(slide, FOOTER_TEXT, 57)
+    _draw_footer(slide, FOOTER_TEXT, 56)
     return slide
 
 
@@ -4720,7 +4839,7 @@ def slide_57_market_vs_firm(prs):
         "over there. A firm's demand is more elastic when the market "
         "elasticity is high, when its market share is small, and when "
         "competitors don't match its price changes."))
-    _draw_footer(slide, FOOTER_TEXT, 58)
+    _draw_footer(slide, FOOTER_TEXT, 57)
     return slide
 
 
@@ -4738,7 +4857,7 @@ def slide_58_other_elasticities(prs):
               "income, and to other goods’ prices",
               size=20, italic=True, color=GRAY, font="Calibri",
               align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 59)
+    _draw_footer(slide, FOOTER_TEXT, 58)
     return slide
 
 
@@ -4792,7 +4911,7 @@ def slide_59_income_elasticity(prs):
                "income", {})], 0, {}),
         ],
         size=26)
-    _draw_footer(slide, FOOTER_TEXT, 60)
+    _draw_footer(slide, FOOTER_TEXT, 59)
     return slide
 
 
@@ -4817,7 +4936,7 @@ def slide_60_rivian(prs):
         size=26)
     _add_media_image(slide, "image54.png", left=Inches(3.95),
                      top=Inches(3.90), width=Inches(4.4))
-    _draw_footer(slide, FOOTER_TEXT, 61)
+    _draw_footer(slide, FOOTER_TEXT, 60)
     _add_pollbreak_badge(slide)
     return slide
 
@@ -4854,7 +4973,7 @@ def slide_63_rivian_solution(prs):
         [("Does this seem like a strong reaction of demand?", 0,
           {'italic': True, 'bullet_style': 'none'})],
         size=24)
-    _draw_footer(slide, FOOTER_TEXT, 64)
+    _draw_footer(slide, FOOTER_TEXT, 63)
     return slide
 
 
@@ -4897,7 +5016,7 @@ def slide_64_income_categories(prs):
         _add_text(slide, x, Inches(6.80), w, Inches(0.3), label,
                   size=13, italic=True, color=GRAY, font="Calibri",
                   align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 65)
+    _draw_footer(slide, FOOTER_TEXT, 64)
     return slide
 
 
@@ -4971,7 +5090,7 @@ def slide_65_recession_retailers(prs):
               "© 2020 Worth Publishers (Figure 9); series approximate",
               size=11, italic=True, color=GRAY, font="Calibri",
               align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 66)
+    _draw_footer(slide, FOOTER_TEXT, 65)
     return slide
 
 
@@ -5001,7 +5120,7 @@ def slide_66_inferior_news(prs):
         "clothes rises — the number of active buyers rose 17% to 1.47 "
         "million in the second quarter. That is the signature of an "
         "inferior good: demand moves opposite to income."))
-    _draw_footer(slide, FOOTER_TEXT, 67)
+    _draw_footer(slide, FOOTER_TEXT, 66)
     return slide
 
 
@@ -5059,7 +5178,7 @@ def slide_67_cross_price(prs):
     _add_text(slide, Inches(9.55), Inches(6.95), Inches(3.25),
               Inches(0.3), "complements", size=13, italic=True,
               color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 68)
+    _draw_footer(slide, FOOTER_TEXT, 67)
     return slide
 
 
@@ -5086,7 +5205,7 @@ def slide_68_popcorn(prs):
         size=26)
     _add_media_image(slide, "image67.jpeg", left=Inches(3.85),
                      top=Inches(3.55), width=Inches(5.6))
-    _draw_footer(slide, FOOTER_TEXT, 69)
+    _draw_footer(slide, FOOTER_TEXT, 68)
     _add_pollbreak_badge(slide)
     return slide
 
@@ -5124,7 +5243,7 @@ def slide_71_popcorn_solution(prs):
                              'color': RGBColor(0x00, 0x70, 0xC0)})], 0,
           {})],
         size=26)
-    _draw_footer(slide, FOOTER_TEXT, 72)
+    _draw_footer(slide, FOOTER_TEXT, 71)
     return slide
 
 
@@ -5154,7 +5273,7 @@ def slide_72_crossprice_news(prs):
         "complements — expensive gas makes gas-guzzlers less attractive "
         "— while hybrids are a substitute for conventional cars. The "
         "sticker shock at the pump shows up directly in the showroom."))
-    _draw_footer(slide, FOOTER_TEXT, 73)
+    _draw_footer(slide, FOOTER_TEXT, 72)
     return slide
 
 
@@ -5210,7 +5329,7 @@ def slide_73_cereal(prs):
         "Flakes were to increase by 10%, the quantity demanded of "
         "Frosted Flakes would rise by 1.5%. This suggests that Frosted "
         "Flakes and Corn Flakes are substitutes."))
-    _draw_footer(slide, FOOTER_TEXT, 74)
+    _draw_footer(slide, FOOTER_TEXT, 73)
     return slide
 
 
@@ -5296,7 +5415,7 @@ def slide_74_cheatsheet(prs):
         [("ΔQ/ΔP = slope of the demand function (Q as a function of P)",
           0, {'bullet_style': 'none', 'italic': True, 'color': GRAY})],
         size=14)
-    _draw_footer(slide, FOOTER_TEXT, 75)
+    _draw_footer(slide, FOOTER_TEXT, 74)
     return slide
 
 
@@ -5305,7 +5424,7 @@ def slide_74_cheatsheet(prs):
 # --------------------------------------------------------------------------
 
 def slide_75_postwork_videos(prs):
-    slide = make_m2_outline(prs, 76, section_tag=TAG_WRAP,
+    slide = make_m2_outline(prs, 75, section_tag=TAG_WRAP,
                             highlight_set={2, 3, 4})
     # bottom-right link box overlaying the footer (deck convention),
     # drawn last so it sits in front
@@ -5320,7 +5439,7 @@ def slide_75_postwork_videos(prs):
 
 
 def slide_76_postwork_ps2(prs):
-    slide = make_m2_outline(prs, 77, section_tag=TAG_WRAP,
+    slide = make_m2_outline(prs, 76, section_tag=TAG_WRAP,
                             highlight_set={5})
     _add_convention_box(
         slide, Inches(9.05), Inches(1.75), Inches(3.9), Inches(1.5),
@@ -5364,70 +5483,85 @@ def build(out_path=None):
     make_stub(prs, 12, TAG_LAW, "Poll results", STUB_POLL)             # 12
     make_stub(prs, 13, TAG_LAW, "Class demand curve (live Excel)",
               STUB_EXCEL)                                              # 13
-    slide_09_law_of_demand(prs, page_num=14)   # 14 (bookend recap, CT)
-    slide_14_existing_buy_more(prs)      # 15
-    slide_15_multiunit(prs)  # 16
-    slide_16_gates(prs) # 17
-    slide_17_inglehart(prs)        # 18
-    slide_18_consumer_opt(prs)               # 19
-    slide_19_movies(prs)            # 20
-    slide_20_aggregation(prs)       # 21
-    slide_21_factors(prs)            # 22
-    slide_22_snob_news(prs)         # 23
-    slide_23_network_effects(prs)  # 24
-    slide_24_remember(prs)               # 25
-    make_m2_outline(prs, 26, highlight_idx=1)                          # 26
-    slide_26_generic_elasticity(prs)  # 27
-    slide_27_netflix(prs)           # 28
-    slide_28_what_is_elasticity(prs) # 29
-    slide_29_three_types(prs)         # 30
-    slide_30_own_price(prs)                # 31
-    slide_31_water(prs)  # 32
-    make_stub(prs, 33, TAG_OWN, "Poll: LADWP water price", STUB_POLL)  # 33
-    make_stub(prs, 34, TAG_OWN, "Poll results", STUB_POLL)             # 34
-    slide_34_water_solution(prs)                     # 35
-    slide_35_categories(prs)  # 36
-    slide_36_yoga(prs)               # 37
-    make_stub(prs, 38, TAG_OWN, "Poll: yoga elasticity", STUB_POLL)    # 38
-    make_stub(prs, 39, TAG_OWN, "Poll results", STUB_POLL)             # 39
-    slide_39_yoga_solution(prs)                      # 40
-    slide_40_method1(prs)      # 41
-    slide_41_ebooks(prs)                      # 42
-    make_stub(prs, 43, TAG_OWN, "Poll: e-book elasticity", STUB_POLL)  # 43
-    make_stub(prs, 44, TAG_OWN, "Poll results", STUB_POLL)             # 44
-    slide_44_ebooks_solution(prs)                   # 45
-    slide_45_megamillions(prs)             # 46
-    slide_46_method2(prs)      # 47
-    slide_47_point_steps(prs)      # 48
-    slide_48_from_demand_fn(prs) # 49
-    make_stub(prs, 50, TAG_OWN, "Poll: elasticity at P=2", STUB_POLL)  # 50
-    make_stub(prs, 51, TAG_OWN, "Poll results", STUB_POLL)             # 51
-    slide_51_qp_solution(prs)       # 52
-    slide_52_linear_elasticity(prs)   # 53
-    slide_53_insight(prs)                   # 54
-    slide_54_uber(prs)     # 55
-    slide_55_special_cases(prs) # 56
-    slide_56_determinants(prs)  # 57
-    slide_57_market_vs_firm(prs)          # 58
-    slide_58_other_elasticities(prs)          # 59
-    slide_59_income_elasticity(prs)                # 60
-    slide_60_rivian(prs)  # 61
-    make_stub(prs, 62, TAG_INCOME, "Poll: R3 income elasticity", STUB_POLL)   # 62
-    make_stub(prs, 63, TAG_INCOME, "Poll results", STUB_POLL)          # 63
-    slide_63_rivian_solution(prs)  # 64
-    slide_64_income_categories(prs)    # 65
-    slide_65_recession_retailers(prs)  # 66
-    slide_66_inferior_news(prs)       # 67
-    slide_67_cross_price(prs)            # 68
-    slide_68_popcorn(prs) # 69
-    make_stub(prs, 70, TAG_CROSS, "Poll: popcorn cross-price", STUB_POLL)  # 70
-    make_stub(prs, 71, TAG_CROSS, "Poll results", STUB_POLL)           # 71
-    slide_71_popcorn_solution(prs)                 # 72
-    slide_72_crossprice_news(prs)  # 73
-    slide_73_cereal(prs)  # 74
-    slide_74_cheatsheet(prs)  # 75
-    slide_75_postwork_videos(prs)    # 76
-    slide_76_postwork_ps2(prs)  # 77
+    slide_14_existing_buy_more(prs)      # 14
+    slide_15_multiunit(prs)  # 15
+    slide_16_gates(prs) # 16
+    slide_17_inglehart(prs)        # 17
+    slide_18_consumer_opt(prs)               # 18
+    slide_19_movies(prs)            # 19
+    slide_20_aggregation(prs)       # 20
+    slide_21_factors(prs)            # 21
+    slide_22_snob_news(prs)         # 22
+    slide_23_network_effects(prs)  # 23
+    slide_24_remember(prs)               # 24
+    make_m2_outline(prs, 25, highlight_idx=1)                          # 25
+    slide_26_generic_elasticity(prs)  # 26
+    slide_27_netflix(prs)           # 27
+    slide_28_what_is_elasticity(prs) # 28
+    slide_29_three_types(prs)         # 29
+    slide_30_own_price(prs)                # 30
+    slide_31_water(prs)  # 31
+    make_stub(prs, 32, TAG_OWN, "Poll: LADWP water price", STUB_POLL)  # 32
+    make_stub(prs, 33, TAG_OWN, "Poll results", STUB_POLL)             # 33
+    slide_34_water_solution(prs)                     # 34
+    slide_35_categories(prs)  # 35
+    slide_36_yoga(prs)               # 36
+    make_stub(prs, 37, TAG_OWN, "Poll: yoga elasticity", STUB_POLL)    # 37
+    make_stub(prs, 38, TAG_OWN, "Poll results", STUB_POLL)             # 38
+    slide_39_yoga_solution(prs)                      # 39
+    slide_40_method1(prs)      # 40
+    slide_41_ebooks(prs)                      # 41
+    make_stub(prs, 42, TAG_OWN, "Poll: e-book elasticity", STUB_POLL)  # 42
+    make_stub(prs, 43, TAG_OWN, "Poll results", STUB_POLL)             # 43
+    slide_44_ebooks_solution(prs)                   # 44
+    slide_45_megamillions(prs)             # 45
+    slide_46_method2(prs)      # 46
+    slide_47_point_steps(prs)      # 47
+    slide_48_from_demand_fn(prs) # 48
+    make_stub(prs, 49, TAG_OWN, "Poll: elasticity at P=2", STUB_POLL)  # 49
+    make_stub(prs, 50, TAG_OWN, "Poll results", STUB_POLL)             # 50
+    slide_51_qp_solution(prs)       # 51
+    slide_52_linear_elasticity(prs)   # 52
+    slide_53_insight(prs)                   # 53
+    slide_54_uber(prs)     # 54
+    slide_55_special_cases(prs) # 55
+    slide_56_determinants(prs)  # 56
+    slide_57_market_vs_firm(prs)          # 57
+    slide_58_other_elasticities(prs)          # 58
+    slide_59_income_elasticity(prs)                # 59
+    slide_60_rivian(prs)  # 60
+    make_stub(prs, 61, TAG_INCOME, "Poll: R3 income elasticity", STUB_POLL)   # 61
+    make_stub(prs, 62, TAG_INCOME, "Poll results", STUB_POLL)          # 62
+    slide_63_rivian_solution(prs)  # 63
+    slide_64_income_categories(prs)    # 64
+    slide_65_recession_retailers(prs)  # 65
+    slide_66_inferior_news(prs)       # 66
+    slide_67_cross_price(prs)            # 67
+    slide_68_popcorn(prs) # 68
+    make_stub(prs, 69, TAG_CROSS, "Poll: popcorn cross-price", STUB_POLL)  # 69
+    make_stub(prs, 70, TAG_CROSS, "Poll results", STUB_POLL)           # 70
+    slide_71_popcorn_solution(prs)                 # 71
+    slide_72_crossprice_news(prs)  # 72
+    slide_73_cereal(prs)  # 73
+    slide_74_cheatsheet(prs)  # 74
+    slide_75_postwork_videos(prs)    # 75
+    slide_76_postwork_ps2(prs)  # 76
+
+    # deck-wide speaker notes (2026-08-23): fill in every slide that does
+    # not already carry notes of its own, so the substantive notes ported
+    # verbatim from Nico's original deck are never overwritten.  Poll
+    # slides are absent from NOTES on purpose — their notes ARE the
+    # PollEverywhere mechanism — and slide 13's notes are injected by
+    # _splice_media.py, since the splice replaces that slide wholesale.
+    from _notes_m2 import NOTES as _M2_NOTES
+    for _i, _slide in enumerate(prs.slides, start=1):
+        _txt = _M2_NOTES.get(_i)
+        if not _txt:
+            continue
+        if (_slide.has_notes_slide
+                and _slide.notes_slide.notes_text_frame.text.strip()):
+            continue
+        _set_notes(_slide, _txt)
 
     out = Path(out_path) if out_path else OUT_DIR / "Module 2 - In Class Revised.pptx"
     prs.save(str(out))
