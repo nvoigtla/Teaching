@@ -1,6 +1,6 @@
 # Session Notes — Module 1 (combined In-Class + Videos deck)
 
-## PENDING (updated 2026-08-23 — deck is 99 slides)
+## PENDING (updated 2026-08-24 — deck is 101 slides)
 
 Nico's open requests on **Module 1 - Revised.pptx**:
 0. **Podcast URL for display 12** — the Sound button is a marker until
@@ -35,6 +35,124 @@ Nico's open requests on **Module 1 - Revised.pptx**:
    needs." gold. Images saved as `Image_Hiker_Mountain_with_text` /
    `_no_text` (in `_source_images/`, .png). Update the slide's
    animation plan afterward (PLANS key 8 pre-shift → 10).
+
+## 2026-08-24 — porting the polished "Videos Final" decks back in
+
+**One-line summary.** Nico deleted the four old video decks, split polished
+per-video decks into `Videos Final/`, and asked for every edit in them to be
+carried back into `Module 1 - Revised.pptx` (still 101 slides). All 35 video
+slides were mapped to their main-deck twins, diffed, and the differences
+ported through the pipeline — build script, group pass, animation plans —
+never by hand.
+
+### How the diff was done (reusable)
+Shape ids SURVIVE an extract-and-polish round trip, so the video slides
+could be paired to the main deck exactly, by id. Three passes:
+- `_vdiff.py` / `_vdiff_all.py` — id-keyed geometry + text + run-format +
+  group-path diff, plus a click-by-click comparison of `<p:timing>`.
+  `_diff_cross.py` is the earlier positional version (kept; weaker).
+- `_rawdiff.py` — raw `spPr` / rels diff. This is what caught the two
+  arrowheads on displays 83 / 86; a shape-level diff cannot see them.
+- `_map_vids.py`, `_pair_ids.py`, `_vtext.py`, `_outline_probe.py`,
+  `_shape_xml.py`, `_find_text.py`, `_vid_inv.py` — probes used along the way.
+The port itself is `_port_video_edits.py`, `_port_video_groups.py`,
+`_port_video_anim.py` — each replacement asserts its match count.
+
+### Video → main-deck mapping
+| Video deck | main displays |
+|---|---|
+| Video 1 – Introduction (11) | 67, 2, 9, 10, 11, 13, **17**, 1, 69, 95, 100 |
+| Video 2 – Markets (7) | 70–76 |
+| Video 3 – Demand and Supply (10) | 77–86 |
+| Video 4 – Equilibrium (7) | 87–93 |
+Video 1's agenda slide is main **17** (In-Class), NOT 68 — it matches 17's
+tag and notes exactly, minus the backup pill. Main 68 was untouched.
+
+### Adopted
+- **Agenda shading (deck-wide).** On a section agenda the items NOT
+  currently covered are dimmed — circle digit and item title both
+  `#BFBFBF` (Nico's decks write `schemeClr bg1 lumMod 75%`); gold circle
+  fill stays gold. The descriptive overview (18) and the Video-1 outline
+  (69) keep every item navy. `DIM` added to the palette; `make_m1_outline`
+  gained `lit = descriptions or i in hi`.
+- Outline data: "the value of the **next-best** alternative you gave up"
+  (one shared list → displays 18, 19, 43, 69).
+- **2** new sub-bullet "Visiting positions at Harvard, University College
+  London"; backup action button 4.555" → 4.765".
+- **9** "as consumers, students" → "partners".
+- **72** "Geographic boundaries"; "vs. gasoline retail vs. App purchases";
+  "Simple test" bold; 18 pt above "Extent of market"; build 5 → 6 clicks
+  (new PLANS key 64).
+- **74** provenance line loses " — not leaked".
+- **75** Covid bullet deleted; discussion badge grouped with its text
+  (new `sdbadge:` names + `CHART_GROUPS[75]`); slide is now STATIC.
+- **77 + 78–86** "Demand and Supply" — title slide AND `TAG_V3`.
+- **83 / 86** the red movement arrows got their missing arrowheads
+  (`_set_line_ends`; 83 = `headEnd`, 86 = `tailEnd` because it is flipV).
+- **84** opening bullet + chips photo now static; 3 → 2 clicks.
+- **91 / 92 / 93** two groups each (shifted curve + label + shift arrow;
+  new-equilibrium guides + P1/Q1) via named shapes in `_v4_shift_chart`
+  and `CHART_GROUPS`; builds recomposed to his beats. On 93 the *S* in the
+  Note line is italic, "Price ($)" moved to (7.300, 2.020) to clear the
+  two-word header, and "➜ Problem Set 1" is the final click.
+- **100** caption 6.00" → 5.06"; gained a 2-click build — the ONLY backup
+  slide that animates (`SKIP_STATIC = (SKIP_STATIC | {75}) - {100}`).
+
+### NOT adopted, and why
+- Page numbers (live fields), and PowerPoint's autofit re-fits of bullet
+  boxes: those shrink the box around an UNCHANGED centre (1.600 + 5.350/2
+  = 2.554 + 3.442/2 = 4.275), so they are save artifacts, not hand-edits.
+  Worth remembering — they look like real moves in a naive diff.
+- **73 / 74 (Tapestry)**: his video copies came out of `Module 1 - Example
+  Candidates.pptx`, not the main deck — "Candidates" tag, "(for review)"
+  footer, candidate research notes, no photo+caption group, and shape ids
+  off by one. The main deck is ahead; only the "not leaked" deletion was
+  taken.
+- **91**: he nested the D’ label around an inner group; ported as ONE flat
+  group of the same four shapes, matching how he grouped 92 and 93.
+- **94** ("Effect of Shifts … in Isolation") is absent from his Video 4
+  deck; read as a video-only cut and left in the main deck.
+- Outline-slide run colors losing their explicit `srgbClr` on 71/78/88 —
+  a copy-paste theme artifact, NOT the dimming (the dimming shows up as
+  `schemeClr bg1 lumMod`, which an `srgbClr`-only probe misses entirely;
+  this is how the shading was nearly missed on the first pass).
+
+### Verification
+- id-keyed diff vs. all 35 video slides: clean (leftovers are page
+  numbers, autofit re-fits, and group NAMES — every group's bounding box
+  matches his exactly).
+- click structure matches his beat-for-beat on every changed slide.
+- `_verify_anim.ps1` (expected counts updated: 72 → 6, 84 → 2, 91/92 → 2,
+  75 removed, 100 → 2): ALL 67 animated slides match; deck opens in
+  PowerPoint at 101 slides.
+- `_slideshow_probe.ps1` on 1, 24, 72, 75, 91, 93, 100: PASS, live poll
+  renders.
+- Renders of all 17 changed slides eyeballed (`_chk_sheet_1/2.png`).
+
+### Rule changes (Nico approved)
+`Teaching/CLAUDE.md`, Module-Outline section: "no fading of the other
+items" is GONE, replaced by the dimming rule above; the reference
+implementation now points at `make_m1_outline` in `Module 1`, not
+`make_m2_outline`.
+
+### Toolchain notes
+- **`_anim_config_m1.txt` IS STALE** — it was the one-off payload for
+  `_splice_anim_config.py`. `_animate.py` has been the live config ever
+  since. A STALE banner was added to the top of the .txt.
+- `_animate.py` PLANS keys are in the 84-deck numbering; display =
+  `_m1_shift_key3(_m1_shift_key2(_m1_shift_key(k)))`. Post-shift overrides
+  (`PLANS[73]`, `PLANS[74]`, and now the 75/100 block) are keyed by
+  DISPLAY number instead.
+- Display 100's caption, now close to its picture, is picked up by group
+  rule 3 — the main deck has a pic+caption group there that his slide does
+  not. Consistent with the standing rule; flagged to him.
+
+### Open / next
+- **Module 2's outline slides still lack the dimming** — its build script
+  predates the rule. Same one-line guard in `make_m2_outline`, but it needs
+  its own backup roll, rebuild and animation re-verify. Awaiting his word.
+- Everything in the PENDING block above is still open.
+
 
 ## 2026-08-23 — link symbols, hand-edit ports, subscripts, outlines, notes
 

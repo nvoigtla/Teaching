@@ -429,8 +429,11 @@ The standard for a module's outline slides — the descriptive overview near
 the front, the section agendas at each transition, the wrap-up / post-work
 slides, and the summary closer. Finalized on Module 2 (2026-08-16, adopted
 from CT's format + Nico's band and spacing rules); apply IDENTICALLY in
-other modules. Reference implementation: `make_m2_outline` in
-`Module 2/_build_Module2InClass.py` — copy it and swap the item list.
+other modules. Reference implementation: `make_m1_outline` in
+`Module 1/_build_Module1.py` — copy it and swap the item list. (It
+supersedes `make_m2_outline` in `Module 2/_build_Module2InClass.py`,
+which predates the dimming rule below; Module 2's outline slides still
+need that pass.)
 
 - **Data**: one module-level list of ~6 `(title, description)` pairs; the
   description is one plain-language line.
@@ -457,7 +460,13 @@ other modules. Reference implementation: `make_m2_outline` in
   or the summary): cream (`FDF6E6`) rounded rectangle BEHIND
   circle + title + description: x 0.90", y row_y − 0.06", w 12.15",
   h 0.92", corner adjustment 0.35, gold border 1.0 pt, soft drop
-  shadow. One band per highlighted item; no fading of the other items.
+  shadow. One band per highlighted item.
+- **Dimming** (2026-08-24, Nico): on a section agenda the items that are
+  NOT currently covered are shaded — the circle digit and the item title
+  both `#BFBFBF` (white, 25 % darker; PowerPoint writes it as `schemeClr
+  bg1` with `lumMod 75%`). The gold circle fill stays gold on every item.
+  The descriptive overview and the summary closer, which have no current
+  topic, keep every item navy.
 - **Pointer / link boxes** (post-work videos, problem set, teaching
   notes): gold-bordered rounded outlined box (white fill, navy bold
   14–15 pt, corner 0.20, soft shadow), two lines — the links line,

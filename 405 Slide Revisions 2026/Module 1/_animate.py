@@ -213,13 +213,20 @@ PLANS = {
         ["cxn:3", "t:MC (Marginal"],
         ["cxn:4", "t:Q* (optimum)"],
     ],
-    65: [  # netflix (video): pic static; options; covid Q; badge
-        ["pr:Define Netflix:1:1"],
-        ["pr:Define Netflix:2:2"],
-        ["pr:Define Netflix:3:3"],
-        ["pr:Define Netflix:4:4"],
-        ["osp:3", "t:Prepare for Class Discussion"],
+    64: [  # market definition — Nico's 2026-08-24 build: "Extent of
+           # market" arrives together with the question under it, then
+           # the two sub-points one at a time, then geography with its
+           # example
+        ["pr:A company must:1:1"],
+        ["pr:A company must:2:2"],
+        ["pr:A company must:3:4"],
+        ["pr:A company must:5:5"],
+        ["pr:A company must:6:6"],
+        ["pr:A company must:7:8"],
     ],
+    # 65 (display 75, the video Netflix slide) is STATIC as of
+    # 2026-08-24 — see the SKIP_STATIC override below. Nico removed
+    # the build along with the Covid bullet.
     66: [  # actors: consumers card static; workers; firms
         ["t:WORKERS", "t:Choose a job"],
         ["t:FIRMS", "t:Employ workers"],
@@ -244,7 +251,8 @@ PLANS = {
     ],
     74: [  # AI and the demand for chips (2026-08-23): photo, then the
            # starting demand curve at P1, then the outward shift to D’
-        ["pr:Firms are racing:1:1", "n:sdpic:chips"],
+        # 2026-08-24 (Nico): the opening bullet and the photo now show
+        # with the slide; the build is D, then the shift to D’
         ["n:sdgroup:D", "n:sdgroup:Q1"],
         ["n:sdgroup:Dp"],
     ],
@@ -265,24 +273,24 @@ PLANS = {
         ["pr:Market equilibrium::2:2", "cxn:5", "cxn:9",
          "t:Excess demand", "t:P2"],
     ],
-    81: [  # shift in demand: setup + old eq; text + D' + arrow; new eq
-        ["cxn:6", "t:D#1", "cxn:7", "t:S#2", "cxn:2", "cxn:3",
-         "t:P0", "t:Q0"],
-        ["t:When the demand", "cxn:8", "t:D’", "cxn:9", "t:Shift in"],
-        ["cxn:4", "cxn:5", "t:P1", "t:Q1"],
+    # 2026-08-24: Nico's choreography on the three equilibrium-change
+    # slides, read out of the polished Video 4 deck. On all three the
+    # opening D, S and old equilibrium now show WITH the slide; the
+    # build is the shift, then the new equilibrium landing together
+    # with the sentence that describes it.
+    81: [  # shift in demand
+        ["n:sdgroup:Dp"],
+        ["n:sdgroup:Q1", "t:When the demand"],
     ],
     82: [  # shift in supply
-        ["cxn:6", "t:D", "cxn:7", "t:S#2", "cxn:2", "cxn:3",
-         "t:P0", "t:Q0"],
-        ["t:When the supply", "cxn:8", "t:S’", "cxn:9", "t:Shift in"],
-        ["cxn:4", "cxn:5", "t:P1", "t:Q1"],
+        ["n:sdgroup:Sp"],
+        ["n:sdgroup:Q1", "t:When the supply"],
     ],
-    83: [  # both shifts; note last; PS pointer static
-        ["cxn:6", "t:D#1", "cxn:7", "t:S#2", "cxn:2", "cxn:3",
-         "t:P0", "t:Q0"],
-        ["pr:In this case:0:0", "cxn:8", "t:D’", "cxn:9", "t:S’"],
-        ["cxn:4", "cxn:5", "t:P1", "t:Q1"],
+    83: [  # both shifts; the note, then the problem-set pointer last
+        ["n:sdgroup:shifts"],
+        ["n:sdgroup:Q1", "pr:In this case:0:0"],
         ["pr:In this case:1:1"],
+        ["t:➜ Problem Set 1"],
     ],
     84: [  # shift table static; the Important rule box is the payoff
         ["grp:1"],
@@ -386,6 +394,20 @@ PLANS[74] = [
     ["t:83%"],
     ["t:\u201cBottom line"],
     ["t:Oct 2024:"],
+]
+
+# ---------------------------------------------------------------------------
+# 2026-08-24: adopted from Nico's polished 'Videos Final' decks.
+#  * display 75 (video Netflix) loses its build entirely.
+#  * display 100 (window-tax backup) gains one: the property-tax block,
+#    then the Back pill. It is the one backup slide that animates.
+# ---------------------------------------------------------------------------
+PLANS.pop(75, None)
+SKIP_STATIC = (SKIP_STATIC | {75}) - {100}
+SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
+PLANS[100] = [
+    ["t:Property tax:"],
+    ["t:\u2190 Back"],
 ]
 
 

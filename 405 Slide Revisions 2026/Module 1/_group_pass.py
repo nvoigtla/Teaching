@@ -100,6 +100,34 @@ CHART_GROUPS = {
         "Sp": ["sdcurve:Sp", "sdlabel:Sp", "sdarrow:ii", "sdlabel:ii",
                "sdguide:h:Q3", "sdguide:v:Q3", "sdxlab:Q3"],
     },
+    # 2026-08-24 (Nico, polished video decks). Display 75: the gold
+    # discussion badge and the text on it are one object. Displays
+    # 91-93: the shifted curve(s) with their labels and the shift
+    # arrow are one beat, and the new-equilibrium guides with P1/Q1
+    # are another. (On 91 he nested the D’ label around an inner
+    # group; a flat group of the same four shapes behaves identically
+    # and matches how he grouped 92 and 93.)
+    75: {
+        "badge": ["sdbadge:box", "sdbadge:txt"],
+    },
+    91: {
+        "Dp": ["sdcurve:Dp", "sdlabel:Dp", "sdarrow:shift",
+               "sdlabel:shift"],
+        "Q1": ["sdguide:h:1", "sdguide:v:1", "sdylab:P1",
+               "sdxlab:Q1"],
+    },
+    92: {
+        "Sp": ["sdcurve:Sp", "sdlabel:Sp", "sdarrow:shift",
+               "sdlabel:shift"],
+        "Q1": ["sdguide:h:1", "sdguide:v:1", "sdylab:P1",
+               "sdxlab:Q1"],
+    },
+    93: {
+        "shifts": ["sdcurve:Dp", "sdlabel:Dp", "sdcurve:Sp",
+                   "sdlabel:Sp"],
+        "Q1": ["sdguide:h:1", "sdguide:v:1", "sdylab:P1",
+               "sdxlab:Q1"],
+    },
 }
 ACTION_BUTTON_PRSTS = {
     "actionButtonSound", "actionButtonDocument", "actionButtonMovie",
@@ -386,7 +414,7 @@ def process_slide(tree, disp):
             nm = cnv.get("name") or ""
             if nm.startswith(("sdcurve:", "sdlabel:", "sdguide:",
                               "sdxlab:", "sdylab:", "sdarrow:",
-                              "sdpic:", "sdcap:")):
+                              "sdpic:", "sdcap:", "sdbadge:")):
                 by_name[nm] = c
         for key, names in spec_map.items():
             els = [by_name[n] for n in names if n in by_name]

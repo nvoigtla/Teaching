@@ -1497,6 +1497,8 @@ def _add_discussion_break(slide, *, top=Inches(6.25), width=Inches(4.8),
     run.font.size = Pt(28)         # bumped 20 → 28 on 2026-05-16
     run.font.bold = True
     run.font.color.rgb = NAVY
+    shp.name = "sdbadge:box"
+    txt.name = "sdbadge:txt"
     return shp
 
 
@@ -2296,6 +2298,11 @@ def _add_math_equation(slide, left, top, width, height, omml_content, *,
 import uuid
 
 CREAM = RGBColor(0xFD, 0xF6, 0xE6)
+DIM = RGBColor(0xBF, 0xBF, 0xBF)           # 2026-08-24 (Nico): outline
+                                           # items not currently covered
+                                           # are shaded (his video decks
+                                           # use schemeClr bg1 lumMod 75%
+                                           # over white = #BFBFBF)
 RED = RGBColor(0xC0, 0x00, 0x00)           # source red (C00000)
 RED_FF = RGBColor(0xFF, 0x00, 0x00)        # source bright red (FF0000)
 GREEN_DK = RGBColor(0x00, 0x7A, 0x33)      # the deck's shift green
@@ -2323,7 +2330,7 @@ TAG_WRAP     = "Module 1 · Wrap-Up"
 TAG_BACKUP   = "Module 1 · Backup"
 TAG_V1       = "Module 1 · Video 1 · Introduction"
 TAG_V2       = "Module 1 · Video 2 · Markets"
-TAG_V3       = "Module 1 · Video 3 · Supply and Demand"
+TAG_V3       = "Module 1 · Video 3 · Demand and Supply"
 TAG_V4       = "Module 1 · Video 4 · Market Equilibrium"
 
 STUB_POLL = "PollEverywhere slide — spliced verbatim by _splice_media.py"
@@ -2879,6 +2886,9 @@ def slide_02_introduction(prs):
             ("BA in Economics and Environmental Engineering in Berlin/Germany", 1),
             ("MSc in Environmental Engineering and Technology Policy from MIT", 1),
             ("PhD in Economics in Barcelona", 1),
+            # 2026-08-24 (Nico, from the polished Video 1 deck)
+            ("Visiting positions at Harvard, University College "
+             "London", 1),
             # the backup jump button is wired in wire_backup_links()
             ("My research: Why are some countries so rich and others so poor?",
              0),
@@ -2999,8 +3009,9 @@ def slide_07_why_econ(prs):
     return content_slide(
         prs, 7, TAG_INTRO, "Why Study Economics?",
         [
+            # "students" -> "partners" 2026-08-24 (Nico)
             ("Make better decisions as managers (and as consumers, "
-             "students, etc.)", 0),
+             "partners, etc.)", 0),
             # the backup jump button is wired in wire_backup_links()
             ("To understand, anticipate, contest, and make economic "
              "arguments", 0),
@@ -3448,7 +3459,7 @@ M1_OUTLINE = [
     ("Equilibrium",
      "Video 4: where demand meets supply, and what moves it"),
     ("Economic costs include opportunity costs",
-     "In class: the value of the best alternative you gave up"),
+     "In class: the value of the next-best alternative you gave up"),
     ("Ignore sunk costs",
      "In class: money already spent should not drive the next decision"),
     ("Use cost-benefit and marginal analysis",
@@ -3524,10 +3535,15 @@ def make_m1_outline(prs, page_num, *, tag=None, title="Outline of Module 1",
         run.text = str(i + 1)
         run.font.size = Pt(25)
         run.font.bold = True
-        run.font.color.rgb = NAVY
+        # 2026-08-24 (Nico): on a section agenda the items that are not
+        # currently covered are shaded; the descriptive overview (which
+        # highlights everything) keeps them all navy
+        lit = descriptions or i in hi
+        run.font.color.rgb = NAVY if lit else DIM
         run.font.name = "Calibri"
         rows = [([(item[0].upper() + item[1:],
-                   {'bold': True, 'size': 25, 'color': NAVY})], 0,
+                   {'bold': True, 'size': 25,
+                    'color': NAVY if lit else DIM})], 0,
                  {'bullet_style': 'none', 'space_before_pts': 0})]
         if i in hi:
             rows.append(([(desc, {'size': 22, 'color': GRAY})], 0,
@@ -4782,16 +4798,23 @@ def slide_64_v2_market_def(prs):
              {'bold': True, 'bullet_style': 'none'}),
             ("Customers", 0),
             ("Competitors (actual and potential)", 0),
+            # 2026-08-24 (Nico, polished Video 2 deck): 18 pt above
+            # "Extent of market" (was the slide default 10),
+            # "Simple test" set bold, "Geographic" boundaries, and
+            # "v. gold" -> "vs. App purchases"
             ("Extent of market", 0,
-             {'bold': True, 'bullet_style': 'none'}),
+             {'bold': True, 'bullet_style': 'none',
+              'space_before_pts': 18}),
             ("Which products belong to a market?", 0),
-            ("Simple test to identify the range of products in your "
-             "market: If the price of another product changes, will demand "
-             "for your product change?", 1),
+            ([("Simple test ", {'bold': True}),
+              ("to identify the range of products in your market: If "
+               "the price of another product changes, will demand for "
+               "your product change?", {})], 1, {}),
             ("Relevant for antitrust litigation (in mergers & "
              "acquisitions)", 1),
-            ("Geography boundaries", 0),
-            ("Coffee shop in Venice (CA) v. gasoline retail v. gold", 1),
+            ("Geographic boundaries", 0),
+            ("Coffee shop in Venice (CA) vs. gasoline retail vs. App "
+             "purchases", 1),
         ],
         size=24, sub_size=22, line_spacing_pts=10,
     )
@@ -4923,8 +4946,9 @@ def slide_tapestry_evidence(prs):
         r2.font.name = "Calibri"; r2.font.size = Pt(18)
         r2.font.color.rgb = GRAY
     _add_text(slide, MARGIN, Inches(4.92), RULE_W, Inches(0.30),
+              # "\u2014 not leaked" dropped 2026-08-24 (Nico)
               "(figures from documents the companies had to hand over in "
-              "the merger review \u2014 not leaked)", size=18, italic=True,
+              "the merger review)", size=18, italic=True,
               color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
     _quote_box(slide, MARGIN + Inches(0.35), Inches(5.34),
                RULE_W - Inches(0.7), Inches(1.00),
@@ -4976,7 +5000,8 @@ def slide_65_v2_netflix(prs):
             ("Online streaming?", 0),
             ("All films?", 0),
             ("All entertainment?", 0),
-            ("Did the market change with Covid-19?", 0),
+            # "Did the market change with Covid-19?" deleted
+            # 2026-08-24 (Nico)
         ],
         size=28, sub_size=24, line_spacing_pts=16,
         bullets_width=Inches(7.0), bullets_height=Inches(4.2),
@@ -5026,7 +5051,7 @@ def slide_66_v2_actors(prs):
 # ---- Video 3 (67–76) ------------------------------------------------------
 
 def slide_67_v3_title(prs):
-    return make_video_title(prs, "Supply and Demand", 3)
+    return make_video_title(prs, "Demand and Supply", 3)
 
 
 def slide_68_v3_outline(prs):
@@ -5173,8 +5198,12 @@ def slide_73_v3_move_vs_shift_d(prs):
         _fig_guide(slide, fig, (2.5, 6.5), color=GRAY)
         _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD, weight_pt=2.75)
         _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=GOLD)
-        _fig_line(slide, fig, (2.5, 6.5), (4.5, 4.5), color=RED,
-                  weight_pt=4.5)
+        # arrowhead added 2026-08-24 (Nico): the movement along D
+        # points UP the curve, i.e. at the path start (2.5, 6.5)
+        _set_line_ends(
+            _fig_line(slide, fig, (2.5, 6.5), (4.5, 4.5), color=RED,
+                      weight_pt=4.5),
+            head='triangle', tail='none')
         _add_text(slide, fig.x(2.55), fig.y(7.6), Inches(0.6), Inches(0.3),
                   "i)", size=18, bold=True, italic=True, color=RED,
                   font="Calibri")
@@ -5362,8 +5391,12 @@ def slide_76_v3_move_vs_shift_s(prs):
         _fig_line(slide, fig, (1, 2), (7.5, 8.5), color=STEEL,
                   weight_pt=2.75)
         _fig_curve_label(slide, fig, 7.7, 8.9, "S", color=NAVY)
-        _fig_line(slide, fig, (3, 4), (4.5, 5.5), color=RED,
-                  weight_pt=4.5).name = "sdarrow:i"
+        # arrowhead added 2026-08-24 (Nico): the movement along S
+        # points UP the curve; the line is flipV, so that is the tail
+        _mv_s = _fig_line(slide, fig, (3, 4), (4.5, 5.5), color=RED,
+                          weight_pt=4.5)
+        _mv_s.name = "sdarrow:i"
+        _set_line_ends(_mv_s, tail='triangle')
         # hand-tweaked 2026-08-23 (from 2.9, 5.6)
         i_lab = _add_text(slide, fig.x(3.0512), fig.y(5.1481), Inches(0.6),
                           Inches(0.3),
@@ -5536,12 +5569,43 @@ def slide_80_v4_terminology(prs):
     )
 
 
-def _v4_shift_chart(slide, *, d_shift=False, s_shift=False):
+def _set_line_ends(shape, *, head=None, tail=None):
+    """Put arrowheads on a connector's <a:ln>, the way PowerPoint
+    writes them (<a:headEnd type="triangle"/> / <a:tailEnd
+    type="none"/>). head = the path START, tail = the path END, so a
+    flipV line's visual top is its tail. Both elements sort last inside
+    <a:ln>, so appending keeps the schema order."""
+    ln = shape.line._get_or_add_ln()
+    for tag, val in (("a:headEnd", head), ("a:tailEnd", tail)):
+        if val is None:
+            continue
+        el = ln.find(qn(tag))
+        if el is None:
+            el = ET.SubElement(ln, qn(tag))
+        el.set("type", val)
+    return shape
+
+
+def _move_shape_by_text(slide, text, pos):
+    """Move the first shape whose text is exactly `text` to `pos`
+    (inches). Used to port hand-nudged chart labels."""
+    for sh in slide.shapes:
+        if sh.has_text_frame and sh.text_frame.text.strip() == text:
+            sh.left = int(Inches(pos[0]))
+            sh.top = int(Inches(pos[1]))
+            return sh
+    raise KeyError("no shape with text %r on this slide" % text)
+
+
+def _v4_shift_chart(slide, *, d_shift=False, s_shift=False,
+                    ylab_pos=None):
     """Shared chart for the three changes-in-equilibrium slides.
     Base: D: y = 9 - x, S: y = x (equilibrium 4.5, 4.5).
     D': y = 12 - x ; S': y = x - 2.5."""
     fig = SimpleFig(8.1, 6.40, 4.3, 4.05, 12, 12)
     _fig_axes(slide, fig, label_size=16)
+    if ylab_pos is not None:
+        _move_shape_by_text(slide, "Price ($)", ylab_pos)
     if d_shift and s_shift:
         q1, p1 = 7.25, 4.75
     elif d_shift:
@@ -5549,7 +5613,12 @@ def _v4_shift_chart(slide, *, d_shift=False, s_shift=False):
     else:
         q1, p1 = 5.75, 3.25
     _fig_guide(slide, fig, (4.5, 4.5), color=GRAY)
-    _fig_guide(slide, fig, (q1, p1), color=GRAY)
+    # 2026-08-24 (Nico): the new-equilibrium guides and their labels
+    # are one group, and the shifted curve + its label + the shift
+    # arrow are another (names drive _group_pass.py rule 5)
+    g1h, g1v = _fig_guide(slide, fig, (q1, p1), color=GRAY)
+    g1h.name = "sdguide:h:1"
+    g1v.name = "sdguide:v:1"
     _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD, weight_pt=2.75)
     _fig_curve_label(slide, fig, 8.1, 1.4, "D", color=GOLD)
     _fig_line(slide, fig, (1.5, 1.5), (9.0, 9.0), color=STEEL,
@@ -5557,21 +5626,25 @@ def _v4_shift_chart(slide, *, d_shift=False, s_shift=False):
     _fig_curve_label(slide, fig, 9.1, 9.4, "S", color=NAVY)
     if d_shift:
         _fig_line(slide, fig, (3.4, 8.6), (10.6, 1.4), color=GREEN_DK,
-                  weight_pt=2.75, dash='dash')
-        _fig_curve_label(slide, fig, 10.7, 1.9, "D’", color=GREEN_DK)
+                  weight_pt=2.75,
+                  dash='dash').name = "sdcurve:Dp"
+        _fig_curve_label(slide, fig, 10.7, 1.9, "D’",
+                         color=GREEN_DK).name = "sdlabel:Dp"
     if s_shift:
         _fig_line(slide, fig, (3.4, 0.9), (10.9, 8.4), color=BLUE_PED,
-                  weight_pt=2.75, dash='dash')
-        _fig_curve_label(slide, fig, 10.5, 8.7, "S’", color=BLUE_PED)
+                  weight_pt=2.75,
+                  dash='dash').name = "sdcurve:Sp"
+        _fig_curve_label(slide, fig, 10.5, 8.7, "S’",
+                         color=BLUE_PED).name = "sdlabel:Sp"
     # keep the two price labels legible when P1 sits close to P0
     p0_lab, p1_lab = 4.5, p1
     if abs(p1 - 4.5) < 0.7:
         p1_lab = 4.5 + 0.55 if p1 >= 4.5 else 4.5 - 0.55
         p0_lab = 4.5 - 0.55 if p1 >= 4.5 else 4.5 + 0.55
     _fig_ylab(slide, fig, p0_lab, "P0", size=16)
-    _fig_ylab(slide, fig, p1_lab, "P1", size=16)
+    _fig_ylab(slide, fig, p1_lab, "P1", size=16).name = "sdylab:P1"
     _fig_xlab(slide, fig, 4.5, "Q0", size=16)
-    _fig_xlab(slide, fig, q1, "Q1", size=16)
+    _fig_xlab(slide, fig, q1, "Q1", size=16).name = "sdxlab:Q1"
     return fig
 
 
@@ -5595,10 +5668,11 @@ def slide_81_v4_shift_demand(prs):
         fig = _v4_shift_chart(slide, d_shift=True)
         # hand-tweaked 2026-08-23 (from logical 5.6,5.0 -> 7.0,6.0)
         _add_arrow(slide, (9208767, 4715447), (9667492, 4309110),
-                   color=GREEN_DK, weight_pt=2.0, head=True)
+                   color=GREEN_DK, weight_pt=2.0,
+                   head=True).name = "sdarrow:shift"
         _add_text(slide, fig.x(7.2), fig.y(3.4), Inches(1.5), Inches(0.6),
                   "Shift in\ndemand", size=13, bold=True, color=GREEN_DK,
-                  font="Calibri")
+                  font="Calibri").name = "sdlabel:shift"
 
     return content_slide(
         prs, 84, TAG_V4, "Changes in Market Equilibrium",
@@ -5630,10 +5704,11 @@ def slide_82_v4_shift_supply(prs):
         # arrow + label hand-tweaked 2026-08-23 (from logical
         # 6.2,6.6 -> 7.8,6.0 and label at 6.3, 7.7)
         _add_arrow(slide, (9634727, 3729609), (10044302, 4099941),
-                   color=BLUE_PED, weight_pt=2.0, head=True)
+                   color=BLUE_PED, weight_pt=2.0,
+                   head=True).name = "sdarrow:shift"
         _add_text(slide, 9861803, 3551301, Inches(1.4), Inches(0.6),
                   "Shift in\nsupply", size=13, bold=True, color=BLUE_PED,
-                  font="Calibri")
+                  font="Calibri").name = "sdlabel:shift"
 
     return content_slide(
         prs, 85, TAG_V4, "Changes in Market Equilibrium",
@@ -5665,7 +5740,11 @@ def slide_83_v4_shift_both(prs):
         _v4_header(slide, [("SHIFT IN SUPPLY ", {}),
                            ("AND", {'underline': True}),
                            (" DEMAND", {})])
-        _v4_shift_chart(slide, d_shift=True, s_shift=True)
+        _v4_shift_chart(slide, d_shift=True, s_shift=True,
+                        # y-axis title hand-moved from (7.350, 1.730)
+                        # on 2026-08-24 (Nico) to clear this slide's
+                        # two-line header
+                        ylab_pos=(7.300, 2.020))
         _add_ps_pointer(slide, left=MARGIN + Inches(0.2), top=Inches(6.35))
 
     return content_slide(
@@ -5676,8 +5755,11 @@ def slide_83_v4_shift_both(prs):
               ("P1", {'italic': True}),
               (" and a much larger quantity ", {}),
               ("Q1", {'italic': True})], 0, {'bullet_style': 'none'}),
-            ("Note: An even larger shift in S will lead to a lower price. "
-             "But quantity unambiguously increases.", 0,
+            # S italicised 2026-08-24 (Nico)
+            ([("Note: An even larger shift in ", {}),
+              ("S", {'italic': True}),
+              (" will lead to a lower price. But quantity "
+               "unambiguously increases.", {})], 0,
              {'bullet_style': 'none'}),
         ],
         size=24, sub_size=22, line_spacing_pts=18,
@@ -6162,7 +6244,9 @@ def slide_98_backup_portland(prs):
     _add_media_image(slide, "ws67_image62.png",
                      left=Inches(0.90), top=Inches(1.62),
                      width=Inches(4.7), rounded=True, shadow=True)
-    _add_text(slide, Inches(0.90), Inches(6.00), Inches(4.7), Inches(0.3),
+    # top hand-tweaked from 6.00 on 2026-08-24 (Nico): the caption sits
+    # right under its picture
+    _add_text(slide, Inches(0.90), Inches(5.06), Inches(4.7), Inches(0.3),
               "Portland Street, Southampton, UK", size=12, italic=True,
               color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
     box = _add_hierarchical_bullets(
@@ -6251,7 +6335,9 @@ def wire_backup_links(prs):
     origin of 0.28" + 0.375" marL); the y positions are the line centres
     from the rendered layout. Re-check both after any font pass."""
     sl = lambda d: prs.slides[d - 1]
-    _add_jump_button(sl(2), sl(96), left=Inches(9.80), top=Inches(4.555),
+    # top hand-tweaked from 4.555 on 2026-08-24 (the new visiting-
+    # positions sub-bullet pushes the linked line down)
+    _add_jump_button(sl(2), sl(96), left=Inches(9.80), top=Inches(4.765),
                      width=Inches(0.434), height=Inches(0.210))
     _add_jump_button(sl(9), sl(100), left=Inches(11.28), top=Inches(3.941),
                      width=Inches(0.490), height=Inches(0.238))

@@ -1,3 +1,8 @@
+# STALE (2026-08-24) — this file was the one-off payload for
+# _splice_anim_config.py, which pasted it into _animate.py once.
+# _animate.py has been the LIVE config ever since; edit it there.
+# Kept only as a record of the 2026-08-20 state.
+
 SKIP_TITLE = {1, 59, 62, 67, 77}         # deck title + 4 video titles
 SKIP_AGENDA = {15, 16, 17, 36, 48, 53,   # roadmap + outline slides
                60, 61, 63, 68, 78}
