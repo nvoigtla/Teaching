@@ -190,6 +190,14 @@ PLANS = {
         ["pr:What is the revenue:0:0"],
         ["pr:What is the revenue:1:1"],
     ],
+    33: [  # the product, then the price history with ALL of its native
+           # axis labels on the same beat (a figure and its labels are
+           # one reveal)
+        ["grp:0"],
+        ["grp:1", "t:$90", "t:$70", "t:$50", "t:$30",
+         "t:May", "t:Jun", "t:Jul", "t:Aug", "t:Sep",
+         "t:$83.99", "t:$62.98", "t:$35.00"],
+    ],
     27: [
         ["pr:1.  Inverse demand:0:2"],
         ["t:MR"],

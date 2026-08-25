@@ -1464,13 +1464,78 @@ S33_NOTE = (
     "these price moves are not randomized, so quantity differences across "
     "high- and low-price days also reflect whatever else changed on those "
     "days (a holiday, a competitor's promotion, a stock-out).\n\n"
-    "The product above the chart is the Labubu plush keyring from Pop "
-    "Mart's THE MONSTERS x Coca-Cola series, sold as a blind box. It is "
-    "a good listing for this point because collectible demand is "
-    "volatile, but nothing turns on the product itself; any listing "
-    "with a restless price would make the same case."
+    "The product above the chart is a Labubu, in case that name means "
+    "nothing to you. Labubu is a character - an elf-like creature with "
+    "pointed ears and a wide, serrated grin - created by the Hong Kong "
+    "illustrator Kasing Lung for his picture-book series THE MONSTERS, "
+    "which he started in 2015 and drew from Nordic folklore. In 2019 "
+    "Lung signed an exclusive licence with Pop Mart, a Chinese "
+    "designer-toy company, which turned the character into small vinyl "
+    "and plush collectibles sold in BLIND BOXES: you pay for a sealed "
+    "box and only find out which variant of the series you got when you "
+    "open it, with one rare 'secret' version per case.\n\n"
+    "From about 2024 the toys became a global craze, helped by "
+    "celebrities photographed with one clipped to a handbag, and Pop "
+    "Mart's Labubu lines have been a large part of its revenue growth. "
+    "The one on this slide is from the Coca-Cola collaboration series. "
+    "That background is exactly why the price line is so restless: "
+    "supply comes in limited drops, demand is faddish, and the listing "
+    "gets re-priced constantly. Nothing in the economics turns on the "
+    "product, though - any item with a volatile price would make the "
+    "same point."
 )
 
+
+
+
+# --------------------------------------------------------------------------
+# Slide 33's price history.  The screenshot's own axis labels come out at
+# roughly 4.6 pt on the slide, so the plot area is cropped out of it
+# (_mk_pricechart.py) and the labels are drawn natively at 17 pt.
+#
+# Crop is 942 x 431 px starting at (41, 12) of the original, where
+#     price -> row   y = 440 - 6.9835 * (price - 30)
+#     May..Sep ticks x = 180, 343, 500, 663, 826
+# --------------------------------------------------------------------------
+
+_S33_X, _S33_Y = 3.400, 3.450          # top-left of the plot image
+_S33_W, _S33_H = 6.230, 2.850          # its size on the slide
+_S33_SX = _S33_W / 942.0               # inches per source pixel
+_S33_SY = _S33_H / 431.0
+
+
+def _s33_row(price):
+    """Source row of a price, then slide y (crop starts at row 12)."""
+    return _S33_Y + (440.0 - 6.9835 * (price - 30.0) - 12.0) * _S33_SY
+
+
+def _s33_col(src_x):
+    return _S33_X + (src_x - 41.0) * _S33_SX
+
+
+def _s33_price_chart(slide):
+    _vid_media(slide, "camel_plot.png", left=Inches(_S33_X),
+               top=Inches(_S33_Y), width=Inches(_S33_W),
+               rounded=False, shadow=False)
+    # y axis: the four tick labels, right-aligned against the axis
+    for price in (90, 70, 50, 30):
+        _add_text(slide, Inches(2.640), Inches(_s33_row(price) - 0.150),
+                  Inches(0.680), Inches(0.300), "$%d" % price,
+                  size=17, bold=True, color=NAVY, font="Calibri",
+                  align=PP_ALIGN.RIGHT)
+    # x axis: the month ticks
+    for src_x, month in ((180, "May"), (343, "Jun"), (500, "Jul"),
+                         (663, "Aug"), (826, "Sep")):
+        _add_text(slide, Inches(_s33_col(src_x) - 0.450), Inches(6.330),
+                  Inches(0.900), Inches(0.300), month, size=17, bold=True,
+                  color=NAVY, font="Calibri", align=PP_ALIGN.CENTER)
+    # the three prices camelcamelcamel calls out: highest, current, lowest
+    for price, label, color in ((83.99, "$83.99", CT_RED),
+                                (62.98, "$62.98", CBLUE),
+                                (35.00, "$35.00", CT_GREEN)):
+        _add_text(slide, Inches(9.720), Inches(_s33_row(price) - 0.140),
+                  Inches(1.100), Inches(0.280), label, size=16, bold=True,
+                  color=color, font="Calibri", align=PP_ALIGN.LEFT)
 
 def v37_amazon_recent(prs):
     """CT slide 37: the product shot sits above the price history, both
@@ -1483,17 +1548,17 @@ def v37_amazon_recent(prs):
     # is Labubu, and the packaging in the shot reads "THE MONSTERS".
     # The photo moved down and the price chart shrank a little to make
     # room for the caption above the photo.
-    _add_text(slide, Inches(5.076), Inches(1.420), Inches(3.200),
+    _add_text(slide, Inches(5.076), Inches(1.350), Inches(3.200),
               Inches(0.300),
               "Pop Mart \u00d7 Coca-Cola Labubu keychain",
               size=13, bold=True, italic=True, color=NAVY,
               font="Calibri", align=PP_ALIGN.CENTER)
     _vid_media(slide, "ct_amazonrecent_image10.png", left=Inches(5.593),
-               top=Inches(1.780), width=Inches(2.165))
-    _vid_media(slide, "ct_amazonrecent_image11.png", left=Inches(3.365),
-               top=Inches(3.580), width=Inches(6.600),
-               rounded=False, shadow=False)
-    _add_text(slide, Inches(0.300), Inches(6.700), Inches(12.730),
+               top=Inches(1.680), width=Inches(2.165))
+    _s33_price_chart(slide)
+    # narrow box centred under the plot, so the source line groups
+    # TIGHTLY with the chart instead of dragging a slide-wide box along
+    _add_text(slide, Inches(5.015), Inches(6.700), Inches(3.000),
               Inches(0.34), "camelcamelcamel.com", size=14, italic=True,
               color=CBLUE, font="Calibri", align=PP_ALIGN.CENTER)
     _set_notes(slide, S33_NOTE)

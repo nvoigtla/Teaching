@@ -63,6 +63,33 @@ title, shade and table changes touched no animation. Slides 21, 36 and
 1/21/33/36/47/57, In-Class 1/13/20/58/62/76) show no failure banner,
 and the live PollEverywhere slide still renders inside the show.
 
+### Follow-up 2 (same day): native axis labels on slide 33's chart
+The camelcamelcamel screenshot's own axis labels come out at about
+4.6 pt on the slide, which is unreadable in a taped video. The plot area
+is now cropped out of the screenshot (`_mk_pricechart.py` -> BUILD
+INPUT `_source_images_video/camel_plot.png`) and the labels are drawn
+natively: $90/$70/$50/$30 and May..Sep at 17 pt bold navy, and the three
+call-outs $83.99 / $62.98 / $35.00 at 16 pt in the tracker's own red /
+blue / green.
+
+The mapping came off the source PNG (1038 x 471): the y-axis is at
+x 41, the plot's right edge at x 983, the x-axis at y 440, the tick
+label centres at y 21/160/300/440, and the month ticks at
+x 180/343/500/663/826. That gives `y = 440 - 6.9835 * (price - 30)`,
+which reproduces the three dashed call-out lines to within a pixel -
+worth keeping if the chart is ever re-cropped.
+
+The source line was narrowed to 3.0" and centred under the plot, so the
+pic+caption group is tight instead of dragging a slide-wide box. Slide
+33 has an explicit animation plan now (photo+caption, then the chart
+with ALL its labels on one beat) and still builds in 2 clicks; the deck
+is unchanged everywhere else.
+
+The note also says who Labubu is: Kasing Lung's character from THE
+MONSTERS (2015, Nordic folklore), licensed exclusively to Pop Mart in
+2019, sold in blind boxes, a global craze from about 2024 - which is why
+the listing's price is so restless.
+
 ### Follow-up (same day): the product on slide 33, agenda title case
 The plush on video slide 33 is Pop Mart's blind-box keyring from THE
 MONSTERS x Coca-Cola series — the character is Labubu, and the packaging
