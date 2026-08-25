@@ -181,7 +181,7 @@ PLANS = {
     40: [  # method 1: formula + convention; caveats; PS pointer
         ["t:E D", "grp:0"],
         ["pr:This method approximates:0:1"],
-        ["t:→"],
+        ["t:✎  Problem Set 2"],
     ],
     41: [  # e-books: quote + logo static; question builds
         ["pr:Amazon said:2:2"],
@@ -219,10 +219,10 @@ PLANS = {
         # "don't operate there" payoff last
         ["cxn:2", "t:D"],
         ["t:Linear demand curve"],
-        ["t:Eᴅ < −1"],
-        ["t:−1 < Eᴅ < 0"],
-        ["osp:4", "t:Eᴅ = −1"],
-        ["t:Eᴅ = −∞", "t:Eᴅ = 0"],
+        ["t:E D  < −1"],
+        ["t:−1 <  E D  < 0"],
+        ["osp:4", "t:E D  = −1"],
+        ["t:E D  = −∞", "t:E D  = 0"],
         ["grp:0", "cxn:3"],
     ],
     54: [  # Uber: chart + logo static; elasticity callout builds
@@ -412,6 +412,7 @@ def shape_info(el, kinds):
     info = {
         "id": int(cnv.get("id")), "name": cnv.get("name") or "",
         "tag": tag, "x": x, "y": y, "w": w, "h": h, "text": txt,
+        "custgeom": el.find(".//" + q(A, "custGeom")) is not None,
         "paras": paras,
         "bul0": sum(1 for (_, l, ne) in paras if l == 0 and ne),
     }
@@ -470,7 +471,11 @@ def is_chrome(s):
         return True                      # practice-video link boxes
     if t.startswith("\u2190 Back") or t.startswith("Tickets"):
         return True                      # navigation pills
-    if (s["tag"] == "sp" and not t and s["w"] > 4 and s["h"] > 2.5):
+    # a freeform CURVE is not a backing: a wide, tall Bezier bbox was
+    # being swallowed here (video slide 6's TR hill), which silently
+    # dropped it from every plan (2026-08-24)
+    if (s["tag"] == "sp" and not t and s["w"] > 4 and s["h"] > 2.5
+            and not s.get("custgeom")):
         return True                      # big white chart backings
     return False
 

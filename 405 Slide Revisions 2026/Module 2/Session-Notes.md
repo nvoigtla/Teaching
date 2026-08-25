@@ -1,5 +1,460 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
+## 2026-08-24 (round 6) — Title case, shades on equation boxes, slide 36/33
+
+**One-line summary.** Slide titles are now title-cased at the one place
+titles are drawn, filled equation boxes carry the shade automatically,
+video slide 36's table clears the footer, and slide 33 explains what
+camelcamelcamel.com is for.
+
+### Title case on every slide title
+`_title_case()` wraps `_draw_action_title`, so BOTH decks are covered
+from a single choke point and no title string had to be hand-edited.
+The pass only ever RAISES a letter — it never lower-cases a word that is
+already capitalised — so MR, TR, OLS, WTP, A/B, "Inside Out 2's" and
+Nico's own choices survive. Articles, coordinating conjunctions and
+short prepositions stay lower unless they open the title, close it, or
+follow a colon; hyphenated compounds capitalise both parts.
+
+25 of the 120 titles changed, almost all of them poll and poll-result
+stubs: "Poll results: marginal revenue" → "Poll Results: Marginal
+Revenue", "Poll: WTP for pizza" → "Poll: WTP for Pizza", "Class demand
+curve (live Excel)" → "Class Demand Curve (Live Excel)". Nothing on a
+content slide moved.
+
+### Shades on the remaining cream boxes
+The gap was `_add_math_equation`, which took `shadow=False` by default
+while several call sites passed `fill=CREAM` without asking for a
+shade — that is where video 21's three formula boxes and 25's came
+from. `shadow` now defaults to `None`, meaning "on when the box is
+filled"; `shadow=False` still suppresses it.
+
+`_shade_audit.py` (new, keep) walks a built deck — group children
+included — and lists every filled shape with no `outerShdw`. Both decks
+now come back clean: what it still reports is the outline circles, the
+scatter dots, the chart bars, the pale-gold revenue rectangles and the
+deliberately flat DIMMED card on In-Class 58, all of which are meant to
+be flat.
+
+### Video slide 36 — the table ran into the footer
+17 rows at 16 pt needed ~5.8", which pushed the last row past the
+footer rule. Row height is line height plus the two vertical cell
+margins, so `_add_styled_table` took a new `margin_v` argument and the
+table is now 14 pt with 0.015" margins at (2.950, 1.560), 4.35 x 4.70".
+It ends around y 6.45".
+
+### Video slide 33 — what camelcamelcamel.com is doing there
+CT's deck carries no note on it, so this one is written from scratch:
+the site is a free Amazon price tracker that plots one listing's price
+history and marks its all-time high and low. The chart shows a single
+product swinging between roughly $35 and $84 over about five months.
+The teaching point is that Amazon re-prices continuously rather than
+running one clean A/B test, so the price variation is there all the
+time — with the caveat, made a few slides later, that it is not
+randomized. The note also says the product shot is a Coca-Cola branded
+collectible plush keychain and that nothing turns on which product it
+is.
+
+### Verification
+Both decks rebuilt through the full pipeline. Per-slide click counts
+are IDENTICAL to the previous decks on all 57 and all 76 slides — the
+title, shade and table changes touched no animation. Slides 21, 36 and
+47 rendered and checked; slideshow probes on both decks (video
+1/21/33/36/47/57, In-Class 1/13/20/58/62/76) show no failure banner,
+and the live PollEverywhere slide still renders inside the show.
+
+### Follow-up (same day): the product on slide 33, agenda title case
+The plush on video slide 33 is Pop Mart's blind-box keyring from THE
+MONSTERS x Coca-Cola series — the character is Labubu, and the packaging
+in the shot reads "THE MONSTERS". Confirmed against retailer listings
+(eBay, StockX, Showcase USA). The slide now carries a title-style
+caption above the photo, "Pop Mart × Coca-Cola Labubu keychain",
+measured in Calibri bold italic 13 pt at 2.93" so it stays on one line
+inside a 3.20" box — which is also the widest the caption may be and
+still be grouped with its picture (the group pass rejects an
+above-caption wider than 1.5x the picture). The photo dropped to
+y 1.780 and the price chart shrank to 6.60" wide at y 3.580 to make
+room. The caption groups with the photo, so slide 33 still builds in
+two clicks.
+
+Agenda ITEM TITLES now take the same title case ("The Law of Demand",
+"Demand and Revenue", "Marginal Revenue"); the one-line description
+under an item is a sentence and keeps sentence case. Added as a
+sub-clause of the title-case rule in the Teaching CLAUDE.md.
+
+### Teaching CLAUDE.md — two rules added
+* The reference glyphs are a fixed vocabulary: ✎ always means a
+  problem set, ▤ always a teaching note, in every module and both
+  decks; route every such box through one helper rather than styling
+  call sites by hand.
+* Slide titles are set in title case, including the throwaway poll and
+  stub titles, and the pass capitalises without ever lower-casing.
+
+
+## 2026-08-24 (round 5) — Cream-box shade, reference boxes, slide 7 note
+
+**One-line summary.** Every cream callout now carries the soft shade the
+Teaching CLAUDE.md always specified, post-work pointers became a single
+`_add_reference_box()` with a glyph per kind, and slide 7's note is
+adopted exactly as Nico set it.
+
+### Slide 7
+- The "[note: if P decreases, Q must increase]" line is its own
+  paragraph: no bullet, `marL = 0`, `indent = 0`, **space-before 0**,
+  indented with the eight leading spaces he typed.  Built with
+  `bullet_style: 'arrow'` + `mar_l: 0` + `indent: 0`, which is the one
+  combination in `_add_hierarchical_bullets` that emits exactly that.
+- The two cream cards take his size: (0.726 / 6.950, 4.298), h 1.452
+  (were at 4.150 with h 2.300).
+
+### Cream callouts are shaded — deck-wide, both decks
+`_add_convention_box` set `shadow.inherit = False` and stopped there, so
+none of the cream boxes had a shade even though the course CLAUDE.md has
+always said "soft drop shadow, so the box reads as a lifted card". It now
+calls `_add_drop_shadow`. This touches every convention box in BOTH decks.
+
+### Post-work reference boxes
+New shared helper `_add_reference_box(..., kind="ps" | "tn")`:
+gold-bordered rounded rect, soft shade, navy bold, with a leading glyph
+saying what kind of reference it is —
+  * **✎** a problem set (an exercise to work)
+  * **▤** a teaching note (something to read)
+Applied to Video 21 (both pointers), Video 29 and In-Class 40.
+
+**Video 21** lost the exercise numbers: "Problem Set 2 · #4, #5" is now
+just "Problem Set 2".
+
+**Video 29** — the old two-line "✎ Problem Set 2 / On BL under Module 2
+Post-Work" box is replaced by the standard reference box at
+(9.45, 5.42), 2.60 x 0.50.
+
+### Teaching CLAUDE.md — new standing rule
+Added a "Post-work reference box" entry under the layout patterns: the
+box style and glyph vocabulary, and two label rules —
+  * **name the problem-set NUMBER only, never the exercise numbers**, so
+    the slide survives next year's re-numbering;
+  * keep the "on BruinLearn under …" line for the wrap-up / post-work
+    slide, not on every pointer.
+
+### Verification
+- Video deck: 57 slides, 42 animated. In-Class: 76 slides, 51 animated.
+  Both open clean.
+- Renders of slides 7, 21, 29 (video) and 19, 40 (In-Class) checked by
+  eye against Nico's hand-edited version.
+- Slideshow probes on both decks (video 1/7/21/29/42/57; In-Class
+  1/13/19/40/76): PASS, checked pixel-wise for the failure banner.
+- Animation selectors that named the old pointer labels were updated in
+  both `_animate.py` and `_animate_video.py`.
+
+### Follow-up (same day): the Problem Set 2 box belongs on slide 42
+He wanted the pointer ON the Application slide, not on the outline. So
+the reference box is gone from slide 29 and sits at (1.000, 6.520) on
+video slide 42, bottom-left, opposite the Poll Break badge. Slide 42
+goes from 3 to 4 clicks; nothing else in the deck changed.
+
+**Bug found while doing it.** `_group_pass.py` had ONE module-level
+`SPLICED` set holding the In-Class display numbers, and it gates which
+slides the pass touches. Running it on the VIDEO deck therefore skipped
+video slides 4, 5, 11, 12, 13, 32, 33, 37, 38, 42, 43, 49, 50 - and
+slide 4 is exactly where Nico's manual groups live, so `_animate_video`
+died on `KeyError: 'grp:0'` unless the run remembered to pass
+`--spliced=24`. `SPLICED` is now `SPLICED_BY_DECK`, resolved off `_STEM`
+like the other deck-keyed tables. Verified: per-slide click counts are
+identical to the previous deck everywhere except slide 42.
+
+
+## 2026-08-24 (round 4) — Video slides 30-52 adopted from CT 34-60
+
+**One-line summary.** Replaced our demand-estimation block wholesale with
+CT's, including CT's poll positions as placeholders. Deck 53 -> **57
+slides**.
+
+### The mapping
+Our 30-52 (23 slides) became CT 34-60 (27 slides), so the deck grows by
+four. Two structural changes inside the block:
+- CT folds our "Regression Results I" and "II" into one slide, so
+  `v44_regression2` dropped out of `build_video()`.
+- Our extra "Obtain Elasticity from Estimated Demand Curve" slide has no
+  CT counterpart; CT carries that formula in the cream box at the foot of
+  its OLS slide instead, so ours was dropped.
+
+### Rebuilt from CT
+30 = CT 34 · 33 = CT 37 (product shot above the price history) · 34 =
+CT 38 · 35 = CT 39 (navy equation bar + the elasticity in a cream box) ·
+36 = CT 40 (table left, aircraft beside it) · 37 = CT 41 (scatter with
+two candidate lines) · 38 = CT 42 (fitted line, two residuals marked,
+algorithm box) · 39 = CT 43 · 40 = CT 44 · 41 = CT 45 · 42 = CT 46 ·
+45 = CT 49 · 48 = CT 52 · 51 = CT 55 · 52 = CT 56 · 53 = CT 57 (the wine
+example replaces our coffee headline) · 54 = CT 58 · 55 = CT 59 (CT's two
+Tyler Vigen charts) · 56 = CT 60.
+
+`_scatter_fig()` was re-derived on CT's geometry: the x-axis starts at
+P = 210 and Q runs 0-150, so P = 220 lands at x 4.415" and Q = 150 at
+y 2.300", exactly as on CT's slides 41/42. Dots are gold with a navy
+edge, as CT has them.
+
+### Poll placeholders
+CT runs three polls in this block (its 47/48, 50/51, 53/54). Those live
+on CT's PollEverywhere account and are never spliced (project
+CLAUDE.md), so they go in as OUR stubs at 43/44, 46/47 and 49/50 —
+markers showing Nico exactly where to insert his own activities. All six
+are in `SKIP_MEDIA`.
+
+### Format adjustments (the ones our rules require)
+Our chrome throughout (navy top bar with the Module 2 · Video 3 tag, our
+action-title position, our footer). CT's equations that are built from
+piles of little text boxes — the elasticity on its slide 39, the
+multivariate equation on 44 — are native OMML here. Filled boxes are
+rounded with a soft shade.
+
+### New build inputs
+`ct_airline_plane.png`, `ct_s57_image19/20.png`, `ct_s58_image19/20/21.png`,
+`ct_s59_image22/23.png`, all extracted from CT's deck into
+`_source_images_video/`.
+
+### Verification
+- Deck opens clean: **57 slides, 42 animated**.
+- Every rebuilt slide rendered and compared side by side against its CT
+  original, in five batches.
+- Slideshow probe on 1/30/36/39/42/43/45/48/51/53/55/57: PASS, checked
+  pixel-wise for the failure banner.
+
+### Caught on the way
+- `_add_styled_table`'s `col_widths` takes EMU, not inches — passing
+  inches collapses the columns and stacks the text vertically.
+- `image12.png` in `_source_images_video/` is from Nico's ORIGINAL deck,
+  not CT's; CT's slide-40 image of the same name is a different picture.
+  Extracted separately as `ct_airline_plane.png`.
+
+
+## 2026-08-24 (round 3) — Video slides 3-7, 19, 21, 22
+
+**One-line summary.** Adopted the hand-edits on slides 3 and 4 (including
+grouping), made slide 4's three points separately animatable, added the
+movement arrows on slide 5, and handled the smaller asks on 7, 19, 21
+and 22. **The CT 30-52 block is NOT started** — see below.
+
+### Hand-edits adopted
+- **s3** retitled "Plotting the (Inverse) Demand Curve"; the cream box now
+  spells out the rearrangement step with the inverse demand set bold.
+- **s4** the two figure groups Nico made by hand are reproduced —
+  {both axes + P + Q} as one object, and {demand line + D label + the
+  $400 / 1600 ticks} as a nested pair — via a new Video entry in
+  `MANUAL_GROUPS_BY_DECK`. "D" moved to (5.476, 3.471); the box moved to
+  (7.923, 2.500) 5.030 x 3.040.
+- **s7** the "[note: if P decreases, Q must increase]" line moved onto
+  its own line under the question.
+- **s21** step 3 reworded to "Compute Marginal Revenue from total
+  revenue".
+
+### New work
+- **s4 — the three points animate one at a time.** The cream rectangle
+  is now a plain background shape and the three points live in their own
+  text box, because a box merged with its text can only animate as a
+  single object. `_group_pass` has a new `NO_GROUP_BOXES` list that tells
+  rule 1 to leave this pair alone. Five paragraphs (three bulleted, two
+  un-bulleted continuations at level 1), revealed as three beats:
+  `pr:Inverse demand:0:0`, `1:2`, `3:4`.
+  **Gotcha:** a literal newline inside a run is read by PowerPoint as a
+  PARAGRAPH break, not a line break — the continuation lines were each
+  picking up their own bullet until they were made real paragraphs.
+- **s5** gold down-arrow to the left of P0 / P1 and gold right-arrow
+  under Q0 / Q1; the gold box now reads "Which area is bigger?".
+- **s19** the arrow pointing at "Derivative" is now the same concept
+  blue as the word.
+- **s21** the single pointer became two boxes: "Problem Set 2 · #4, #5"
+  and "Teaching Note: Marginal Revenue".
+- **s22** the two braces are back over the demand curve, one across the
+  elastic stretch and one across the inelastic stretch, from Nico's own
+  Module 2 Video 2 slide 8. New `_brace_along()` helper lays a rightBrace
+  along an arbitrary segment: rotate by (theta + 90) so it curls DOWN
+  onto the line, then lift it clear along the upward normal.
+
+### Verification
+- Deck opens clean: **53 slides, 44 animated**.
+- Slide 4 = 5 clicks (two figure groups, then one per point).
+- Slideshow probe on 1/3/4/5/7/19/21/22/24/53: PASS, checked for the
+  failure banner pixel-wise as well as by eye.
+- Renders of every changed slide compared against Nico's hand-edited
+  version and against his originals.
+
+### NOT DONE — the CT 30-52 block
+Nico also asked for our slides 30-52 to be replaced wholesale by CT video
+slides 34-60 ("keep the location, font size, animations, grouping, all
+exactly as in CT"), including CT's PollEverywhere slides as placeholders.
+That is ~27 slides of pixel-faithful adoption and grows the deck by four;
+it is a separate piece of work and has not been started. Everything else
+from his 2026-08-24 round-3 list is done and verified.
+
+
+## 2026-08-24 (round 2) — Video deck: hand-edits + slides 7, 18, 20-23, 27
+
+**One-line summary.** Ported Nico's hand-edits on video slides 1-27,
+reinstated his own slide 7, adopted CT 21 on slide 18, relaid out the
+calculus slide, folded CT 23's sub-lines into slide 21 and deleted the
+now-redundant slide 22 (deck 54 -> 53 slides).
+
+### Hand-edits ported
+- **s2** teaching-note link box lifted to (8.200, 6.272).
+- **s3 / s4** cream boxes made taller and moved up (3.20 -> 1.95 with
+  h 3.25; 2.40 -> 1.38 with h 4.20).
+- **s6** TR label to (4.165, 4.775); both region arrows and both region
+  note boxes repositioned and narrowed.
+- **s7** "price decrease" in red, and P / Q italic inside the questions —
+  folded into the reinstated slide (below).
+- **s8** retitled "What can a Price Cut and Revenues tell us about the
+  Elasticity?"; the bullet now says *revenues* rather than *sales*, and
+  the speaker note follows. NOTE: his note edit read "sales reveunes";
+  ported as "sales revenues" (unambiguous typo).
+- **s19** "increases by 1 unit" -> "by one unit".
+- **s21** each step label gained an un-bolded parenthetical.
+
+### New work
+- **Slide 7 — Nico's own slide reinstated.** Replaced the CT version
+  adopted last round with his Module 2 Video 1 slide: TR = P · Q and
+  %ΔTR = %ΔP + %ΔQ as native OMML, the "to assess a price decrease"
+  line, and the two cream question cards. This reverses last round's
+  CT adoption for slide 7 only; 3-6 stay CT.
+- **Slide 18 = CT video slide 21.** The two rules moved out of the
+  sub-bullets and onto their own navy bars. Kept close to CT except the
+  bars are rounded with a soft shade, per the deck's filled-box rule.
+- **Slide 20 — calculus refresher relaid out.** Was crammed into the top
+  left; now a centred definition card, then "The general rule" and
+  "A worked example" as two columns, each formula on its own line.
+- **Slide 21 — CT 23's sub-lines folded in.** Under each bold step label
+  sits CT's explanation ("Rearrange demand so P is a function of Q",
+  etc.), with the formula boxes unchanged on the right, plus CT's
+  Problem-Set pointer. Row pitch tightened to 1.40" so the pointer
+  clears step 3.
+- **Slide 22 deleted** (the "3-Step Method: Summary Notes" recap) now
+  that its content lives on 21. Everything from 23 on shifted down one;
+  splice map 25 -> 24, SKIP sets and all PLANS keys shifted.
+- **Slide 23 (now 22)** — inverse demand line, its D label and the
+  E_D = −1 label all navy, matching the inverse demand on slide 6; the
+  elastic / inelastic portion labels take CT slide 26's 16 pt bold
+  concept-blue treatment and sit in clear zones above the demand line.
+- **Slide 27 (now 26)** — Poll Break badge instead of Group Discussion.
+
+### Verification
+- Video deck opens clean: **53 slides, 44 animated**.
+- Geometry diff over slides 1-21: only the intended rebuilds (7, 18) and
+  PowerPoint save artifacts (title run splits, autofit heights inside the
+  cream boxes, `i` attribute normalisation).
+- Slideshow probe on 1/7/18/20/21/22/24/26/53: PASS.
+- In-Class deck rebuilt and diffed to confirm the shared-layer fixes
+  (`_add_cubic_curve`, `is_chrome`, subscripts, links) leave it
+  untouched: **0 slides differ, all 76 timings identical**.
+
+### Still open
+- Three slides continue to carry the "Group Discussion" badge (video 14,
+  16, 17 in the new numbering). Nico has now named slide 8 and slide 27
+  individually; the rest were left alone.
+- The PollEverywhere slide (video 24) still renders "Activity not found"
+  in the live show — an account-side issue, not a deck defect.
+
+
+## 2026-08-24 — Agenda restructure (both decks) + CT adoption in the Video deck
+
+**One-line summary.** Reworked the module outline on both decks (3a / 3b
+sub-items, non-current items shaded), then rebuilt Video slides 3-7 from
+CT's slides 4-8, dropped the Wrigley example, and ran two deck-wide
+passes (real subscripts, CT source links).
+
+### Agenda / outline — BOTH decks
+- `M2_OUTLINE` now carries `(label, title, description, is_sub)`.
+  "Elasticity and revenue" and "Marginal revenue" became sub-items **3a**
+  and **3b** under "Demand and revenue", and demand estimation moved up
+  to **4** — the structure of Nico's original deck, where those two sit
+  at outline level 1. LIST INDICES are unchanged, so every
+  `highlight_idx` / `highlight_set` call site kept working untouched.
+- Sub-items render indented: circle Ø 0.46" at x 1.62 with a 17 pt
+  label, title at 22 pt, and a correspondingly narrower cream band.
+- **Dimming**: on a section agenda every item that is not the current one
+  is now `#BFBFBF` (circle digit + title); the gold circle fill stays
+  gold. Follows the Module-1 rule already written into the Teaching
+  CLAUDE.md, so the descriptive overview and the summary closer — which
+  have no current topic — keep every item navy.
+
+### Video deck
+- **Wrigley example deleted** (build displays 8-10: the chewing-gum
+  setup, its poll and its solution). Deck 57 -> **54 slides**; page
+  numbers, `SPLICE_MAP` (only 25 <- 20 left), `SKIP_*` and every PLANS
+  key shifted down by three.
+- **Slides 3-7 rebuilt from CT slides 4-8** (Nico's call: CT content in
+  our chrome).
+  - 3 = CT 4 "Plotting the Demand Curve": the firm note became an italic
+    caption above the graph and the red bottom line went away. NOTE: this
+    supersedes the earlier "make the bottom line a shaded box" request —
+    Nico chose CT over his own edit when the conflict was surfaced.
+  - 4 = CT 5 "From Demand to Total Revenue": the shaded P x Q rectangle
+    with "Total revenue" inside it, and the full Demand -> Inverse ->
+    TR = P·Q -> substitute box with the result in gold.
+  - 5 = CT 6: base revenue box, the red slice lost to the lower price,
+    the green slice gained on volume, a two-entry legend and the gold
+    "Which is bigger?" box. All four corners sit ON the demand line.
+  - 6 = CT 7 PLUS Nico's own video slide 6: the two rotated gold braces
+    over the elastic / inelastic stretches, the unit-elastic midpoint,
+    and — his addition — the rising / falling arrows with the region
+    descriptions inside the bottom TR graph.
+  - 7 = CT 8 "To Assess a Price Change, Ask About Elasticity": two
+    gold-bordered cards.
+  - New animation plans for all five.
+- **Slide 8** now uses the deck-standard **Poll Break** badge instead of
+  the "Group Discussion" relabel.
+
+### Deck-wide passes (both decks)
+- **`apply_subscripts()`** — every faked index becomes a real PowerPoint
+  subscript (`baseline="-25000"`, what PowerPoint and CT both write).
+  Fixes two defects: Unicode lookalikes typed inline (the small-capital D
+  in E_D, subscript digits in P_0 / Q_1) and an index faked with a
+  smaller font (what slide 9 was doing). 21 subscript runs in the Video
+  deck, 19 in the In-Class deck; zero lookalikes left in either.
+- **`apply_ct_source_links()`** — CT's own source URLs restored on the
+  runs we adopted, keyed by run text so they survive renumbering:
+  "Source: Pharmaceutical Technology" (slide 8), "Novo Nordisk shares
+  tumbled ~18%" (10), "camelcamelcamel.com" (34),
+  "tylervigen.com/spurious-correlations" (52). Checked CT's In-Class
+  deck too — it carries no external links at all, so nothing is missing
+  there.
+
+### Two real bugs found and fixed
+- **`_add_cubic_curve` emitted `<a:effectLst/>` BEFORE `<a:ln>`.**
+  `shadow.inherit = False` appends the empty effectLst, and the ln built
+  afterwards then violates schema order, so PowerPoint silently drops the
+  whole line style and falls back to the theme line — thin and light
+  blue. That is why the Video deck's TR parabolas had never rendered
+  gold. The In-Class deck's MPV curve was accidentally immune because
+  `_add_drop_shadow` re-appends the effectLst at the end.
+- **`is_chrome()` was eating freeform curves.** A textless `sp` wider
+  than 4" and taller than 2.5" is treated as a white chart backing;
+  video slide 6's TR hill has a Bezier control-point bbox of 5.49 x 2.53,
+  so it was being dropped from every animation plan. Now guarded on
+  `custGeom`.
+- Also scoped `_group_pass.py`'s MANUAL_GROUPS **by deck** — the pass is
+  shared, and In-Class 9/18/19/20/21 are entirely different slides from
+  Video 9/18/19/20/21, so the video build was picking up the In-Class
+  groupings.
+
+### Verification
+- Both decks open clean: Video 54 slides / 45 animated, In-Class 76 / 51.
+- In-Class geometry diff vs. the committed deck: 12 slides, all of them
+  the new outline (7, 8, 25, 75, 76) or the subscript conversions.
+- Video slideshow probe on 1/3/4/5/6/7/8/25/54: PASS.
+- Renders of every rebuilt slide checked against the CT original.
+
+### Open / flagged
+- **Four more slides still carry the "Group Discussion" badge** (Video
+  15, 17, 18, 30 in the new numbering). Nico named only slide 8, so the
+  others were left alone — say the word to switch them too.
+- **The PollEverywhere slide (Video 25) renders "Activity not found"** in
+  the live slideshow. The splice is intact; the activity itself looks
+  deleted or renamed in the PollEv account.
+- The subscript pass sets the baseline but does NOT force the base letter
+  italic, so the existing look of E_D is preserved. The Teaching
+  CLAUDE.md rule for indexed symbols also asks for an italic base — worth
+  deciding whether to apply that deck-wide.
+
+
 ## 2026-08-23 (third pass) — Speaker notes on every slide
 
 **One-line summary.** Every one of the 76 slides now carries speaker

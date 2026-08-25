@@ -53,7 +53,9 @@ CT_NOTES = ('application/vnd.openxmlformats-officedocument.'
 # new-deck display -> source-deck display
 # new-deck displays shifted +1 from 14 on (bookend insert, 2026-08-15)
 SPLICE_MAP = {
-    9: 9, 28: 20,
+    # 2026-08-24: the gum poll (was display 9) went with the
+    # deleted Wrigley example; the MR poll moved 28 -> 25
+    24: 20,
 }
 
 

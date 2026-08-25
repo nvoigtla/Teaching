@@ -46,10 +46,15 @@ M = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 MC = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 EMU = 914400.0
 
-SKIP_TITLE = {1, 19, 32}
-SKIP_AGENDA = {2, 20, 33, 57}
-SKIP_MEDIA = {9, 28}
-SKIP_STATIC = {40}                 # data table stays static
+# 2026-08-24: Wrigley example (old 8-10) deleted, so every display
+# from 11 on moved down by three.
+# 2026-08-24: CT adoption of 30-52 (CT 34-60) — our extra
+# elasticity slide dropped, CT's two regression slides merged,
+# and six poll placeholders inserted.
+SKIP_TITLE = {1, 16, 28}
+SKIP_AGENDA = {2, 17, 29, 57}
+SKIP_MEDIA = {24, 43, 44, 46, 47, 49, 50}
+SKIP_STATIC = {36}                 # data table stays static
 SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 
 FIG_GROUP_DEFAULT = 0
@@ -58,210 +63,137 @@ PLANS_PRE = {}
 STATIC = {}
 
 PLANS = {
-    3: [
-        ["cxn:2"],
+    3: [   # CT slide 4: demand line + D, then the two functions
+        ["cxn:2", "t:D"],
         ["grp:0"],
-        ["t:This is the demand"],
     ],
-    4: [
-        ["cxn:4", "t:D"],
-        ["cxn:5", "cxn:6"],
-        ["osp:3", "t:Total revenue"],
-        ["cxn:7", "cxn:8"],
-    ],
-    5: [
-        ["cxn:3", "t:P₀", "cxn:5", "t:Q₀", "t:TR₀"],
-        ["cxn:4", "t:P₁", "cxn:6", "t:Q₁", "t:TR₁"],
-        ["osp:3", "grp:0", "cxn:7"],
-        ["osp:4", "grp:1", "cxn:8"],
-        ["t:Which area is bigger?", "t:Total revenue"],
-    ],
-    6: [
-        ["t:Eᴅ < −1"],
-        ["t:−1 < Eᴅ"],
-        ["osp:3", "t:Eᴅ = −1"],
-        ["osp:4", "t:TR#2", "cxn:5"],
+    4: [   # axes, then the demand curve with its ticks, then the three
+        # points one at a time (Nico wants them separately callable)
+        ["grp:0"],
         ["grp:1"],
-        ["grp:2"],
+        ["pr:Inverse demand:0:0"],
+        ["pr:Inverse demand:1:2"],
+        ["pr:Inverse demand:3:4"],
     ],
-    7: [
-        ["pr:Total Revenues:1:1"],
+    5: [   # CT slide 6: demand, the base revenue box, then what the
+        # price cut costs and what the extra volume brings in
+        ["cxn:2", "t:Demand"],
+        ["osp:3", "t:TR"],
+        ["osp:4", "osp:6", "t:Reduction in"],
+        ["osp:5", "osp:7", "t:Increase in"],
+        ["t:Which area is bigger?"],
+    ],
+    6: [   # CT slide 7 + Nico's in-graph region notes: demand, the two
+        # elasticity stretches, the unit-elastic midpoint, then the TR
+        # hill and what each region does to revenue
+        ["cxn:2", "t:D"],
+        ["osp:3", "t:E D  <"],
+        ["osp:4", "t:\u22121 <"],
+        ["cxn:3", "cxn:4", "t:E D  ="],
+        ["osp:5", "cxn:7", "t:TR"],
+        ["cxn:8", "t:Elastic region"],
+        ["cxn:9", "t:Inelastic region"],
+    ],
+    7: [   # Nico's own slide, reinstated: the two formulas carry the
+        # argument, then the question, then each card
+        ["t:Total Revenues"],
         ["t:To assess"],
         ["grp:0"],
         ["grp:1"],
     ],
     8: [
-        ["pr:Information:1:1"],
-        ["pr:Information:2:2"],
-        ["pr:Information:3:3"],
-    ],
-    10: [
-        ["pr:Demand is:1:2"],
-    ],
-    11: [
         ["pr:Novo Nordisk:1:1"],
         ["pr:Novo Nordisk:2:2"],
     ],
-    12: [
+    9: [
         ["t:Demand is"],
         ["pr:A price cut:0:0"],
         ["pr:A price cut:1:1"],
         ["pr:A price cut:2:2"],
     ],
-    13: [
+    10: [
         ["pr:The price decrease:0:0"],
         ["pr:The price decrease:1:1"],
         ["pr:The price decrease:2:2"],
         ["pr:The price decrease:3:3"],
     ],
-    14: [
+    11: [
         ["pr:Is the percent:1:1"],
     ],
-    15: [
+    12: [
         ["pr:In 2014:1:1"],
         ["pr:In 2014:2:5"],
     ],
-    16: [
+    13: [
         ["t:E D"],
         ["t:where"],
         ["pr:→:0:0"],
         ["pr:→:1:1"],
         ["pr:→:2:2"],
     ],
-    17: [
+    14: [
         ["pr:What does this suggest:1:1"],
         ["pr:What does this suggest:2:2"],
         ["pr:What does this suggest:3:3"],
     ],
-    18: [
+    15: [
         ["pr:April 2025:1:1"],
         ["pr:April 2025:2:2"],
         ["pr:April 2025:3:3"],
         ["grp:0"],
     ],
-    22: [
+    18: [  # CT 21: objective, its rule bar, the firm's objective, its
+        # rule bar, then today's question
+        ["t:General objective"],
+        ["t:Net benefits are maximized"],
+        ["t:Firms’ objective"],
+        ["t:Produce where Marginal Revenue"],
+        ["t:Today: how to compute"],
+    ],
+    19: [
         ["t:MR"],
         ["t:Derivative", "cxn:0"],
         ["t:How to compute"],
     ],
-    23: [
-        ["pr:::1:1"],
-        ["pr:::2:3"],
-        ["pr:::4:4"],
-        ["pr:::5:5"],
+    20: [  # calculus refresher, relaid out: definition card, the
+        # general rule, then the same rule on numbers
+        ["grp:0"],
+        ["t:The general rule", "t:If"],
+        ["t:A worked example", "t:With a = 1"],
         ["t:→"],
     ],
-    24: [
+    21: [  # three steps, each with its sub-line and its formula box
         ["t:Step 1", "t:P"],
         ["t:Step 2", "t:TR"],
         ["t:Step 3", "t:MR"],
+        ["t:✎  Problem Set 2", "t:▤  Teaching Note"],
     ],
-    25: [
-        ["pr:1.  Calculate inverse:2:3"],
-        ["pr:1.  Calculate inverse:4:5"],
-        ["t:→"],
-    ],
-    26: [
+    22: [
         ["cxn:5", "t:MR"],
-        ["osp:3", "t:Eᴅ = −1"],
+        ["osp:3", "t:E D  = −1"],
         ["t:Elastic portion", "t:Inelastic portion"],
         ["osp:4", "t:TR#2", "cxn:6"],
         ["grp:1", "cxn:7"],
     ],
-    27: [
+    23: [
         ["pr:MR:1:1"],
         ["pr:MR:2:2"],
         ["pr:MR:3:3"],
         ["pr:MR:4:4"],
     ],
-    29: [
+    25: [
         ["t:1.", "t:P"],
         ["t:2.", "t:TR"],
         ["t:3.", "t:MR"],
     ],
-    30: [
+    26: [
         ["pr:What is the revenue:0:0"],
         ["pr:What is the revenue:1:1"],
     ],
-    31: [
+    27: [
         ["pr:1.  Inverse demand:0:2"],
         ["t:MR"],
         ["pr:Why revenue maximization:0:0"],
-    ],
-    38: [
-        ["pr:Description::1:1"],
-        ["pr:Description::2:2"],
-    ],
-    39: [
-        ["t:Slope", "cxn:0"],
-        ["t:where:"],
-        ["t:E"],
-    ],
-    41: [
-        ["osp:3", "osp:4", "osp:5", "osp:6", "osp:7", "osp:8", "osp:9",
-         "osp:10", "osp:11", "osp:12", "osp:13", "osp:14", "osp:15",
-         "osp:16", "osp:17", "osp:18", "t:Scatterplot"],
-    ],
-    42: [
-        ["cxn:3", "cxn:4"],
-        ["grp:0"],
-        ["cxn:5", "cxn:6", "cxn:7"],
-        ["cxn:2"],
-    ],
-    43: [
-        ["grp:0"],
-        ["t:Demand Equation:"],
-        ["t:Note: Now"],
-        ["t:→"],
-    ],
-    44: [
-        ["pr:R Square:1:1"],
-        ["pr:R Square:2:3"],
-        ["pr:R Square:4:4", "t:e.g.,"],
-    ],
-    45: [
-        ["pr:We have estimated:1:1"],
-        ["pr:We have estimated:2:2"],
-        ["t:Q = 151"],
-        ["t:E"],
-    ],
-    46: [
-        ["t:where:"],
-    ],
-    47: [
-        ["grp:0"],
-        ["t:Demand Equation:"],
-    ],
-    48: [
-        ["pr:Currently:1:1"],
-        ["pr:Currently:2:2"],
-        ["pr:Currently:3:3"],
-    ],
-    49: [
-        ["pr:Q = 479:1:2"],
-        ["t:E"],
-        ["t:→"],
-    ],
-    50: [
-        ["t:1.", "t:P"],
-        ["t:2.", "t:TR"],
-        ["t:3.", "t:MR#1"],
-        ["t:MR#2"],
-    ],
-    51: [
-        ["pr:MR:1:1"],
-        ["cxn:3", "t:MR#2", "osp:3", "t:Eᴅ = −1", "t:Elastic portion",
-         "t:Inelastic portion"],
-    ],
-    53: [
-        ["pic:0"],
-        ["t:Actual finding"],
-    ],
-    54: [
-        ["pic:0", "pic:1", "pic:2"],
-    ],
-    56: [
-        ["pr:Randomizing:1:1"],
     ],
 }
 
@@ -364,6 +296,7 @@ def shape_info(el, kinds):
     info = {
         "id": int(cnv.get("id")), "name": cnv.get("name") or "",
         "tag": tag, "x": x, "y": y, "w": w, "h": h, "text": txt,
+        "custgeom": el.find(".//" + q(A, "custGeom")) is not None,
         "paras": paras,
         "bul0": sum(1 for (_, l, ne) in paras if l == 0 and ne),
     }
@@ -422,7 +355,11 @@ def is_chrome(s):
         return True                      # practice-video link boxes
     if t.startswith("\u2190 Back") or t.startswith("Tickets"):
         return True                      # navigation pills
-    if (s["tag"] == "sp" and not t and s["w"] > 4 and s["h"] > 2.5):
+    # a freeform CURVE is not a backing: a wide, tall Bezier bbox was
+    # being swallowed here (video slide 6's TR hill), which silently
+    # dropped it from every plan (2026-08-24)
+    if (s["tag"] == "sp" and not t and s["w"] > 4 and s["h"] > 2.5
+            and not s.get("custgeom")):
         return True                      # big white chart backings
     return False
 
@@ -581,7 +518,7 @@ def main():
              for s in pres.find(q(P, "sldIdLst"))]
 
     if sel == ["all"] or not sel:
-        todo = [d for d in range(1, 58) if d not in SKIP]
+        todo = [d for d in range(1, len(order) + 1) if d not in SKIP]
     else:
         todo = [int(x) for x in sel]
 

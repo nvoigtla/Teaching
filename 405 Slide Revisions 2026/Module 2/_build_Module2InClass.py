@@ -26,7 +26,7 @@ from pptx.chart.data import CategoryChartData, XyChartData
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
-from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.shapes import MSO_SHAPE, MSO_SHAPE_TYPE
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Cm, Inches, Pt
@@ -217,6 +217,9 @@ def _add_convention_box(slide, left, top, width, height, *,
         shp.adjustments[0] = corner_pct
     except Exception:
         pass
+    # 2026-08-24 (Nico): the cream callouts carry the deck's soft shade
+    # like every other filled box, so they read as lifted cards
+    _add_drop_shadow(shp)
 
     # Inset text box so the rounded corners breathe — matches slide 14.
     pad_h = Inches(0.20) if pad_h is None else pad_h
@@ -529,6 +532,68 @@ def make_section_agenda(prs, page_num, *, current_part_idx=None,
 # --------------------------------------------------------------------------
 # Layout 3 — Content bulleted
 # --------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
+# Slide titles are set in title case (2026-08-24, Nico), the way a paper
+# title is: every significant word starts with a capital, while articles,
+# coordinating conjunctions and short prepositions stay lower case unless
+# they open the title, close it, or follow a colon.
+#
+# The pass only ever RAISES a letter - it never lower-cases a word that is
+# already capitalised - so acronyms (MR, TR, OLS, WTP, A/B), product names
+# and Nico's own capitalisation choices survive untouched.
+# --------------------------------------------------------------------------
+
+TITLE_LOWER = {
+    "a", "an", "the",
+    "and", "but", "or", "nor", "for", "so", "yet",
+    "as", "at", "by", "in", "into", "of", "off", "on", "onto", "out",
+    "per", "to", "up", "via", "with", "from", "over", "than", "vs",
+}
+
+
+def _tc_word(word, force):
+    """Capitalise one whitespace-delimited token, hyphen parts included."""
+    parts = word.split("-")
+    out = []
+    for i, part in enumerate(parts):
+        core = part.lstrip("\u201c\u2018\"'([")
+        lead = part[:len(part) - len(core)]
+        stripped = core.rstrip("\u201d\u2019\"')]:,.?!")
+        trail = core[len(stripped):]
+        low = stripped.lower().rstrip(".")
+        keep_low = (not force) and low in TITLE_LOWER
+        if stripped and not keep_low and stripped[0].islower():
+            stripped = stripped[0].upper() + stripped[1:]
+        out.append(lead + stripped + trail)
+        force = False          # only the first hyphen part can be forced
+    return "-".join(out)
+
+
+def _title_case(title):
+    words = title.split(" ")
+    idx = [i for i, w in enumerate(words) if w.strip()]
+    if not idx:
+        return title
+    first, last = idx[0], idx[-1]
+    out = []
+    force_next = True
+    for i, w in enumerate(words):
+        if not w.strip():
+            out.append(w)
+            continue
+        force = force_next or i == first or i == last
+        out.append(_tc_word(w, force))
+        force_next = w.rstrip().endswith((":", "?", "!", "\u2014", "\u2013"))
+    return " ".join(out)
+
+
+_draw_action_title_raw = _draw_action_title
+
+
+def _draw_action_title(slide, title, gold_len=GOLD_W):
+    return _draw_action_title_raw(slide, _title_case(title), gold_len)
+
 
 def make_content_bulleted(prs, page_num, section_tag, title, bullets, *,
                           size=24, sub_size=None, line_spacing_pts=18,
@@ -2168,7 +2233,7 @@ def _add_mixed_textbox(slide, left, top, width, height, segments, *,
 
 def _add_math_equation(slide, left, top, width, height, omml_content, *,
                        size_pt=32, color=NAVY, fill=None, line=None,
-                       rounded=False, shadow=False, corner_pct=25000):
+                       rounded=False, shadow=None, corner_pct=25000):
     """Place an OMML equation in a textbox on the slide.
 
     omml_content: a string built from _omml_* helpers (without the outer
@@ -2181,6 +2246,11 @@ def _add_math_equation(slide, left, top, width, height, omml_content, *,
     silently drops the shape (see slide-54 fix).
     """
     left, top, width, height = int(left), int(top), int(width), int(height)
+    # 2026-08-24 (Nico): a FILLED equation box is one of the deck's cream
+    # cards, so it gets the soft shade unless the caller says otherwise.
+    # Passing shadow=False still suppresses it.
+    if shadow is None:
+        shadow = fill is not None
     box = slide.shapes.add_textbox(left, top, width, height)
 
     if fill is not None:
@@ -2294,6 +2364,12 @@ def _add_math_equation(slide, left, top, width, height, omml_content, *,
 import uuid
 
 CREAM = RGBColor(0xFD, 0xF6, 0xE6)
+DIM = RGBColor(0xBF, 0xBF, 0xBF)           # 2026-08-24 (Nico):
+                                           # outline items not
+                                           # currently covered are
+                                           # shaded (his own decks
+                                           # use schemeClr bg1
+                                           # lumMod 75% over white)
 
 TAG_LOGISTICS = "Module 2 · Logistics"
 TAG_RECAP     = "Module 2 · Recap"
@@ -2399,7 +2475,8 @@ def _add_styled_table(slide, left, top, width, height, rows_data, *,
                       col_widths=None, row_heights=None, font_size=18,
                       header_size=None, backing_pad=Inches(0.15),
                       first_col_bold=True, first_col_align_left=True,
-                      cell_fills=None, cell_text_colors=None):
+                      cell_fills=None, cell_text_colors=None,
+                      margin_v=None):
     """rows_data: list of rows (row 0 = navy header). cell_fills /
     cell_text_colors: optional {(r, c): RGBColor} overrides."""
     header_size = header_size or font_size
@@ -2428,8 +2505,11 @@ def _add_styled_table(slide, left, top, width, height, rows_data, *,
             cell = tbl.cell(r, c)
             cell.margin_left = Inches(0.10)
             cell.margin_right = Inches(0.10)
-            cell.margin_top = Inches(0.04)
-            cell.margin_bottom = Inches(0.04)
+            # a long table can be squeezed by lowering margin_v; row
+            # height in PowerPoint is line height + these two margins
+            _mv = Inches(0.04) if margin_v is None else int(margin_v)
+            cell.margin_top = _mv
+            cell.margin_bottom = _mv
             cell.vertical_anchor = MSO_ANCHOR.MIDDLE
             hdr = (r == 0)
             if cell_fills and (r, c) in cell_fills:
@@ -2485,21 +2565,28 @@ def _inject_handoff_group(slide, fname, id_base=9500):
 
 FOOTER_TEXT = "Management 405  ·  Module 2  ·  Demand Analysis"
 
+# (label, title, description, is_sub_item).  2026-08-24 (Nico): items 4
+# and 5 became sub-items 3a and 3b of "Demand and revenue", and demand
+# estimation moved up to 4 — the structure of the original deck, where
+# those two sit at outline level 1 under "Demand and revenue".  The LIST
+# INDICES are unchanged, so every highlight_idx / highlight_set call site
+# keeps working.
 M2_OUTLINE = [
-    ("The law of demand",
+    ("1", "The law of demand",
      "When the price falls, quantity demanded rises – holding everything "
-     "else constant"),
-    ("Elasticities",
+     "else constant", False),
+    ("2", "Elasticities",
      "How strongly demand responds to price, income, and the prices of "
-     "other goods"),
-    ("Demand and revenue",
-     "How the demand curve translates into total revenue"),
-    ("Elasticity and revenue",
-     "When a price increase raises revenue – and when it backfires"),
-    ("Marginal revenue",
-     "The extra revenue from selling one more unit"),
-    ("Demand estimation",
-     "Measuring demand from data – market experiments and regression"),
+     "other goods", False),
+    ("3", "Demand and revenue",
+     "How the demand curve translates into total revenue", False),
+    ("3a", "Elasticity and revenue",
+     "When a price increase raises revenue – and when it backfires", True),
+    ("3b", "Marginal revenue",
+     "The extra revenue from selling one more unit", True),
+    ("4", "Demand estimation",
+     "Measuring demand from data – market experiments and regression",
+     False),
 ]
 
 COURSE_PARTS = [
@@ -2590,12 +2677,28 @@ def make_m2_outline(prs, page_num, *, section_tag=TAG_OUTLINE,
     y = int(top + max(0, (bottom - top - total) // 2))
 
     ys = []
-    for i, (item, desc) in enumerate(M2_OUTLINE):
+    for i, (label, item, desc, sub) in enumerate(M2_OUTLINE):
         ys.append(y)
+        # sub-items (3a / 3b) sit indented under their parent, on a
+        # smaller circle and one type size down
+        circ_x = Inches(1.62) if sub else Inches(1.15)
+        circ_d = Inches(0.46) if sub else Inches(0.58)
+        circ_dy = Inches(0.08) if sub else Inches(0.02)
+        text_x = Inches(2.28) if sub else Inches(2.05)
+        num_pt = 17 if sub else 25
+        item_pt = 22 if sub else 25
+        band_x = Inches(1.37) if sub else Inches(0.90)
+        band_w = Inches(11.68) if sub else Inches(12.15)
+        # 2026-08-24 (Nico): on a section agenda the items that are NOT
+        # currently covered are shaded; the descriptive overview, which
+        # lights every item, keeps them all navy.  The gold circle fill
+        # stays gold on every item either way.
+        lit = descriptions or i in hi
+        ink = NAVY if lit else DIM
         if not descriptions and i in hi:
             band = slide.shapes.add_shape(
-                MSO_SHAPE.ROUNDED_RECTANGLE, int(Inches(0.90)),
-                int(y - Inches(0.06)), int(Inches(12.15)),
+                MSO_SHAPE.ROUNDED_RECTANGLE, int(band_x),
+                int(y - Inches(0.06)), int(band_w),
                 int(title_h + desc_h + Inches(0.10)))
             band.adjustments[0] = 0.35
             band.fill.solid()
@@ -2605,8 +2708,8 @@ def make_m2_outline(prs, page_num, *, section_tag=TAG_OUTLINE,
             band.shadow.inherit = False
             _add_drop_shadow(band)
         circ = slide.shapes.add_shape(
-            MSO_SHAPE.OVAL, int(Inches(1.15)), int(y + Inches(0.02)),
-            int(Inches(0.58)), int(Inches(0.58)))
+            MSO_SHAPE.OVAL, int(circ_x), int(y + circ_dy),
+            int(circ_d), int(circ_d))
         circ.fill.solid()
         circ.fill.fore_color.rgb = GOLD
         circ.line.fill.background()
@@ -2619,20 +2722,23 @@ def make_m2_outline(prs, page_num, *, section_tag=TAG_OUTLINE,
         para = tf.paragraphs[0]
         para.alignment = PP_ALIGN.CENTER
         run = para.add_run()
-        run.text = str(i + 1)
-        run.font.size = Pt(25)
+        run.text = label
+        run.font.size = Pt(num_pt)
         run.font.bold = True
-        run.font.color.rgb = NAVY
+        run.font.color.rgb = ink
         run.font.name = "Calibri"
-        rows = [([(item[0].upper() + item[1:],
-                   {'bold': True, 'size': 25, 'color': NAVY})], 0,
+        # 2026-08-24 (Nico): agenda item titles follow the same title
+        # case as slide titles.  The one-line description underneath is
+        # a sentence, so it is left alone.
+        rows = [([(_title_case(item[0].upper() + item[1:]),
+                   {'bold': True, 'size': item_pt, 'color': ink})], 0,
                  {'bullet_style': 'none', 'space_before_pts': 0})]
         if i in hi:
             rows.append(([(desc, {'size': 22, 'color': GRAY})], 0,
                          {'bullet_style': 'none', 'space_before_pts': 0}))
         _add_hierarchical_bullets(
-            slide, Inches(2.05), y, Inches(11.0), title_h + desc_h,
-            rows, size=25, line_spacing_pts=0)
+            slide, text_x, y, Inches(11.0), title_h + desc_h,
+            rows, size=item_pt, line_spacing_pts=0)
         y = int(y + pitch)
 
     slide._m2_item_ys = ys
@@ -2772,6 +2878,15 @@ def _add_cubic_curve(slide, p0, c1, c2, p1, *, color=NAVY, weight_pt=2.5,
         dash_el = ET.SubElement(ln, qn('a:prstDash'))
         dash_el.set('val', dash)
     ET.SubElement(ln, qn('a:round'))
+    # schema order inside spPr is geometry -> fill -> ln -> effectLst.
+    # shadow.inherit = False appends an empty <a:effectLst/> BEFORE the
+    # ln we just built, and PowerPoint then silently drops the whole ln
+    # and falls back to the theme line (thin, light blue).  Move any
+    # effectLst behind the ln.  Found 2026-08-24 on the video deck's TR
+    # parabola, which had been rendering unstyled.
+    for eff in sppr.findall(qn('a:effectLst')):
+        sppr.remove(eff)
+        sppr.append(eff)
     return shp
 
 
@@ -4191,10 +4306,10 @@ def slide_40_method1(prs):
             ("See TA Math Review videos", 0),
         ],
         size=24, line_spacing_pts=10)
-    _add_outlined_box(slide, MARGIN, Inches(6.45), Inches(3.0),
-                      Inches(0.5), "→  Problem Set 2", line=GOLD,
-                      text_color=NAVY, size=18, bold=True, rounded=True,
-                      shadow=True, corner_pct=0.25)
+    # 2026-08-24: the deck-wide reference-box convention (glyph + the
+    # problem-set number only)
+    _add_reference_box(slide, MARGIN, Inches(6.45), Inches(3.0),
+                       Inches(0.5), "Problem Set 2", kind="ps", size=18)
     _draw_footer(slide, FOOTER_TEXT, 40)
     return slide
 
@@ -5464,6 +5579,243 @@ def slide_76_postwork_ps2(prs):
 # _splice_media.py replaces them.
 # --------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------
+# Deck-wide subscript pass (2026-08-24, Nico: "when there are formulas with
+# a letter such as ED, the d is the subscript ... go through the whole deck
+# and check that this is implemented").
+#
+# Two defects are fixed:
+#   1. Unicode LOOKALIKES typed inline - the small-capital D in "E<D>", the
+#      subscript digits in "P<0>" / "Q<1>", and friends.  They are not
+#      subscripts, they are separate characters that happen to sit low.
+#   2. A subscript FAKED with a smaller font: an "E" run followed by a "D"
+#      run at a reduced size (this is what slide 9 was doing).
+# Both are rewritten to a real PowerPoint subscript, i.e. the index run
+# carries baseline="-25000", which is exactly what PowerPoint itself writes
+# and what CT's own decks use.
+# --------------------------------------------------------------------------
+
+SUBSCRIPT_BASELINE = "-25000"
+
+# lookalike -> the character it really stands for
+SUB_LOOKALIKE = {
+    "ᴅ": "D",     # small capital D, used for E_D
+    "ᴄ": "C",     # small capital C
+    "ᵢ": "i",     # subscript i, used for E_I
+    "ᵧ": "y",     # subscript gamma, used for P_Y
+    "ₓ": "x",     # subscript x, used for E_X / Q_X
+}
+for _d in range(10):
+    SUB_LOOKALIKE[chr(0x2080 + _d)] = str(_d)
+
+# a base letter immediately followed by one or more lookalikes
+_SUB_RE = re.compile(
+    "([A-Za-z])([" + "".join(SUB_LOOKALIKE) + "]+(?:,[" +
+    "".join(SUB_LOOKALIKE) + "]+)*)")
+
+
+def _sub_expand(idx_text):
+    return "".join(SUB_LOOKALIKE.get(ch, ch) for ch in idx_text)
+
+
+def _split_subscript_runs(para):
+    """Split every run of a paragraph so an index becomes a real
+    subscript run.  Formatting is copied from the base run; the italic
+    state is left exactly as it was."""
+    changed = False
+    for run in list(para.runs):
+        text = run.text or ""
+        if not _SUB_RE.search(text):
+            continue
+        pieces = []                     # (text, is_subscript)
+        pos = 0
+        for m in _SUB_RE.finditer(text):
+            if m.start() > pos:
+                pieces.append((text[pos:m.start()], False))
+            pieces.append((m.group(1), False))
+            pieces.append((_sub_expand(m.group(2)), True))
+            pos = m.end()
+        if pos < len(text):
+            pieces.append((text[pos:], False))
+        r_el = run._r
+        anchor = r_el
+        for i, (txt, is_sub) in enumerate(pieces):
+            if i == 0:
+                run.text = txt
+                continue
+            new_r = copy.deepcopy(r_el)
+            for t_el in new_r.findall(qn('a:t')):
+                t_el.text = txt
+            npr = new_r.find(qn('a:rPr'))
+            if npr is not None:
+                if is_sub:
+                    npr.set('baseline', SUBSCRIPT_BASELINE)
+                else:
+                    npr.attrib.pop('baseline', None)
+            anchor.addnext(new_r)
+            anchor = new_r
+        changed = True
+    return changed
+
+
+def _fix_smallfont_subscripts(para):
+    """An index faked with a smaller font: a one-or-two-character run
+    (D / I / X / a digit) that directly follows a run ending in a letter
+    and is set smaller than it.  Give it the real baseline and put its
+    size back to the base run's."""
+    changed = False
+    runs = list(para.runs)
+    for i in range(1, len(runs)):
+        prev, cur = runs[i - 1], runs[i]
+        ptxt, ctxt = (prev.text or ""), (cur.text or "")
+        if not ptxt or not ctxt:
+            continue
+        if not (ptxt[-1].isalpha() and len(ctxt) <= 2
+                and (ctxt.isalpha() or ctxt.isdigit())):
+            continue
+        ppr = prev._r.find(qn('a:rPr'))
+        cpr = cur._r.find(qn('a:rPr'))
+        if ppr is None or cpr is None:
+            continue
+        if cpr.get('baseline'):
+            continue                       # already a real subscript
+        psz, csz = ppr.get('sz'), cpr.get('sz')
+        if not psz or not csz or int(csz) >= int(psz):
+            continue
+        cpr.set('baseline', SUBSCRIPT_BASELINE)
+        cpr.set('sz', psz)
+        changed = True
+    return changed
+
+
+def _iter_text_frames(shp):
+    if shp.has_text_frame:
+        yield shp.text_frame
+    if shp.shape_type == MSO_SHAPE_TYPE.GROUP:
+        for child in shp.shapes:
+            for tf in _iter_text_frames(child):
+                yield tf
+    if getattr(shp, "has_table", False) and shp.has_table:
+        for row in shp.table.rows:
+            for cell in row.cells:
+                yield cell.text_frame
+
+
+def apply_subscripts(prs):
+    """Deck-wide: turn every faked index into a real subscript run."""
+    n = 0
+    for slide in prs.slides:
+        for shp in slide.shapes:
+            for tf in _iter_text_frames(shp):
+                for para in tf.paragraphs:
+                    if _split_subscript_runs(para):
+                        n += 1
+                    if _fix_smallfont_subscripts(para):
+                        n += 1
+    return n
+
+
+
+def _add_external_link(slide, run, url, *, underline=True,
+                       lock_color=True):
+    """Make ``run`` open ``url`` in the browser.
+
+    Same colour-lock trick as the slide-jump helper: without it
+    PowerPoint repaints hyperlink text in the theme's hlink blue and the
+    caption stops looking like a caption.
+    """
+    rId = slide.part.relate_to(url, RT.HYPERLINK, is_external=True)
+    rPr = run._r.get_or_add_rPr()
+    if underline:
+        rPr.set('u', 'sng')
+    for hl in rPr.findall(qn('a:hlinkClick')):
+        rPr.remove(hl)
+    hlinkClick = ET.SubElement(rPr, qn('a:hlinkClick'))
+    hlinkClick.set(qn('r:id'), rId)
+    if lock_color:
+        AHYP_NS = ('http://schemas.microsoft.com/office/drawing/2018/'
+                   'hyperlinkcolor')
+        ext_xml = (
+            f'<a:extLst xmlns:a="{A_NS}">'
+            f'<a:ext xmlns:ahyp="{AHYP_NS}" '
+            f'uri="{{A12FA001-AC4F-418D-AE19-62706E023703}}">'
+            f'<ahyp:hlinkClr val="tx"/></a:ext></a:extLst>')
+        hlinkClick.append(ET.fromstring(ext_xml))
+    return run
+
+
+# --------------------------------------------------------------------------
+# Source links carried over from CT's decks (2026-08-24).  Keyed by the
+# exact run text they belong on, so the pass finds them wherever the run
+# ends up as slides are inserted or deleted.
+# --------------------------------------------------------------------------
+
+CT_SOURCE_LINKS = {
+    "Source: Pharmaceutical Technology":
+        "https://www.pharmaceutical-technology.com/news/trump-hits-long-"
+        "term-pledge-as-us-prices-of-weight-loss-drugs-slashed/",
+    "Novo Nordisk shares tumbled ~18%":
+        "https://www.pharmaceutical-technology.com/news/novo-nordisk-"
+        "shares-tumble-18-after-2026-sales-dip-warning/",
+    "camelcamelcamel.com":
+        "https://camelcamelcamel.com/product/B0DRVPMBX3",
+    "tylervigen.com/spurious-correlations":
+        "https://www.tylervigen.com/spurious-correlations",
+}
+
+
+def apply_ct_source_links(prs, links=None):
+    """Deck-wide: attach the CT source URL to every run whose text matches
+    one of CT_SOURCE_LINKS.  Runs that already carry a hyperlink are left
+    alone."""
+    links = CT_SOURCE_LINKS if links is None else links
+    n = 0
+    for slide in prs.slides:
+        for shp in slide.shapes:
+            for tf in _iter_text_frames(shp):
+                for para in tf.paragraphs:
+                    for run in para.runs:
+                        url = links.get((run.text or "").strip())
+                        if not url:
+                            continue
+                        rPr = run._r.find(qn('a:rPr'))
+                        if rPr is not None and \
+                                rPr.find(qn('a:hlinkClick')) is not None:
+                            continue
+                        _add_external_link(slide, run, url)
+                        n += 1
+    return n
+
+
+# --------------------------------------------------------------------------
+# Post-work reference boxes (2026-08-24, Nico).  Any pointer to a problem
+# set or a teaching note is built here so the whole deck family uses one
+# look and one glyph vocabulary:
+#     PS_GLYPH   ✎   an exercise to work
+#     TN_GLYPH   ▤   a note to read
+# The label carries the problem-set NUMBER only - never the exercise
+# numbers - so the reference survives re-numbering in later years.
+# --------------------------------------------------------------------------
+
+PS_GLYPH = "✎"
+TN_GLYPH = "▤"
+
+
+def _add_reference_box(slide, left, top, width, height, label, *,
+                       kind="ps", size=15, corner_pct=0.25):
+    """Gold-bordered rounded pointer to post-work material.
+
+    ``kind`` is "ps" (problem set) or "tn" (teaching note); it only picks
+    the leading glyph.  Pass ``kind=None`` for a reference with no glyph.
+    """
+    glyph = {"ps": PS_GLYPH, "tn": TN_GLYPH}.get(kind)
+    text = ("%s  %s" % (glyph, label)) if glyph else label
+    return _add_outlined_box(slide, left, top, width, height, text,
+                             line=GOLD, text_color=NAVY, size=size,
+                             bold=True, rounded=True, shadow=True,
+                             corner_pct=corner_pct)
+
+
 def build(out_path=None):
     prs = Presentation()
     prs.slide_width = int(SLIDE_W)
@@ -5546,6 +5898,13 @@ def build(out_path=None):
     slide_74_cheatsheet(prs)  # 74
     slide_75_postwork_videos(prs)    # 75
     slide_76_postwork_ps2(prs)  # 76
+
+    # CT's own source links, restored on the runs we adopted
+    apply_ct_source_links(prs)
+
+    # deck-wide subscript pass (2026-08-24): every faked index
+    # becomes a real PowerPoint subscript run
+    apply_subscripts(prs)
 
     # deck-wide speaker notes (2026-08-23): fill in every slide that does
     # not already carry notes of its own, so the substantive notes ported

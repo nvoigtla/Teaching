@@ -104,6 +104,27 @@ For work in this folder, you are assisting with **teaching materials**
 - **Title each slide with the takeaway**, not the topic. Bad title:
   "Supply and Demand". Better: "Prices Coordinate Strangers Without
   Central Direction".
+- **Slide titles are set in TITLE CASE**, the way a paper title is:
+  every significant word starts with a capital letter, while articles
+  ("a", "an", "the"), coordinating conjunctions ("and", "but", "or"),
+  and short prepositions ("of", "in", "at", "to", "for", "with") stay
+  lower case – unless they open the title, close it, or follow a colon.
+  "Poll results: marginal revenue" is wrong; "Poll Results: Marginal
+  Revenue" is right. This covers EVERY title, including the throwaway
+  ones – poll slides, poll-result slides, stubs and backup slides.
+  Hyphenated compounds capitalise both parts ("Cross-Price", "E-Book").
+  - **Capitalise, never lower-case.** A pass that fixes titles only
+    ever raises a letter; it must not lower-case a word that is
+    already capitalised, so acronyms (MR, TR, OLS, WTP, A/B), product
+    names, and deliberate capitalisation survive untouched.
+  - **The same rule applies to the agenda / outline slides – to the
+    ITEM TITLES only.** "3. Demand and Revenue", "3b. Marginal
+    Revenue". The one-line description under an item is a sentence,
+    not a heading, so it keeps ordinary sentence case.
+  - Do this in the build script at the one place titles are drawn
+    (Module 2: `_title_case()` wrapping `_draw_action_title`, and the
+    item-title row of `make_m2_outline`), not by editing title strings
+    one by one.
 - **Use real-world examples** wherever possible – named companies,
   named industries, identifiable events. Generic "Firm A and Firm B"
   examples should be a last resort.
@@ -419,6 +440,26 @@ artifact.
   page number, and in front of any chart elements. On dedicated
   video-index slides (e.g., "Cournot: Computation") larger centered boxes
   mid-slide are fine; everywhere else use the default corner position.
+- **Post-work reference box** – the deck-standard pointer to a problem set
+  or a teaching note: gold-bordered rounded rect (~25% corner), white fill,
+  soft drop shadow, navy bold ~15 pt, with a **leading glyph** that says
+  what kind of reference it is – **✎ for a problem set**, **▤ for a
+  teaching note**. Two rules for the label:
+  - **Name the problem set NUMBER only – never the exercise numbers.**
+    "Problem Set 2", not "Problem Set 2 · #4, #5". The exercises get
+    renumbered from year to year and the slide should survive that.
+  - Keep the label to the reference itself. The "on BruinLearn under
+    …" line belongs on the wrap-up / post-work slide, not on every
+    pointer.
+  - **The glyphs are a fixed vocabulary – reuse them everywhere.** ✎
+    always means "a problem set", ▤ always means "a teaching note", in
+    every module and both the in-class and the video deck. Students
+    should learn to recognise the mark, so never invent a second symbol
+    for the same kind of reference and never leave one pointer bare
+    while its neighbours carry a glyph. Build scripts route every such
+    box through ONE helper (Module 2: `_add_reference_box(…,
+    kind="ps" | "tn")`) rather than hand-styling call sites; a new kind
+    of reference means adding a glyph to that helper.
 - **Concept maps / outline anchors** – a network-graph overview slide at the
   start of each major section, returned to at transitions; the section
   divider highlights the current section (cream band, navy / gold badge,

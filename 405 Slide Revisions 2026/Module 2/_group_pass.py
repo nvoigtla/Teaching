@@ -39,8 +39,15 @@ M = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
 
-SPLICED = {4, 5, 11, 12, 13, 32, 33, 37, 38, 42, 43, 49, 50,
-           61, 62, 69, 70}
+# Slides spliced in verbatim from the old deck: the group pass leaves
+# them alone.  Keyed by deck (2026-08-24) - the In-Class list used to be
+# the module-wide default, which silently skipped VIDEO slide 4 and cost
+# it its manual groups.
+SPLICED_BY_DECK = {
+    "Module 2 - In Class Revised": {4, 5, 11, 12, 13, 32, 33, 37, 38,
+                                    42, 43, 49, 50, 61, 62, 69, 70},
+    "Module 2 - Video Part Revised": {24},
+}
 
 # --------------------------------------------------------------------------
 # Explicit groups ported from Nico's hand-edits (2026-08-23).  The
@@ -48,8 +55,13 @@ SPLICED = {4, 5, 11, 12, 13, 32, 33, 37, 38, 42, 43, 49, 50,
 # are the pairings he made by hand in PowerPoint.  Members are matched by
 # their rendered (x, y) in INCHES to 0.01" among the top-level shapes of
 # that slide, then grouped in document order.
+#
+# KEYED BY DECK, because this pass is shared by the In-Class and the
+# Video decks and the display numbers collide: In-Class 9/18/19/20/21 are
+# entirely different slides from Video 9/18/19/20/21.  Without the deck
+# key the video build silently picks up the In-Class groupings.
 # --------------------------------------------------------------------------
-MANUAL_GROUPS = {
+_M2_INCLASS_GROUPS = {
     9: [   # the whole demand-curve mini figure = one object
         [(9.350, 2.570), (9.350, 6.050), (8.979, 2.285),
          (11.800, 6.150), (9.590, 3.080), (12.155, 5.357)],
@@ -75,11 +87,53 @@ MANUAL_GROUPS = {
 # Manual groups applied AFTER the geometric rules, so a member may itself
 # be a group that rule 1 just built (slide 19: the MPV convention callout
 # nests inside a group with the arrow that points at the curve).
-MANUAL_GROUPS_POST = {
+_M2_INCLASS_GROUPS_POST = {
     19: [
         [(5.500, 2.870), (4.092, 3.850)],
     ],
 }
+
+# Video deck (2026-08-24, Nico's hand-grouping on slide 4): the two
+# axes with their P / Q labels are one object, and the demand line, its
+# D label and the $400 / 1600 ticks are another (built as a nested pair,
+# exactly the way he made it).
+_M2_VIDEO_GROUPS = {
+    4: [
+        [(1.450, 1.590), (1.120, 1.370), (1.450, 3.850), (6.520, 3.950)],
+        [(1.450, 2.233), (5.476, 3.471)],
+    ],
+}
+_M2_VIDEO_GROUPS_POST = {
+    4: [
+        [(0.380, 2.093), (1.450, 2.233), (5.058, 3.910)],
+    ],
+}
+
+# Filled boxes that must NOT be merged with the text sitting on them,
+# because the text has to animate paragraph by paragraph.  Keyed by deck
+# then slide, listing the box's rendered (x, y) in inches.
+NO_GROUP_BOXES_BY_DECK = {
+    "Module 2 - Video Part Revised": {
+        4: [(7.923, 2.500)],     # the three-point box Nico wants to
+                                 # reveal one bullet at a time
+    },
+}
+
+MANUAL_GROUPS_BY_DECK = {
+    "Module 2 - In Class Revised": _M2_INCLASS_GROUPS,
+    "Module 2 - Video Part Revised": _M2_VIDEO_GROUPS,
+}
+MANUAL_GROUPS_POST_BY_DECK = {
+    "Module 2 - In Class Revised": _M2_INCLASS_GROUPS_POST,
+    "Module 2 - Video Part Revised": _M2_VIDEO_GROUPS_POST,
+}
+# resolve for the deck actually being processed (a side-path build keeps
+# the canonical name plus a "_test" suffix)
+_STEM = DECK.stem[:-5] if DECK.stem.endswith("_test") else DECK.stem
+MANUAL_GROUPS = MANUAL_GROUPS_BY_DECK.get(_STEM, {})
+MANUAL_GROUPS_POST = MANUAL_GROUPS_POST_BY_DECK.get(_STEM, {})
+NO_GROUP_BOXES = NO_GROUP_BOXES_BY_DECK.get(_STEM, {})
+SPLICED = SPLICED_BY_DECK.get(_STEM, set())
 for _a in _args:
     if _a.startswith("--spliced="):
         SPLICED = {int(x) for x in _a.split("=", 1)[1].split(",")}
@@ -282,6 +336,10 @@ def process_slide(tree, disp):
             continue
         if box["b"][2] > 10 * EMU:
             continue          # agenda highlight bands, not callouts
+        if any(abs(box["b"][0] / EMU - bx) < 0.011
+               and abs(box["b"][1] / EMU - by) < 0.011
+               for bx, by in NO_GROUP_BOXES.get(disp, ())):
+            continue          # its text must stay separately animatable
         for txt in info:
             if id(txt["el"]) in used or txt["tag"] != "sp":
                 continue
