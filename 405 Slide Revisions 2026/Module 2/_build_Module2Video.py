@@ -217,29 +217,32 @@ def v03_plot_demand(prs):
     # retitled by hand 2026-08-24
     _draw_action_title(slide,
                        "Plotting the (Inverse) Demand Curve")
+    # 2026-08-25 (Nico): the note moved below the chart and now names
+    # the INVERSE demand function
     _add_hierarchical_bullets(
-        slide, Inches(0.60), Inches(1.50), Inches(12.1), Inches(0.55),
-        [([("Note: this is the demand function a single ",
-            {'italic': True, 'color': GRAY}),
+        slide, Inches(0.86), Inches(6.42), Inches(12.1), Inches(0.39),
+        [([("Note: this is the (inverse) demand function that a "
+            "single ", {'italic': True, 'color': GRAY}),
            ("firm", {'italic': True, 'bold': True, 'color': NAVY}),
            (" faces", {'italic': True, 'color': GRAY})], 0,
           {'bullet_style': 'none'})],
         size=23)
     # scaled so Q = 1600 lands at x 6.289" and P = 400 at y 3.166",
     # exactly where CT's demand line starts and ends
-    fig = SimpleFig(1.10, 6.40, 6.30, 3.98, 1942.6, 492.3)
+    # chart lifted 0.55" on 2026-08-25 to make room for the note
+    fig = SimpleFig(1.10, 5.85, 6.30, 3.98, 1942.6, 492.3)
     _fig_axes(slide, fig)
-    _add_text(slide, Inches(0.77), Inches(2.02), Inches(0.66),
+    _add_text(slide, Inches(0.77), Inches(1.47), Inches(0.66),
               Inches(0.34), "P", size=19, bold=True, italic=True,
               color=NAVY, font="Calibri")
-    _add_text(slide, Inches(7.07), Inches(6.50), Inches(0.66),
+    _add_text(slide, Inches(7.07), Inches(5.95), Inches(0.66),
               Inches(0.32), "Q", size=19, bold=True, italic=True,
               color=NAVY, font="Calibri")
     _add_arrow(slide, (fig.x(0), fig.y(400)), (fig.x(1600), fig.y(0)),
                color=NAVY, weight_pt=3.0, head=False)
     _fig_ytick(slide, fig, 400, "$400", size=18)
     _fig_xtick(slide, fig, 1600, "1600", size=18)
-    _add_text(slide, Inches(6.43), Inches(6.06), Inches(1.6),
+    _add_text(slide, Inches(6.43), Inches(5.51), Inches(1.6),
               Inches(0.34), "D", size=20, bold=True, color=NAVY,
               font="Calibri")
     _add_convention_box(
@@ -254,7 +257,10 @@ def v03_plot_demand(prs):
                {'bold': True, 'italic': True, 'size': 19}),
               ("\nInverse demand function", {'bold': True, 'size': 19}),
               ("\nP = 400 − Q/4",
-               {'bold': True, 'italic': True, 'size': 22})],
+               {'bold': True, 'italic': True, 'size': 22}),
+              # closing line added by hand 2026-08-25
+              ("[this is what we plot]",
+               {'size': 14, 'newline': True})],
         size=19, align=PP_ALIGN.CENTER)
     _vnote(slide, 3)
     _draw_footer(slide, FOOTER_TEXT, 3)
@@ -557,7 +563,9 @@ def v07_depends_on_ed(prs):
              + _omml_run('P') + _omml_text(' ⋅ ') + _omml_run('Q'),
              {'size': 24}),
             ("break", None, None),
-            ("text", "In % changes, this implies:   ", {'size': 24}),
+            # "In % changes" set bold by hand, 2026-08-25
+            ("text", "In % changes", {'size': 24, 'bold': True}),
+            ("text", ", this implies:   ", {'size': 24}),
             ("omml", _omml_text('%Δ') + _omml_text('TR')
              + _omml_text(' = %Δ') + _omml_run('P')
              + _omml_text(' + %Δ') + _omml_run('Q'),
@@ -581,9 +589,12 @@ def v07_depends_on_ed(prs):
               'space_before_pts': 0}),
         ],
         size=24)
-    # cards hand-resized 2026-08-24 (were 0.75 / 4.15, h 2.30)
+    # cards hand-resized again 2026-08-25 (were 0.726 / 6.950, 5.9
+    # wide, h 1.452): the left one now starts at the slide margin and
+    # both are shorter
     _add_convention_box(
-        slide, Inches(0.726), Inches(4.298), Inches(5.9), Inches(1.452),
+        slide, Inches(0.280), Inches(4.300), Inches(6.35), Inches(1.230),
+        pad_h=Inches(0.21), pad_v=Inches(0.10),
         runs=[("Is the % reduction in ", {}), ("P", {'italic': True}),
               (" ", {}),
               ("smaller", {'bold': True, 'underline': True}),
@@ -594,7 +605,8 @@ def v07_depends_on_ed(prs):
               ("elastic", {'bold': True, 'color': CBLUE})],
         size=18)
     _add_convention_box(
-        slide, Inches(6.950), Inches(4.298), Inches(5.9), Inches(1.452),
+        slide, Inches(6.950), Inches(4.300), Inches(6.15), Inches(1.230),
+        pad_h=Inches(0.21), pad_v=Inches(0.10),
         runs=[("Is the % reduction in ", {}), ("P", {'italic': True}),
               (" ", {}),
               ("larger", {'bold': True, 'underline': True}),
@@ -665,6 +677,13 @@ def v11_ozempic(prs):
             ([("What does this imply about the ", {}),
               ("elasticity of demand", {'bold': True, 'color': CBLUE}),
               ("?", {})], 0, {}),
+            # the options he reads out, added by hand 2026-08-25
+            ("Elastic?", 1),
+            ("Inelastic?", 1),
+            # 2026-08-25: his own file said "Eᴅ=0"; unit elasticity
+            # is Eᴅ = −1, corrected with his approval
+            ("Eᴅ=−1 (unit elastic)?", 1),
+            ("Need more information?", 1),
         ],
         size=24, line_spacing_pts=16)
     _vid_media(slide, "ct_ozempic_image1.png", left=Inches(7.65),
@@ -699,7 +718,7 @@ def v12_ozempic_solution(prs):
     _add_hierarchical_bullets(
         slide, Inches(1.10), Inches(3.55), Inches(11.2), Inches(2.4),
         [
-            ("A price cut caused total revenue to fall", 0),
+            ("A price cut caused TR to fall", 0),
             ("The quantity response was too small to offset the price "
              "cut", 0),
             ([("Inelastic:  ", {'bold': True, 'color': CBLUE}),
@@ -722,10 +741,12 @@ def v13_profits(prs):
     _add_hierarchical_bullets(
         slide, Inches(1.50), Inches(3.15), Inches(10.3), Inches(3.4),
         [
-            ("The price decrease caused total revenue to decrease", 0),
-            ("It also raised the quantity produced/sold  →  costs "
-             "increase", 0),
-            ("So profits fell", 0),
+            ([("We know: ", {}),
+              ("The price decrease caused TR to decrease", {})], 0, {}),
+            # "produce/sold" in his file is a slip for "produced/sold"
+            ("A declining price also raises quantity produced/sold "
+             "Q  →  costs increase", 0),
+            ("Thus: Profits fell", 0),
             ([("Markets agreed:  ", {}),
               ("Novo Nordisk shares tumbled ~18%",
                {'underline': True, 'color': CBLUE})], 0, {}),
@@ -760,13 +781,14 @@ def v14_four_cases(prs):
     rows = [
         ["% change in P", "Resulting % change in Q", "Demand is…",
          "Resulting change in revenue"],
-        ["If P decreases", "Q increases by MORE than P falls",
+        # middle column reworded by hand 2026-08-25
+        ["If P decreases", "Relatively large increase in Q",
          "Elastic", "Revenue increases"],
-        ["If P decreases", "Q increases by LESS than P falls",
+        ["If P decreases", "Relatively small increase in Q",
          "Inelastic", "Revenue decreases"],
-        ["If P increases", "Q decreases by MORE than P rises",
+        ["If P increases", "Relatively large decline in Q",
          "Elastic", "Revenue decreases"],
-        ["If P increases", "Q decreases by LESS than P rises",
+        ["If P increases", "Relatively small decline in Q",
          "Inelastic", "Revenue increases"],
     ]
     _add_styled_table(slide, Inches(0.85), Inches(3.05), Inches(11.6),
@@ -849,18 +871,24 @@ def v17_mcdonalds(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V1)
     _draw_action_title(slide, "Why Is McDonald's Cutting Prices?")
-    _vid_media(slide, "ct_mcdonalds_image3.png", left=Inches(3.40),
-               top=Inches(1.60), width=Inches(6.5), rounded=False,
+    _vid_media(slide, "ct_mcdonalds_image3.png", left=Inches(3.42),
+               top=Inches(1.50), width=Inches(6.5), rounded=False,
                shadow=False)
     _add_hierarchical_bullets(
-        slide, Inches(1.20), Inches(4.00), Inches(11.0), Inches(2.8),
+        slide, Inches(1.28), Inches(3.70), Inches(11.0), Inches(3.32),
         [
-            ("What does this suggest about its demand?", 0),
-            ("How did it persuade franchisees to adopt the cuts?", 0),
-            ("What does this reveal about demand across locations?", 0),
-            ([("What are the implications for revenue and profit given "
-               "a franchise's ", {}),
-              ("Eᴅ", {'bold': True, 'color': CBLUE}), ("?", {})], 0, {}),
+            # 2026-08-25 (Nico): two questions, each followed by the
+            # answer options he reads out
+            ("What does this suggest about its demand elasticity?", 0),
+            ("Elastic? ", 1),
+            ("Inelastic?", 1),
+            ("Need more information?", 1),
+            ("What are the implications for 1) revenue and 2) profit "
+             "given this elasticity?", 0),
+            ("Rise?", 1),
+            ("Fall?", 1),
+            ("Unchanged?", 1),
+            ("Need more information?", 1),
         ],
         size=22, line_spacing_pts=12)
     _set_notes(slide, (
@@ -872,7 +900,8 @@ def v17_mcdonalds(prs):
         "lower prices — side payments to align incentives across "
         "locations with different demand elasticities."))
     _draw_footer(slide, FOOTER_TEXT, 14)
-    _add_groupdiscussion_badge(slide)
+    # 2026-08-25 (Nico): Poll Break here, not Group Discussion
+    _add_pollbreak_badge(slide)
     return slide
 
 
@@ -931,7 +960,7 @@ def v21_why_mr(prs):
     filled-box convention."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V2)
-    _draw_action_title(slide, "Why Do We Care About Marginal Revenue?")
+    _draw_action_title(slide, "Context: Why Do We Care About Marginal Revenue?")
     _add_hierarchical_bullets(
         slide, Inches(1.10), Inches(1.75), Inches(11.1), Inches(1.05),
         [([("General objective: maximize ", {}),
@@ -940,7 +969,7 @@ def v21_why_mr(prs):
          ("Use marginal analysis", 1, {'size': 20})],
         size=23, sub_size=20)
     _add_rounded_filled_box(
-        slide, Inches(1.60), Inches(2.95), Inches(10.13), Inches(0.72),
+        slide, Inches(1.60), Inches(2.76), Inches(10.13), Inches(0.72),
         "Net benefits are maximized where MB = MC",
         fill=NAVY, text_color=WHITE, size=22, bold=True,
         corner_pct=0.18)
@@ -951,7 +980,7 @@ def v21_why_mr(prs):
           {'bullet_style': 'none'})],
         size=23)
     _add_rounded_filled_box(
-        slide, Inches(1.60), Inches(4.70), Inches(10.13), Inches(0.72),
+        slide, Inches(1.60), Inches(4.50), Inches(10.13), Inches(0.72),
         "Produce where Marginal Revenue (MR) = Marginal Cost (MC)",
         fill=NAVY, text_color=WHITE, size=22, bold=True,
         corner_pct=0.18)
@@ -1031,7 +1060,7 @@ def v23_calculus(prs):
               ("\n", {}),
               ("dY/dX is the change in ", {}), ("Y", {'italic': True}),
               (" caused by a small (marginal) change in ", {}),
-              ("X", {'italic': True}), (".", {})],
+              ("X", {'italic': True})],
         size=22, align=PP_ALIGN.CENTER)
     # --- left column: the general rule ----------------------------------
     _add_text(slide, Inches(0.75), Inches(3.15), Inches(5.7),
@@ -1093,7 +1122,7 @@ def v24_three_step(prs):
     """
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V2)
-    _draw_action_title(slide, "3-Step Method in Action")
+    _draw_action_title(slide, "3-Step Method to Compute Marginal Revenue")
     _add_convention_box(
         slide, MARGIN + Inches(0.15), Inches(1.55), Inches(5.9),
         Inches(0.75),
@@ -1102,11 +1131,12 @@ def v24_three_step(prs):
     steps = [
         ("Step 1:  Calculate inverse demand", " (solve for P)",
          [("Rearrange demand so ", {}), ("P", {'italic': True}),
-          (" is a function of ", {}), ("Q", {'italic': True})],
+          (" is a function of ", {}), ("Q", {'italic': True}),
+          (":  P(Q)", {'italic': True})],
          _omml_run('P') + _omml_text(' = 400 − ')
          + _omml_frac(_omml_text('1'), _omml_text('4'))
          + _omml_run('Q')),
-        ("Step 2:  Calculate total revenue ", "(multiply P by Q)",
+        ("Step 2:  Calculate total revenue ", "(multiply P(Q) by Q)",
          [("TR = P · Q", {'italic': True}),
           ("; replace P with inverse demand so TR is a function "
            "of ", {}), ("Q", {'italic': True}), (" only", {})],
@@ -1180,7 +1210,7 @@ def v25_three_step_summary(prs):
                       "→  PS 2 + Teaching Note Marginal Revenue",
                       line=GOLD, text_color=NAVY, size=18, bold=True,
                       rounded=True, shadow=True, corner_pct=0.25)
-    _draw_footer(slide, FOOTER_TEXT, 22)
+    _draw_footer(slide, FOOTER_TEXT, 24)
     return slide
 
 
@@ -1247,13 +1277,13 @@ def v26_mr_graph(prs):
                (figT.x(830), figT.y(158000)), color=GOLD, weight_pt=1.75,
                head=True)
     _vnote(slide, 18)
-    _draw_footer(slide, FOOTER_TEXT, 22)
+    _draw_footer(slide, FOOTER_TEXT, 24)
     return slide
 
 
 def v27_mr_vs_price(prs):
     return make_content_bulleted(
-        prs, 23, TAG_V2, "Why Is MR Different From the Price?",
+        prs, 25, TAG_V2, "Why Is MR Different From the Price?",
         [
             ([("MR", {'italic': True}),
               (" : additional revenue from selling one more unit. "
@@ -1267,14 +1297,17 @@ def v27_mr_vs_price(prs):
               (" from selling one additional unit takes into account "
                "the loss on every other unit  →  ", {}),
               ("MR < P", {'bold': True, 'italic': True})], 0, {}),
+            # rewritten by hand 2026-08-25 to state the MR < 0 case
             ([("Note", {'underline': True}),
-              (": Total Revenues (", {}), ("TR", {'italic': True}),
-              (") may either increase or decrease when ", {}),
-              ("Q", {'italic': True}),
-              (" increases (depends on elastic vs. inelastic demand)",
-               {})], 0, {'size': 22}),
+              (": ", {}), ("When ", {}),
+              ("MR < 0, ", {'bold': True, 'italic': True, 'size': 20}),
+              ("Total", {'bold': True}), (" Revenues (", {}),
+              ("TR", {'italic': True}), (") decrease", {}),
+              (" as price falls (and ", {}), ("Q", {'italic': True}),
+              (" increases", {}), (")", {})], 0, {'size': 22}),
         ],
-        size=24, sub_size=22)
+        # column narrowed to 11.49" by hand, 2026-08-25
+        size=24, sub_size=22, bullets_width=Inches(11.49))
 
 
 def v29_mr_solution(prs):
@@ -1311,7 +1344,7 @@ def v29_mr_solution(prs):
                            color=RED if i == 2 else NAVY,
                            fill=CREAM, line=NAVY, rounded=True)
         y = int(y + Inches(1.45))
-    _draw_footer(slide, FOOTER_TEXT, 25)
+    _draw_footer(slide, FOOTER_TEXT, 23)
     return slide
 
 
@@ -1417,8 +1450,8 @@ def v34_how_estimate(prs):
              "between price and quantity", 0),
             ("Need data linking prices to quantities", 0),
             ("Several approaches", 0),
-            ("Transaction data (marketing firms, internet, store club "
-             "cards)", 1),
+            ("Transaction data (marketing firms, internet shopping, "
+             "store club cards)", 1),
             ("Surveys", 1),
             ("Market experimentation", 1, {'bold': True}),
         ],
@@ -1431,7 +1464,7 @@ def v35_abtest(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
     _draw_action_title(
-        slide, "A/B Testing: What Is the Demand for This Product?")
+        slide, "A/B Testing: What Is the Demand Function for This Product?")
     _vid_media(slide, "ct_abtest_image8.png", left=Inches(4.85),
                top=Inches(1.60), height=Inches(5.35), width=None)
     _draw_footer(slide, FOOTER_TEXT, 31)
@@ -1571,17 +1604,19 @@ def v38_econometrics(prs):
     slide = make_content_bulleted(
         prs, 34, TAG_V3, "Econometric Estimates",
         [
-            ([("Description:  ", {'bold': True}),
+            ([("Econometrics:  ", {'bold': True}),
               ("combine economics, statistics, and mathematical model "
                "building", {})], 0, {}),
             ("Develop hypotheses linking dependent variables (e.g., "
              "sales) to explanatory variables (e.g., price)", 0),
             ([("How:  ", {'bold': True}),
-              ("least squares regression analysis", {})], 0, {}),
-            ("Covered in detail in your Stats class", 1),
-            ("Today: a broad overview", 1),
-            ([("What you need here: interpret and use the ", {}),
-              ("coefficients", {'bold': True})], 1, {}),
+              ("Least Squares regression analysis", {})], 0, {}),
+            ([("Covered in detail in your ", {}),
+              ("Stats class", {'bold': True})], 1, {}),
+            ("Today: A broad overview", 1),
+            ([("What you need for our class: ", {}),
+              ("Interpret and use the estimated coefficients",
+               {'bold': True})], 1, {}),
         ],
         size=25, sub_size=24)
     _vnote(slide, 24)
@@ -1595,7 +1630,7 @@ def v39_ols(prs):
     OMML in the cream box, per the deck's equation rule."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "Ordinary Least Squares: The Basic Equation")
+    _draw_action_title(slide, "Ordinary Least Squares: Estimating the Demand Function")
     _add_rounded_filled_box(
         slide, Inches(4.170), Inches(1.550), Inches(5.000), Inches(1.000),
         "Q = a + b \u00b7 P", fill=NAVY, text_color=WHITE, size=32,
@@ -1610,12 +1645,12 @@ def v39_ols(prs):
             ([("a", {'bold': True, 'italic': True}),
               (" = intercept with the y-axis (Q on y-axis)", {})], 0, {}),
             ([("b", {'bold': True, 'italic': True}),
-              (" = slope of the regression line (inverse of the usual "
-               "demand slope)", {})], 0, {}),
+              (" = slope of the regression line (demand curve)",
+               {})], 0, {}),
         ],
         size=25, line_spacing_pts=14)
     _add_math_equation(
-        slide, Inches(3.300), Inches(6.050), Inches(6.700), Inches(0.920),
+        slide, Inches(4.360), Inches(5.250), Inches(4.610), Inches(1.070),
         _oED() + _omml_text(' = ')
         + _omml_frac(_omml_text('\u0394') + _omml_run('Q'),
                      _omml_text('\u0394') + _omml_run('P'))
@@ -1640,7 +1675,7 @@ def v40_airline_data(prs):
     the aircraft shot beside it."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "Airline Ticket Experimentation")
+    _draw_action_title(slide, "Airline Ticket Experimentation: Data")
     rows = [("Price ($)", "Seats sold")] + [
         ("%.2f" % p_, str(q_)) for p_, q_ in AIRLINE_DATA]
     # 2026-08-24 (Nico): 17 rows at 16 pt ran past the footer rule.
@@ -1705,7 +1740,16 @@ def v41_scatter(prs):
     _add_arrow(slide, (Inches(4.415), Inches(3.180)),
                (Inches(9.289), Inches(4.967)), color=GOLD,
                weight_pt=3.0, head=False)
+    # 2026-08-25 (Nico): the question the two candidate lines pose.  His
+    # own copy is a hand-scaled group; the padding here reproduces the
+    # rendered geometry (box 8.48/3.41 6.35x0.56, text 8.59/3.25).
     _draw_footer(slide, FOOTER_TEXT, 37)
+    _add_convention_box(
+        slide, Inches(8.480), Inches(3.410), Inches(3.620),
+        Inches(0.560),
+        runs=[("Which line provides the best fit?", {'italic': True})],
+        size=18, align=PP_ALIGN.CENTER,
+        pad_h=Inches(0.110), pad_v=Inches(-0.165))
     return slide
 
 
@@ -1751,7 +1795,7 @@ def v43_regression1(prs):
     slide is gone."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "Regression Results")
+    _draw_action_title(slide, "Regression Results for the Airline Data")
     _add_styled_table(
         slide, Inches(3.570), Inches(1.600), Inches(6.200), Inches(2.460),
         [("Coefficient", "Value"),
@@ -1765,7 +1809,9 @@ def v43_regression1(prs):
         size=30, align=PP_ALIGN.CENTER)
     _add_text(slide, Inches(1.000), Inches(6.100), Inches(11.330),
               Inches(0.50),
-              "Now that we have demand, we can compute MR!", size=21,
+              # "and estimated" in his file is a slip for "an estimated"
+              "Now that we have an estimated demand curve, we can "
+              "compute MR!", size=21,
               bold=True, italic=True, color=NAVY, font="Calibri",
               align=PP_ALIGN.CENTER)
     _vnote(slide, 29)
@@ -1801,7 +1847,7 @@ def v44_regression2(prs):
         + _omml_text(' = 151'),
         size_pt=22, color=NAVY),
     _vnote(slide, 30)
-    _draw_footer(slide, FOOTER_TEXT, 40)
+    _draw_footer(slide, FOOTER_TEXT, 50)
     return slide
 
 
@@ -1848,7 +1894,7 @@ def v45_elasticity_from_est(prs):
         + _omml_text(' = −2.17   (elastic demand)'),
         size_pt=24, color=RED)
     _vnote(slide, 31)
-    _draw_footer(slide, FOOTER_TEXT, 41)
+    _draw_footer(slide, FOOTER_TEXT, 51)
     return slide
 
 
@@ -1856,7 +1902,7 @@ def v46_multivariate(prs):
     """CT slide 44."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "Multivariate Regression")
+    _draw_action_title(slide, "Note: We can also Run Multivariate Regressions")
     _add_text(slide, Inches(0.300), Inches(1.400), Inches(12.730),
               Inches(0.50), "Incorporating other determinants of demand",
               size=23, bold=True, italic=True, color=NAVY,
@@ -1885,7 +1931,7 @@ def v46_multivariate(prs):
         ],
         size=29, line_spacing_pts=16)
     _vnote(slide, 30)
-    _draw_footer(slide, FOOTER_TEXT, 40)
+    _draw_footer(slide, FOOTER_TEXT, 50)
     return slide
 
 
@@ -1909,7 +1955,7 @@ def v47_added_vars(prs):
                {'italic': True})],
         size=26, align=PP_ALIGN.CENTER)
     _vnote(slide, 31)
-    _draw_footer(slide, FOOTER_TEXT, 41)
+    _draw_footer(slide, FOOTER_TEXT, 51)
     return slide
 
 
@@ -1917,23 +1963,38 @@ def v48_application(prs):
     """CT slide 46: the estimated demand curve the polls work from."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "Application")
+    _draw_action_title(slide, "Application Using the Airline Demand Function")
+    # 2026-08-25 (Nico): the equation moved up and the three questions
+    # the polls ask are now named on the slide, one paragraph each so
+    # they can be revealed one at a time
     _add_convention_box(
-        slide, Inches(3.400), Inches(2.400), Inches(6.500), Inches(1.150),
+        slide, Inches(3.400), Inches(1.790), Inches(6.500), Inches(1.150),
         runs=[("Q = 478.95 \u2212 1.64 P", {'italic': True})],
         size=28, align=PP_ALIGN.CENTER)
-    _add_text(slide, Inches(1.000), Inches(4.000), Inches(11.330),
-              Inches(0.60),
-              "Use the estimated airline demand to answer the polls",
-              size=24, color=NAVY, font="Calibri",
-              align=PP_ALIGN.CENTER)
+    _add_hierarchical_bullets(
+        slide, Inches(1.000), Inches(3.390), Inches(11.330), Inches(2.120),
+        [
+            ("Use the estimated airline demand to compute:", 0,
+             {'bullet_style': 'none', 'align': PP_ALIGN.CENTER,
+              'bold': True}),
+            ("What Is E\u1d05 at P = 140?", 0,
+             {'bullet_style': 'none', 'align': PP_ALIGN.CENTER,
+              'bold': True, 'mar_l': 457200, 'indent': -457200}),
+            ("What Is MR at P = 140?", 0,
+             {'bullet_style': 'none', 'align': PP_ALIGN.CENTER,
+              'bold': True, 'mar_l': 457200, 'indent': -457200}),
+            ("Can you provide a Pricing Recommendation?", 0,
+             {'bullet_style': 'none', 'align': PP_ALIGN.CENTER,
+              'bold': True, 'mar_l': 457200, 'indent': -457200}),
+        ],
+        size=24, line_spacing_pts=14)
     # 2026-08-24 (Nico): the Problem Set 2 pointer sits on THIS slide,
     # bottom-left, opposite the Poll Break badge (moved off slide 29)
     _add_reference_box(slide, Inches(1.000), Inches(6.520), Inches(2.600),
                        Inches(0.500), "Problem Set 2", kind="ps")
     _add_pollbreak_badge(slide)
     _vnote(slide, 32)
-    _draw_footer(slide, FOOTER_TEXT, 42)
+    _draw_footer(slide, FOOTER_TEXT, 40)
     return slide
 
 
@@ -1941,7 +2002,7 @@ def v49_ed_solution(prs):
     """CT slide 49."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "Solution: E\u1d05")
+    _draw_action_title(slide, "Solution: E\u1d05 at P=140")
     _add_hierarchical_bullets(
         slide, Inches(1.000), Inches(1.450), Inches(11.800), Inches(5.550),
         [
@@ -1965,7 +2026,7 @@ def v49_ed_solution(prs):
         ],
         size=27, line_spacing_pts=16)
     _vnote(slide, 33)
-    _draw_footer(slide, FOOTER_TEXT, 45)
+    _draw_footer(slide, FOOTER_TEXT, 43)
     return slide
 
 
@@ -1973,7 +2034,7 @@ def v50_mr_solution(prs):
     """CT slide 52."""
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V3)
-    _draw_action_title(slide, "Solution: MR")
+    _draw_action_title(slide, "Solution: MR at P=140")
     _add_hierarchical_bullets(
         slide, Inches(1.000), Inches(1.450), Inches(11.800), Inches(5.550),
         [
@@ -1994,7 +2055,7 @@ def v50_mr_solution(prs):
         ],
         size=27, sub_size=26, line_spacing_pts=14)
     _vnote(slide, 34)
-    _draw_footer(slide, FOOTER_TEXT, 48)
+    _draw_footer(slide, FOOTER_TEXT, 46)
     return slide
 
 
@@ -2053,7 +2114,7 @@ def v51_raise_price(prs):
               Inches(0.34), "Inelastic", size=18, bold=True,
               color=CBLUE, font="Calibri")
     _vnote(slide, 35)
-    _draw_footer(slide, FOOTER_TEXT, 51)
+    _draw_footer(slide, FOOTER_TEXT, 49)
     return slide
 
 
@@ -2068,10 +2129,15 @@ def v52_transaction_issues(prs):
                "locations and stores", {})], 0, {}),
             ("Can we be sure the change in quantity is due to the price "
              "change?", 0),
-            ([("Airline example:  ", {'bold': True}),
-              ("Aug 2019 sold 135 tickets at $200; Oct 2019 sold 90 at "
-               "$180", {})], 0, {}),
+            # 2026-08-25 (Nico): his own Hawaii numbers, with the two
+            # observations on their own lines and a blank line before
+            # each of the two questions
+            ([("Airline example:  ", {'bold': True})], 0, {}),
+            ("August: Sell 5000 tickets to Hawaii for $600", 1),
+            ("September: Sell 3,500 tickets at $500", 1),
+            ("", 1, {'bullet_style': 'none'}),
             ("Should we conclude demand slopes upward?", 1),
+            ("", 1, {'bullet_style': 'none'}),
             ("What else changed between those two periods?", 1),
         ],
         size=25, sub_size=24)
@@ -2123,11 +2189,11 @@ def v54_omitted(prs):
         size=27)
     _vid_media(slide, "ct_s58_image21.png", left=Inches(5.500),
                top=Inches(2.500), width=Inches(2.350))
-    _add_arrow(slide, (Inches(5.700), Inches(4.200)),
-               (Inches(4.700), Inches(5.000)), color=CT_RED,
+    _add_arrow(slide, (Inches(5.650), Inches(4.200)),
+               (Inches(4.650), Inches(5.000)), color=CT_RED,
                weight_pt=2.5, head=True)
-    _add_arrow(slide, (Inches(7.600), Inches(4.200)),
-               (Inches(8.600), Inches(5.000)), color=CT_RED,
+    _add_arrow(slide, (Inches(7.550), Inches(4.200)),
+               (Inches(8.550), Inches(5.000)), color=CT_RED,
                weight_pt=2.5, head=True)
     _vid_media(slide, "ct_s58_image19.png", left=Inches(3.300),
                top=Inches(5.050), width=Inches(2.300))
@@ -2193,7 +2259,7 @@ def build_video(out_path=None):
     prs = Presentation()
     prs.slide_width = int(SLIDE_W)
     prs.slide_height = int(SLIDE_H)
-    _video_title_slide(prs, "Demand and Revenue",
+    _video_title_slide(prs, "Elasticity and Revenue",
                        "Module 2  ·  Video 1")                     #  1
     v02_outline(prs)                                               #  2
     v03_plot_demand(prs)                                           #  3
@@ -2201,8 +2267,8 @@ def build_video(out_path=None):
     v05_price_change_tr(prs)                                       #  5
     v06_elasticity_tr(prs)                                         #  6
     v07_depends_on_ed(prs)                                         #  7
-    v11_ozempic(prs)                                               # 8
-    v12_ozempic_solution(prs)                                      # 9
+    v11_ozempic(prs)                                               #  8
+    v12_ozempic_solution(prs)                                      #  9
     v13_profits(prs)                                               # 10
     v14_four_cases(prs)                                            # 11
     v15_netflix(prs)                                               # 12
@@ -2216,11 +2282,11 @@ def build_video(out_path=None):
     v22_mr_definition(prs)                                         # 19
     v23_calculus(prs)                                              # 20
     v24_three_step(prs)                                            # 21
-    v26_mr_graph(prs)                                              # 22
-    v27_mr_vs_price(prs)                                           # 23
-    make_stub(prs, 24, TAG_V2, "Poll: MR when Q = 10 − 0.5P",
-              STUB_POLL)                                           # 24
-    v29_mr_solution(prs)                                           # 25
+    make_stub(prs, 22, TAG_V2, "Poll: MR when Q = 10 − 0.5P",
+              STUB_POLL)                                           # 22
+    v29_mr_solution(prs)                                           # 23
+    v26_mr_graph(prs)                                              # 24
+    v27_mr_vs_price(prs)                                           # 25
     v30_insideout(prs)                                             # 26
     v31_insideout_solution(prs)                                    # 27
     _video_title_slide(prs, "Demand Estimation",
@@ -2236,34 +2302,33 @@ def build_video(out_path=None):
     v41_scatter(prs)                                               # 37
     v42_least_squares(prs)                                         # 38
     v43_regression1(prs)                                           # 39
-    v46_multivariate(prs)                                          # 40
-    v47_added_vars(prs)                                            # 41
-    v48_application(prs)                                           # 42
+    v48_application(prs)                                           # 40
     # CT runs three polls here (its slides 47/48, 50/51, 53/54).  Those
     # live on CT's PollEverywhere account, so they go in as OUR stubs —
     # placeholders marking where Nico inserts his own activities.
-    make_stub(prs, 43, TAG_V3, "Poll: What is Eᴅ at P = 140?",
-              STUB_POLL)                                           # 43
-    make_stub(prs, 44, TAG_V3, "Poll results: elasticity",
+    make_stub(prs, 41, TAG_V3, "Poll: What is Eᴅ at P = 140?",
+              STUB_POLL)                                           # 41
+    make_stub(prs, 42, TAG_V3, "Poll results: elasticity",
+              STUB_POLL)                                           # 42
+    v49_ed_solution(prs)                                           # 43
+    make_stub(prs, 44, TAG_V3, "Poll: What is MR at P = 140?",
               STUB_POLL)                                           # 44
-    v49_ed_solution(prs)                                           # 45
-    make_stub(prs, 46, TAG_V3, "Poll: What is MR at P = 140?",
-              STUB_POLL)                                           # 46
-    make_stub(prs, 47, TAG_V3, "Poll results: marginal revenue",
+    make_stub(prs, 45, TAG_V3, "Poll results: marginal revenue",
+              STUB_POLL)                                           # 45
+    v50_mr_solution(prs)                                           # 46
+    make_stub(prs, 47, TAG_V3, "Poll: pricing recommendation",
               STUB_POLL)                                           # 47
-    v50_mr_solution(prs)                                           # 48
-    make_stub(prs, 49, TAG_V3, "Poll: pricing recommendation",
-              STUB_POLL)                                           # 49
-    make_stub(prs, 50, TAG_V3, "Poll results: pricing recommendation",
-              STUB_POLL)                                           # 50
-    v51_raise_price(prs)                                           # 51
+    make_stub(prs, 48, TAG_V3, "Poll results: pricing recommendation",
+              STUB_POLL)                                           # 48
+    v51_raise_price(prs)                                           # 49
+    v46_multivariate(prs)                                          # 50
+    v47_added_vars(prs)                                            # 51
     v52_transaction_issues(prs)                                    # 52
     v53_coffee(prs)                                                # 53
     v54_omitted(prs)                                               # 54
     v55_spurious(prs)                                              # 55
     v56_randomization(prs)                                         # 56
     v57_summary(prs)                                               # 57
-
     # CT's own source links, restored on the runs we adopted
     apply_ct_source_links(prs)
 

@@ -30,6 +30,10 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 ORIGINAL = HERE / "Module 2 - Video Part.pptx"
+VF = HERE / "Videos Final"
+VF1 = VF / "Module 2 - Video 1 - Elasticity and Revenue.pptx"
+VF2 = VF / "Module 2 - Video 2 - Marginal Revenue.pptx"
+VF3 = VF / "Module 2 - Video 3 - Demand Estimation.pptx"
 
 NS_P = 'http://schemas.openxmlformats.org/presentationml/2006/main'
 NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
@@ -50,12 +54,21 @@ CT_TAGS = ('application/vnd.openxmlformats-officedocument.'
 CT_NOTES = ('application/vnd.openxmlformats-officedocument.'
             'presentationml.notesSlide+xml')
 
-# new-deck display -> source-deck display
-# new-deck displays shifted +1 from 14 on (bookend insert, 2026-08-15)
+# our display -> (source deck, source display, x-shift in EMU)
+#
+# The x-shift centres 4:3 content on the 16:9 canvas; it applies only to
+# slides coming from the ORIGINAL 4:3 deck.  Slides taken from the final
+# video decks are already 16:9 and must NOT be shifted.
+#
+# 2026-08-25: slides 4, 5, 6 and 22 are Nico's wholesale rebuilds and 24
+# is his re-recorded MR poll, all carried over verbatim from the three
+# final decks - slide XML, groups, <p:timing>, media, tags and notes.
 SPLICE_MAP = {
-    # 2026-08-24: the gum poll (was display 9) went with the
-    # deleted Wrigley example; the MR poll moved 28 -> 25
-    24: 20,
+    4:  (VF1, 4, 0),
+    5:  (VF1, 5, 0),
+    6:  (VF1, 6, 0),
+    22: (VF2, 7, 0),      # the MR poll, re-recorded
+    24: (VF2, 9, 0),      # MR: graphical representation
 }
 
 
@@ -106,9 +119,13 @@ def _copy_part_tree(src, src_name, disp, new_parts, tgt_names,
 
 
 def splice(deck_path):
-    src = zipfile.ZipFile(ORIGINAL)
-    src_parts = display_to_part(src)
-    src_names = set(src.namelist())
+    # one open handle per distinct source deck
+    zips, parts_of = {}, {}
+    for _deck, _d, _sh in SPLICE_MAP.values():
+        key = str(_deck)
+        if key not in zips:
+            zips[key] = zipfile.ZipFile(_deck)
+            parts_of[key] = display_to_part(zips[key])
 
     tmp = deck_path.with_suffix('.splice_tmp.pptx')
     with zipfile.ZipFile(deck_path) as tgt:
@@ -126,7 +143,9 @@ def splice(deck_path):
                                      r'\.xml$', n)), None)
     assert notes_master, "built deck has no notesMaster part"
 
-    for disp, s_disp in sorted(SPLICE_MAP.items()):
+    for disp, (s_deck, s_disp, x_shift) in sorted(SPLICE_MAP.items()):
+        src = zips[str(s_deck)]
+        src_parts = parts_of[str(s_deck)]
         t_part = tgt_parts[disp - 1]
         t_base = t_part.split('/')[-1]
         t_rels = ET.fromstring(items['ppt/slides/_rels/%s.rels' % t_base])
@@ -214,15 +233,27 @@ def splice(deck_path):
             slide_xml = slide_xml.replace('"%s"' % old, '"%s"' % new)
 
         # center 4:3 content on the 16:9 canvas (string-level edit; an
-        # ElementTree round-trip would break mc:AlternateContent)
-        slide_xml = re.sub(
-            r'<a:off x="(-?\d+)"',
-            lambda m: '<a:off x="%d"' % (int(m.group(1)) + X_SHIFT_EMU),
-            slide_xml)
+        # ElementTree round-trip would break mc:AlternateContent).  Only
+        # slides taken from the original 4:3 deck need this.
+        if x_shift:
+            slide_xml = re.sub(
+                r'<a:off x="(-?\d+)"',
+                lambda m: '<a:off x="%d"' % (int(m.group(1)) + x_shift),
+                slide_xml)
 
         # live page-number field on every spliced slide (2026-08-16:
         # "slide numbers throughout") — same look/position as
         # _add_slidenum_field in the build script
+        # slides from the final decks already carry a live slidenum
+        # field; only the poll capture needs one added
+        if 'type="slidenum"' in slide_xml:
+            items[t_part] = slide_xml.encode('utf-8')
+            ET.register_namespace('', NS_REL)
+            items['ppt/slides/_rels/%s.rels' % t_base] = ET.tostring(
+                out, xml_declaration=True, encoding='UTF-8')
+            print('spliced display %d <- %s %d (verbatim)'
+                  % (disp, Path(s_deck).name[:28], s_disp))
+            continue
         guid = str(uuid.uuid5(uuid.NAMESPACE_DNS,
                               'm2ic-splice-num-%d' % disp)).upper()
         num_sp = (
@@ -247,8 +278,8 @@ def splice(deck_path):
         ET.register_namespace('', NS_REL)
         items['ppt/slides/_rels/%s.rels' % t_base] = ET.tostring(
             out, xml_declaration=True, encoding='UTF-8')
-        print('spliced display %d <- source %d (%s)'
-              % (disp, s_disp, s_base))
+        print('spliced display %d <- %s %d (%s)'
+              % (disp, Path(s_deck).name[:28], s_disp, s_base))
 
     # content types
     ET.register_namespace('', NS_CT)

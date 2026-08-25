@@ -52,9 +52,17 @@ EMU = 914400.0
 # elasticity slide dropped, CT's two regression slides merged,
 # and six poll placeholders inserted.
 SKIP_TITLE = {1, 16, 28}
-SKIP_AGENDA = {2, 17, 29, 57}
-SKIP_MEDIA = {24, 43, 44, 46, 47, 49, 50}
-SKIP_STATIC = {36}                 # data table stays static
+SKIP_AGENDA = {17, 29, 57}      # slide 2 is no longer static: in
+                                # his final Video 1 deck the
+                                # teaching-note link fades in on
+                                # its own click (2026-08-25)
+SKIP_MEDIA = {4, 5, 6, 22, 24, 41, 42, 44, 45, 47, 48}
+                                # 4/5/6/22 arrive from the final
+                                # decks with their own <p:timing>
+SKIP_STATIC = {11, 36, 50, 51, 54}
+                                # 36: the data table; 11/40/41/54
+                                # were made fully static in his
+                                # final decks (2026-08-25)
 SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 
 FIG_GROUP_DEFAULT = 0
@@ -63,47 +71,25 @@ PLANS_PRE = {}
 STATIC = {}
 
 PLANS = {
-    3: [   # CT slide 4: demand line + D, then the two functions
-        ["cxn:2", "t:D"],
-        ["grp:0"],
+    2: [   # the outline itself is static; only the teaching-note
+           # link is revealed, on one click
+        ["t:▶  Teaching Note"],
     ],
-    4: [   # axes, then the demand curve with its ticks, then the three
-        # points one at a time (Nico wants them separately callable)
-        ["grp:0"],
+    3: [   # 2026-08-25: the two functions first, then the curve with
+           # its labels as ONE object, then the note underneath
         ["grp:1"],
-        ["pr:Inverse demand:0:0"],
-        ["pr:Inverse demand:1:2"],
-        ["pr:Inverse demand:3:4"],
+        ["grp:0"],
+        ["t:Note: this is"],
     ],
-    5: [   # CT slide 6: demand, the base revenue box, then what the
-        # price cut costs and what the extra volume brings in
-        ["cxn:2", "t:Demand"],
-        ["osp:3", "t:TR"],
-        ["osp:4", "osp:6", "t:Reduction in"],
-        ["osp:5", "osp:7", "t:Increase in"],
-        ["t:Which area is bigger?"],
-    ],
-    6: [   # CT slide 7 + Nico's in-graph region notes: demand, the two
-        # elasticity stretches, the unit-elastic midpoint, then the TR
-        # hill and what each region does to revenue
-        ["cxn:2", "t:D"],
-        ["osp:3", "t:E D  <"],
-        ["osp:4", "t:\u22121 <"],
-        ["cxn:3", "cxn:4", "t:E D  ="],
-        ["osp:5", "cxn:7", "t:TR"],
-        ["cxn:8", "t:Elastic region"],
-        ["cxn:9", "t:Inelastic region"],
-    ],
-    7: [   # Nico's own slide, reinstated: the two formulas carry the
-        # argument, then the question, then each card
+    7: [   # 2026-08-25: the question and the FIRST card land together
         ["t:Total Revenues"],
-        ["t:To assess"],
-        ["grp:0"],
+        ["t:To assess", "grp:0"],
         ["grp:1"],
     ],
-    8: [
+    8: [  # the revenue forecast, then the question with all four of
+          # its answer options on one click (2026-08-25)
         ["pr:Novo Nordisk:1:1"],
-        ["pr:Novo Nordisk:2:2"],
+        ["pr:Novo Nordisk:2:6"],
     ],
     9: [
         ["t:Demand is"],
@@ -111,14 +97,12 @@ PLANS = {
         ["pr:A price cut:1:1"],
         ["pr:A price cut:2:2"],
     ],
-    10: [
-        ["pr:The price decrease:0:0"],
-        ["pr:The price decrease:1:1"],
-        ["pr:The price decrease:2:2"],
-        ["pr:The price decrease:3:3"],
-    ],
-    11: [
-        ["pr:Is the percent:1:1"],
+    10: [  # 2026-08-25: Profit = Revenue - Costs is revealed first
+        ["t:Profit"],
+        ["pr:We know:0:0"],
+        ["pr:We know:1:1"],
+        ["pr:We know:2:2"],
+        ["pr:We know:3:3"],
     ],
     12: [
         ["pr:In 2014:1:1"],
@@ -131,10 +115,9 @@ PLANS = {
         ["pr:→:1:1"],
         ["pr:→:2:2"],
     ],
-    14: [
-        ["pr:What does this suggest:1:1"],
-        ["pr:What does this suggest:2:2"],
-        ["pr:What does this suggest:3:3"],
+    14: [  # 2026-08-25: first question + its options are up front;
+           # one click brings the second question and its options
+        ["pr:What does this suggest:4:8"],
     ],
     15: [
         ["pr:April 2025:1:1"],
@@ -168,20 +151,13 @@ PLANS = {
         ["t:Step 3", "t:MR"],
         ["t:✎  Problem Set 2", "t:▤  Teaching Note"],
     ],
-    22: [
-        ["cxn:5", "t:MR"],
-        ["osp:3", "t:E D  = −1"],
-        ["t:Elastic portion", "t:Inelastic portion"],
-        ["osp:4", "t:TR#2", "cxn:6"],
-        ["grp:1", "cxn:7"],
-    ],
-    23: [
+    25: [
         ["pr:MR:1:1"],
         ["pr:MR:2:2"],
         ["pr:MR:3:3"],
         ["pr:MR:4:4"],
     ],
-    25: [
+    23: [
         ["t:1.", "t:P"],
         ["t:2.", "t:TR"],
         ["t:3.", "t:MR"],
@@ -202,6 +178,42 @@ PLANS = {
         ["pr:1.  Inverse demand:0:2"],
         ["t:MR"],
         ["pr:Why revenue maximization:0:0"],
+    ],
+    # ---- Video 3 -----------------------------------------------------
+    35: [  # only the elasticity formula is revealed
+        ["t:E D  ="],
+    ],
+    37: [  # the gold line, then the blue one, then the question
+        ["cxn:3"],
+        ["cxn:2"],
+        ["grp:0"],
+    ],
+    38: [  # just the two vertical residuals
+        ["cxn:3"],
+        ["cxn:4"],
+    ],
+    39: [  # the table is up front; equation, then the hand-off line
+        ["grp:1"],
+        ["t:Now that we have"],
+    ],
+    40: [  # the three questions the polls ask, one at a time
+        ["pr:Use the estimated:1:1"],
+        ["pr:Use the estimated:2:2"],
+        ["pr:Use the estimated:3:3"],
+    ],
+    46: [  # each step of the 3-step method, then the answer
+        ["pr:3-step method:1:1"],
+        ["pr:3-step method:2:2"],
+        ["pr:3-step method:3:3"],
+        ["pr:3-step method:4:5"],
+    ],
+    52: [  # the airline example, then each of the two questions
+        ["pr:Transaction data:2:4"],
+        ["pr:Transaction data:6:6"],
+        ["pr:Transaction data:8:8"],
+    ],
+    53: [  # the causal reading lands with both photos and the arrow
+        ["t:Causal interpretation", "pic:0", "pic:1", "cxn:0"],
     ],
 }
 

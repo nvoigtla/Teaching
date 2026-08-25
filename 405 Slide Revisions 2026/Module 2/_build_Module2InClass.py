@@ -598,7 +598,8 @@ def _draw_action_title(slide, title, gold_len=GOLD_W):
 def make_content_bulleted(prs, page_num, section_tag, title, bullets, *,
                           size=24, sub_size=None, line_spacing_pts=18,
                           sub_line_spacing_pts=None,
-                          extras=None, bullets_top=None):
+                          extras=None, bullets_top=None,
+                          bullets_width=None):
     """bullets: list of (text, level) tuples OR plain strings (level=0).
 
     ``bullets_top`` overrides the default body-region start (Inches(1.85))
@@ -621,7 +622,7 @@ def make_content_bulleted(prs, page_num, section_tag, title, bullets, *,
         slide,
         left=MARGIN,
         top=bullets_top,
-        width=RULE_W,
+        width=RULE_W if bullets_width is None else bullets_width,
         height=Inches(5.0),
         items=normalized,
         size=size,
@@ -719,6 +720,7 @@ def _add_hierarchical_bullets(slide, left, top, width, height, items,
         space_before_pts: spcBef in pts (overrides legacy formula)
         size, color, bold, italic: defaults applied to every run unless
             the run_opts override them.
+        align: a PP_ALIGN value (default LEFT).
 
     Run-level opts (run_opts in a runs_list tuple):
         font_name (default 'Calibri'), size, color, bold, italic,
@@ -773,7 +775,9 @@ def _add_hierarchical_bullets(slide, left, top, width, height, items,
                               and level < 2)
 
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        p.alignment = PP_ALIGN.LEFT
+        # 2026-08-25: paragraphs can be centred (the video deck's
+        # "compute:" list on slide 42 is a centred, un-bulleted list)
+        p.alignment = opts.get('align', PP_ALIGN.LEFT)
         pPr = p._p.get_or_add_pPr()
 
         # Space-before.  When the paragraph inherits from lstStyle and the
@@ -2370,6 +2374,11 @@ DIM = RGBColor(0xBF, 0xBF, 0xBF)           # 2026-08-24 (Nico):
                                            # shaded (his own decks
                                            # use schemeClr bg1
                                            # lumMod 75% over white)
+# How far a SHADED outline item's text drops so its single line centres
+# against the gold circle (Nico, 2026-08-25).  Measured off the three
+# final video decks, not guessed: every dimmed item moved down by
+# exactly this much and the current topic did not move at all.
+DIM_DROP = 85064                           # 0.093 in
 
 TAG_LOGISTICS = "Module 2 · Logistics"
 TAG_RECAP     = "Module 2 · Recap"
@@ -2736,9 +2745,15 @@ def make_m2_outline(prs, page_num, *, section_tag=TAG_OUTLINE,
         if i in hi:
             rows.append(([(desc, {'size': 22, 'color': GRAY})], 0,
                          {'bullet_style': 'none', 'space_before_pts': 0}))
+        # 2026-08-25 (Nico, measured off the three final video decks):
+        # an item with no description shown renders its single line at
+        # the TOP of the reserved two-row box, which sits high against
+        # the gold circle.  He nudged every SHADED item down by exactly
+        # 85064 EMU (0.093 in) to centre it; the current topic, which
+        # fills its box with title + description, does NOT move.
         _add_hierarchical_bullets(
-            slide, text_x, y, Inches(11.0), title_h + desc_h,
-            rows, size=item_pt, line_spacing_pts=0)
+            slide, text_x, y if lit else int(y + DIM_DROP), Inches(11.0),
+            title_h + desc_h, rows, size=item_pt, line_spacing_pts=0)
         y = int(y + pitch)
 
     slide._m2_item_ys = ys

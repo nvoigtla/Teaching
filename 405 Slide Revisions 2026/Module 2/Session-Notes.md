@@ -1,5 +1,91 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
+## 2026-08-25 — Adopting the three FINAL video decks
+
+**One-line summary.** Nico finished the video slides as three separate
+decks in `Videos Final/`; every slide of "Module 2 - Video Part Revised"
+that has a counterpart there now matches it, including order, grouping
+and animation.
+
+### How the match was made and proved
+`_vf_map.py` lists the four decks side by side; `_vf_diff.py` compares
+one of ours with its final twin (leaf geometry, run formatting, notes,
+grouping, and the click structure resolved to shape signatures);
+`_vf_text.py` prints paragraph- and run-level text so wording and
+emphasis can be ported exactly. All three are BUILD INPUTS - keep them,
+they are how the next round gets checked.
+
+Two harness traps worth remembering:
+* `_diff_slides.dump` truncated shape text at 90 characters, which HID a
+  real rewrite (slide 8 gained four answer options whose first 90 chars
+  were unchanged). It now keeps the full text and callers slice for
+  display. Any future diff must not re-introduce a truncation.
+* PowerPoint recomputes the height of every `spAutoFit` text box on
+  save. A top-anchored box keeps its y and changes h; a CENTRED box
+  keeps its vertical centre and changes y. `moved_for_real()` ignores
+  both, so only x, width, or a genuine move is flagged.
+
+### Slides taken over verbatim
+4, 5, 6 and 22 (his wholesale rebuilds - new dashed guides, relabelled
+axes, five to thirteen nested groups, 7-to-11-click builds) and 24 (the
+re-recorded MR poll) are SPLICED from the final decks, so slide XML,
+groups, `<p:timing>`, media, tags and notes come over byte for byte.
+`_splice_video.py` was generalised for this: `SPLICE_MAP` is now
+`our display -> (source deck, source display, x-shift)`, the 4:3
+centring shift applies only to slides from the original 4:3 deck, and a
+page-number field is grafted only when the source has none. Those five
+slides are in `_group_pass.SPLICED_BY_DECK` and `_animate_video.SKIP`.
+
+Everything else was PORTED into the build script.
+
+### Slide order
+Two of his moves, adopted:
+* Video 2 - the MR poll and its solution move up to right after the
+  3-step method; MR-graphical and "Why is MR different" now follow.
+* Video 3 - the multivariate pair moves to the end of the section,
+  after "Solution: Raise the Price".
+Slides with no counterpart (Netflix pair, Mega Millions, Inside Out 2
+pair, the six poll stubs, the summary) keep their place relative to
+their neighbours. The call list in `build_video()` was reordered and
+every page number and display-keyed table renumbered with it.
+
+### The agenda shift
+Measured, not guessed: on every section agenda each DIMMED item's text
+box moves down by exactly **85064 EMU (0.093")** and the current topic
+does not move at all. `DIM_DROP` in the outline builder does this, so it
+applies to the In-Class deck too - the reason it works is that a
+title-only item renders its single line at the top of the reserved
+two-row box, which sits high against its gold circle.
+
+### Verified
+* Every mapped slide matches on shape structure, geometry, grouping and
+  click COUNT.
+* A beat-for-beat check (each click resolved to shape signatures)
+  matches on 44 of 45 mapped slides; the one difference is slide 39,
+  where the target text carries a typo fix (below).
+* Both decks rebuilt through the full pipeline; slideshow probes clean,
+  and the re-recorded PollEverywhere slide renders live in the show.
+
+### Deliberate departures from his files - worth a look
+1. **Titles on slides 8 and 50** keep title case ("What Can a Price Cut
+   and Revenues Tell Us About the Elasticity?", "Note: We Can Also Run
+   Multivariate Regressions"). His wording is adopted; only the
+   capitalisation follows the standing rule.
+2. **Two typos fixed**: slide 10 "quantity produce/sold" ->
+   "produced/sold"; slide 39 "we have and estimated demand curve" ->
+   "an estimated".
+3. **Slide 22** carries a live page-number field that his poll capture
+   does not have.
+4. **Slide 8's third answer option** read "Eᴅ=0 (unit elastic)?" in his
+   file. Unit elasticity is Eᴅ = −1, so with his approval the slide now
+   reads "Eᴅ=−1 (unit elastic)?".
+
+His answers on the four departures (same day): 1 and 3 stand as built -
+the titles keep title case, and slide 22 keeps the live page-number
+field our build grafts onto the poll capture (his own file has none).
+2 and 4 were approved.
+
+
 ## 2026-08-24 (round 6) — Title case, shades on equation boxes, slide 36/33
 
 **One-line summary.** Slide titles are now title-cased at the one place

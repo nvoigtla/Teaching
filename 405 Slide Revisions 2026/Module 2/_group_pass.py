@@ -46,7 +46,9 @@ EMU = 914400.0
 SPLICED_BY_DECK = {
     "Module 2 - In Class Revised": {4, 5, 11, 12, 13, 32, 33, 37, 38,
                                     42, 43, 49, 50, 61, 62, 69, 70},
-    "Module 2 - Video Part Revised": {24},
+    # 2026-08-25: 4, 5, 6 and 22 now come over verbatim from the
+    # final video decks, groups and all
+    "Module 2 - Video Part Revised": {4, 5, 6, 22, 24},
 }
 
 # --------------------------------------------------------------------------
@@ -98,26 +100,28 @@ _M2_INCLASS_GROUPS_POST = {
 # D label and the $400 / 1600 ticks are another (built as a nested pair,
 # exactly the way he made it).
 _M2_VIDEO_GROUPS = {
-    4: [
-        [(1.450, 1.590), (1.120, 1.370), (1.450, 3.850), (6.520, 3.950)],
-        [(1.450, 2.233), (5.476, 3.471)],
+    # 2026-08-25 (Nico): on slide 3 the demand line, its two tick labels
+    # and the "D" label are one object, revealed on one click
+    3: [
+        [(1.10, 2.62), (0.03, 2.48), (5.79, 5.91), (6.43, 5.51)],
+    ],
+    # slide 37's "best fit?" callout: its text box is TALLER than the
+    # cream rect (his own copy is a hand-scaled group), so the geometric
+    # rule cannot see the pair - name the two explicitly
+    37: [
+        [(8.480, 3.410), (8.590, 3.245)],
     ],
 }
-_M2_VIDEO_GROUPS_POST = {
-    4: [
-        [(0.380, 2.093), (1.450, 2.233), (5.058, 3.910)],
-    ],
-}
+# slide 4's manual groups are gone: from 2026-08-25 that slide arrives
+# spliced from the final Video 1 deck, already grouped.
+_M2_VIDEO_GROUPS_POST = {}
 
 # Filled boxes that must NOT be merged with the text sitting on them,
 # because the text has to animate paragraph by paragraph.  Keyed by deck
 # then slide, listing the box's rendered (x, y) in inches.
-NO_GROUP_BOXES_BY_DECK = {
-    "Module 2 - Video Part Revised": {
-        4: [(7.923, 2.500)],     # the three-point box Nico wants to
-                                 # reveal one bullet at a time
-    },
-}
+# (slide 4's entry is gone: from 2026-08-25 that slide arrives spliced
+# from the final Video 1 deck, already grouped the way he wants it.)
+NO_GROUP_BOXES_BY_DECK = {}
 
 MANUAL_GROUPS_BY_DECK = {
     "Module 2 - In Class Revised": _M2_INCLASS_GROUPS,

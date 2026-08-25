@@ -83,8 +83,12 @@ def decode(el, ox=0.0, oy=0.0, sx=1.0, sy=1.0, out=None, depth=0):
             runs.append("%s%s%s%s" % (
                 sz or "-", "b" if b == "1" else "", "i" if i == "1" else "",
                 ("#" + clr.get("val")) if clr is not None else ""))
+        # 2026-08-25: keep the FULL text.  Truncating at 90 chars hid a
+        # real rewrite (video slide 8 gained four answer options whose
+        # first 90 characters were unchanged), so callers slice for
+        # display instead.
         out.append((tag, depth, x / EMU, y / EMU, w / EMU, h / EMU,
-                    txt[:90], ",".join(runs[:8])))
+                    txt, ",".join(runs[:8])))
     return out
 
 
