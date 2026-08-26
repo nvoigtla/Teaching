@@ -67,8 +67,8 @@ SPLICE_MAP = {
     4:  (VF1, 4, 0),
     5:  (VF1, 5, 0),
     6:  (VF1, 6, 0),
-    22: (VF2, 7, 0),      # the MR poll, re-recorded
-    24: (VF2, 9, 0),      # MR: graphical representation
+    19: (VF2, 7, 0),      # the MR poll, re-recorded
+    21: (VF2, 9, 0),      # MR: graphical representation
 }
 
 

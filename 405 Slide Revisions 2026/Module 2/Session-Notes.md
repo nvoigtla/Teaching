@@ -1,5 +1,355 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
+## 2026-08-25 (round 5) — In-Class slides 27, 38, 41–43, 47–49
+
+**One-line summary.** Nico's fifth In-Class round: title changes on 38
+and 42, the point-elasticity example restarted from the demand
+function, an Uber photo on 49, and slide 48's figure replaced with CT's
+graph from her In-Class slide 39.
+
+### What changed, slide by slide
+- **27** – the "$7.99" label and the arrow take his hand positions
+  (arrow (9.279, 4.612) → (9.070, 4.383); label at (8.05, 4.52)).
+- **38** – title is now "Computing Elasticity:  Method 1".
+- **41** – the three Mega Millions equations drop from 24 pt to 21 pt so
+  they sit better against the "price" / "quantity" labels.
+- **42** – title "Computing Elasticity:  Method 2 (“Point Elasticity”)";
+  the equation box moved to (3.43, 2.39) 5.70×2.10; the little slope
+  convention box is gone, replaced by CT's device – a dark-red oval
+  ringing ΔQ/ΔP with a labelled arrow ("Slope of the demand curve /
+  constant for a linear demand curve") – in DARK_RED rather than CT's
+  gold; a ✎ Problem Set 2 box sits below the bullets.
+- **43** – the given is now the DEMAND function (Q = 400 − 4 P), so the
+  old "solve for Q" step disappears and the three remaining steps
+  renumber 1/2/3. The red "Step 1 is not needed" note is gone.
+- **47** – the solution mirrors 43: steps renumbered, note removed, the
+  elasticity formula set in navy instead of red.
+- **48** – see below.
+- **49** – the Uber app photo (rounded corners + shadow, from his
+  screenshot) at (9.09, 5.18) 3.56" wide; bullet column narrowed to
+  8.60".
+
+### Slide 48: CT's graph transplanted
+Her In-Class slide 39 is reproduced element for element – axes with her
+"Price" / "Quantity" word labels, the navy demand line, a gold
+right-brace laid ALONG each stretch of the curve (rot 298°, adj
+defaults), the region labels with "elastic" / "inelastic" in bold
+concept blue, the gold "E_D = −1 unit elastic" callout with its leader
+to the gold midpoint dot, and the two intercept labels with their short
+leaders. Her coordinates are kept verbatim in the build script and
+shifted by (−1.75, −0.60) inches – constants `CT_DX` / `CT_DY` inside
+`slide_52_linear_elasticity` – which slides the graph left and up so it
+clears our right-hand column (CT has no column; her formula box sits
+inside the plot area). Kept from our version: the cream E_D formula box,
+the "linear demand curve: E_D goes from −∞ … to 0" line, and the bottom
+convention box, whose gold pointer now runs (8.40, 5.20) → (6.85, 5.48)
+into the inelastic stretch. Plan 48 rebuilt to 7 clicks / 16 effects:
+curve+D, the right-column line, elastic brace+label, inelastic
+brace+label, dot+leader+gold label, both intercepts+leaders, then the
+payoff box with its arrow.
+
+**Flagged for Nico:** the transplant makes slide 48's demand line NAVY,
+because CT's is. Our other elasticity figures (slide 51's perfectly
+elastic / inelastic cases) draw demand in RED. One-line change if he
+wants 48 back in red.
+
+### New helpers in the shared layer
+`_add_rot_brace` (rotated right-brace), `_add_runs_text` (one-line text
+box with per-run formatting), `_add_oval_filled` (absolute-coordinate
+dot). `_add_oval_outline` was already there from round 4.
+
+### Verification
+Render of 48 compared side by side with a render of CT's slide 39;
+click count checked via `_animate.py 48` (7 clicks / 16 effects);
+full-screen slideshow probe on 1 / 48 / 49 – PASS, no error banner.
+
+
+## 2026-08-25 (final) — Split pill, slides 15/24, Netflix at $19.99
+
+**One-line summary.** Topic 3's pill now says it spans two videos and
+its sub-topics hang narrower pills under it; slides 15 and 24 take his
+repositioning; the Netflix chart runs through the March 2026 price.
+
+### The pill on topic 3
+His edit answers the numbering question from the previous round: topic 3
+(Demand and Revenue) is covered across BOTH videos 1 and 2, so its pill
+reads "Videos 1+2" at full width, and the sub-topics 3a and 3b carry
+narrower 1.14" pills - right-aligned to the same 12.85" edge - saying
+"Video 1" and "Video 2". `COVERAGE_LABEL` holds the wording; the width
+follows the item's own `sub` flag, so the treatment is automatic on
+every outline slide in both decks, dimmed versions included.
+
+### Slides 15 and 24
+15 - the pale-blue takeaway card moved to (2.85, 6.20), h 0.80, so it
+clears the footer rule it had been touching.
+24 - the bullet column narrowed to 7.31" and lifted to y 1.62.
+
+### Netflix, slide 27
+Netflix raised the US Standard plan to **$19.99 on 26 March 2026** (from
+$17.99 in January 2025) - verified against CNBC, Variety and CBS. The
+series gains (2026, 19.99), the line runs to 2027, the x axis to 2028
+and the y axis to 22 for headroom, and the old $17.99 label is replaced
+by "$19.99" in the top-right corner.
+
+### Note for the next round
+Only slide 7 carried his pill edit, so the rebuild now differs from the
+deck he handed back on slides 8, 25, 71 and 72 - that is the "adopt
+throughout" propagating, not drift.
+
+
+## 2026-08-25 (last) — Coverage pills become the outline template
+
+**One-line summary.** Sample A is now the outline template in BOTH
+decks; the four sample slides are gone (In-Class back to 72 slides, 141
+clicks; video deck 45 slides, 112 clicks).
+
+### What the template does
+Every outline item carries a pill on the right saying where the topic is
+taught: navy "In class" for topics 1-2, gold "Video N" for 3, 3a, 3b
+and 4.  On a section agenda the pill dims with the rest of the row -
+only the current topic keeps its colour and its shade - so a section
+agenda now reads "this is the one we are on, and here is where each of
+the others lives".  `COVERAGE_LABEL` in the shared layer is the single
+place that maps an item to its pill.
+
+### Deviation from the literal instruction, flagged
+Nico asked for the video pills to read "Video 1, Video 2, Video 3,
+Video 4".  There are only THREE videos: **Video 1 covers topics 3 AND
+3a** - its own outline slide highlights both rows - Video 2 is 3b and
+Video 3 is topic 4.  Numbering the four topics 1-4 would have put
+"Video 2" on Elasticity and Revenue and sent students to the wrong
+video, and the video deck's own agenda would have contradicted itself on
+screen.  The pills therefore read 1, 1, 2, 3.  To switch to plain
+sequential numbering, change the four entries in `COVERAGE_LABEL`.
+
+### One collision fixed
+On the video deck's outline the teaching-note link box sat at y 6.272
+(hand-moved on 2026-08-24) and ran straight into the new pill on item 4.
+It is back at the convention position, y 6.68, overlaying the footer.
+
+### Verified
+Both decks rebuilt through the full pipeline and rendered; slideshow
+probes over the outline slides of both decks show no failure banner.
+
+
+## 2026-08-25 (late) — In-Class round 2 + the coverage-marking samples
+
+**One-line summary.** His second pass on the In-Class deck is adopted,
+and four SAMPLE slides (9-12) try two ways of marking which outline
+topics are taught in class and which in the videos. 72 → 76 slides.
+
+### Adopted
+* **18** - definitions box tightened to 6.16 x 1.35, chevron and gold
+  hero lifted, hero re-worded "Choose consumption quantity where:".
+* **24** - photo enlarged to 4.61" and lifted; it no longer animates.
+  `FIG_GROUP[24] = None` is the new way to say "this figure is up front"
+  (the table previously only chose WHICH bullet a figure rides on).
+* **26, 35** - builds removed, both now in `SKIP_STATIC`.
+* **34** - label and arrow nudged and grouped; each elasticity card is
+  one object via a POST group folding the second line and the verdict
+  into the box+first-line pair rule 1 already makes.
+* **37** - the "%" is bold on a yellow HIGHLIGHT. Worth noting: that is
+  `<a:highlight>`, a wash behind the glyphs, NOT a font colour - the
+  run-dump reports both as an srgbClr, so they are easy to confuse.
+  `_add_hierarchical_bullets` gained a `highlight` run option.
+* **38** - formula narrowed and moved left, the convention card moved up
+  beside it, and two blue arrows from the card to the two denominators
+  (drawn last, so the z-order matches his).
+* **39/43** - CT's full-bleed lottery photo as a washed-out background.
+  `_add_media_image` gained `transparency=`, which writes
+  `<a:alphaModFix>` on the blip; 78% is what keeps navy text readable.
+
+### The coverage samples (slides 9-12)
+Two treatments, each on a copy of the descriptive overview AND of a
+section agenda, so both slide types can be judged:
+
+* **Sample A (9, 10)** - a small pill at the right of every row, navy
+  "In class" for topics 1-2, gold "Video" for 3, 3a, 3b and 4. Reads
+  per item, needs no layout change, and survives the dimming on a
+  section agenda.
+* **Sample B (11, 12)** - two soft tinted bands behind the groups (pale
+  navy and pale gold) with the heading set vertically in the left
+  margin. Reads as two blocks rather than six labels; the vertical
+  heading is what keeps it clear of the long item descriptions.
+
+`make_m2_outline(..., coverage="badge" | "band")` drives both; the real
+outline slides pass nothing and are untouched. Delete the pair we do not
+keep and drop the `coverage` argument from the survivors.
+
+### Verified
+76 slides, 143 clicks. Every hand-edit reconciles against a fresh build
+(`_ic_diff.py --all` reports only slide 43, which is the background
+photo we added). Slides 9-12, 18, 24, 34, 38, 42 and 43 rendered and
+checked; slideshow probe over 12 slides shows no failure banner.
+
+
+## 2026-08-25 (evening) — In-Class round: deletions, redesigns, Mega Millions
+
+**One-line summary.** The In-Class deck goes 76 → 70 (his deletions) → 72
+(the two new Mega Millions slides), with his hand-edits adopted and six
+slides redesigned.
+
+### His six deletions, adopted in the build
+Each PollEverywhere activity had been spliced in TWICE - once in its
+"instructions" display state, once in its "chart" state. He kept the
+CHART slide of each pair and deleted the instructions one (builds 32 and
+37), and dropped the four-slide Amazon e-book example as outdated.
+`_ic_diff.py` (new, keep) is the aligned diff that found this; note the
+trap it exposed - matching the two poll slides by TITLE is ambiguous
+(both are blank), so the pair has to be told apart by the poll URL in
+the notes (`display_state=instructions` vs `display_state=chart`).
+
+### Hand-edits adopted
+15 (retitled "To the Same Consumer, Each Extra Slice is Worth Less",
+chart lifted 0.20", axis labels moved), 16 (quote glyph), 22 (both
+clippings nudged), 27 (chart callout, arrow and price labels), 28 (the
+ringed percentage symbol + arrow + label, grouped, drawn after the
+footer so the z-order matches his), 33 (reworded, everything lifted
+0.58", the Wingdings arrow on the takeaway, last equation navy not red),
+35 (text and photo lifted).
+
+### New work
+* **10** - his "Nice Pizza Slice.png" cut-out replaces the carved wedge.
+* **15** - the two-line takeaway now sits in a pale-blue card.
+* **18** - redesigned: the general rule MB = MC in a navy hero box, the
+  definitions under it, and the SAME box repeated in gold for the
+  consumption context (MPV = MC), with a gold chevron between them and
+  the two "buy more / buy less" cards below.
+* **19** - the MPV pointer takes the curve's navy and a heavier weight.
+* **24** - bullets narrowed to a left column, his "Demand Shopping.png"
+  on the right.
+* **27, 38** - practice-video pointers became reference boxes. The glyph
+  vocabulary gains **▶ = a practice video** alongside ✎ and ▤.
+* **34** - relaid out on CT's In-Class p.9 (deck slide 28): three cards
+  side by side, native OMML throughout, and the gold "absolute value"
+  pointer aimed at the bars. The bars stay navy, as he asked.
+* **37** - Eᴅ with a capital D, navy not red.
+* **38** - real subscripts on P₀/Q₀/P₁/Q₁, and the convention callout
+  promoted to a louder concept-blue card so it stops being missed.
+
+### Mega Millions, now three slides (39, 40, 41)
+39 sets up the problem with a Poll Break, 40 is a stub for his own
+PollEverywhere activity, 41 is the worked solution on CT's layout
+(In-Class p.18) in navy, keeping the "Method 1 approximates" caution.
+
+**What was wrong with CT's numbers** (he asked to be reminded): she
+dates the increase to 2024 and calls it "the MA State Lottery raising
+ticket prices". The $2 → $5 change was a NATIONAL Mega Millions
+redesign that took effect on **8 April 2025** - announced in October
+2024, which is probably where the year came from - and the state
+lotteries sell the tickets but did not set the price. Her sales figures
+(142,170 → 100,297 weekly) give Eᴅ ≈ −0.2.
+
+**Our New York numbers re-checked and confirmed**: ~1.9 million tickets
+per drawing before, ~560,000 after, from Hansen (UC San Diego Rady),
+Misra (Boston College Carroll) and Singh (NYU Stern), "Pricing a
+Participation-Dependent Product: Evidence from the Mega Millions
+Redesign". That is −70.5%, and with +150% on price, Eᴅ ≈ −0.47.
+
+### Verified
+72 slides, 145 clicks. Slides 10, 15, 18, 24, 34, 38, 39 and 41 rendered
+and checked by eye; slideshow probe across 14 slides shows no failure
+banner and the live poll slides still render.
+
+### One thing to check
+He said "adopt slide nine from the CT in-class deck" for slide 34 and
+"CT slides fifteen to eighteen" for Mega Millions. Those are CT's
+FOOTER page numbers, not her deck positions - pages 9 and 15-18 are her
+deck slides 28 and 34-37. That is what was used; worth confirming.
+
+
+## 2026-08-25 (final) — The video part is DONE
+
+**One-line summary.** "Module 2 - Video Part Revised.pptx" is now
+exactly Videos 1, 2 and 3 laid end to end - 45 slides, 112 clicks - and
+the pipeline reproduces it from source with nothing left over.
+
+### Where the unused slides went
+Nico moved them into **"Module 2 - Potential Practice Exercises.pptx"**
+(6 slides, hand-made, NOT built by the pipeline): a cover reading
+"Potential Practice Exercises for Module 2", then the Netflix pair, Mega
+Millions and the Inside Out 2 pair. He dropped the six PollEverywhere
+stubs and the module summary altogether.
+
+### What changed in the scripts
+* `build_video()` ends at slide 45. The backup divider and the twelve
+  parked entries are gone from the call list; the numbering of slides
+  1-45 was already right, so nothing needed renumbering.
+* The builders for the slides that left are **kept but uncalled**, each
+  with a docstring line saying so: `v15_netflix`,
+  `v16_netflix_solution`, `v18_megamillions_revisited`,
+  `v30_insideout`, `v31_insideout_solution`, `v57_summary` and
+  `_backup_divider_slide`. If the practice deck ever needs
+  regenerating, they are the starting point.
+* `_animate_video.py`: plans 47-51 dropped, `SKIP_TITLE` back to
+  {1, 13, 23}, `SKIP_AGENDA` to {14, 24}, `SKIP_MEDIA` to
+  {4, 5, 6, 19, 21}.
+* `_vf_diff.MAP` now covers all 45 slides - there is no unmatched
+  remainder left to list.
+
+### Proof the record is right
+A rebuild through the full pipeline was diffed against the deck Nico
+left on disk: **45 vs 45 slides, 0 differing slides** on shape
+structure, geometry, text, click counts and notes. Against the three
+decks in `Videos Final` the only flags are the three departures agreed
+earlier - title case on slides 8 and 39, and the live page-number field
+our build grafts onto the poll capture at slide 19.
+
+No COM renders or slideshow probe this round: he had the In-Class deck
+open in PowerPoint (`~$` lock file), and both probe scripts kill
+POWERPNT. Verification was structural only, which is enough for a
+deletion plus renumber.
+
+### State of play
+The video part of Module 2 is finished. The In-Class deck is untouched
+by this round and remains where the previous session left it.
+
+
+## 2026-08-25 (later) — The video deck IS the three videos, plus a backup
+
+**One-line summary.** Slides 1-45 of "Module 2 - Video Part Revised" are
+now Videos 1, 2 and 3 laid end to end; a divider at 46 introduces the 12
+slides Nico did not use, parked behind it with their builds intact.
+
+### Structure
+* **1-12** Video 1, **13-22** Video 2, **23-45** Video 3 - a straight
+  run against the three decks in `Videos Final`, so `_vf_diff.MAP` is
+  now generated rather than hand-listed.
+* **46** `_backup_divider_slide` - "Slides not Used in Videos", in the
+  same family as the three video title slides (no top bar, no page
+  number) with a gray line naming what is behind it.
+* **47-58** the Netflix pair, Mega Millions, the Inside Out 2 pair, the
+  six PollEverywhere stubs and the module summary. Their animations were
+  kept: they are finished slides that were parked, not scratch.
+
+Every display-keyed table moved with them - the build call list and page
+numbers, `SPLICE_MAP`, `SPLICED_BY_DECK`, the two manual groups, the 27
+animation plans and the four SKIP sets.
+
+### His corrections to the final decks, adopted
+He re-saved Video 1 and Video 3 at 16:25. Two changes came back:
+* slide 34's closing line is now "Now that we have an estimated demand
+  curve, we can compute MR **(Following the 3 steps we've seen above)**",
+  with the parenthetical set regular rather than bold-italic;
+* he applied the unit-elasticity fix on slide 8. He typed a hyphen
+  ("Eᴅ=-1"); ours keeps the proper minus sign ("Eᴅ=−1"), which is what
+  the rest of the deck uses.
+
+He also opened and re-saved the main deck. A diff against a fresh build
+found no hand-edits - the only difference was PowerPoint recomputing the
+cached number inside slide 21's spliced slidenum field.
+
+### Verified
+* Slides 1-45 match the three final decks on shape structure, geometry,
+  grouping and click count, and the beat-for-beat check is clean on
+  **45 of 45**.
+* 58 slides, 128 clicks. Slideshow probe clean across the join (45, 46,
+  47) and at both ends.
+* Three deliberate departures remain, all previously agreed: title case
+  on slides 8 and 39, and the live page-number field our build grafts
+  onto the poll capture at slide 19.
+
+
 ## 2026-08-25 — Adopting the three FINAL video decks
 
 **One-line summary.** Nico finished the video slides as three separate

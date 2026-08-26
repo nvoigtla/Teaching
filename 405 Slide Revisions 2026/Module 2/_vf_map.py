@@ -20,7 +20,8 @@ FINALS = [
     "Module 2 - Video 2 - Marginal Revenue.pptx",
     "Module 2 - Video 3 - Demand Estimation.pptx",
 ]
-OURS = "Module 2 - Video Part Revised.pptx"
+import os
+OURS = os.environ.get("VF_OURS", "Module 2 - Video Part Revised.pptx")
 
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 P = "http://schemas.openxmlformats.org/presentationml/2006/main"

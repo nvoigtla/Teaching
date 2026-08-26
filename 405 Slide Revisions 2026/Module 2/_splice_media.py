@@ -56,11 +56,14 @@ CT_NOTES = ('application/vnd.openxmlformats-officedocument.'
 # new-deck display -> source-deck display
 # 2026-08-15: displays shifted +1 from 14 on (bookend insert);
 # 2026-08-23: bookend deleted by Nico, so the shift is back to zero
+# 2026-08-25: Nico kept only the CHART slide of the water and yoga
+# poll pairs (sources 31 and 36) and dropped the e-book pair (40/41)
+# with the rest of that example.
 SPLICE_MAP = {
     4: 4, 5: 5, 11: 11, 12: 12, 13: 13,
-    32: 30, 33: 31, 37: 35, 38: 36,
-    42: 40, 43: 41, 49: 46, 50: 47,
-    61: 57, 62: 58, 69: 64, 70: 65,
+    32: 31, 36: 36,
+    45: 46, 46: 47,
+    57: 57, 58: 58, 65: 64, 66: 65,
 }
 
 

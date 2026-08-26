@@ -173,7 +173,7 @@ NOTES = {
         "does the price increase have to be? Work it out on the poll "
         "before we do it together."),
 
-    34: (
+    33: (
         "Elasticity is the percent change in quantity over the percent "
         "change in price, so rearrange it: the percent change in price "
         "equals the percent change in quantity divided by the "
@@ -183,14 +183,14 @@ NOTES = {
         "is inelastic, it takes a large price move to get a modest "
         "quantity response."),
 
-    36: (
+    35: (
         "Now the same formula run in the other direction. CorePower "
         "Yoga cuts its price by 17% and the number of booked lessons "
         "doubles, which is a 100% increase in quantity. What is the "
         "implied elasticity, and does that make demand elastic or "
         "inelastic? Try it on the poll."),
 
-    39: (
+    37: (
         "The percent change in quantity is +100% and the percent change "
         "in price is −17%, so the elasticity is roughly −6. Notice that "
         "the answer is not “6%”. Elasticity is a unit-free number, not "
@@ -199,7 +199,7 @@ NOTES = {
         "makes sense given how many substitutes a yoga studio has. "
         "Compare that with water at −0.4."),
 
-    40: (
+    38: (
         "There are two ways to compute an elasticity, and which one you "
         "use depends on what you know. Method 1 is for when you have "
         "two observed price and quantity points. Compute both "
@@ -210,7 +210,7 @@ NOTES = {
         "the initial one. The TA math review videos cover this, and you "
         "will practise it on Problem Set 2."),
 
-    46: (
+    42: (
         "Method 2 is for when you know the whole demand curve rather "
         "than two points. Then you do not need an approximation at all, "
         "because you can use the slope of the demand curve directly. "
@@ -220,7 +220,7 @@ NOTES = {
         "the elasticity is not, because P and Q both change as you move "
         "along the curve. We come back to that in a few slides."),
 
-    47: (
+    43: (
         "Let us work one all the way through. The demand function is "
         "given in inverse form, P = 100 − 0.25Q, and we want the "
         "elasticity at a price of 25. Step 1, solve for Q, which gives "
@@ -231,12 +231,12 @@ NOTES = {
         "handed to us with P on the left-hand side. If you already have "
         "Q as a function of P, start at step 2."),
 
-    48: (
+    44: (
         "Your turn. You are given a firm's demand function and the "
         "price it charges. Compute the elasticity of demand at that "
         "price, using the same four steps we just went through."),
 
-    51: (
+    47: (
         "The answer is −0.25. Step 1 is unnecessary here, because we "
         "already have Q as a function of P. The derivative dQ/dP is −1. "
         "At P = 2 the quantity is 10 − 2 = 8. So the elasticity is −1 "
@@ -244,7 +244,7 @@ NOTES = {
         "0, so demand is inelastic at this price, and as the next slide "
         "shows, that is not a place a firm wants to be."),
 
-    53: (
+    49: (
         "Here is a result worth carrying out of this module: a firm "
         "should not operate on the inelastic part of its demand curve. "
         "The intuition is short. If demand is inelastic, raising the "
@@ -257,7 +257,7 @@ NOTES = {
         "prices and revenues are far higher today. We develop the "
         "argument properly in the Module 2 videos."),
 
-    54: (
+    50: (
         "This is the estimated demand curve behind that number. At the "
         "2016 base price the elasticity was about −0.4, solidly "
         "inelastic. I will go through how a curve like this is "
@@ -266,7 +266,7 @@ NOTES = {
         "numbers. Firms really do estimate their own demand curves, and "
         "the estimate changes the pricing decision."),
 
-    55: (
+    51: (
         "Elasticity normally changes as you move along a demand curve, "
         "with two exceptions worth knowing. Perfectly elastic demand is "
         "horizontal: at that price customers will take any quantity, "
@@ -277,7 +277,7 @@ NOTES = {
         "short-run picture for something like a life-saving drug. Real "
         "products sit between the two, but these are the anchors."),
 
-    56: (
+    52: (
         "What makes demand elastic? Mostly substitutes: how many there "
         "are, how close they are, and how willing customers are to "
         "switch. Firm size relative to the relevant market matters too. "
@@ -287,7 +287,7 @@ NOTES = {
         "the gap between the elasticity your firm faces and the "
         "elasticity the whole industry faces."),
 
-    58: (
+    54: (
         "We have done own-price elasticity. The same construction, one "
         "percent change divided by another percent change, gives two "
         "more measures that managers use. Income elasticity tells you "
@@ -297,7 +297,7 @@ NOTES = {
         "another product, which is what you need to identify "
         "substitutes and complements."),
 
-    59: (
+    55: (
         "Income elasticity is the percentage change in quantity "
         "demanded divided by the percentage change in income. It "
         "answers a question every planner asks: if the economy grows 2% "
@@ -305,12 +305,12 @@ NOTES = {
         "elasticity, the sign is not fixed here. It can be positive or "
         "negative, and that sign is exactly what classifies the good."),
 
-    60: (
+    56: (
         "A worked case. Average income in the United States rises by "
         "2%, and as a result demand for the Rivian R3 rises by 5%. What "
         "is the income elasticity? Take a moment on the poll."),
 
-    63: (
+    59: (
         "The percent change in quantity is 5% and the percent change in "
         "income is 2%, so the income elasticity is 2.5. It is positive, "
         "which makes the R3 a normal good, and it is above 1, which "
@@ -319,7 +319,7 @@ NOTES = {
         "discretionary big-ticket purchase. It also means a recession "
         "hits this product harder than the average."),
 
-    64: (
+    60: (
         "The sign and the size of the income elasticity classify the "
         "good. Above zero it is a normal good, so demand rises with "
         "income. Above one it is a luxury good, so demand rises faster "
@@ -330,7 +330,7 @@ NOTES = {
         "examples. Nothing pejorative is meant by “inferior”. It is a "
         "statement about the income elasticity, not about quality."),
 
-    65: (
+    61: (
         "Here is why the classification pays off. In 2007 Target's "
         "stock traded well above Walmart's. Then the economy entered "
         "recession and the two moved in opposite directions: Walmart's "
@@ -342,7 +342,7 @@ NOTES = {
         "volume. The two series here are digitized from the printed "
         "figure, so read the shape rather than the exact levels."),
 
-    67: (
+    63: (
         "The third measure. Cross-price elasticity is the percent "
         "change in the quantity demanded of good X divided by the "
         "percent change in the price of another good Y. The sign is "
@@ -353,13 +353,13 @@ NOTES = {
         "teams and antitrust authorities use to decide which products "
         "actually compete with each other."),
 
-    68: (
+    64: (
         "A concrete one. A movie theater raises its ticket price from "
         "$15 to $18, and the quantity of popcorn it sells falls by 8%. "
         "What is the implied cross-price elasticity, and what does its "
         "sign tell you about the two products? Take it on the poll."),
 
-    71: (
+    67: (
         "The percent change in the quantity of popcorn is −8%. The "
         "percent change in the ticket price is 18 minus 15 over 15, or "
         "+20%. So the cross-price elasticity is −8 divided by 20, which "
@@ -369,7 +369,7 @@ NOTES = {
         "prices lower than you might expect: the ticket is what sells "
         "the popcorn."),
 
-    74: (
+    70: (
         "A one-page summary of own-price elasticity. The definition and "
         "the intuition are at the top. The three categories are in the "
         "middle: inelastic between −1 and 0, unit-elastic at exactly "
@@ -379,14 +379,14 @@ NOTES = {
         "known, where ΔQ/ΔP is the slope of Q as a function of P. Keep "
         "this slide next to you when you do Problem Set 2."),
 
-    75: (
+    71: (
         "That is where we stop in class. The remaining topics, demand "
         "and revenue, elasticity and revenue, and marginal revenue, are "
         "covered in the post-work. Watch Module 2 Videos 1 and 2, and "
         "use Practice Videos 1 and 2 to work through the computations. "
         "Everything is on BruinLearn under “Module 2 Post-Work”."),
 
-    76: (
+    72: (
         "The last topic is demand estimation, which is where these "
         "numbers come from in practice: market experiments and "
         "regression. Module 2 Video 3 covers it and Problem Set 2 gives "

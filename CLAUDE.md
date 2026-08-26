@@ -508,6 +508,36 @@ need that pass.)
   bg1` with `lumMod 75%`). The gold circle fill stays gold on every item.
   The descriptive overview and the summary closer, which have no current
   topic, keep every item navy.
+- **Coverage pills – every outline item says where it is taught**
+  (2026-08-25, Nico). A small rounded pill sits at the right of each
+  row: **navy fill / white text** for a topic done **in class**, **gold
+  fill / navy text** for one on **video**. This is now standard on
+  EVERY module's outline and agenda slides – including a module taught
+  entirely in class and one that is entirely on video, so the format
+  stays uniform and a student can tell at a glance whether there is
+  anything to watch beforehand.
+  - **Geometry:** height 0.36", top = row_y + 0.02", 13 pt bold, corner
+    0.30, soft drop shadow. A main item's pill is 1.55" wide; a
+    **sub-item's is narrower (1.14") and right-aligned to the SAME right
+    edge** (12.85"), so it reads as part of its parent's rather than a
+    peer. Take the width from the item's own sub-item flag, never from
+    a hand-kept list.
+  - **Name the video a student actually has to watch, not a sequence
+    number.** If a topic spans two videos the pill says so ("Videos
+    1+2") and its sub-topics each name their single video. Numbering
+    topics 1, 2, 3, 4 when there are only three videos points students
+    at the wrong one, and the video deck's own agenda then contradicts
+    itself on screen.
+  - **Dimming:** on a section agenda the pill dims with its row –
+    `#BFBFBF` fill, white text, and no shadow – so only the current
+    topic keeps its colour. The descriptive overview and the summary
+    closer, which light every item, keep every pill in colour.
+  - **Implementation:** one table mapping item → pill text, read by the
+    outline builder (Module 2: `COVERAGE_LABEL` in the shared layer).
+  - **Watch the right edge.** The pills occupy it, so a pointer / link
+    box on an agenda slide has to sit at the convention position
+    (y 6.68, overlaying the footer) – higher up it collides with the
+    last item's pill.
 - **Pointer / link boxes** (post-work videos, problem set, teaching
   notes): gold-bordered rounded outlined box (white fill, navy bold
   14–15 pt, corner 0.20, soft shadow), two lines — the links line,

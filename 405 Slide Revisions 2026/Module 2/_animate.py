@@ -48,9 +48,12 @@ EMU = 914400.0
 
 SKIP_TITLE = {1}
 SKIP_AGENDA = {6, 7, 8, 25}          # roadmap + outline/section agendas
-SKIP_MEDIA = {4, 5, 11, 12, 13, 32, 33, 37, 38, 42, 43, 49, 50,
-              61, 62, 69, 70}        # PollEv pairs + live Excel slide
-SKIP_STATIC = {48,                   # single-thought poll setup (Q=10−P)
+SKIP_MEDIA = {4, 5, 11, 12, 13, 32, 36, 40, 45, 46,
+              57, 58, 65, 66}        # PollEv slides + live Excel slide
+                                     # (40 is the new Mega Millions poll
+                                     #  placeholder, 2026-08-25)
+SKIP_STATIC = {44,                   # single-thought poll setup (Q=10−P)
+               26, 35,               # builds removed by hand 2026-08-25
                16, 17}                # Gates quote + Inglehart panel —
                                       # Nico removed the builds by hand
                                       # (2026-08-23)
@@ -60,14 +63,17 @@ SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 # built bullet); per-slide overrides:
 FIG_GROUP_DEFAULT = 0
 FIG_GROUP = {
-    23: -1,   # network-effects screenshot -> last bullet
+    23: -1,     # network-effects screenshot -> last bullet
+    # None means the figure is NOT animated at all - it is up front with
+    # the slide (Nico removed slide 24's photo build, 2026-08-25)
+    24: None,
 }
 
 PLANS_PRE = {}
 
 STATIC = {
     10: ["t:Poll Break"],
-    36: ["t:Poll Break"],
+    35: ["t:Poll Break"],
 }
 
 # ---------------------------------------------------------------------------
@@ -89,11 +95,13 @@ PLANS = {
         ["t:MPV of 5th slice", "t:$0"],
         ["cxn:2", "t:Diminishing Marginal Personal Value"],
     ],
-    18: [  # consumer optimization (2026-08-16 boxed redesign; re-cut by
-        # hand 2026-08-23): recall box static, then the MB = MC star as
-        # the general rule, then the MPV version of it as the payoff
-        ["grp:2"],
-        ["grp:1"],
+    18: [  # 2026-08-25 redesign: the general rule is up front, then
+           # what MB and MC mean, then the same rule in the consumption
+           # context, the two directions to move, and the anchor star
+        ["t:MB:  marginal benefit"],
+        ["t:▼", "t:In the context of consumption"],
+        ["t:If MPV > MC", "t:If MPV < MC"],
+        ["t:MB = MC"],
     ],
     19: [  # movies, re-cut by hand 2026-08-23: MPV curve + its labels,
         # then the "MPV is the demand curve" callout (now grouped with its
@@ -138,14 +146,16 @@ PLANS = {
         ["pic:0", "pic:1", "t:Source: The Wall Street"],
         ["pic:2", "pic:3"],
     ],
-    27: [  # Netflix: chart static; implications, key concept, video pointer
+    27: [  # Netflix: chart static; implications, key concept, then the
+           # practice-video reference box (a box now, not a bullet)
         ["pr:Netflix frequently raises:1:3"],
         ["pr:Netflix frequently raises:4:4"],
-        ["pr:Netflix frequently raises:5:5"],
+        ["t:▶  Module 2, Practice Video 1"],
     ],
     28: [  # what is elasticity: formula static; unit-free; %-label last
         ["pr:Definition::2:2"],
-        ["pr:Definition::3:3", "t:percentage change", "cxn:0"],
+        # the label, its arrow and the ringed symbol are one group now
+        ["pr:Definition::3:3", "grp:0"],
     ],
     29: [  # three types: one card per click, recipe line last
         ["t:Own-price elasticity", "t:E D"],
@@ -162,144 +172,145 @@ PLANS = {
         ["cxn:0", "t:LADWP wants"],
         ["cxn:1", "t:By how much"],
     ],
-    34: [  # water solution: equation lines one per click; takeaway last
+    33: [  # water solution: equation lines one per click; takeaway last
         ["t:E D"],
         ["t:−0.4"],
         ["t:%Δ P"],
-        ["t:Raise the price"],
+        ["t:  Raise the price"],
     ],
-    35: [  # categories: formula static; one category row per click
-        ["t:If", "t::"],
-        ["t:If", "t::"],
-        ["t:If", "t::"],
+    34: [  # 2026-08-25 (CT layout): formula static, then one card per
+           # click, and the absolute-value pointer with the first
+        ["grp:0", "t:absolute value"],
+        ["grp:1"],
+        ["grp:2"],
     ],
-    39: [  # yoga solution: equation, question, answer + interpretation
-        ["t:E d"],
+    37: [  # yoga solution: equation, question, answer + interpretation
+        ["t:E D"],
         ["pr:Is demand for yoga:0:0"],
         ["pr:Is demand for yoga:1:2"],
     ],
-    40: [  # method 1: formula + convention; caveats; PS pointer
-        ["t:E D", "grp:0"],
-        ["pr:This method approximates:0:1"],
-        ["t:✎  Problem Set 2"],
+    38: [  # method 1: the formula and its convention card, the caveat,
+           # then the two pointers (2026-08-25)
+        ["t:E D", "t:CONVENTION"],
+        ["pr:This method approximates:0:0"],
+        ["t:▶  TA Math Review Videos", "t:✎  Problem Set 2"],
     ],
-    41: [  # e-books: quote + logo static; question builds
-        ["pr:Amazon said:2:2"],
-    ],
-    44: [  # e-books solution
-        ["pr:Problem states:1:1"],
-        ["t:E D"],
-        ["t:→"],
-    ],
-    45: [  # Mega Millions: facts, equation, caution + source
+    39: [  # Mega Millions setup: the two facts, then the question
         ["pr:April 2025:1:1"],
+        ["pr:April 2025:2:2"],
+    ],
+    41: [  # the worked answer: %ΔQ, %ΔP, the elasticity, the caution
+        ["t:%Δ Q  =  Q 1"],
+        ["t:%Δ P  =  P 1"],
         ["t:E D"],
-        ["grp:0", "t:Source: Hansen"],
+        ["t:Caution"],
     ],
-    46: [  # method 2: formula + slope callout; interpretation; linear note
-        ["t:E D", "grp:0"],
+    42: [  # 2026-08-25: the formula, then the ringed slope term with
+           # its label, then the interpretation and the pointer
+        ["t:E D"],
+        ["osp:3", "t:Slope of the demand curve", "cxn:0"],
         ["pr:ΔQ/ΔP is the slope:0:2"],
-        ["pr:ΔQ/ΔP is the slope:3:3"],
+        ["pr:ΔQ/ΔP is the slope:3:3", "t:✎  Problem Set 2"],
     ],
-    47: [  # point elasticity: step + its result box per click; note last
-        ["t:Step 1", "t:Q"],
-        ["t:Step 2", "t:dQ dP"],
-        ["t:Step 3", "t:Q"],
-        ["t:Step 4", "t:E D"],
-        ["t:#Note#1"],
+    43: [  # 2026-08-25: three steps now (the "solve for Q" step is
+           # gone, the example starts from the demand function)
+        ["t:Step 1", "t:dQ dP"],
+        ["t:Step 2", "t:Q"],
+        ["t:Step 3", "t:E D"],
     ],
-    51: [  # Q=10−P solution: steps, formula with step 4, verdict
+    47: [  # Q=10−P solution: steps, formula with step 4, verdict
         ["pr:Answer is:1:1"],
         ["pr:Answer is:2:2"],
         ["pr:Answer is:3:3"],
         ["pr:Answer is:4:4", "t:E D"],
         ["t:→"],
     ],
-    52: [  # linear case: D, explanation, regions, unit point, intercepts,
-        # "don't operate there" payoff last
+    48: [  # linear case (CT's graph): curve, then a brace + its region
+        # label per click, the unit-elastic point, the two intercepts,
+        # and the "don't operate there" payoff last
         ["cxn:2", "t:D"],
         ["t:Linear demand curve"],
-        ["t:E D  < −1"],
-        ["t:−1 <  E D  < 0"],
-        ["osp:4", "t:E D  = −1"],
-        ["t:E D  = −∞", "t:E D  = 0"],
-        ["grp:0", "cxn:3"],
+        ["osp:3", "t:E D  < −1"],
+        ["osp:4", "t:−1 <  E D  < 0"],
+        ["osp:5", "cxn:3", "t:E D  = −1"],
+        ["t:E D  = −∞", "cxn:4", "t:E D  = 0", "cxn:5"],
+        ["grp:0", "cxn:6"],
     ],
-    54: [  # Uber: chart + logo static; elasticity callout builds
+    50: [  # Uber: chart + logo static; elasticity callout builds
         ["grp:0", "cxn:0"],
     ],
-    55: [  # special cases: intro static; left panel, then right panel
+    51: [  # special cases: intro static; left panel, then right panel
         ["cxn:2", "t:D#1", "t:Perfectly Elastic", "t:E D"],
         ["cxn:5", "t:D#2", "t:Perfectly Inelastic", "t:E D"],
     ],
-    56: [  # determinants: substitutes block static; then remaining factors
+    52: [  # determinants: substitutes block static; then remaining factors
         ["pr:Availability of substitutes:3:3"],
         ["pr:Availability of substitutes:4:4"],
     ],
-    57: [  # market vs firm: first bullet static; conditions + photo together
+    53: [  # market vs firm: first bullet static; conditions + photo together
         ["pr:The elasticity a company:1:4", "grp:0"],
     ],
-    58: [  # re-anchor: own-price (faded) static; other two cards; next line
+    54: [  # re-anchor: own-price (faded) static; other two cards; next line
         ["t:Income elasticity", "t:E I"],
         ["t:Cross-price elasticity", "t:E X"],
         ["t:Own-price elasticity ✓"],
     ],
-    59: [  # income elasticity definition
+    55: [  # income elasticity definition
         ["pr:% change in quantity:1:1"],
     ],
-    60: [  # Rivian example: photo + badge static
+    56: [  # Rivian example: photo + badge static
         ["pr:Average income:1:1"],
         ["pr:Average income:2:2"],
     ],
-    63: [  # R3 solution
+    59: [  # R3 solution
         ["pr:Answer is:1:1"],
         ["pr:Answer is:2:4"],
         ["t:E I"],
         ["t:Does this seem"],
     ],
-    64: [  # income categories: row + its picture + caption per click
+    60: [  # income categories: row + its picture + caption per click
         ["pr:,:0:0", "grp:0"],
         ["pr:,:1:1", "grp:1"],
         ["pr:,:2:2", "grp:2"],
     ],
-    65: [  # recession retailers: lines static; recession marker; then the
+    61: [  # recession retailers: lines static; recession marker; then the
         # two stories (bullet + its curve label together)
         ["cxn:2", "t:U.S. economy"],
         ["pr:In 2007:1:1", "t:Walmart’s stock rose"],
         ["pr:In 2007:2:2", "t:Target’s stock fell"],
     ],
-    66: [  # inferior-goods news: whole panel one beat
+    62: [  # inferior-goods news: whole panel one beat
         ["pic:0", "pic:1", "pic:2", "t:Source: The Wall Street"],
     ],
-    67: [  # cross-price definition: formula static; cases with pictures
+    63: [  # cross-price definition: formula static; cases with pictures
         ["pr:% change in the quantity:1:1"],
         ["pr:% change in the quantity:2:3", "grp:0"],
         ["pr:% change in the quantity:4:4", "grp:1"],
     ],
-    68: [  # popcorn example: photo + badge static; question builds
+    64: [  # popcorn example: photo + badge static; question builds
         ["pr:When a movie theater:1:1"],
     ],
-    71: [  # popcorn solution
+    67: [  # popcorn solution
         ["pr:Unit free:1:2"],
         ["t:E X"],
         ["pr:Popcorn and movie tickets:0:0"],
     ],
-    72: [  # cross-price news: whole panel one beat
+    68: [  # cross-price news: whole panel one beat
         ["pic:0", "pic:1", "pic:2", "t:Source: The Wall Street"],
     ],
-    73: [  # cereal table: table + boxes static; takeaway line builds
+    69: [  # cereal table: table + boxes static; takeaway line builds
         ["t:Larger cross-price"],
     ],
-    74: [  # cheat sheet: definition, categories, computing — 3 beats
+    70: [  # cheat sheet: definition, categories, computing — 3 beats
         ["t:Definition", "t:E D", "t:Intuitively"],
         ["t:Categories", "t:Inelastic"],
         ["t:Computing elasticity", "t:Two observed", "t:E d",
          "t:Whole demand", "t:E d", "t:ΔQ/ΔP = slope"],
     ],
-    75: [  # post-work videos box + caption + arrow
+    71: [  # post-work videos box + caption + arrow
         ["t:▶"],
     ],
-    76: [  # post-work PS2 box, then the estimation note
+    72: [  # post-work PS2 box, then the estimation note
         ["t:▶"],
         ["grp:0"],
     ],
@@ -565,6 +576,8 @@ def default_plan(shapes, disp):
         figs.sort(key=lambda s: (0 if s["tag"] in ("pic", "grpSp")
                                  else 1, s["y"], s["x"]))
         fig_targets = [(s["id"], None) for s in figs]
+        if disp in FIG_GROUP and FIG_GROUP[disp] is None:
+            fig_targets = []          # figure stays visible from the start
         if fig_targets:
             if not bullet_beats:
                 bullet_beats.append(fig_targets)

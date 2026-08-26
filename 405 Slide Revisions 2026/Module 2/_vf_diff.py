@@ -32,39 +32,21 @@ EMU = D.EMU
 
 # our display number -> (final deck, its display number)
 MAP = {
-    # our display -> its slide in one of the final decks.
-    # (Since 2026-08-25 our order matches theirs, so the matched slides
-    # run in the same sequence.)
-    # ---- Video 1 -------------------------------------------------
-    1: (V1, 1), 2: (V1, 2), 3: (V1, 3), 4: (V1, 4), 5: (V1, 5),
-    6: (V1, 6), 7: (V1, 7), 8: (V1, 8), 9: (V1, 9), 10: (V1, 10),
-    11: (V1, 11), 14: (V1, 12),
-    # 12, 13 (Netflix pair) and 15 (Mega Millions) are not in the final
-    # ---- Video 2 -------------------------------------------------
-    16: (V2, 1), 17: (V2, 2), 18: (V2, 3), 19: (V2, 4), 20: (V2, 5),
-    21: (V2, 6), 22: (V2, 7), 23: (V2, 8), 24: (V2, 9), 25: (V2, 10),
-    # 26, 27 (Inside Out 2 pair) are not in the final
-    # ---- Video 3 -------------------------------------------------
-    28: (V3, 1), 29: (V3, 2), 30: (V3, 3), 31: (V3, 4), 32: (V3, 5),
-    33: (V3, 6), 34: (V3, 7), 35: (V3, 8), 36: (V3, 9), 37: (V3, 10),
-    38: (V3, 11), 39: (V3, 12), 40: (V3, 13), 43: (V3, 14),
-    46: (V3, 15), 49: (V3, 16), 50: (V3, 17), 51: (V3, 18),
-    52: (V3, 19), 53: (V3, 20), 54: (V3, 21), 55: (V3, 22),
-    56: (V3, 23),
-    # 41/42, 44/45, 47/48 (poll pairs) and 57 (summary) are not in the
-    # final decks
+    # From 2026-08-25 the deck's first 45 slides ARE the three final
+    # decks laid end to end, so the map is a straight run:
+    #   1-12  -> Video 1        13-22 -> Video 2        23-45 -> Video 3
+    # There is nothing else in the deck: the slides Nico did not use
+    # moved out to "Module 2 - Potential Practice Exercises.pptx".
 }
-
-# the order the final decks imply, with our unmatched slides kept in
-# place relative to their neighbours
-NEW_ORDER = (
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    + [16, 17, 18, 19, 20, 21, 24, 25, 22, 23, 26, 27]
-    + [28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
-    + [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
-    + [40, 41]
-    + [52, 53, 54, 55, 56, 57]
-)
+MAP = {}
+for _i in range(1, 13):
+    MAP[_i] = (V1, _i)
+for _i in range(1, 11):
+    MAP[12 + _i] = (V2, _i)
+for _i in range(1, 24):
+    MAP[22 + _i] = (V3, _i)
+# 2026-08-25: the deck is now EXACTLY the three videos - 45 slides,
+# every one of them mapped.  Nothing is unmatched any more.
 
 
 def tree_of(deck, disp):

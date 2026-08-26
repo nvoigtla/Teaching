@@ -25,3 +25,7 @@ __pycache__/
 *_t-1.pptx
 *_t-2.pptx
 *.pptx.tmp
+
+# Render / probe output and side-path test builds
+_probe/
+*_test.pptx

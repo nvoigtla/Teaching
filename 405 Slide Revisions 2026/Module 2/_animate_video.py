@@ -51,15 +51,15 @@ EMU = 914400.0
 # 2026-08-24: CT adoption of 30-52 (CT 34-60) — our extra
 # elasticity slide dropped, CT's two regression slides merged,
 # and six poll placeholders inserted.
-SKIP_TITLE = {1, 16, 28}
-SKIP_AGENDA = {17, 29, 57}      # slide 2 is no longer static: in
+SKIP_TITLE = {1, 13, 23}
+SKIP_AGENDA = {14, 24}      # slide 2 is no longer static: in
                                 # his final Video 1 deck the
                                 # teaching-note link fades in on
                                 # its own click (2026-08-25)
-SKIP_MEDIA = {4, 5, 6, 22, 24, 41, 42, 44, 45, 47, 48}
+SKIP_MEDIA = {4, 5, 6, 19, 21}
                                 # 4/5/6/22 arrive from the final
                                 # decks with their own <p:timing>
-SKIP_STATIC = {11, 36, 50, 51, 54}
+SKIP_STATIC = {11, 31, 39, 40, 43}
                                 # 36: the data table; 11/40/41/54
                                 # were made fully static in his
                                 # final decks (2026-08-25)
@@ -104,28 +104,11 @@ PLANS = {
         ["pr:We know:2:2"],
         ["pr:We know:3:3"],
     ],
-    12: [
-        ["pr:In 2014:1:1"],
-        ["pr:In 2014:2:5"],
-    ],
-    13: [
-        ["t:E D"],
-        ["t:where"],
-        ["pr:→:0:0"],
-        ["pr:→:1:1"],
-        ["pr:→:2:2"],
-    ],
-    14: [  # 2026-08-25: first question + its options are up front;
+    12: [  # 2026-08-25: first question + its options are up front;
            # one click brings the second question and its options
         ["pr:What does this suggest:4:8"],
     ],
-    15: [
-        ["pr:April 2025:1:1"],
-        ["pr:April 2025:2:2"],
-        ["pr:April 2025:3:3"],
-        ["grp:0"],
-    ],
-    18: [  # CT 21: objective, its rule bar, the firm's objective, its
+    15: [  # CT 21: objective, its rule bar, the firm's objective, its
         # rule bar, then today's question
         ["t:General objective"],
         ["t:Net benefits are maximized"],
@@ -133,40 +116,36 @@ PLANS = {
         ["t:Produce where Marginal Revenue"],
         ["t:Today: how to compute"],
     ],
-    19: [
+    16: [
         ["t:MR"],
         ["t:Derivative", "cxn:0"],
         ["t:How to compute"],
     ],
-    20: [  # calculus refresher, relaid out: definition card, the
+    17: [  # calculus refresher, relaid out: definition card, the
         # general rule, then the same rule on numbers
         ["grp:0"],
         ["t:The general rule", "t:If"],
         ["t:A worked example", "t:With a = 1"],
         ["t:→"],
     ],
-    21: [  # three steps, each with its sub-line and its formula box
+    18: [  # three steps, each with its sub-line and its formula box
         ["t:Step 1", "t:P"],
         ["t:Step 2", "t:TR"],
         ["t:Step 3", "t:MR"],
         ["t:✎  Problem Set 2", "t:▤  Teaching Note"],
     ],
-    25: [
+    22: [
         ["pr:MR:1:1"],
         ["pr:MR:2:2"],
         ["pr:MR:3:3"],
         ["pr:MR:4:4"],
     ],
-    23: [
+    20: [
         ["t:1.", "t:P"],
         ["t:2.", "t:TR"],
         ["t:3.", "t:MR"],
     ],
-    26: [
-        ["pr:What is the revenue:0:0"],
-        ["pr:What is the revenue:1:1"],
-    ],
-    33: [  # the product, then the price history with ALL of its native
+    28: [  # the product, then the price history with ALL of its native
            # axis labels on the same beat (a figure and its labels are
            # one reveal)
         ["grp:0"],
@@ -174,45 +153,40 @@ PLANS = {
          "t:May", "t:Jun", "t:Jul", "t:Aug", "t:Sep",
          "t:$83.99", "t:$62.98", "t:$35.00"],
     ],
-    27: [
-        ["pr:1.  Inverse demand:0:2"],
-        ["t:MR"],
-        ["pr:Why revenue maximization:0:0"],
-    ],
     # ---- Video 3 -----------------------------------------------------
-    35: [  # only the elasticity formula is revealed
+    30: [  # only the elasticity formula is revealed
         ["t:E D  ="],
     ],
-    37: [  # the gold line, then the blue one, then the question
+    32: [  # the gold line, then the blue one, then the question
         ["cxn:3"],
         ["cxn:2"],
         ["grp:0"],
     ],
-    38: [  # just the two vertical residuals
+    33: [  # just the two vertical residuals
         ["cxn:3"],
         ["cxn:4"],
     ],
-    39: [  # the table is up front; equation, then the hand-off line
+    34: [  # the table is up front; equation, then the hand-off line
         ["grp:1"],
         ["t:Now that we have"],
     ],
-    40: [  # the three questions the polls ask, one at a time
+    35: [  # the three questions the polls ask, one at a time
         ["pr:Use the estimated:1:1"],
         ["pr:Use the estimated:2:2"],
         ["pr:Use the estimated:3:3"],
     ],
-    46: [  # each step of the 3-step method, then the answer
+    37: [  # each step of the 3-step method, then the answer
         ["pr:3-step method:1:1"],
         ["pr:3-step method:2:2"],
         ["pr:3-step method:3:3"],
         ["pr:3-step method:4:5"],
     ],
-    52: [  # the airline example, then each of the two questions
+    41: [  # the airline example, then each of the two questions
         ["pr:Transaction data:2:4"],
         ["pr:Transaction data:6:6"],
         ["pr:Transaction data:8:8"],
     ],
-    53: [  # the causal reading lands with both photos and the arrow
+    42: [  # the causal reading lands with both photos and the arrow
         ["t:Causal interpretation", "pic:0", "pic:1", "cxn:0"],
     ],
 }

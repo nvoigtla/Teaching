@@ -44,11 +44,11 @@ EMU = 914400.0
 # the module-wide default, which silently skipped VIDEO slide 4 and cost
 # it its manual groups.
 SPLICED_BY_DECK = {
-    "Module 2 - In Class Revised": {4, 5, 11, 12, 13, 32, 33, 37, 38,
-                                    42, 43, 49, 50, 61, 62, 69, 70},
+    "Module 2 - In Class Revised": {4, 5, 11, 12, 13, 32, 36, 45, 46,
+                                    57, 58, 65, 66},
     # 2026-08-25: 4, 5, 6 and 22 now come over verbatim from the
     # final video decks, groups and all
-    "Module 2 - Video Part Revised": {4, 5, 6, 22, 24},
+    "Module 2 - Video Part Revised": {4, 5, 6, 19, 21},
 }
 
 # --------------------------------------------------------------------------
@@ -68,8 +68,8 @@ _M2_INCLASS_GROUPS = {
         [(9.350, 2.570), (9.350, 6.050), (8.979, 2.285),
          (11.800, 6.150), (9.590, 3.080), (12.155, 5.357)],
     ],
-    18: [  # MB = MC anchor star + its label
-        [(9.750, 3.000), (10.240, 3.630)],
+    18: [  # MB = MC anchor star + its label (star moved 2026-08-25)
+        [(11.410, 5.280), (11.710, 5.660)],
     ],
     20: [  # aggregation: each "=" with the aggregate dot it produces,
            # all four "+" signs as one beat, aggregate legend swatch+label
@@ -79,6 +79,14 @@ _M2_INCLASS_GROUPS = {
         [(2.958, 2.856), (3.790, 3.714), (4.622, 4.573), (5.454, 5.431)],
         [(7.534, 5.431), (9.283, 5.536)],
         [(9.550, 2.870), (9.820, 2.790)],
+    ],
+    34: [  # 2026-08-25 (Nico): the "absolute value" label and its
+           # arrow are one object
+        [(1.380, 3.460), (2.360, 3.850)],
+    ],
+    28: [  # 2026-08-25 (Nico, from CT): the ringed percentage symbol,
+           # the arrow and the label are one object
+        [(8.100, 1.320), (7.200, 1.430), (6.625, 1.745)],
     ],
     21: [  # demand-shift figure: each shifted curve + its arrow + label
         [(7.791, 1.920), (8.254, 2.645), (9.226, 3.395)],   # rising
@@ -90,6 +98,14 @@ _M2_INCLASS_GROUPS = {
 # be a group that rule 1 just built (slide 19: the MPV convention callout
 # nests inside a group with the arrow that points at the curve).
 _M2_INCLASS_GROUPS_POST = {
+    # 2026-08-25 (Nico): each elasticity card is ONE object - rule 1 has
+    # already paired the box with its first line, so this pass folds the
+    # second line and the verdict into that group
+    34: [
+        [(0.800, 3.980), (0.800, 4.660), (0.800, 5.280)],
+        [(4.820, 3.980), (4.820, 4.660), (4.820, 5.280)],
+        [(8.840, 3.980), (8.840, 4.660), (8.840, 5.280)],
+    ],
     19: [
         [(5.500, 2.870), (4.092, 3.850)],
     ],
@@ -108,7 +124,7 @@ _M2_VIDEO_GROUPS = {
     # slide 37's "best fit?" callout: its text box is TALLER than the
     # cream rect (his own copy is a hand-scaled group), so the geometric
     # rule cannot see the pair - name the two explicitly
-    37: [
+    32: [
         [(8.480, 3.410), (8.590, 3.245)],
     ],
 }

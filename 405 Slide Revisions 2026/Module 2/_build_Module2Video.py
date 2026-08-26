@@ -197,8 +197,9 @@ def _tr_parabola(slide, figT, *, color=GOLD, weight_pt=3.0):
 def v02_outline(prs):
     slide = make_m2_outline(prs, 2, section_tag=TAG_VOUT,
                             highlight_set={2, 3})
-    # hand-moved 2026-08-24 (was 8.15, 6.68)
-    _add_outlined_box(slide, Inches(8.20), Inches(6.272), Inches(4.9),
+    # back to the convention position 2026-08-25: at 6.272 the box ran
+    # into the new coverage pill on item 4
+    _add_outlined_box(slide, Inches(8.20), Inches(6.680), Inches(4.9),
                       Inches(0.72),
                       "▶  Teaching Note – Demand Elasticity and Total "
                       "Revenue\nOn BL under “Module 2 Post-Work”",
@@ -799,6 +800,10 @@ def v14_four_cases(prs):
 
 
 def v15_netflix(prs):
+    """
+    NOT BUILT since 2026-08-25: this slide moved to
+    "Module 2 - Potential Practice Exercises.pptx".
+    """
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V1)
     _draw_action_title(slide, "The Netflix 2014 Price Increase")
@@ -817,12 +822,16 @@ def v15_netflix(prs):
             ("Profits (speculative)?", 1),
         ],
         size=26, sub_size=24)
-    _draw_footer(slide, FOOTER_TEXT, 12)
+    _draw_footer(slide, FOOTER_TEXT, 47)
     _add_groupdiscussion_badge(slide)
     return slide
 
 
 def v16_netflix_solution(prs):
+    """
+    NOT BUILT since 2026-08-25: this slide moved to
+    "Module 2 - Potential Practice Exercises.pptx".
+    """
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V1)
     _draw_action_title(slide, "Solution: Netflix")
@@ -863,7 +872,7 @@ def v16_netflix_solution(prs):
                "likely fell too", {})], 0, {}),
         ],
         size=22, line_spacing_pts=12)
-    _draw_footer(slide, FOOTER_TEXT, 13)
+    _draw_footer(slide, FOOTER_TEXT, 48)
     return slide
 
 
@@ -899,13 +908,17 @@ def v17_mcdonalds(prs):
         "aside roughly $35 million to compensate operators hit by the "
         "lower prices — side payments to align incentives across "
         "locations with different demand elasticities."))
-    _draw_footer(slide, FOOTER_TEXT, 14)
+    _draw_footer(slide, FOOTER_TEXT, 12)
     # 2026-08-25 (Nico): Poll Break here, not Group Discussion
     _add_pollbreak_badge(slide)
     return slide
 
 
 def v18_megamillions_revisited(prs):
+    """
+    NOT BUILT since 2026-08-25: this slide moved to
+    "Module 2 - Potential Practice Exercises.pptx".
+    """
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V1)
     _draw_action_title(slide, "Mega Millions, Revisited")
@@ -939,7 +952,7 @@ def v18_megamillions_revisited(prs):
         "large, the initial-point elasticity and the revenue rule based "
         "on it can point the wrong way — a good reason to be careful "
         "before applying the rule to big price moves."))
-    _draw_footer(slide, FOOTER_TEXT, 15)
+    _draw_footer(slide, FOOTER_TEXT, 49)
     _add_groupdiscussion_badge(slide)
     return slide
 
@@ -949,7 +962,7 @@ def v18_megamillions_revisited(prs):
 # ==========================================================================
 
 def v20_outline(prs):
-    return make_m2_outline(prs, 17, section_tag=TAG_VOUT,
+    return make_m2_outline(prs, 14, section_tag=TAG_VOUT,
                            highlight_set={4})
 
 
@@ -991,7 +1004,7 @@ def v21_why_mr(prs):
           {'bullet_style': 'none'})],
         size=23)
     _vnote(slide, 13)
-    _draw_footer(slide, FOOTER_TEXT, 18)
+    _draw_footer(slide, FOOTER_TEXT, 15)
     return slide
 
 
@@ -1036,7 +1049,7 @@ def v22_mr_definition(prs):
            (" : start from the demand function and use a 3-step method",
             {'bold': True})], 0, {})],
         size=24)
-    _draw_footer(slide, FOOTER_TEXT, 19)
+    _draw_footer(slide, FOOTER_TEXT, 16)
     return slide
 
 
@@ -1108,7 +1121,7 @@ def v23_calculus(prs):
                       Inches(0.55), "→  See TA’s Math Review Videos",
                       line=GOLD, text_color=NAVY, size=18, bold=True,
                       rounded=True, shadow=True, corner_pct=0.25)
-    _draw_footer(slide, FOOTER_TEXT, 20)
+    _draw_footer(slide, FOOTER_TEXT, 17)
     return slide
 
 
@@ -1180,7 +1193,7 @@ def v24_three_step(prs):
                        Inches(0.50), "Teaching Note: Marginal Revenue",
                        kind="tn")
     _vnote(slide, 16)
-    _draw_footer(slide, FOOTER_TEXT, 21)
+    _draw_footer(slide, FOOTER_TEXT, 18)
     return slide
 
 
@@ -1210,7 +1223,7 @@ def v25_three_step_summary(prs):
                       "→  PS 2 + Teaching Note Marginal Revenue",
                       line=GOLD, text_color=NAVY, size=18, bold=True,
                       rounded=True, shadow=True, corner_pct=0.25)
-    _draw_footer(slide, FOOTER_TEXT, 24)
+    _draw_footer(slide, FOOTER_TEXT, 21)
     return slide
 
 
@@ -1277,13 +1290,13 @@ def v26_mr_graph(prs):
                (figT.x(830), figT.y(158000)), color=GOLD, weight_pt=1.75,
                head=True)
     _vnote(slide, 18)
-    _draw_footer(slide, FOOTER_TEXT, 24)
+    _draw_footer(slide, FOOTER_TEXT, 21)
     return slide
 
 
 def v27_mr_vs_price(prs):
     return make_content_bulleted(
-        prs, 25, TAG_V2, "Why Is MR Different From the Price?",
+        prs, 22, TAG_V2, "Why Is MR Different From the Price?",
         [
             ([("MR", {'italic': True}),
               (" : additional revenue from selling one more unit. "
@@ -1344,11 +1357,15 @@ def v29_mr_solution(prs):
                            color=RED if i == 2 else NAVY,
                            fill=CREAM, line=NAVY, rounded=True)
         y = int(y + Inches(1.45))
-    _draw_footer(slide, FOOTER_TEXT, 23)
+    _draw_footer(slide, FOOTER_TEXT, 20)
     return slide
 
 
 def v30_insideout(prs):
+    """
+    NOT BUILT since 2026-08-25: this slide moved to
+    "Module 2 - Potential Practice Exercises.pptx".
+    """
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V2)
     _draw_action_title(slide, "Inside Out 2's Marginal Revenue")
@@ -1377,13 +1394,17 @@ def v30_insideout(prs):
         size=24, line_spacing_pts=14)
     _vid_media(slide, "ct_insideout_image7.png", left=Inches(8.35),
                top=Inches(1.90), width=Inches(4.2))
-    _draw_footer(slide, FOOTER_TEXT, 26)
+    _draw_footer(slide, FOOTER_TEXT, 50)
     # 2026-08-24 (Nico): Poll Break, not Group Discussion
     _add_pollbreak_badge(slide)
     return slide
 
 
 def v31_insideout_solution(prs):
+    """
+    NOT BUILT since 2026-08-25: this slide moved to
+    "Module 2 - Potential Practice Exercises.pptx".
+    """
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_V2)
     _draw_action_title(
@@ -1427,7 +1448,7 @@ def v31_insideout_solution(prs):
            (" – so maximizing revenue is (almost) maximizing profit",
             {})], 0, {})],
         size=22)
-    _draw_footer(slide, FOOTER_TEXT, 27)
+    _draw_footer(slide, FOOTER_TEXT, 51)
     return slide
 
 
@@ -1436,7 +1457,7 @@ def v31_insideout_solution(prs):
 # ==========================================================================
 
 def v33_outline(prs):
-    slide = make_m2_outline(prs, 29, section_tag=TAG_VOUT,
+    slide = make_m2_outline(prs, 24, section_tag=TAG_VOUT,
                             highlight_set={5})
     return slide
 
@@ -1444,7 +1465,7 @@ def v33_outline(prs):
 def v34_how_estimate(prs):
     """CT slide 34."""
     slide = make_content_bulleted(
-        prs, 30, TAG_V3, "How to Estimate a Demand Curve?",
+        prs, 25, TAG_V3, "How to Estimate a Demand Curve?",
         [
             ("Use regression analysis to estimate the relationship "
              "between price and quantity", 0),
@@ -1467,7 +1488,7 @@ def v35_abtest(prs):
         slide, "A/B Testing: What Is the Demand Function for This Product?")
     _vid_media(slide, "ct_abtest_image8.png", left=Inches(4.85),
                top=Inches(1.60), height=Inches(5.35), width=None)
-    _draw_footer(slide, FOOTER_TEXT, 31)
+    _draw_footer(slide, FOOTER_TEXT, 26)
     return slide
 
 
@@ -1477,7 +1498,7 @@ def v36_amazon_exp(prs):
     _draw_action_title(slide, "A/B Testing: Amazon “Experiments”")
     _vid_media(slide, "ct_amazonexp_image9.png", left=Inches(2.55),
                top=Inches(1.70), width=Inches(8.2))
-    _draw_footer(slide, FOOTER_TEXT, 32)
+    _draw_footer(slide, FOOTER_TEXT, 27)
     return slide
 
 
@@ -1595,14 +1616,14 @@ def v37_amazon_recent(prs):
               Inches(0.34), "camelcamelcamel.com", size=14, italic=True,
               color=CBLUE, font="Calibri", align=PP_ALIGN.CENTER)
     _set_notes(slide, S33_NOTE)
-    _draw_footer(slide, FOOTER_TEXT, 33)
+    _draw_footer(slide, FOOTER_TEXT, 28)
     return slide
 
 
 def v38_econometrics(prs):
     """CT slide 38."""
     slide = make_content_bulleted(
-        prs, 34, TAG_V3, "Econometric Estimates",
+        prs, 29, TAG_V3, "Econometric Estimates",
         [
             ([("Econometrics:  ", {'bold': True}),
               ("combine economics, statistics, and mathematical model "
@@ -1660,7 +1681,7 @@ def v39_ols(prs):
         + _omml_frac(_omml_run('P'), _omml_run('Q')),
         size_pt=24, color=NAVY, fill=CREAM, line=NAVY, rounded=True)
     _vnote(slide, 25)
-    _draw_footer(slide, FOOTER_TEXT, 35)
+    _draw_footer(slide, FOOTER_TEXT, 30)
     return slide
 
 
@@ -1689,7 +1710,7 @@ def v40_airline_data(prs):
     _vid_media(slide, "ct_airline_plane.png", left=Inches(8.150),
                top=Inches(2.900), width=Inches(4.200),
                rounded=False, shadow=False)
-    _draw_footer(slide, FOOTER_TEXT, 36)
+    _draw_footer(slide, FOOTER_TEXT, 31)
     return slide
 
 
@@ -1743,7 +1764,7 @@ def v41_scatter(prs):
     # 2026-08-25 (Nico): the question the two candidate lines pose.  His
     # own copy is a hand-scaled group; the padding here reproduces the
     # rendered geometry (box 8.48/3.41 6.35x0.56, text 8.59/3.25).
-    _draw_footer(slide, FOOTER_TEXT, 37)
+    _draw_footer(slide, FOOTER_TEXT, 32)
     _add_convention_box(
         slide, Inches(8.480), Inches(3.410), Inches(3.620),
         Inches(0.560),
@@ -1784,7 +1805,7 @@ def v42_least_squares(prs):
              {'bullet_style': 'none'}),
         ],
         size=19, line_spacing_pts=10)
-    _draw_footer(slide, FOOTER_TEXT, 38)
+    _draw_footer(slide, FOOTER_TEXT, 33)
     return slide
 
 
@@ -1807,15 +1828,17 @@ def v43_regression1(prs):
         slide, Inches(3.850), Inches(4.500), Inches(5.650), Inches(1.050),
         runs=[("Q = 478.95 \u2212 1.64 P", {'italic': True})],
         size=30, align=PP_ALIGN.CENTER)
-    _add_text(slide, Inches(1.000), Inches(6.100), Inches(11.330),
-              Inches(0.50),
-              # "and estimated" in his file is a slip for "an estimated"
-              "Now that we have an estimated demand curve, we can "
-              "compute MR!", size=21,
-              bold=True, italic=True, color=NAVY, font="Calibri",
-              align=PP_ALIGN.CENTER)
+    # 2026-08-25 (Nico, second pass): the line now points back at the
+    # 3-step method, and the parenthetical is set regular, not bold
+    _add_hierarchical_bullets(
+        slide, Inches(1.000), Inches(6.100), Inches(11.330), Inches(0.71),
+        [([("Now that we have an estimated demand curve, we can "
+            "compute MR ", {'bold': True, 'italic': True}),
+           ("(Following the 3 steps we’ve seen above)", {})], 0,
+          {'bullet_style': 'none', 'align': PP_ALIGN.CENTER})],
+        size=21)
     _vnote(slide, 29)
-    _draw_footer(slide, FOOTER_TEXT, 39)
+    _draw_footer(slide, FOOTER_TEXT, 34)
     return slide
 
 
@@ -1847,7 +1870,7 @@ def v44_regression2(prs):
         + _omml_text(' = 151'),
         size_pt=22, color=NAVY),
     _vnote(slide, 30)
-    _draw_footer(slide, FOOTER_TEXT, 50)
+    _draw_footer(slide, FOOTER_TEXT, 39)
     return slide
 
 
@@ -1894,7 +1917,7 @@ def v45_elasticity_from_est(prs):
         + _omml_text(' = −2.17   (elastic demand)'),
         size_pt=24, color=RED)
     _vnote(slide, 31)
-    _draw_footer(slide, FOOTER_TEXT, 51)
+    _draw_footer(slide, FOOTER_TEXT, 40)
     return slide
 
 
@@ -1931,7 +1954,7 @@ def v46_multivariate(prs):
         ],
         size=29, line_spacing_pts=16)
     _vnote(slide, 30)
-    _draw_footer(slide, FOOTER_TEXT, 50)
+    _draw_footer(slide, FOOTER_TEXT, 39)
     return slide
 
 
@@ -1955,7 +1978,7 @@ def v47_added_vars(prs):
                {'italic': True})],
         size=26, align=PP_ALIGN.CENTER)
     _vnote(slide, 31)
-    _draw_footer(slide, FOOTER_TEXT, 51)
+    _draw_footer(slide, FOOTER_TEXT, 40)
     return slide
 
 
@@ -1994,7 +2017,7 @@ def v48_application(prs):
                        Inches(0.500), "Problem Set 2", kind="ps")
     _add_pollbreak_badge(slide)
     _vnote(slide, 32)
-    _draw_footer(slide, FOOTER_TEXT, 40)
+    _draw_footer(slide, FOOTER_TEXT, 35)
     return slide
 
 
@@ -2026,7 +2049,7 @@ def v49_ed_solution(prs):
         ],
         size=27, line_spacing_pts=16)
     _vnote(slide, 33)
-    _draw_footer(slide, FOOTER_TEXT, 43)
+    _draw_footer(slide, FOOTER_TEXT, 36)
     return slide
 
 
@@ -2055,7 +2078,7 @@ def v50_mr_solution(prs):
         ],
         size=27, sub_size=26, line_spacing_pts=14)
     _vnote(slide, 34)
-    _draw_footer(slide, FOOTER_TEXT, 46)
+    _draw_footer(slide, FOOTER_TEXT, 37)
     return slide
 
 
@@ -2114,14 +2137,14 @@ def v51_raise_price(prs):
               Inches(0.34), "Inelastic", size=18, bold=True,
               color=CBLUE, font="Calibri")
     _vnote(slide, 35)
-    _draw_footer(slide, FOOTER_TEXT, 49)
+    _draw_footer(slide, FOOTER_TEXT, 38)
     return slide
 
 
 def v52_transaction_issues(prs):
     """CT slide 56."""
     slide = make_content_bulleted(
-        prs, 52, TAG_V3,
+        prs, 41, TAG_V3,
         "Issues With Transaction Data: Why Randomization Is Key",
         [
             ([("Transaction data:  ", {'bold': True}),
@@ -2172,7 +2195,7 @@ def v53_coffee(prs):
     _vid_media(slide, "ct_s57_image20.png", left=Inches(7.700),
                top=Inches(4.000), width=Inches(2.400))
     _vnote(slide, 37)
-    _draw_footer(slide, FOOTER_TEXT, 53)
+    _draw_footer(slide, FOOTER_TEXT, 42)
     return slide
 
 
@@ -2200,7 +2223,7 @@ def v54_omitted(prs):
     _vid_media(slide, "ct_s58_image20.png", left=Inches(7.700),
                top=Inches(5.050), width=Inches(2.300))
     _vnote(slide, 38)
-    _draw_footer(slide, FOOTER_TEXT, 54)
+    _draw_footer(slide, FOOTER_TEXT, 43)
     return slide
 
 
@@ -2220,7 +2243,7 @@ def v55_spurious(prs):
               size=14, italic=True, color=CBLUE, font="Calibri",
               align=PP_ALIGN.CENTER)
     _vnote(slide, 39)
-    _draw_footer(slide, FOOTER_TEXT, 55)
+    _draw_footer(slide, FOOTER_TEXT, 44)
     return slide
 
 
@@ -2242,18 +2265,49 @@ def v56_randomization(prs):
         ],
         size=27, line_spacing_pts=18)
     _vnote(slide, 40)
-    _draw_footer(slide, FOOTER_TEXT, 56)
+    _draw_footer(slide, FOOTER_TEXT, 45)
     return slide
 
 
 def v57_summary(prs):
-    return make_m2_outline(prs, 57, section_tag="Module 2 · Summary",
+    """
+    NOT BUILT since 2026-08-25: this slide moved to
+    "Module 2 - Potential Practice Exercises.pptx".
+    """
+    return make_m2_outline(prs, 58, section_tag="Module 2 · Summary",
                            title="Module 2: Summary", descriptions=True)
 
 
 # ==========================================================================
 #  build_video() — 57-slide registry
 # ==========================================================================
+
+def _backup_divider_slide(prs):
+    """
+    NOT BUILT since 2026-08-25: this slide moved to
+    "Module 2 - Potential Practice Exercises.pptx".
+
+Divider introducing the slides that did NOT go into the videos.
+
+    Same family as the three video title slides - no top bar, no page
+    number - so it reads as a section break rather than a content slide.
+    """
+    slide = _blank_slide(prs)
+    _add_text(slide, 0, Inches(2.55), SLIDE_W, Inches(1.0),
+              "Slides not Used in Videos",
+              size=48, bold=True, color=NAVY, font="Calibri",
+              align=PP_ALIGN.CENTER)
+    _add_rect(slide, int((SLIDE_W - Inches(4.0)) / 2), Inches(3.72),
+              Inches(4.0), 54864, GOLD)
+    _add_text(slide, 0, Inches(4.06), SLIDE_W, Inches(0.55),
+              "Kept for reference: poll placeholders, further examples "
+              "and the module summary",
+              size=22, color=GRAY, font="Calibri",
+              align=PP_ALIGN.CENTER)
+    _add_rect(slide, 0, Inches(7.15), SLIDE_W, Inches(0.02), RULE)
+    _add_rect(slide, MARGIN, Inches(7.135), GOLD_W, Inches(0.05), GOLD)
+    return slide
+
 
 def build_video(out_path=None):
     prs = Presentation()
@@ -2271,64 +2325,51 @@ def build_video(out_path=None):
     v12_ozempic_solution(prs)                                      #  9
     v13_profits(prs)                                               # 10
     v14_four_cases(prs)                                            # 11
-    v15_netflix(prs)                                               # 12
-    v16_netflix_solution(prs)                                      # 13
-    v17_mcdonalds(prs)                                             # 14
-    v18_megamillions_revisited(prs)                                # 15
+    v17_mcdonalds(prs)                                             # 12
     _video_title_slide(prs, "Marginal Revenue",
-                       "Module 2  ·  Video 2")                     # 16
-    v20_outline(prs)                                               # 17
-    v21_why_mr(prs)                                                # 18
-    v22_mr_definition(prs)                                         # 19
-    v23_calculus(prs)                                              # 20
-    v24_three_step(prs)                                            # 21
-    make_stub(prs, 22, TAG_V2, "Poll: MR when Q = 10 − 0.5P",
-              STUB_POLL)                                           # 22
-    v29_mr_solution(prs)                                           # 23
-    v26_mr_graph(prs)                                              # 24
-    v27_mr_vs_price(prs)                                           # 25
-    v30_insideout(prs)                                             # 26
-    v31_insideout_solution(prs)                                    # 27
+                       "Module 2  ·  Video 2")                     # 13
+    v20_outline(prs)                                               # 14
+    v21_why_mr(prs)                                                # 15
+    v22_mr_definition(prs)                                         # 16
+    v23_calculus(prs)                                              # 17
+    v24_three_step(prs)                                            # 18
+    make_stub(prs, 19, TAG_V2, "Poll: MR when Q = 10 − 0.5P",
+              STUB_POLL)                                           # 19
+    v29_mr_solution(prs)                                           # 20
+    v26_mr_graph(prs)                                              # 21
+    v27_mr_vs_price(prs)                                           # 22
     _video_title_slide(prs, "Demand Estimation",
-                       "Module 2  ·  Video 3")                     # 28
-    v33_outline(prs)                                               # 29
-    v34_how_estimate(prs)                                          # 30
-    v35_abtest(prs)                                                # 31
-    v36_amazon_exp(prs)                                            # 32
-    v37_amazon_recent(prs)                                         # 33
-    v38_econometrics(prs)                                          # 34
-    v39_ols(prs)                                                   # 35
-    v40_airline_data(prs)                                          # 36
-    v41_scatter(prs)                                               # 37
-    v42_least_squares(prs)                                         # 38
-    v43_regression1(prs)                                           # 39
-    v48_application(prs)                                           # 40
-    # CT runs three polls here (its slides 47/48, 50/51, 53/54).  Those
-    # live on CT's PollEverywhere account, so they go in as OUR stubs —
-    # placeholders marking where Nico inserts his own activities.
-    make_stub(prs, 41, TAG_V3, "Poll: What is Eᴅ at P = 140?",
-              STUB_POLL)                                           # 41
-    make_stub(prs, 42, TAG_V3, "Poll results: elasticity",
-              STUB_POLL)                                           # 42
-    v49_ed_solution(prs)                                           # 43
-    make_stub(prs, 44, TAG_V3, "Poll: What is MR at P = 140?",
-              STUB_POLL)                                           # 44
-    make_stub(prs, 45, TAG_V3, "Poll results: marginal revenue",
-              STUB_POLL)                                           # 45
-    v50_mr_solution(prs)                                           # 46
-    make_stub(prs, 47, TAG_V3, "Poll: pricing recommendation",
-              STUB_POLL)                                           # 47
-    make_stub(prs, 48, TAG_V3, "Poll results: pricing recommendation",
-              STUB_POLL)                                           # 48
-    v51_raise_price(prs)                                           # 49
-    v46_multivariate(prs)                                          # 50
-    v47_added_vars(prs)                                            # 51
-    v52_transaction_issues(prs)                                    # 52
-    v53_coffee(prs)                                                # 53
-    v54_omitted(prs)                                               # 54
-    v55_spurious(prs)                                              # 55
-    v56_randomization(prs)                                         # 56
-    v57_summary(prs)                                               # 57
+                       "Module 2  ·  Video 3")                     # 23
+    v33_outline(prs)                                               # 24
+    v34_how_estimate(prs)                                          # 25
+    v35_abtest(prs)                                                # 26
+    v36_amazon_exp(prs)                                            # 27
+    v37_amazon_recent(prs)                                         # 28
+    v38_econometrics(prs)                                          # 29
+    v39_ols(prs)                                                   # 30
+    v40_airline_data(prs)                                          # 31
+    v41_scatter(prs)                                               # 32
+    v42_least_squares(prs)                                         # 33
+    v43_regression1(prs)                                           # 34
+    v48_application(prs)                                           # 35
+    v49_ed_solution(prs)                                           # 36
+    v50_mr_solution(prs)                                           # 37
+    v51_raise_price(prs)                                           # 38
+    v46_multivariate(prs)                                          # 39
+    v47_added_vars(prs)                                            # 40
+    v52_transaction_issues(prs)                                    # 41
+    v53_coffee(prs)                                                # 42
+    v54_omitted(prs)                                               # 43
+    v55_spurious(prs)                                              # 44
+    v56_randomization(prs)                                         # 45
+    # 2026-08-25: the deck ENDS here, at 45 slides - Videos 1, 2 and 3
+    # laid end to end, matching "Videos Final" exactly.  Nico moved the
+    # slides he did not use into "Module 2 - Potential Practice
+    # Exercises.pptx": the Netflix pair, Mega Millions, the Inside Out 2
+    # pair, the six PollEverywhere stubs and the module summary.  Their
+    # builders are still in this file, uncalled, so that deck can be
+    # regenerated - see _backup_divider_slide and the functions it used
+    # to introduce.
     # CT's own source links, restored on the runs we adopted
     apply_ct_source_links(prs)
 
