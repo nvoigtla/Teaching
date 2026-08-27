@@ -320,17 +320,16 @@ NOTES = {
         "hits this product harder than the average."),
 
     60: (
-        "The sign and the size of the income elasticity classify the "
-        "good. Above zero it is a normal good, so demand rises with "
-        "income. Above one it is a luxury good, so demand rises faster "
-        "than income, like the Rivian we just computed. Below zero it "
-        "is an inferior good: demand actually falls as people get "
-        "richer, because they trade up to something else. Store brands, "
-        "instant noodles, and secondhand goods are the standard "
-        "examples. Nothing pejorative is meant by “inferior”. It is a "
-        "statement about the income elasticity, not about quality."),
-
-    61: (
+        # 2026-08-26: the three lines that used to sit on the slide are
+        # now the first sentences here - the slide is the figure alone
+        "In 2007, Target's stock price was much higher than Walmart's. "
+        "Then the U.S. economy entered a recession in December 2007 and "
+        "average incomes fell. Walmart sells inferior goods, so lower "
+        "incomes raised its sales and its stock price rose. Target "
+        "sells normal goods, so lower incomes reduced demand and its "
+        "stock price fell. Show the left half of the figure first, ask "
+        "the class which line is which and what happened after the "
+        "recession began, then click to fade the cover away. "
         "Here is why the classification pays off. In 2007 Target's "
         "stock traded well above Walmart's. Then the economy entered "
         "recession and the two moved in opposite directions: Walmart's "
@@ -342,7 +341,7 @@ NOTES = {
         "volume. The two series here are digitized from the printed "
         "figure, so read the shape rather than the exact levels."),
 
-    63: (
+    62: (
         "The third measure. Cross-price elasticity is the percent "
         "change in the quantity demanded of good X divided by the "
         "percent change in the price of another good Y. The sign is "
@@ -353,13 +352,13 @@ NOTES = {
         "teams and antitrust authorities use to decide which products "
         "actually compete with each other."),
 
-    64: (
+    63: (
         "A concrete one. A movie theater raises its ticket price from "
         "$15 to $18, and the quantity of popcorn it sells falls by 8%. "
         "What is the implied cross-price elasticity, and what does its "
         "sign tell you about the two products? Take it on the poll."),
 
-    67: (
+    66: (
         "The percent change in the quantity of popcorn is −8%. The "
         "percent change in the ticket price is 18 minus 15 over 15, or "
         "+20%. So the cross-price elasticity is −8 divided by 20, which "
@@ -369,7 +368,7 @@ NOTES = {
         "prices lower than you might expect: the ticket is what sells "
         "the popcorn."),
 
-    70: (
+    69: (
         "A one-page summary of own-price elasticity. The definition and "
         "the intuition are at the top. The three categories are in the "
         "middle: inelastic between −1 and 0, unit-elastic at exactly "
@@ -379,14 +378,14 @@ NOTES = {
         "known, where ΔQ/ΔP is the slope of Q as a function of P. Keep "
         "this slide next to you when you do Problem Set 2."),
 
-    71: (
+    70: (
         "That is where we stop in class. The remaining topics, demand "
         "and revenue, elasticity and revenue, and marginal revenue, are "
         "covered in the post-work. Watch Module 2 Videos 1 and 2, and "
         "use Practice Videos 1 and 2 to work through the computations. "
         "Everything is on BruinLearn under “Module 2 Post-Work”."),
 
-    72: (
+    71: (
         "The last topic is demand estimation, which is where these "
         "numbers come from in practice: market experiments and "
         "regression. Module 2 Video 3 covers it and Problem Set 2 gives "

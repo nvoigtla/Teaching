@@ -31,10 +31,12 @@ EMU = D.EMU
 def MAP(his):
     """His display number -> the same slide in a fresh build.
 
-    From 2026-08-25 the build itself drops the six slides he deleted, so
-    the two decks line up one to one.
+    2026-08-26: display slide 60 (Income Elasticity: Categories) was
+    deleted, so from 61 on his hand-edited deck runs one ahead of the
+    build.  Set IC_SHIFT_FROM=0 to compare two decks of equal length.
     """
-    return his
+    cut = int(os.environ.get("IC_SHIFT_FROM", "60"))
+    return his - 1 if cut and his > cut else his
 
 
 def struct(deck, disp):

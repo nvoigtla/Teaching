@@ -33,6 +33,21 @@ ROSE = RGBColor(0xF2, 0xC4, 0xC4)        # pale red (revenue lost)
 PALE_GREEN = RGBColor(0xC9, 0xE3, 0xC9)  # pale green (revenue gained)
 CBLUE = RGBColor(0x00, 0x70, 0xC0)       # concept blue
 
+# 2026-08-26 (Nico): the deck-wide rule is that a solution slide's FINAL
+# line is dark red.  The standalone video deck reproduces the three
+# recorded video decks slide for slide, so it stays as taped; the merged
+# "Module 2 - Revised.pptx" builds with this flag ON (_merge_Module2.py).
+RED_SOLUTIONS = False
+
+
+def _sol(opts):
+    """Paint a run dark red when the red-solution mode is on."""
+    if not RED_SOLUTIONS:
+        return opts
+    out = dict(opts)
+    out['color'] = RED
+    return out
+
 
 def _video_title_slide(prs, main, video_line):
     slide = _blank_slide(prs)
@@ -2041,9 +2056,11 @@ def v49_ed_solution(prs):
               (" in to get ", {}), ("Q", {'italic': True}), (":  ", {}),
               ("Q = 478.95 \u2212 1.64 \u00b7 140 = 249.35",
                {'bold': True, 'italic': True})], 0, {}),
-            ([("E\u1d05 = ", {'italic': True}),
-              ("\u22121.64 \u00b7 (140 / 249.35) = ", {}),
-              ("\u22120.92", {'bold': True})], 0, {}),
+            # the line that delivers the answer - dark red when the
+            # red-solution mode is on (2026-08-26, Nico)
+            ([("E\u1d05 = ", _sol({'italic': True})),
+              ("\u22121.64 \u00b7 (140 / 249.35) = ", _sol({})),
+              ("\u22120.92", _sol({'bold': True}))], 0, {}),
             ([("Demand is ", {}),
               ("inelastic", {'bold': True, 'color': CBLUE})], 0, {}),
         ],
@@ -2072,8 +2089,10 @@ def v50_mr_solution(prs):
               ("MR = 292 \u2212 1.22 Q", {'italic': True})], 1,
              {'bullet_style': 'none', 'size': 26}),
             ("MR at P = 140?", 0, {'bold': True}),
-            ([("P = 140  \u2192  Q = 249.35  \u2192  ", {}),
-              ("MR = \u221212", {'bold': True, 'italic': True})], 1,
+            # the line that delivers the answer (2026-08-26, Nico)
+            ([("P = 140  \u2192  Q = 249.35  \u2192  ", _sol({})),
+              ("MR = \u221212",
+               _sol({'bold': True, 'italic': True}))], 1,
              {'bullet_style': 'none', 'size': 26}),
         ],
         size=27, sub_size=26, line_spacing_pts=14)
@@ -2309,7 +2328,9 @@ Divider introducing the slides that did NOT go into the videos.
     return slide
 
 
-def build_video(out_path=None):
+def build_video(out_path=None, red_solutions=False):
+    global RED_SOLUTIONS
+    RED_SOLUTIONS = bool(red_solutions)
     prs = Presentation()
     prs.slide_width = int(SLIDE_W)
     prs.slide_height = int(SLIDE_H)
@@ -2385,4 +2406,6 @@ def build_video(out_path=None):
 
 if __name__ == "__main__":
     import sys as _s
-    build_video(_s.argv[1] if len(_s.argv) > 1 else None)
+    _args = [a for a in _s.argv[1:] if a != "--red-solutions"]
+    build_video(_args[0] if _args else None,
+                red_solutions="--red-solutions" in _s.argv[1:])

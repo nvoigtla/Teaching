@@ -45,7 +45,7 @@ EMU = 914400.0
 # it its manual groups.
 SPLICED_BY_DECK = {
     "Module 2 - In Class Revised": {4, 5, 11, 12, 13, 32, 36, 45, 46,
-                                    57, 58, 65, 66},
+                                    57, 58, 64, 65},
     # 2026-08-25: 4, 5, 6 and 22 now come over verbatim from the
     # final video decks, groups and all
     "Module 2 - Video Part Revised": {4, 5, 6, 19, 21},
@@ -92,6 +92,10 @@ _M2_INCLASS_GROUPS = {
         [(7.791, 1.920), (8.254, 2.645), (9.226, 3.395)],   # rising
         [(6.928, 2.331), (7.708, 2.881), (7.188, 3.653)],   # falling
     ],
+    49: [  # 2026-08-26 (Nico): the slide-wide warning box is wider than
+           # rule 1's 10" callout guard, so box + text are paired by hand
+        [(0.276, 1.450), (0.476, 1.570)],
+    ],
 }
 
 # Manual groups applied AFTER the geometric rules, so a member may itself
@@ -108,6 +112,18 @@ _M2_INCLASS_GROUPS_POST = {
     ],
     19: [
         [(5.500, 2.870), (4.092, 3.850)],
+    ],
+    # 2026-08-26 (Nico): the photo panel on slide 53 is picture +
+    # header + the message line underneath - rule 3 has already paired
+    # the picture with its header, so this folds the message in.
+    53: [
+        [(7.550, 1.764), (7.550, 6.300)],
+    ],
+    # 2026-08-26 (Nico): a figure and its source line are ONE object.
+    # Rule 2 has already paired the backing card with the first of the
+    # three table sections; this folds the source line into that group.
+    52: [
+        ["first", (7.975, 1.300), (8.125, 6.912)],
     ],
 }
 
@@ -149,7 +165,14 @@ MANUAL_GROUPS_POST_BY_DECK = {
 }
 # resolve for the deck actually being processed (a side-path build keeps
 # the canonical name plus a "_test" suffix)
-_STEM = DECK.stem[:-5] if DECK.stem.endswith("_test") else DECK.stem
+# a side-path build keeps the canonical name plus a suffix: "_test"
+# (hand-edit diffs) or "_red" (_merge_Module2.py's red-solution video
+# part)
+_STEM = DECK.stem
+for _sfx in ("_test", "_red"):
+    if _STEM.endswith(_sfx):
+        _STEM = _STEM[:-len(_sfx)]
+        break
 MANUAL_GROUPS = MANUAL_GROUPS_BY_DECK.get(_STEM, {})
 MANUAL_GROUPS_POST = MANUAL_GROUPS_POST_BY_DECK.get(_STEM, {})
 NO_GROUP_BOXES = NO_GROUP_BOXES_BY_DECK.get(_STEM, {})
@@ -300,6 +323,14 @@ def apply_manual_groups(spTree, disp, gid, post=False):
     # can spuriously match an untouched shape.
     cands = [c for c in spTree if ET.QName(c).localname in tags]
     for spec in specs:
+        # 2026-08-26: a spec may lead with "first" / "last" to pick the
+        # group's z-order.  Default stays "last" (PowerPoint's own
+        # behaviour, which reproduces Nico's hand-made groups); slide
+        # 52 needs "first" so the group carrying the table's backing
+        # card does not jump on top of the two table sections below it.
+        anchor = "last"
+        if spec and isinstance(spec[0], str):
+            anchor, spec = spec[0], spec[1:]
         members = []
         for want_x, want_y in spec:
             hit = None
@@ -319,7 +350,7 @@ def apply_manual_groups(spTree, disp, gid, post=False):
             members.append(hit)
             used.add(id(hit))
         members.sort(key=lambda e: cands.index(e))
-        make_group(spTree, members, gid, anchor="last")
+        make_group(spTree, members, gid, anchor=anchor)
         gid += 1
         n += 1
         print("  s%02d manual%s group of %d"
@@ -356,6 +387,9 @@ def process_slide(tree, disp):
             continue
         if box["b"][2] > 10 * EMU:
             continue          # agenda highlight bands, not callouts
+        if any(g["tag"] == "graphicFrame" and contains(box["b"], g["b"])
+               for g in info):
+            continue          # a table/chart backing card - rule 2's job
         if any(abs(box["b"][0] / EMU - bx) < 0.011
                and abs(box["b"][1] / EMU - by) < 0.011
                for bx, by in NO_GROUP_BOXES.get(disp, ())):
@@ -377,7 +411,9 @@ def process_slide(tree, disp):
     for back in info:
         if id(back["el"]) in used or back["tag"] != "sp":
             continue
-        if back["prst"] != "rect" or back["text"]:
+        # 2026-08-26: slide 68's table card is a roundRect (Nico
+        # asked for rounded edges on the table), so accept both
+        if back["prst"] not in ("rect", "roundRect") or back["text"]:
             continue
         if not has_outer_shadow(back["el"]):
             continue

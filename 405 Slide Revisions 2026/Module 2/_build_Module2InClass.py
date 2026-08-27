@@ -272,7 +272,7 @@ def _add_convention_box(slide, left, top, width, height, *,
                           fill_rgb=None, border=None, line_w=1.0,
                           corner_pct=0.12, size=15, align=PP_ALIGN.LEFT,
                           font="Calibri", pad_h=None, pad_v=None,
-                          line_spacing_pct=None):
+                          line_spacing_pct=None, fill_alpha_pct=None):
     """Cream-fill / navy-border rounded-rect explanation callout.
 
     The "Convention" textbox pattern from slide 14 generalised — use it
@@ -290,6 +290,11 @@ def _add_convention_box(slide, left, top, width, height, *,
     box" spec — cream fill, thin primary-color border, slight rounding,
     primary-color text.  Override ``fill_rgb`` / ``border`` only when you
     need a different accent.
+
+    ``fill_alpha_pct`` washes the fill out to that opacity (2026-08-26,
+    Nico): the WARNING variant of this box is a transparent dark-red
+    tint with a dark-red border, used where a line is a caution rather
+    than a convention.
     """
     fill = fill_rgb if fill_rgb is not None else RGBColor(0xFD, 0xF6, 0xE6)
     border = border if border is not None else NAVY
@@ -300,6 +305,11 @@ def _add_convention_box(slide, left, top, width, height, *,
     )
     shp.fill.solid()
     shp.fill.fore_color.rgb = fill
+    if fill_alpha_pct is not None:
+        srgb = shp._element.spPr.find(
+            qn('a:solidFill')).find(qn('a:srgbClr'))
+        alpha = ET.SubElement(srgb, qn('a:alpha'))
+        alpha.set('val', str(int(fill_alpha_pct * 1000)))
     shp.line.color.rgb = border
     shp.line.width = Pt(line_w)
     shp.shadow.inherit = False
@@ -372,7 +382,8 @@ def _add_convention_box(slide, left, top, width, height, *,
 
 def _add_rounded_filled_box(slide, left, top, width, height, label, *,
                              fill=NAVY, text_color=WHITE, line=None,
-                             size=18, bold=True, font="Calibri",
+                             size=18, bold=True, italic=False,
+                             font="Calibri",
                              corner_pct=0.06, shadow=True, line_w=0.75):
     """Rounded-corner filled rectangle with centered text and soft drop shadow.
 
@@ -412,6 +423,7 @@ def _add_rounded_filled_box(slide, left, top, width, height, label, *,
     run.font.name = font
     run.font.size = Pt(size)
     run.font.bold = bold
+    run.font.italic = italic
     run.font.color.rgb = text_color
     return shp
 
@@ -1205,6 +1217,23 @@ def _add_slide_jump_hyperlink_shape(source_slide, shape, target_slide):
     hlinkClick.set('action', 'ppaction://hlinksldjump')
 
 
+def _link_shape_to_url(slide, shape, url, *, tooltip=None):
+    """Make a shape or picture open an external URL when clicked.
+
+    2026-08-26: restores the podcast link Nico had on the original
+    Uber slide.  A CLICK link rather than a hover link — a hover link
+    would jump to the browser whenever the mouse crossed the box during
+    a lecture; the ScreenTip gives the hover feedback instead.
+    """
+    shape.click_action.hyperlink.address = url
+    cNvPr = shape._element.find('.//' + qn('p:cNvPr'))
+    if tooltip and cNvPr is not None:
+        hl = cNvPr.find(qn('a:hlinkClick'))
+        if hl is not None:
+            hl.set('tooltip', tooltip)
+    return shape
+
+
 # --------------------------------------------------------------------------
 # Image helpers — embed source-deck images into the new deck.
 # Images are pre-extracted to _source_images/slide{N}_{rId}.{ext}.
@@ -1242,7 +1271,8 @@ def _add_drop_shadow(shape, *, blur="50800", dist="38100",
 
 
 def _add_graphicframe_shadow(slide, left, top, width, height, *,
-                              shadow_alpha=45000):
+                              shadow_alpha=45000, rounded=False,
+                              corner_in=0.16):
     """White backing rectangle with an outerShdw effect, behind a
     graphicFrame (table or chart).  graphicFrames can't host
     a:effectLst directly; this rect supplies the shadow projected
@@ -1255,9 +1285,17 @@ def _add_graphicframe_shadow(slide, left, top, width, height, *,
     the table/chart so z-order is correct.
     """
     shdw = slide.shapes.add_shape(
-        MSO_SHAPE.RECTANGLE,
+        MSO_SHAPE.ROUNDED_RECTANGLE if rounded else MSO_SHAPE.RECTANGLE,
         int(left), int(top), int(width), int(height),
     )
+    if rounded:
+        # adj is a fraction of half the SHORTER side - fix the radius in
+        # inches so a wide card is not over-rounded
+        try:
+            shdw.adjustments[0] = min(
+                0.5, corner_in / (min(width, height) / 914400.0 / 2.0))
+        except Exception:
+            pass
     shdw.fill.solid()
     shdw.fill.fore_color.rgb = WHITE
     shdw.line.fill.background()
@@ -2274,12 +2312,17 @@ def _add_mixed_textbox(slide, left, top, width, height, segments, *,
                         align=PP_ALIGN.LEFT, default_color=NAVY,
                         default_size=24,
                         margin_left=None, margin_right=None,
-                        margin_top=None, margin_bottom=None):
+                        margin_top=None, margin_bottom=None,
+                        space_before_pts=None):
     """Build a textbox whose paragraphs mix plain text runs and inline OMML.
 
     segments: list of (kind, content, opts) tuples, with kind ∈ {"text",
     "omml", "break"}.  "break" inserts a new paragraph.  Opts may set
     `size`, `bold`, `italic`, `color`, `font` per run.
+
+    ``space_before_pts`` puts the same spcBef on every paragraph — the
+    sparse-slide spacing rule (few lines on a slide breathe better with
+    18 pt between them; Teaching CLAUDE.md, 2026-08-26).
     """
     box = slide.shapes.add_textbox(int(left), int(top),
                                      int(width), int(height))
@@ -2294,9 +2337,18 @@ def _add_mixed_textbox(slide, left, top, width, height, segments, *,
     if align == PP_ALIGN.CENTER: align_attr = ' algn="ctr"'
     elif align == PP_ALIGN.RIGHT: align_attr = ' algn="r"'
 
+    spc_xml = ('<a:spcBef><a:spcPts val="%d"/></a:spcBef>'
+               % int(space_before_pts * 100)) if space_before_pts else ''
+
     def _start_para():
+        if spc_xml:
+            ppr = f'<a:pPr{align_attr}>{spc_xml}</a:pPr>'
+        elif align_attr:
+            ppr = f'<a:pPr{align_attr}/>'
+        else:
+            ppr = ''
         return [f'<a:p xmlns:a="{A_NS}" xmlns:m="{M_NS}" xmlns:a14="{A14_NS}">',
-                f'<a:pPr{align_attr}/>' if align_attr else '']
+                ppr]
 
     paragraphs = [_start_para()]
     for kind, content, opts in segments:
@@ -2621,15 +2673,24 @@ def _add_styled_table(slide, left, top, width, height, rows_data, *,
                       header_size=None, backing_pad=Inches(0.15),
                       first_col_bold=True, first_col_align_left=True,
                       cell_fills=None, cell_text_colors=None,
-                      margin_v=None):
+                      margin_v=None, backing=True,
+                      backing_rounded=False):
     """rows_data: list of rows (row 0 = navy header). cell_fills /
-    cell_text_colors: optional {(r, c): RGBColor} overrides."""
+    cell_text_colors: optional {(r, c): RGBColor} overrides.
+
+    ``backing=False`` skips the shadowed white card — for a table that
+    is one of several stacked pieces sharing ONE backing drawn by the
+    caller (slide 52, where the three sections animate separately;
+    three stacked cards would cast shadows across each other).
+    """
     header_size = header_size or font_size
     left, top, width, height = int(left), int(top), int(width), int(height)
-    _add_graphicframe_shadow(slide, left - int(backing_pad),
-                             top - int(backing_pad),
-                             width + 2 * int(backing_pad),
-                             height + 2 * int(backing_pad))
+    if backing:
+        _add_graphicframe_shadow(slide, left - int(backing_pad),
+                                 top - int(backing_pad),
+                                 width + 2 * int(backing_pad),
+                                 height + 2 * int(backing_pad),
+                                 rounded=backing_rounded)
     n_rows, n_cols = len(rows_data), len(rows_data[0])
     gf = slide.shapes.add_table(n_rows, n_cols, left, top, width, height)
     tbl = gf.table
@@ -4371,10 +4432,11 @@ def slide_34_water_solution(prs):
         (_oED_frac('P'), NAVY),
         (_omml_text('−0.4') + _omml_text(' = ')
          + _omml_frac(_omml_text('−10%'), _o_pct('P')), NAVY),
-        # set navy like the others, 2026-08-25 (was RED)
+        # 2026-08-26 (Nico): the FINAL solution line is dark red on
+        # every solution slide; the steps above it stay navy
         (_o_pct('P') + _omml_text(' = ')
          + _omml_frac(_omml_text('−10%'), _omml_text('−0.4'))
-         + _omml_text(' = 25% price increase'), NAVY),
+         + _omml_text(' = 25% price increase'), RED),
     ]
     # equations and takeaway lifted 0.58" by hand 2026-08-25
     y = Inches(2.87)
@@ -4512,13 +4574,13 @@ def slide_39_yoga_solution(prs):
         size=26)
     _add_math_equation(
         slide, Inches(1.65), Inches(2.70), Inches(10.0), Inches(1.25),
-        # 2026-08-25 (Nico): capital D subscript, and navy like every
-        # other formula in the deck (was red)
+        # 2026-08-25 (Nico): capital D subscript.  2026-08-26: the
+        # final solution is dark red on every solution slide.
         _oED() + _omml_text(' = ')
         + _omml_frac(_o_pct('Q'), _o_pct('P')) + _omml_text(' = ')
         + _omml_frac(_omml_text('+100%'), _omml_text('−17%'))
         + _omml_text('  =  −5.88   (or about −6)'),
-        size_pt=28, color=NAVY)
+        size_pt=28, color=RED)
     _add_hierarchical_bullets(
         slide, MARGIN + Inches(0.15), Inches(4.35), Inches(12.4),
         Inches(2.2),
@@ -4611,8 +4673,9 @@ def slide_40_method1(prs):
         slide, Inches(4.30), Inches(6.36), Inches(3.90), Inches(0.62),
         "TA Math Review Videos", kind="video", size=16)
     # 2026-08-24: the deck-wide reference-box convention (glyph + the
-    # problem-set number only)
-    _add_reference_box(slide, MARGIN, Inches(6.45), Inches(3.0),
+    # problem-set number only).  2026-08-26: problem-set pointers live
+    # in the bottom-RIGHT corner deck-wide (PS_BOX_XY)
+    _add_reference_box(slide, PS_BOX_XY[0], PS_BOX_XY[1], Inches(3.0),
                        Inches(0.5), "Problem Set 2", kind="ps", size=18)
     _draw_footer(slide, FOOTER_TEXT, 38)
     # 2026-08-25 (Nico): two arrows from the convention card to the
@@ -4837,7 +4900,8 @@ def slide_41_megamillions_solution(prs):
         + _omml_frac(_o_pct('Q'), _o_pct('P')) + _omml_text(' = ')
         + _omml_frac(_omml_text('\u221270.5%'), _omml_text('150%'))
         + _omml_text('  \u2248  \u22120.47'),
-        size_pt=21, color=NAVY)
+        # 2026-08-26 (Nico): final solution in dark red
+        size_pt=21, color=RED)
 
     _add_convention_box(
         slide, Inches(1.85), Inches(6.42), Inches(9.6), Inches(0.62),
@@ -4928,7 +4992,10 @@ def slide_46_method2(prs):
         slide, MARGIN + Inches(0.15), Inches(4.65), Inches(12.4),
         Inches(2.1),
         [
-            ("ΔQ/ΔP is the slope of the demand curve", 0),
+            # 2026-08-26 (Nico): the ΔQ/ΔP term is set in red so it ties
+            # back to the red ring around it in the formula above
+            ([("ΔQ/ΔP", {'color': RED}),
+              (" is the slope of the demand curve", {})], 0, {}),
             ([("Mathematically: Derivative of ", {}),
               ("Q", {'italic': True}), (" with respect to ", {}),
               ("P", {'italic': True}), (" :  ", {}),
@@ -4937,7 +5004,9 @@ def slide_46_method2(prs):
             ("For a linear demand curve, the slope is constant", 0),
         ],
         size=24, sub_size=22, line_spacing_pts=10)
-    _add_reference_box(slide, Inches(4.90), Inches(6.60), Inches(3.00),
+    # 2026-08-26 (Nico): the pointer moves to the bottom-right corner,
+    # the deck's default position for a post-work reference box
+    _add_reference_box(slide, PS_BOX_XY[0], PS_BOX_XY[1], Inches(3.00),
                        Inches(0.50), "Problem Set 2", kind="ps", size=17)
     _draw_footer(slide, FOOTER_TEXT, 42)
     return slide
@@ -4950,17 +5019,23 @@ def slide_46_method2(prs):
 def slide_47_point_steps(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_OWN)
-    _draw_action_title(slide, "Computing the Point Elasticity: Step-by-Step")
-    # given: inverse demand + task (top-left cream card)
+    # 2026-08-26 (Nico): the title now names the method, with "Method 2"
+    # in red exactly as on slide 42
+    _custom_title_runs(slide, [
+        ("Computing the Point Elasticity: ", {}),
+        ("Method 2", {'color': RED}),
+        (" – Step-by-Step", {})], size=32)
+    # given: inverse demand + task (top-left cream card).  2026-08-26:
+    # wider card, text up from 17 to 24 pt
     _add_convention_box(
-        slide, MARGIN + Inches(0.15), Inches(1.70), Inches(5.9),
+        slide, MARGIN + Inches(0.15), Inches(1.70), Inches(6.644),
         Inches(1.15),
         # 2026-08-25 (Nico): start from the DEMAND function itself,
         # so there is no "solve for Q" step to do first
         runs=[("Demand function:   Q = 400 − 4 P", {'bold': True}),
               ("\nTask: Compute the point elasticity at P = 25",
                {'bold': True})],
-        size=17)
+        size=24)
     steps = [
         ("Step 1:  Compute derivative dQ/dP",
          _oD_deriv() + _omml_text(' = −4')),
@@ -4999,20 +5074,24 @@ def slide_48_from_demand_fn(prs):
     _draw_top_bar_tc(slide, TAG_OWN)
     _draw_action_title(
         slide, "Obtain Price Elasticity from the Demand Function")
+    # 2026-08-26 (Nico): three lines on an otherwise empty slide, so they
+    # go up to 28 pt and get 18 pt of air before each — the sparse-slide
+    # spacing rule in the Teaching CLAUDE.md
     _add_mixed_textbox(
         slide, MARGIN + Inches(0.15), Inches(2.30), Inches(12.4),
         Inches(2.6),
         [
-            ("text", "A firm’s demand function is  ", {'size': 26}),
+            ("text", "A firm’s demand function is  ", {'size': 28}),
             ("omml", _omml_run('Q') + _omml_text(' = 10 − ')
-             + _omml_run('P'), {'size': 26}),
+             + _omml_run('P'), {'size': 28}),
             ("break", None, None),
-            ("text", "The firm charges a price of  ", {'size': 26}),
-            ("omml", _omml_run('P') + _omml_text(' = 2'), {'size': 26}),
+            ("text", "The firm charges a price of  ", {'size': 28}),
+            ("omml", _omml_run('P') + _omml_text(' = 2'), {'size': 28}),
             ("break", None, None),
             ("text", "What is its elasticity of demand at this point?",
-             {'size': 26, 'bold': True}),
-        ])
+             {'size': 28, 'bold': True}),
+        ],
+        default_size=28, space_before_pts=18)
     _draw_footer(slide, FOOTER_TEXT, 44)
     _add_pollbreak_badge(slide)
     return slide
@@ -5048,15 +5127,17 @@ def slide_51_qp_solution(prs):
             ("Step 3:", 0, {'bold': True}),
         ],
         size=24, line_spacing_pts=12)
+    # 2026-08-26 (Nico): the formula sits directly under "Step 3:"
     _add_math_equation(
-        slide, Inches(2.85), Inches(4.65), Inches(7.6), Inches(1.15),
+        slide, Inches(2.70), Inches(3.64), Inches(7.6), Inches(1.15),
         _oED() + _omml_text(' = ') + _oD_deriv() + _omml_text(' ∙ ')
         + _omml_frac(_omml_run('P'), _omml_run('Q'))
         + _omml_text(' = −1 × ')
         + _omml_frac(_omml_text('2'), _omml_text('8'))
         + _omml_text(' = −')
         + _omml_frac(_omml_text('1'), _omml_text('4')),
-        size_pt=26, color=NAVY)
+        # 2026-08-26 (Nico): final solution in dark red
+        size_pt=26, color=RED)
     _add_hierarchical_bullets(
         slide, MARGIN + Inches(0.15), Inches(6.05), Inches(12.4),
         Inches(0.55),
@@ -5148,21 +5229,27 @@ def slide_52_linear_elasticity(prs):
         [("Eᴅ = 0", {})], size=18, color=NAVY)
     _add_arrow(slide, (CX(8.637), CY(6.340)), (CX(8.377), CY(6.500)),
                color=NAVY, weight_pt=1.5, head=True)
+    # 2026-08-26 (Nico): the label heads its own underlined line, the
+    # statement follows underneath
     _add_hierarchical_bullets(
-        slide, Inches(8.45), Inches(3.15), Inches(4.3), Inches(1.9),
-        [([("Linear demand curve:  ", {}), ("E", {'italic': True}),
-           ("D", {'size': 16}),
+        slide, Inches(8.525), Inches(2.915), Inches(4.3), Inches(1.0),
+        [([("Linear demand curve:", {'underline': True})], 0,
+          {'bullet_style': 'none'}),
+         ([("E", {'italic': True}), ("D", {'size': 16}),
            (" goes from −∞ (approaching y-axis) to 0 (approaching "
-            "x-axis)", {})], 0, {'bullet_style': 'none'})],
-        size=20)
+            "x-axis)", {})], 0,
+          {'bullet_style': 'none', 'space_before_pts': 6})],
+        size=18)
+    # 2026-08-26 (Nico): this line is a WARNING, not a convention —
+    # transparent dark-red wash, dark-red border, dark-red pointer
     _add_convention_box(
-        slide, Inches(8.45), Inches(5.15), Inches(4.3), Inches(1.15),
+        slide, Inches(8.518), Inches(4.90), Inches(4.3), Inches(0.80),
         runs=[("We will learn: ", {}),
               ("Firms should NOT operate", {'bold': True}),
               (" in the inelastic area (Module 2, Videos 1+2)", {})],
-        size=15)
-    _add_arrow(slide, (Inches(8.40), Inches(5.20)),
-               (Inches(6.85), Inches(5.48)), color=GOLD, weight_pt=2.0,
+        size=15, fill_rgb=RED, fill_alpha_pct=12, border=RED)
+    _add_arrow(slide, (Inches(8.518), Inches(5.242)),
+               (Inches(7.718), Inches(4.796)), color=RED, weight_pt=2.0,
                head=True)
     _set_notes(slide, (
         "Unless the demand curve has the shape of a hyperbola, the "
@@ -5209,12 +5296,8 @@ def slide_52_linear_elasticity(prs):
 def slide_53_insight(prs):
     slide = make_content_bulleted(
         prs, 49, TAG_OWN,
-        "Important Insight (Elaborated in Module 2 Videos 1+2)",
+        "Important Insight",
         [
-            ([("Firms should ", {}),
-              ("not", {'underline': True}),
-              (" operate in the inelastic part of demand", {})], 0,
-             {'bold': True}),
             ([("Intuition:", {'color': RED, 'bold': True}),
               ("  With inelastic demand, quantity reacts little when "
                "prices are raised  →  higher prices will ", {}),
@@ -5231,7 +5314,25 @@ def slide_53_insight(prs):
             ("Now prices (and revenues) are much higher", 1,
              {'size': 20}),
         ],
-        size=24, sub_size=22, bullets_width=Inches(8.60))
+        size=24, sub_size=22, bullets_width=Inches(8.60),
+        bullets_top=Inches(2.25))
+    # 2026-08-26 (Nico): the headline claim leaves the bullet list and
+    # becomes a slide-wide WARNING box — same transparent dark red as
+    # the "We will learn" box on slide 48 — with the bullets below it
+    _add_convention_box(
+        slide, MARGIN, Inches(1.45), RULE_W, Inches(0.65),
+        runs=[("Firms that operate in the inelastic part of demand ",
+               {'bold': True}),
+              ("should raise their price", {'bold': True, 'color': RED})],
+        size=24, fill_rgb=RED, fill_alpha_pct=12, border=RED)
+    # 2026-08-26 (Nico): "elaborated in Videos 1+2" leaves the title and
+    # becomes a navy video pointer beside the intuition bullet, above
+    # the Uber shot
+    _add_rounded_filled_box(
+        slide, Inches(9.09), Inches(2.35), Inches(3.56), Inches(0.95),
+        "%s  Elaborated in\nModule 2, Videos 1+2" % PV_GLYPH,
+        fill=NAVY, text_color=WHITE, size=18, bold=True,
+        corner_pct=0.15)
     # 2026-08-25 (Nico): his Uber shot, with the deck's rounded corners
     # and soft shade
     _add_media_image(slide, "uber_app.png", left=Inches(9.09),
@@ -5255,16 +5356,27 @@ def slide_54_uber(prs):
     _add_media_image(slide, "image49.emf", left=Inches(2.05),
                      top=Inches(1.95), width=Inches(6.6),
                      rounded=False, shadow=True)
+    # 2026-08-26 (Nico): wider, flatter callout ...
     _add_convention_box(
-        slide, Inches(9.05), Inches(3.65), Inches(3.3), Inches(0.95),
+        slide, Inches(9.00), Inches(3.802), Inches(3.756), Inches(0.58),
         runs=[("Elasticity = −0.4", {'bold': True}),
               (" at 2016 base price", {})], size=16)
-    _add_arrow(slide, (Inches(9.00), Inches(4.15)),
-               (Inches(8.15), Inches(4.65)), color=GOLD, weight_pt=2.0,
+    # ... and its pointer lands where it did in his ORIGINAL deck (old
+    # slide 51): the head sat at 79.8% across / 67.6% down the chart
+    # image, which on our copy of the figure is (7.32, 5.23)
+    _add_arrow(slide, (Inches(8.95), Inches(4.30)),
+               (Inches(7.32), Inches(5.23)), color=GOLD, weight_pt=2.0,
                head=True)
-    _add_media_image(slide, "image52.png", left=Inches(9.45),
-                     top=Inches(5.85), width=Inches(2.6),
-                     rounded=False, shadow=False)
+    # 2026-08-26 (Nico): the Freakonomics screenshot gets the deck's
+    # rounded corners + shade, and the podcast link from the original
+    # deck is restored (click opens; the ScreenTip names the episode)
+    pod = _add_media_image(slide, "image52.png", left=Inches(9.069),
+                           top=Inches(5.568), width=Inches(3.756),
+                           rounded=True, shadow=True)
+    _link_shape_to_url(
+        slide, pod,
+        "https://freakonomics.com/podcast/why-uber-is-an-economists-dream/",
+        tooltip="Freakonomics Radio 258: Why Uber Is an Economist’s Dream")
     _draw_footer(slide, FOOTER_TEXT, 50)
     return slide
 
@@ -5277,15 +5389,18 @@ def slide_55_special_cases(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_OWN)
     _draw_action_title(slide, "Special Cases of Price Elasticities")
+    # 2026-08-26 (Nico): the whole slide lifts 0.30" to clear the new
+    # takeaway pill at the bottom; both panel labels move above their
+    # figures and the axis letters sit closer to their axes
     _add_hierarchical_bullets(
-        slide, MARGIN + Inches(0.15), Inches(1.70), Inches(12.4),
+        slide, MARGIN + Inches(0.15), Inches(1.40), Inches(12.4),
         Inches(0.55),
         [("Elasticity changes along the demand curve, except ...", 0)],
         size=24)
     # left: perfectly elastic (horizontal D)
-    figL = SimpleFig(1.95, 6.35, 4.0, 3.4, 10, 10)
+    figL = SimpleFig(1.95, 6.05, 4.0, 3.4, 10, 10)
     _fig_axes(slide, figL)
-    _add_text(slide, Inches(figL.l - 0.65), Inches(figL.b - figL.h - 0.5),
+    _add_text(slide, Inches(figL.l - 0.30), Inches(2.15),
               Inches(0.7), Inches(0.35), "P", size=20, bold=True,
               italic=True, color=NAVY, font="Calibri")
     _add_text(slide, Inches(figL.l + figL.w + 0.05),
@@ -5296,16 +5411,16 @@ def slide_55_special_cases(prs):
     _add_text(slide, figL.x(9.0), figL.y(6.6), Inches(0.5), Inches(0.4),
               "D", size=22, bold=True, color=RED, font="Calibri")
     _add_rounded_filled_box(
-        slide, Inches(2.35), Inches(6.55), Inches(3.3), Inches(0.55),
+        slide, Inches(2.44), Inches(2.145), Inches(3.3), Inches(0.55),
         "Perfectly Elastic", fill=NAVY, text_color=WHITE, size=18,
         bold=True, corner_pct=0.15)
     _add_math_equation(
-        slide, Inches(2.75), Inches(2.45), Inches(2.6), Inches(0.6),
+        slide, Inches(2.74), Inches(2.82), Inches(2.6), Inches(0.6),
         _oED() + _omml_text(' = −∞'), size_pt=20, color=NAVY)
     # right: perfectly inelastic (vertical D)
-    figR = SimpleFig(7.85, 6.35, 4.0, 3.4, 10, 10)
+    figR = SimpleFig(7.85, 6.05, 4.0, 3.4, 10, 10)
     _fig_axes(slide, figR)
-    _add_text(slide, Inches(figR.l - 0.65), Inches(figR.b - figR.h - 0.5),
+    _add_text(slide, Inches(figR.l - 0.30), Inches(2.175),
               Inches(0.7), Inches(0.35), "P", size=20, bold=True,
               italic=True, color=NAVY, font="Calibri")
     _add_text(slide, Inches(figR.l + figR.w + 0.05),
@@ -5316,12 +5431,19 @@ def slide_55_special_cases(prs):
     _add_text(slide, figR.x(5.2), figR.y(9.2), Inches(0.5), Inches(0.4),
               "D", size=22, bold=True, color=RED, font="Calibri")
     _add_rounded_filled_box(
-        slide, Inches(8.25), Inches(6.55), Inches(3.3), Inches(0.55),
+        slide, Inches(8.25), Inches(2.17), Inches(3.3), Inches(0.55),
         "Perfectly Inelastic", fill=NAVY, text_color=WHITE, size=18,
         bold=True, corner_pct=0.15)
     _add_math_equation(
-        slide, Inches(10.05), Inches(2.45), Inches(2.4), Inches(0.6),
+        slide, Inches(7.90), Inches(2.732), Inches(2.4), Inches(0.6),
         _oED() + _omml_text(' = 0'), size_pt=20, color=NAVY)
+    # 2026-08-26 (Nico): the gold takeaway pill he copied from CT's deck
+    _add_rounded_filled_box(
+        slide, Inches(3.58), Inches(6.596), Inches(6.85), Inches(0.399),
+        "Elasticity depends on the starting price — except in these "
+        "two extremes",
+        fill=GOLD, text_color=NAVY, size=16, bold=True, italic=True,
+        corner_pct=0.18)
     _draw_footer(slide, FOOTER_TEXT, 51)
     return slide
 
@@ -5335,21 +5457,100 @@ def slide_56_determinants(prs):
     _draw_top_bar_tc(slide, TAG_OWN)
     _draw_action_title(
         slide, "What Determines the Price Elasticity of Demand?")
+    # 2026-08-26 (Nico): bigger type (28/24) and three empty paragraphs
+    # that open a gap under "Closeness" for his four substitute photos
     _add_hierarchical_bullets(
-        slide, MARGIN + Inches(0.15), Inches(2.30), Inches(5.3),
-        Inches(4.0),
+        slide, Inches(0.383), Inches(1.494), Inches(5.3), Inches(5.6),
         [
             ("Availability of substitutes", 0),
             ("Number", 1),
             ("Closeness", 1),
-            ("Willingness to switch", 0),
+            # 2026-08-26 (Nico, 2nd pass): the two remaining factors move
+            # UP under the substitutes block and the photo gap drops to
+            # the bottom of the column
+            ("Willingness to switch", 0, {'space_before_pts': 6}),
+            ("", 0),
+            ("", 0),
+            ("", 0),
             ([("Firm size relative to relevant market ", {}),
               ("(smaller size → higher demand elasticity)",
-               {'size': 18})], 0, {}),
+               {'size': 20})], 0, {'space_before_pts': 6}),
         ],
-        size=24, sub_size=22)
-    _add_media_image(slide, "image53.png", left=Inches(6.55),
-                     top=Inches(1.65), width=Inches(4.7))
+        size=28, sub_size=24)
+    # his four jars: the same product in near-substitute variants, the
+    # personalised "nico" jar last and largest (rounded + shaded, the
+    # deck's photo treatment; the three small ones stay flat as pasted)
+    for fname, x, y, w in (
+            ("subs_nutella.png", 0.355, 3.560, 1.383),
+            ("subs_skippy.png", 2.040, 3.560, 1.025),
+            ("subs_nutella_peanut.png", 3.398, 3.560, 1.400)):
+        _add_media_image(slide, fname, left=Inches(x), top=Inches(y),
+                         width=Inches(w), rounded=False, shadow=False)
+    _add_media_image(slide, "subs_nico_nutella.png", left=Inches(4.995),
+                     top=Inches(1.970), width=Inches(2.804),
+                     rounded=True, shadow=True)
+    # 2026-08-26 (Nico): the elasticity-estimates table was still the
+    # original screenshot (~8 pt type).  Rebuilt as a native table at
+    # 16 pt, section rows merged across both columns — and (later the
+    # same day) split into its THREE sections so they can be revealed
+    # one at a time.  ONE backing card carries the shade for all three;
+    # three stacked cards would cast shadows across each other.
+    T_X, T_W, T_TOP = Inches(8.125), Inches(4.80), 1.45
+    ROW_H, HDR_H = 0.311, 0.60
+    COLS = [Inches(2.60), Inches(2.20)]
+    _add_graphicframe_shadow(slide, T_X - Inches(0.15),
+                             Inches(T_TOP - 0.15), T_W + Inches(0.30),
+                             Inches(HDR_H + 15 * ROW_H + 0.30))
+    sections = [
+        # (rows, header row?)  the first block carries the column header
+        ([["Product", "Estimated Own-Price Elasticity of Demand"],
+          ["BROAD FOOD GROUPS", ""],
+          ["Eggs", "−0.06"],
+          ["Beef", "−0.35"],
+          ["Fish", "−0.39"],
+          ["Juice", "−1.05"]], True),
+        ([["SPECIFIC BREAKFAST CEREALS", ""],
+          ["Cap’N Crunch", "−2.28"],
+          ["Froot Loops", "−2.34"],
+          ["Kellogg’s Corn Flakes", "−3.38"],
+          ["Cheerios", "−3.66"],
+          ["Shredded Wheat", "−4.25"]], False),
+        ([["SPECIFIC AUTOMOBILES", ""],
+          ["Jeep Grand Cherokee", "−3.06"],
+          ["Cadillac Seville", "−3.16"],
+          ["Toyota Corolla", "−3.92"]], False),
+    ]
+    y = T_TOP
+    for rows, has_header in sections:
+        n_body = len(rows) - (1 if has_header else 0)
+        heights = ([Inches(HDR_H)] if has_header else []) \
+            + [Inches(ROW_H)] * n_body
+        sect_row = 1 if has_header else 0     # the SECTION label row
+        # the section label keeps the body look even in row 0, where
+        # _add_styled_table would otherwise paint a navy header
+        fills = {(sect_row, c): CREAM for c in (0, 1)}
+        colors = {(sect_row, c): NAVY for c in (0, 1)}
+        h = sum(heights) / 914400.0
+        gf = _add_styled_table(
+            slide, T_X, Inches(y), T_W, Inches(h), rows,
+            col_widths=COLS, row_heights=heights,
+            font_size=16, header_size=16, margin_v=Inches(0.02),
+            first_col_bold=False, first_col_align_left=False,
+            cell_fills=fills, cell_text_colors=colors, backing=False)
+        tbl = gf.table
+        cell = tbl.cell(sect_row, 0)          # label spans both columns
+        cell.merge(tbl.cell(sect_row, 1))
+        tf = cell.text_frame
+        for extra in list(tf.paragraphs[1:]):
+            extra._p.getparent().remove(extra._p)
+        for run in tf.paragraphs[0].runs:
+            run.font.bold = True
+        y += h
+    _add_text(slide, Inches(8.125), Inches(6.912), Inches(4.80),
+              Inches(0.28),
+              "Source: food data – Huang & Lin (2000), USDA Technical "
+              "Bulletin 1887", size=11, italic=True, color=GRAY,
+              font="Calibri")
     _draw_footer(slide, FOOTER_TEXT, 52)
     return slide
 
@@ -5374,13 +5575,29 @@ def slide_57_market_vs_firm(prs):
             ("the firm's market share is small", 1),
             ("competitors don't react to its price changes", 1),
         ],
-        size=24, sub_size=22)
-    _add_text(slide, Inches(7.55), Inches(1.62), Inches(4.9),
-              Inches(0.35), "Gas market vs. gas stations", size=15,
+        size=28, sub_size=24)
+    # 2026-08-26 (Nico): his own aerial shot replaces CT's stock photo —
+    # four competing stations on the four corners of one intersection,
+    # which is exactly the market-vs-firm point
+    # 2026-08-26 (Nico): the header counts the stations - "4 Gas
+    # stations at ..."
+    _add_text(slide, Inches(7.55), Inches(1.764), Inches(5.507),
+              Inches(0.35),
+              "4 Gas stations at Slauson Ave and La Brea Ave, "
+              "Los Angeles", size=15,
               italic=True, bold=True, color=NAVY, font="Calibri",
               align=PP_ALIGN.CENTER)
-    _add_media_image(slide, "ct_gas_image22.png", left=Inches(7.55),
-                     top=Inches(2.02), width=Inches(4.9))
+    _add_media_image(slide, "Gas Stations Slauson.png",
+                     left=Inches(7.55), top=Inches(2.09),
+                     width=Inches(5.507))
+    # 2026-08-26 (Nico): the point of the photo, right under it - folded
+    # into the picture group by _group_pass's MANUAL_GROUPS_POST[53]
+    _add_text(slide, Inches(7.55), Inches(6.30), Inches(5.507),
+              Inches(0.50),
+              "Demand at individual gas stations is much more elastic "
+              "than the overall market demand for gas",
+              size=15, italic=True, color=NAVY, font="Calibri",
+              align=PP_ALIGN.CENTER)
     _set_notes(slide, (
         "The distinction that matters for pricing: the elasticity YOUR "
         "company faces is not the elasticity the industry faces. Demand "
@@ -5390,7 +5607,10 @@ def slide_57_market_vs_firm(prs):
         "station across the intersection does not, customers just drive "
         "over there. A firm's demand is more elastic when the market "
         "elasticity is high, when its market share is small, and when "
-        "competitors don't match its price changes."))
+        "competitors don't match its price changes. The photo is the "
+        "intersection of Slauson and La Brea in Los Angeles, with four "
+        "competing stations on the four corners — the posted prices are "
+        "readable from the street, so switching costs almost nothing."))
     _draw_footer(slide, FOOTER_TEXT, 53)
     return slide
 
@@ -5445,14 +5665,18 @@ def slide_59_income_elasticity(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_INCOME)
     _draw_action_title(slide, "Income Elasticity")
+    # 2026-08-26 (Nico): this slide is now CT's In-Class slide 47 — the
+    # definition AND the categories on one page, in our formatting.  It
+    # absorbs the old "Income Elasticity: Categories" slide, which is
+    # deleted (his instruction the same day).
     _add_math_equation(
-        slide, Inches(4.35), Inches(1.90), Inches(4.6), Inches(1.35),
+        slide, Inches(4.35), Inches(1.45), Inches(4.6), Inches(1.25),
         _oEI() + _omml_text(' = ')
         + _omml_frac(_o_pct('Q'), _omml_text('%Δ') + _omml_run('I')),
-        size_pt=34, color=NAVY, fill=CREAM, line=NAVY, rounded=True,
+        size_pt=32, color=NAVY, fill=CREAM, line=NAVY, rounded=True,
         shadow=True)
     _add_hierarchical_bullets(
-        slide, MARGIN + Inches(0.15), Inches(3.90), Inches(12.4),
+        slide, MARGIN + Inches(0.15), Inches(2.80), Inches(12.4),
         Inches(2.0),
         [
             ([("% change in quantity demanded, divided by the % change "
@@ -5461,8 +5685,31 @@ def slide_59_income_elasticity(prs):
             ([("Intuition:", {'bold': True}),
               ("  How sensitive demand is to changes in customer’s "
                "income", {})], 0, {}),
+            ([("If  ", {}), ("E", {'italic': True}), ("I", {'size': 16}),
+              (" > 0  →  ", {}),
+              ("normal good", {'bold': True, 'color': CBLUE}),
+              ("   (if  ", {}), ("E", {'italic': True}),
+              ("I", {'size': 16}), (" > 1  →  ", {}),
+              ("luxury good", {'bold': True, 'color': CBLUE}),
+              (")", {})], 0, {}),
+            ([("If  ", {}), ("E", {'italic': True}), ("I", {'size': 16}),
+              (" < 0  →  ", {}),
+              ("inferior good", {'bold': True, 'color': CBLUE})], 0, {}),
         ],
-        size=26)
+        size=24, line_spacing_pts=12)
+    # her three cars, in our picture treatment (rounded + shade) with a
+    # caption each, ordered to follow the two bullets above
+    for fname, x, w, label in (
+            ("ct_income_normal.png", 1.600, 2.773, "normal"),
+            ("ct_income_luxury.png", 4.923, 3.264, "luxury"),
+            ("ct_income_inferior.png", 8.737, 2.996, "inferior")):
+        # 2026-08-26 (Nico): cars nudged down 0.07" (was 5.00 / 6.60)
+        # and the labels enlarged to 16 pt bold (was 13 pt regular)
+        _add_media_image(slide, fname, left=Inches(x), top=Inches(5.07),
+                         width=Inches(w))
+        _add_text(slide, Inches(x), Inches(6.67), Inches(w),
+                  Inches(0.28), label, size=16, italic=True, bold=True,
+                  color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
     _draw_footer(slide, FOOTER_TEXT, 55)
     return slide
 
@@ -5530,49 +5777,6 @@ def slide_63_rivian_solution(prs):
 
 
 # --------------------------------------------------------------------------
-# Slide 64 — Income elasticity: categories
-# --------------------------------------------------------------------------
-
-def slide_64_income_categories(prs):
-    slide = _blank_slide(prs)
-    _draw_top_bar_tc(slide, TAG_INCOME)
-    _draw_action_title(slide, "Income Elasticity: Categories")
-    _add_mixed_textbox(
-        slide, MARGIN + Inches(0.15), Inches(1.85), Inches(12.4),
-        Inches(2.3),
-        [
-            ("omml", _oEI() + _omml_text(' &gt; 0'), {'size': 24}),
-            ("text", " ,  then the good is  ", {'size': 24}),
-            ("text", "normal", {'size': 24, 'bold': True,
-                                'color': RGBColor(0x00, 0x70, 0xC0)}),
-            ("break", None, None),
-            ("text", "      Sub-case:  ", {'size': 22}),
-            ("omml", _oEI() + _omml_text(' &gt; 1'), {'size': 22}),
-            ("text", " ,  then the good is a  ", {'size': 22}),
-            ("text", "luxury good", {'size': 22, 'bold': True,
-                                     'color': RGBColor(0x00, 0x70, 0xC0)}),
-            ("break", None, None),
-            ("omml", _oEI() + _omml_text(' &lt; 0'), {'size': 24}),
-            ("text", " ,  then the good is  ", {'size': 24}),
-            ("text", "inferior", {'size': 24, 'bold': True,
-                                  'color': RGBColor(0x00, 0x70, 0xC0)}),
-        ])
-    for fname, x, w, label in (
-            ("image54.png", Inches(0.95), Inches(3.6),
-             "normal"),
-            ("image61.png", Inches(4.95), Inches(3.6),
-             "luxury"),
-            ("image58.png", Inches(8.95), Inches(3.6),
-             "inferior vs. normal")):
-        _add_media_image(slide, fname, left=x, top=Inches(4.35), width=w)
-        _add_text(slide, x, Inches(6.80), w, Inches(0.3), label,
-                  size=13, italic=True, color=GRAY, font="Calibri",
-                  align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 60)
-    return slide
-
-
-# --------------------------------------------------------------------------
 # Slide 65 — Which retailers do well in a recession? (native rebuild of the
 # Stevenson/Wolfers Target-vs-Walmart figure, decision 2026-08-14)
 # --------------------------------------------------------------------------
@@ -5583,32 +5787,14 @@ def slide_65_recession_retailers(prs):
     _draw_action_title(
         slide, "Which Retailers Do Well in a Recession? "
                "Clues from Income Elasticity")
-    _add_hierarchical_bullets(
-        slide, MARGIN + Inches(0.15), Inches(1.60), Inches(12.4),
-        Inches(1.5),
-        [
-            ([("In 2007, ", {}), ("Target’s", {'bold': True}),
-              (" stock price was much higher than ", {}),
-              ("Walmart’s", {'bold': True, 'color': GREEN}),
-              (". Then the U.S. economy entered a recession (December "
-               "2007), and average incomes fell", {})], 0,
-             {'size': 18}),
-            ([("Walmart", {'bold': True, 'color': GREEN}),
-              (" sells ", {}), ("inferior goods", {'bold': True}),
-              (" – lower incomes raised its sales, and its stock price "
-               "rose", {})], 0, {'size': 18}),
-            ([("Target", {'bold': True}), (" sells ", {}),
-              ("normal goods", {'bold': True}),
-              (" – lower incomes reduced demand, and its stock price "
-               "fell", {})], 0, {'size': 18}),
-        ],
-        size=18, line_spacing_pts=8)
+    # 2026-08-26 (Nico): the three descriptive lines move into the
+    # speaker notes and the figure takes the whole slide instead
     # native chart: stock prices Dec 2006 – Dec 2008 (approx. from figure)
-    fig = SimpleFig(2.6, 6.30, 7.6, 2.9, 24, 70)
-    _add_graphicframe_shadow(slide, Inches(1.35), Inches(3.25),
-                             Inches(10.6), Inches(3.45))
+    fig = SimpleFig(2.9, 6.20, 8.0, 4.1, 24, 70)
+    _add_graphicframe_shadow(slide, Inches(1.35), Inches(1.95),
+                             Inches(10.9), Inches(4.80))
     _fig_axes(slide, fig)
-    _add_text(slide, Inches(fig.l - 1.35), Inches(fig.b - fig.h - 0.5),
+    _add_text(slide, Inches(fig.l - 1.35), Inches(1.58),
               Inches(1.9), Inches(0.32), "Stock price", size=15,
               bold=True, italic=True, color=NAVY, font="Calibri")
     for v in (25, 40, 55):
@@ -5627,22 +5813,32 @@ def slide_65_recession_retailers(prs):
                   color=GREEN, weight_pt=2.5)
     _add_arrow(slide, (fig.x(12), fig.y(0)), (fig.x(12), fig.y(68)),
                color=GRAY, weight_pt=1.25, head=False, dash="dash")
-    _add_text(slide, fig.x(12.4), fig.y(67), Inches(2.6), Inches(0.3),
-              "U.S. economy enters recession", size=12, italic=True,
-              color=GRAY, font="Calibri")
-    _add_text(slide, fig.x(24.4), fig.y(58) - Inches(0.1), Inches(1.9),
-              Inches(0.55), "Walmart’s stock rose", size=13, bold=True,
+    # the recession label moves to the LEFT of its line: everything to
+    # the right of December 2007 is hidden until the class has guessed
+    _add_text(slide, fig.x(12) - Inches(2.70), fig.y(67), Inches(2.60),
+              Inches(0.3), "U.S. economy enters recession", size=12,
+              italic=True, color=GRAY, font="Calibri",
+              align=PP_ALIGN.RIGHT)
+    # the two verdicts sit INSIDE the plot now, so the cover card can
+    # stop at the backing card's edge and leave its shade intact
+    _add_text(slide, fig.x(17.3), fig.y(64), Inches(2.2),
+              Inches(0.35), "Walmart’s stock rose", size=14, bold=True,
               color=GREEN, font="Calibri")
-    _add_text(slide, fig.x(24.4), fig.y(31) - Inches(0.1), Inches(1.9),
-              Inches(0.55), "Target’s stock fell", size=13, bold=True,
+    _add_text(slide, fig.x(17.3), fig.y(26), Inches(2.2),
+              Inches(0.35), "Target’s stock fell", size=14, bold=True,
               color=RED, font="Calibri")
-    _add_text(slide, Inches(1.35), Inches(6.85), Inches(10.6),
+    # 2026-08-26 (Nico): the white cover card — drawn LAST so it sits on
+    # top of both series and their labels.  It fades out on the single
+    # click of this slide (plan 60: "x:osp:6"), which is the reveal.
+    _add_rect(slide, Inches(6.92), Inches(1.96), Inches(5.33),
+              Inches(4.23), WHITE)
+    _add_text(slide, Inches(1.35), Inches(6.85), Inches(10.9),
               Inches(0.28),
               "Source: Stevenson/Wolfers, Principles of Economics, 1e, "
               "© 2020 Worth Publishers (Figure 9); series approximate",
               size=11, italic=True, color=GRAY, font="Calibri",
               align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 61)
+    _draw_footer(slide, FOOTER_TEXT, 60)
     return slide
 
 
@@ -5654,17 +5850,30 @@ def slide_66_inferior_news(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_INCOME)
     _draw_action_title(slide, "Inferior Goods in the News")
+    # 2026-08-26 (Nico): the WSJ masthead sits above its headline, the
+    # photo is bigger, and its source line moved underneath it (so the
+    # grouping pass pairs photo + source into one object)
     _add_media_image(slide, "ct_inferior_image28.png", left=Inches(0.95),
                      top=Inches(2.30), width=Inches(6.1),
                      rounded=False, shadow=False)
-    _add_media_image(slide, "ct_inferior_image29.png", left=Inches(1.75),
-                     top=Inches(5.45), width=Inches(2.6),
+    _add_media_image(slide, "ct_inferior_image29.png", left=Inches(2.30),
+                     top=Inches(1.873), width=Inches(2.6),
                      rounded=False, shadow=False)
-    _add_media_image(slide, "ct_inferior_image27.jpg", left=Inches(7.85),
-                     top=Inches(2.00), width=Inches(4.6))
-    _add_text(slide, MARGIN, Inches(6.78), Inches(6.0), Inches(0.3),
+    _add_media_image(slide, "ct_inferior_image27.jpg", left=Inches(7.46),
+                     top=Inches(1.816), width=Inches(5.27))
+    _add_text(slide, Inches(8.956), Inches(5.434), Inches(3.044),
+              Inches(0.28),
               "Source: The Wall Street Journal (2025)", size=12,
               italic=True, color=GRAY, font="Calibri")
+    # 2026-08-26 (Nico): the bottom-left corner was empty — the takeaway
+    # this clipping is here to make goes in it
+    _add_convention_box(
+        slide, Inches(0.95), Inches(4.75), Inches(6.10), Inches(1.55),
+        runs=[("Inferior ≠ low quality: ", {'bold': True}),
+              ("demand RISES when incomes fall. Secondhand clothing, "
+               "discount grocers, store brands and public transit all "
+               "grow in a downturn", {})],
+        size=20)
     _set_notes(slide, (
         "A current example of an inferior good: ThredUp, the online "
         "secondhand-clothing marketplace. When consumers get worried "
@@ -5672,7 +5881,7 @@ def slide_66_inferior_news(prs):
         "clothes rises — the number of active buyers rose 17% to 1.47 "
         "million in the second quarter. That is the signature of an "
         "inferior good: demand moves opposite to income."))
-    _draw_footer(slide, FOOTER_TEXT, 62)
+    _draw_footer(slide, FOOTER_TEXT, 61)
     return slide
 
 
@@ -5720,17 +5929,20 @@ def slide_67_cross_price(prs):
                      top=Inches(3.30), width=Inches(1.55))
     _add_media_image(slide, "image65.png", left=Inches(11.25),
                      top=Inches(3.30), width=Inches(1.55))
-    _add_text(slide, Inches(9.55), Inches(4.95), Inches(3.25),
+    # 2026-08-26 (Nico): both labels move up (4.95 -> 4.75,
+    # 6.95 -> 6.81) and the gas pump shrinks (11.45/5.30/1.15" ->
+    # 11.58/5.36/0.89")
+    _add_text(slide, Inches(9.55), Inches(4.75), Inches(3.25),
               Inches(0.3), "substitutes", size=13, italic=True,
               color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
     _add_media_image(slide, "image63.png", left=Inches(9.55),
                      top=Inches(5.35), width=Inches(1.55))
-    _add_media_image(slide, "image66.png", left=Inches(11.45),
-                     top=Inches(5.30), width=Inches(1.15))
-    _add_text(slide, Inches(9.55), Inches(6.95), Inches(3.25),
+    _add_media_image(slide, "image66.png", left=Inches(11.58),
+                     top=Inches(5.36), width=Inches(0.89))
+    _add_text(slide, Inches(9.55), Inches(6.81), Inches(3.25),
               Inches(0.3), "complements", size=13, italic=True,
               color=GRAY, font="Calibri", align=PP_ALIGN.CENTER)
-    _draw_footer(slide, FOOTER_TEXT, 63)
+    _draw_footer(slide, FOOTER_TEXT, 62)
     return slide
 
 
@@ -5757,7 +5969,7 @@ def slide_68_popcorn(prs):
         size=26)
     _add_media_image(slide, "image67.jpeg", left=Inches(3.85),
                      top=Inches(3.55), width=Inches(5.6))
-    _draw_footer(slide, FOOTER_TEXT, 64)
+    _draw_footer(slide, FOOTER_TEXT, 63)
     _add_pollbreak_badge(slide)
     return slide
 
@@ -5795,7 +6007,7 @@ def slide_71_popcorn_solution(prs):
                              'color': RGBColor(0x00, 0x70, 0xC0)})], 0,
           {})],
         size=26)
-    _draw_footer(slide, FOOTER_TEXT, 67)
+    _draw_footer(slide, FOOTER_TEXT, 66)
     return slide
 
 
@@ -5807,25 +6019,38 @@ def slide_72_crossprice_news(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_CROSS)
     _draw_action_title(slide, "Cross-Price Elasticity in the News")
+    # 2026-08-26 (Nico): his layout - the masthead moves ABOVE the
+    # headline (was 1.75 / 5.35), the clipping grows to 6.83" (was
+    # 6.0" at x 0.95) and the photo to 5.26" (was 4.9" at 7.65/2.05).
+    # He also deleted the "Source: The Wall Street Journal" line; the
+    # masthead itself carries the attribution now.
     _add_media_image(slide, "ct_crossprice_image34.png",
-                     left=Inches(0.95), top=Inches(2.35),
-                     width=Inches(6.0), rounded=False, shadow=False)
+                     left=Inches(0.61), top=Inches(2.35),
+                     width=Inches(6.83), rounded=False, shadow=False)
     _add_media_image(slide, "ct_crossprice_image29.png",
-                     left=Inches(1.75), top=Inches(5.35),
+                     left=Inches(2.48), top=Inches(1.75),
                      width=Inches(2.6), rounded=False, shadow=False)
     _add_media_image(slide, "ct_crossprice_image35.png",
-                     left=Inches(7.65), top=Inches(2.05),
-                     width=Inches(4.9))
-    _add_text(slide, MARGIN, Inches(6.78), Inches(6.0), Inches(0.3),
-              "Source: The Wall Street Journal", size=12, italic=True,
-              color=GRAY, font="Calibri")
+                     left=Inches(7.56), top=Inches(1.97),
+                     width=Inches(5.26))
+    # 2026-08-26 (Nico): the slide's message, in the empty lower-left
+    _add_convention_box(
+        slide, Inches(0.61), Inches(4.45), Inches(6.83), Inches(1.35),
+        runs=[
+            ("As the price of fuel goes up, demand for fuel-powered "
+             "vehicles goes down", {}),
+            ("\u2192  The two are ", {'newline': True}),
+            ("complements", {'bold': True,
+                             'color': RGBColor(0x00, 0x70, 0xC0)}),
+        ],
+        size=20, align=PP_ALIGN.CENTER, line_spacing_pct=110)
     _set_notes(slide, (
         "Cross-price elasticity in action: when gasoline prices spike, "
         "sales of hybrid cars surge. Gasoline and conventional cars are "
         "complements — expensive gas makes gas-guzzlers less attractive "
         "— while hybrids are a substitute for conventional cars. The "
         "sticker shock at the pump shows up directly in the showroom."))
-    _draw_footer(slide, FOOTER_TEXT, 68)
+    _draw_footer(slide, FOOTER_TEXT, 67)
     return slide
 
 
@@ -5846,8 +6071,11 @@ def slide_73_cereal(prs):
         ["Rice Krispies", "0.19", "0.14", ""],
         ["Froot Loops", "0.02", "0.13", "0.04"],
     ]
+    # 2026-08-26 (Nico): the table's card gets rounded edges (the
+    # cereal-box images stay flat)
     _add_styled_table(slide, Inches(3.05), Inches(2.45), Inches(7.4),
-                      Inches(3.1), rows, font_size=18, header_size=18)
+                      Inches(3.1), rows, font_size=18, header_size=18,
+                      backing_rounded=True)
     # cereal boxes: columns (above header) and rows (left of first column)
     for fname, x, y in (("image70.png", Inches(5.47), Inches(1.62)),
                         ("image72.png", Inches(7.32), Inches(1.62)),
@@ -5881,7 +6109,7 @@ def slide_73_cereal(prs):
         "Flakes were to increase by 10%, the quantity demanded of "
         "Frosted Flakes would rise by 1.5%. This suggests that Frosted "
         "Flakes and Corn Flakes are substitutes."))
-    _draw_footer(slide, FOOTER_TEXT, 69)
+    _draw_footer(slide, FOOTER_TEXT, 68)
     return slide
 
 
@@ -5967,7 +6195,7 @@ def slide_74_cheatsheet(prs):
         [("ΔQ/ΔP = slope of the demand function (Q as a function of P)",
           0, {'bullet_style': 'none', 'italic': True, 'color': GRAY})],
         size=14)
-    _draw_footer(slide, FOOTER_TEXT, 70)
+    _draw_footer(slide, FOOTER_TEXT, 69)
     return slide
 
 
@@ -5976,7 +6204,7 @@ def slide_74_cheatsheet(prs):
 # --------------------------------------------------------------------------
 
 def slide_75_postwork_videos(prs):
-    slide = make_m2_outline(prs, 71, section_tag=TAG_WRAP,
+    slide = make_m2_outline(prs, 70, section_tag=TAG_WRAP,
                             highlight_set={2, 3, 4})
     # bottom-right link box overlaying the footer (deck convention),
     # drawn last so it sits in front
@@ -5991,7 +6219,7 @@ def slide_75_postwork_videos(prs):
 
 
 def slide_76_postwork_ps2(prs):
-    slide = make_m2_outline(prs, 72, section_tag=TAG_WRAP,
+    slide = make_m2_outline(prs, 71, section_tag=TAG_WRAP,
                             highlight_set={5})
     _add_convention_box(
         slide, Inches(9.05), Inches(1.75), Inches(3.9), Inches(1.5),
@@ -6239,6 +6467,10 @@ TN_GLYPH = "▤"
 # 2026-08-25 (Nico): a pointer to a practice VIDEO gets the play
 # glyph the deck already uses on its video link boxes
 PV_GLYPH = "▶"
+# 2026-08-26 (Nico): every problem-set pointer sits in the bottom-RIGHT
+# corner, overlapping the footer — the slide-42 position.  Use this
+# constant at every call site so the corner never drifts.
+PS_BOX_XY = (Inches(10.17), Inches(6.53))
 
 
 def _add_reference_box(slide, left, top, width, height, label, *,
@@ -6324,13 +6556,14 @@ def build(out_path=None):
     make_stub(prs, 57, TAG_INCOME, "Poll: R3 income elasticity", STUB_POLL)   # 55
     make_stub(prs, 58, TAG_INCOME, "Poll results", STUB_POLL)          # 56
     slide_63_rivian_solution(prs)  # 59
-    slide_64_income_categories(prs)    # 60
+    # slide 60 (Income Elasticity: Categories) deleted 2026-08-26 (Nico):
+    # CT's slide 47, now our slide 55, carries the categories
     slide_65_recession_retailers(prs)  # 61
     slide_66_inferior_news(prs)       # 62
     slide_67_cross_price(prs)            # 63
     slide_68_popcorn(prs) # 64
-    make_stub(prs, 65, TAG_CROSS, "Poll: popcorn cross-price", STUB_POLL)  # 63
-    make_stub(prs, 66, TAG_CROSS, "Poll results", STUB_POLL)           # 64
+    make_stub(prs, 64, TAG_CROSS, "Poll: popcorn cross-price", STUB_POLL)  # 63
+    make_stub(prs, 65, TAG_CROSS, "Poll results", STUB_POLL)           # 64
     slide_71_popcorn_solution(prs)                 # 67
     slide_72_crossprice_news(prs)  # 68
     slide_73_cereal(prs)  # 69

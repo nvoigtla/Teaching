@@ -49,7 +49,7 @@ EMU = 914400.0
 SKIP_TITLE = {1}
 SKIP_AGENDA = {6, 7, 8, 25}          # roadmap + outline/section agendas
 SKIP_MEDIA = {4, 5, 11, 12, 13, 32, 36, 40, 45, 46,
-              57, 58, 65, 66}        # PollEv slides + live Excel slide
+              57, 58, 64, 65}        # PollEv slides + live Excel slide
                                      # (40 is the new Mega Millions poll
                                      #  placeholder, 2026-08-25)
 SKIP_STATIC = {44,                   # single-thought poll setup (Q=10−P)
@@ -209,8 +209,10 @@ PLANS = {
            # its label, then the interpretation and the pointer
         ["t:E D"],
         ["osp:3", "t:Slope of the demand curve", "cxn:0"],
-        ["pr:ΔQ/ΔP is the slope:0:2"],
-        ["pr:ΔQ/ΔP is the slope:3:3", "t:✎  Problem Set 2"],
+        # 2026-08-26: the ΔQ/ΔP term is its own red run now, so the
+        # shape text carries an extra space - match on the short prefix
+        ["pr:ΔQ/ΔP:0:2"],
+        ["pr:ΔQ/ΔP:3:3", "t:✎  Problem Set 2"],
     ],
     43: [  # 2026-08-25: three steps now (the "solve for Q" step is
            # gone, the example starts from the demand function)
@@ -236,16 +238,33 @@ PLANS = {
         ["t:E D  = −∞", "cxn:4", "t:E D  = 0", "cxn:5"],
         ["grp:0", "cxn:6"],
     ],
+    49: [  # 2026-08-26: the insight is now a slide-wide warning box that
+           # shows with the slide; intuition, then the Uber example
+        ["pr:Intuition::0:2"],
+        ["pr:Intuition::3:5"],
+    ],
     50: [  # Uber: chart + logo static; elasticity callout builds
         ["grp:0", "cxn:0"],
     ],
-    51: [  # special cases: intro static; left panel, then right panel
+    51: [  # special cases: intro static; left panel, then right panel,
+           # then the takeaway pill (2026-08-26)
         ["cxn:2", "t:D#1", "t:Perfectly Elastic", "t:E D"],
         ["cxn:5", "t:D#2", "t:Perfectly Inelastic", "t:E D"],
+        ["t:Elasticity depends on the starting price"],
     ],
-    52: [  # determinants: substitutes block static; then remaining factors
-        ["pr:Availability of substitutes:3:3"],
-        ["pr:Availability of substitutes:4:4"],
+    52: [  # 2026-08-26 (Nico's own hand-cut): all four factors are up
+           # with the slide; the jars arrive one at a time (each one a
+           # closer substitute than the last), then the estimates table
+           # builds section by section
+        ["pic:0"],
+        ["pic:1"],
+        ["pic:2"],
+        ["pic:3"],
+        # 2026-08-26 (Nico's own click): the firm-size bullet
+        ["pr:Availability of substitutes:7:7"],
+        ["grp:0"],                 # card + header + broad food groups
+        ["gf:0"],                  # specific breakfast cereals
+        ["gf:1"],                  # specific automobiles
     ],
     53: [  # market vs firm: first bullet static; conditions + photo together
         ["pr:The elasticity a company:1:4", "grp:0"],
@@ -255,8 +274,11 @@ PLANS = {
         ["t:Cross-price elasticity", "t:E X"],
         ["t:Own-price elasticity ✓"],
     ],
-    55: [  # income elasticity definition
+    55: [  # 2026-08-26: CT's slide 47 - definition, then the two
+           # sign cases, each with the cars that illustrate it
         ["pr:% change in quantity:1:1"],
+        ["pr:% change in quantity:2:2", "grp:0", "grp:1"],
+        ["pr:% change in quantity:3:3", "grp:2"],
     ],
     56: [  # Rivian example: photo + badge static
         ["pr:Average income:1:1"],
@@ -268,49 +290,47 @@ PLANS = {
         ["t:E I"],
         ["t:Does this seem"],
     ],
-    60: [  # income categories: row + its picture + caption per click
-        ["pr:,:0:0", "grp:0"],
-        ["pr:,:1:1", "grp:1"],
-        ["pr:,:2:2", "grp:2"],
+    60: [  # 2026-08-26: the whole figure is on the slide, with the
+           # white cover card hiding everything after December 2007.
+           # One click fades the card out - that is the reveal.
+        ["x:osp:6"],
     ],
-    61: [  # recession retailers: lines static; recession marker; then the
-        # two stories (bullet + its curve label together)
-        ["cxn:2", "t:U.S. economy"],
-        ["pr:In 2007:1:1", "t:Walmart’s stock rose"],
-        ["pr:In 2007:2:2", "t:Target’s stock fell"],
+    61: [  # inferior-goods news: the clipping panel, then the takeaway
+           # box (2026-08-26); photo + source are one group now
+        ["pic:0", "pic:1", "grp:0"],
+        ["grp:1"],
     ],
-    62: [  # inferior-goods news: whole panel one beat
-        ["pic:0", "pic:1", "pic:2", "t:Source: The Wall Street"],
-    ],
-    63: [  # cross-price definition: formula static; cases with pictures
+    62: [  # cross-price definition: formula static; cases with pictures
         ["pr:% change in the quantity:1:1"],
         ["pr:% change in the quantity:2:3", "grp:0"],
         ["pr:% change in the quantity:4:4", "grp:1"],
     ],
-    64: [  # popcorn example: photo + badge static; question builds
+    63: [  # popcorn example: photo + badge static; question builds
         ["pr:When a movie theater:1:1"],
     ],
-    67: [  # popcorn solution
+    66: [  # popcorn solution
         ["pr:Unit free:1:2"],
         ["t:E X"],
         ["pr:Popcorn and movie tickets:0:0"],
     ],
-    68: [  # cross-price news: whole panel one beat
-        ["pic:0", "pic:1", "pic:2", "t:Source: The Wall Street"],
+    67: [  # cross-price news: whole panel one beat, then the
+           # message box (2026-08-26, Nico)
+        ["pic:0", "pic:1", "pic:2"],
+        ["grp:0"],
     ],
-    69: [  # cereal table: table + boxes static; takeaway line builds
+    68: [  # cereal table: table + boxes static; takeaway line builds
         ["t:Larger cross-price"],
     ],
-    70: [  # cheat sheet: definition, categories, computing — 3 beats
+    69: [  # cheat sheet: definition, categories, computing — 3 beats
         ["t:Definition", "t:E D", "t:Intuitively"],
         ["t:Categories", "t:Inelastic"],
         ["t:Computing elasticity", "t:Two observed", "t:E d",
          "t:Whole demand", "t:E d", "t:ΔQ/ΔP = slope"],
     ],
-    71: [  # post-work videos box + caption + arrow
+    70: [  # post-work videos box + caption + arrow
         ["t:▶"],
     ],
-    72: [  # post-work PS2 box, then the estimation note
+    71: [  # post-work PS2 box, then the estimation note
         ["t:▶"],
         ["grp:0"],
     ],
@@ -346,6 +366,31 @@ def sptgt(spid, prg):
             '</p:txEl></p:spTgt>' % (spid, prg[0], prg[1]))
 
 
+def exit_par(spid, prg, node_type, ids):
+    """Fade OUT on click — the mirror of effect_par.
+
+    2026-08-26: added for slide 60's white cover card, which hides the
+    right-hand half of the Target/Walmart figure until the class has
+    guessed what happened after December 2007.
+    """
+    a, b, c = ids(), ids(), ids()
+    tgt = sptgt(spid, prg)
+    return (
+        '<p:par><p:cTn id="%d" presetID="10" presetClass="exit" '
+        'presetSubtype="0" fill="hold" grpId="0" nodeType="%s">'
+        '<p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+        '<p:animEffect transition="out" filter="fade"><p:cBhvr>'
+        '<p:cTn id="%d" dur="500"/><p:tgtEl>%s</p:tgtEl></p:cBhvr>'
+        '</p:animEffect>'
+        '<p:set><p:cBhvr><p:cTn id="%d" dur="1" fill="hold">'
+        '<p:stCondLst><p:cond delay="499"/></p:stCondLst></p:cTn>'
+        '<p:tgtEl>%s</p:tgtEl><p:attrNameLst><p:attrName>'
+        'style.visibility</p:attrName></p:attrNameLst></p:cBhvr>'
+        '<p:to><p:strVal val="hidden"/></p:to></p:set>'
+        '</p:childTnLst></p:cTn></p:par>'
+        % (a, node_type, b, tgt, c, tgt))
+
+
 def effect_par(spid, prg, node_type, ids):
     a, b, c = ids(), ids(), ids()
     tgt = sptgt(spid, prg)
@@ -367,9 +412,9 @@ def effect_par(spid, prg, node_type, ids):
 def click_group(beat, ids):
     outer, inner = ids(), ids()
     effs = "".join(
-        effect_par(spid, prg, "clickEffect" if i == 0 else "withEffect",
-                   ids)
-        for i, (spid, prg) in enumerate(beat))
+        (exit_par if is_exit else effect_par)(
+            spid, prg, "clickEffect" if i == 0 else "withEffect", ids)
+        for i, (spid, prg, is_exit) in enumerate(beat))
     return (
         '<p:par><p:cTn id="%d" fill="hold"><p:stCondLst>'
         '<p:cond delay="indefinite"/></p:stCondLst><p:childTnLst>'
@@ -621,11 +666,14 @@ def custom_plan(shapes, disp):
     for beat_sel in PLANS[disp]:
         beat = []
         for sel in beat_sel:
-            (target, pbox) = resolve(sel, shapes, used)
+            # 2026-08-26: an "x:" prefix makes the beat a fade-OUT
+            is_exit = sel.startswith("x:")
+            (target, pbox) = resolve(sel[2:] if is_exit else sel,
+                                     shapes, used)
             if isinstance(target, list):
-                beat.extend(target)
+                beat.extend((spid, prg, is_exit) for spid, prg in target)
             else:
-                beat.append(target)
+                beat.append((target[0], target[1], is_exit))
             if pbox is not None:
                 para_ids.append(pbox)
         beats.append(beat)
@@ -664,6 +712,10 @@ def main():
         if not beats:
             print("s%02d: no beats — skipped" % disp)
             continue
+        # every target is (spid, prg, is_exit); the default plan and the
+        # pre-2026-08-26 helpers still emit 2-tuples
+        beats = [[t if len(t) == 3 else (t[0], t[1], False) for t in b]
+                 for b in beats]
         # strip existing timing, then append the new block
         for t_el in tree.findall(q(P, "timing")):
             tree.remove(t_el)
