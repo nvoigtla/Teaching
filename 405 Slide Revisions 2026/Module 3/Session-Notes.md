@@ -1884,3 +1884,75 @@ scatter+fit XY chart.
 ### Open / pending
 - Module 3 is DONE. Deck = 79 slides, canonical `Module 3 - Revised.pptx`.
 - If more PollEv/other slides are hand-inserted later, page numbers now self-renumber; just tell me so I edit AROUND the live poll slides (never round-trip them through python-pptx).
+
+## 2026-08-26 – Agenda rework, formatting audit, and video conversion (deck 79 → 88 slides)
+
+**One-line summary.** Rebuilt the agenda system (7 outline items, coverage
+pills, agenda-item top-bar tags), fixed a deck-wide list of formatting
+deviations, and converted the deck for taping — a video title card per
+section plus the "Video N" banners — with four new conventions written into
+Teaching/CLAUDE.md.
+
+### Key work
+- **Agenda slides.** Slide 8 became the descriptive overview (all items lit,
+  no band); a per-section agenda was added for item 1; the Part-2 divider
+  narrowed from items 4+5 to item 4. **"Wage Searchers"** joined the outline
+  (slides 26–31 taught it but no item named it) and later **"Introduction to
+  Module 3"** as item 1 — seven items now, so the agenda geometry switched to
+  Module 1's adaptive pitch (derived, capped at 0.91").
+- **Top-bar convention (NEW).** Every content slide's tag names the agenda
+  item it sits under (`Module 3 · Short Run: Hiring Decisions`); agenda slides
+  read `Module 3 · Agenda`; front matter and the summary closer keep their own
+  tags. 61 slides retagged, superseding `Module · Part · Section`.
+- **Formatting audit + fixes** (`_audit_format.py`, `_format_fixes.py`):
+  back buttons on the two backup slides → navy "← Back" pill at the fixed
+  corner; 56 off-palette fills/runs mapped onto the palette; trailing periods
+  on 3 bullets; rounding + shade on the concept map's 11 boxes, slide 17's
+  note bar and cream callout, and slide 44's three-card comparison; 5 slide
+  titles raised to title case (the full-sentence one left alone).
+- **Reference box** (`_restyle_refs.py`): the old "folded-corner PDF + SEE
+  TEACHING NOTE" pointer became the current single gold-bordered box with the
+  ▤ glyph — Module 2's glyph vocabulary, not Module 1's older ➜ pills.
+- **Video conversion** (`_video_prep.py` then `_retrofit_agenda.py`):
+  7 title cards (Module 2's `_video_title_slide` layout, verbatim), the
+  Introduction's card opening the deck ahead of the title slide; gold
+  "Video N" coverage pills on every agenda slide, dropped 0.16" so they
+  centre in their row.
+
+### Decisions
+- The outline now lives in **`_m3_outline.py`**, shared by the agenda builder
+  and the video-card builder, so an item's title, its pill and its card can't
+  drift apart.
+- Pipeline order is fixed: `_video_prep.py` → `_retrofit_agenda.py` (cards
+  first, so pills and cached page numbers land on the final slide order).
+- Nico's hand-edits adopted as-is: the 7/8 swap (outline before concept map),
+  the Introduction card moved to slide 1, the 0.16" pill drop from slide 11.
+- Concept blue on slide 20's navy hero box was reverted to the light-blue
+  tint — #0070C0 is too dark on navy.
+
+### Gotchas
+- **Deleting a shape whose animation still targets it makes PowerPoint refuse
+  to open the deck** ("PowerPoint could not open the file"), while python-pptx
+  and the editing canvas see nothing wrong. Drop the effect's `<p:par>` with
+  the shape, or transplant onto the shape that carries the click.
+- **"Production and Costs" matches every slide's FOOTER**, not just the title
+  slide — a loose text match rounded 18 pictures deck-wide before it was
+  caught. Match on a marker unique to the slide ("EMBA").
+- A blanket "line ends in a period" strip misses text inside box+text groups
+  (`findall` vs `iter`) and would hit prose; name the lines instead.
+
+### New CLAUDE.md conventions
+1. Top-bar tag = current agenda item (agenda slides read "Agenda").
+2. Converting a module for video taping = title card per taped section +
+   coverage pills; the Introduction card is always slide 1.
+3. Coverage pills sit vertically centred in their row (0.16" drop) on every
+   agenda slide.
+4. A description must clear its pill by a five-letter word; shorten the
+   wording, never the type. Enforced by a PIL measurement in the build.
+
+### Open / pending
+- Deck = 88 slides. Video 1 (Introduction) currently runs card → Big Picture
+  → Outline → Concept Map; the course roadmap sits outside it.
+- The Introduction has no section agenda of its own (the overview serves).
+- Not done: box+text grouping on the concept map (would invalidate its
+  animations), and the new title cards / agenda slides carry no animations.

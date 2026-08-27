@@ -171,6 +171,17 @@ For work in this folder, you are assisting with **teaching materials**
 - **Bullet spacing-before: 12 pt before main bullets, 3 pt before
   sub-bullets** (first bullet in a box gets none), as long as the result
   looks balanced.
+- **Sparse slides get MORE space between items, not more empty space at
+  the bottom.** When a slide carries only a few items – roughly three or
+  four main bullets, or three sentences on a poll-setup or question
+  slide – raise the space-before to about **18 pt** so the lines are
+  distributed over the content area instead of clustering at the top.
+  Combine this with the larger end of the sizing range (28 pt main).
+  The reference case is Module 2's In-Class slide 44 ("Obtain Price
+  Elasticity from the Demand Function"): three lines at 28 pt with 18 pt
+  before each, which balances the slide. Do this by default on sparse
+  slides – it is the same principle as "even spacing between main
+  bullets", applied when there is spare vertical room.
 
 ## Concept-explanation textboxes (preferred format)
 - When a slide needs a short, visually-distinct callout to **explain a
@@ -238,9 +249,28 @@ accent, one neutral.
 
 **Chrome** – keep identical across content slides; never enlarge one slide's
 title relative to the others.
-- **Navy top bar** with a three-level hierarchical section tag, white bold
-  ~15–16 pt: `Module · Part · Section`, title-cased. (A non-module deck
-  family may use a two-level tag.)
+- **Navy top bar** with a section tag, white bold ~15–16 pt, title-cased.
+- **The top-bar tag names the CURRENT AGENDA ITEM** (2026-08-26, Nico).
+  A content slide's tag is `Module N · <agenda item title>`, copied
+  verbatim from the module outline — slide 15 of Module 3 sits under
+  outline item 2, so its tag reads `Module 3 · Short Run: Hiring
+  Decisions`. A student can therefore always tell from the top bar where
+  in the agenda s/he is. Rules:
+  - **Agenda / outline slides read `Module N · Agenda`.**
+  - **Rename the item, rename the tag.** The outline list is the single
+    source of both, so a build script derives the tag from it rather
+    than repeating the wording per slide.
+  - Slides ahead of the first agenda slide (logistics, announcements,
+    recap of the previous module, course roadmap, big picture, concept
+    map) keep their own two-level tag — `Module 3 · Recap`, `Module 3 ·
+    Big Picture` — as does the summary closer (`Module 3 · Summary`).
+    They belong to no agenda item.
+  - Slides with no top bar at all (title, poll, backup) stay as they
+    are.
+  - This SUPERSEDES the older three-level `Module · Part · Section` tag
+    (`Module 3 · Production · Short Run`), whose middle level drifted
+    away from the agenda wording. (A non-module deck family may still
+    use a two-level tag.)
 - **Action title** = the takeaway, not the topic; navy bold ~30 pt.
 - Under the title, above the footer: a **thin gray rule** with a short
   **gold accent strip** on the left.
@@ -383,6 +413,14 @@ artifact.
   any small all-italic ≤13 pt text box sitting within ~0.3" of its edge
   and horizontally centered on it). Grouping invalidates existing
   animations on the slide — re-run the animation build afterward.
+- **The same rule covers charts and tables, not just photographs.** A
+  native table or chart, its white backing card, and its source line are
+  ONE object. Group all three. The one deliberate exception is a figure
+  built in pieces so the pieces can be revealed on separate clicks (a
+  table split into sections, for example): there the backing card and
+  the source line are grouped with the FIRST piece and the remaining
+  pieces stay separate — and the shared card must keep the z-order of
+  that first piece, or it will be drawn on top of the pieces below it.
 
 ## Visual hierarchy: boxes, arrows, bridges
 - **Filled boxes = primary content nodes** (a key concept, rule, definition)
@@ -444,7 +482,14 @@ artifact.
   or a teaching note: gold-bordered rounded rect (~25% corner), white fill,
   soft drop shadow, navy bold ~15 pt, with a **leading glyph** that says
   what kind of reference it is – **✎ for a problem set**, **▤ for a
-  teaching note**. Two rules for the label:
+  teaching note**. **Default position: the bottom-RIGHT corner,
+  overlapping the footer** (left 10.17", top 6.53", 3.00 × 0.50" on the
+  13.33 × 7.5" canvas), the same corner the practice-video box uses.
+  Put every problem-set pointer there unless that corner is already
+  taken on the slide (by a Poll Break badge or a video box); only then
+  move it left along the bottom edge. Route the position through one
+  constant in the build script (`PS_BOX_XY`), never per call site, so
+  the corner cannot drift. Two rules for the label:
   - **Name the problem set NUMBER only – never the exercise numbers.**
     "Problem Set 2", not "Problem Set 2 · #4, #5". The exercises get
     renumbered from year to year and the slide should survive that.
@@ -532,6 +577,26 @@ need that pass.)
     `#BFBFBF` fill, white text, and no shadow – so only the current
     topic keeps its colour. The descriptive overview and the summary
     closer, which light every item, keep every pill in colour.
+  - **The pill sits vertically CENTRED in its row – 0.16" below the top
+    of the reserved two-row box** (2026-08-26, Nico). A section agenda
+    shades most of its rows down to a single line, which is itself nudged
+    down to centre it in that box; left at the top, the pill floats away
+    from the item it belongs to. Use the same drop on EVERY agenda slide
+    of the deck – section agendas, the descriptive overview and the
+    summary closer alike – so the pill column is identical everywhere and
+    nothing jumps between consecutive slides. Route it through one
+    constant in the outline builder (`PILL_DROP`), never per row.
+  - **A description must clear the pill by at least a five-letter word**
+    (2026-08-26, Nico). The description row runs the full width of the
+    text box, so a long one reaches under the pill and reads as running
+    into it. Measure each description in the real font (PIL ImageFont on
+    Calibri at the description's own size) and require
+    `width ≤ pill_left − text_left − width("costs")`; on the standard
+    geometry (text box at x 2.05", pill left edge 11.30", 22 pt) that is
+    8.63". If a description is over, **shorten the wording** – never
+    shrink the type or narrow the text box. Module 3's "Cost Concepts"
+    line lost its closing "for decisions" this way. Put the check in the
+    build script so it fails loudly rather than shipping a collision.
   - **Implementation:** one table mapping item → pill text, read by the
     outline builder (Module 2: `COVERAGE_LABEL` in the shared layer).
   - **Watch the right edge.** The pills occupy it, so a pointer / link
@@ -618,6 +683,49 @@ need that pass.)
 - If a slide has heavy technical content with little on-slide text,
   the speaker notes should contain the full explanation I'll deliver
   verbally.
+
+## Converting a Module for Video Taping
+When I say "convert / adapt Module X for my video purposes" (or for
+taping), apply these two steps to **every section that will be taped**.
+A module can be taped in full (Module 3: all six sections are videos) or
+only in part (Modules 1 and 2: half video, half in class) — so first
+establish which sections are taped, then treat only those.
+
+1. **A video title card at the start of each taped section**, placed
+   immediately BEFORE that section's agenda slide, matching the order the
+   video decks use (title card → outline → content).
+   - **The INTRODUCTION video's card is always the VERY FIRST slide of
+     the deck** (2026-08-26, Nico) — ahead of the deck title slide, so a
+     video-mode deck opens by naming the video the viewer is about to
+     watch. The introduction is item 1 of the outline (Module 3:
+     "Introduction to Module 3 — a brief overview of what we cover in
+     Module 3"), and it has no section agenda of its own: the module
+     overview slide is its agenda.
+   The card is the
+   title-slide layout with no top bar, no footer text and no page number:
+   the section name navy bold 60 pt at y 2.10"; `Module N  ·  Video k`
+   gold bold 40 pt at y 3.25"; a 4" gold strip centered at y 4.28";
+   "Management 405" gray bold 26 pt at 4.62"; "Prof. Nico Voigtländer ·
+   UCLA Anderson" gray 22 pt at 5.32"; the footer rule and its gold strip.
+   Reference implementation: `_video_title_slide` in
+   `Module 2/_build_Module2Video.py`. The card carries **no speaker
+   notes**. The card's name is the outline item's title, so the agenda
+   and the video announce the same thing.
+2. **Coverage pills on every agenda slide** (the "video banners"), per the
+   Coverage-pills rule in the Module-Outline section: gold fill / navy
+   text for a taped topic, navy fill / white text for one done in class,
+   dimming with its row on a section agenda. Numbering follows the videos
+   a student actually has to watch, not the item numbers.
+
+Order matters: insert the title cards FIRST, then rebuild the agenda
+slides, so the pills and the cached page numbers land on the final slide
+order. Module 3's pipeline is the reference — `_video_prep.py` then
+`_retrofit_agenda.py`.
+
+Everything else in the deck stays as it is: the top-bar tags keep naming
+the agenda item (they are not rewritten to "Video k"), and the module
+front matter (logistics, announcements, recap, roadmap, big picture,
+concept map) sits ahead of the first title card, outside any video.
 
 ## Teleprompter Notes
 I tape video lectures and read the script off a teleprompter. When I ask
@@ -1097,6 +1205,13 @@ When I ask for fresh, current examples for a module's concepts:
   structure and wording; color-code matched quantities (each quantity its
   own color, reused in equation + bullets), but only the quantities carrying
   the pedagogical link.
+- **The final solution is set in DARK RED** (2026-08-26, Nico). On every
+  solution slide the line that delivers the answer - the last equation of
+  the derivation - is dark red (`C00000`), while the setup and the
+  intermediate steps stay navy. This is the baseline for all decks, not
+  just game-theory ones (the payoff-matrix section below repeats it for
+  numeric answers). One red line per solution slide: if every equation is
+  red, none of them reads as the answer.
 
 ### Chart legends
 - **Legends stack vertically, one entry per line.** When a chart has
