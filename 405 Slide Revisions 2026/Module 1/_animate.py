@@ -290,7 +290,7 @@ PLANS = {
         ["n:sdgroup:shifts"],
         ["n:sdgroup:Q1", "pr:In this case:0:0"],
         ["pr:In this case:1:1"],
-        ["t:➜ Problem Set 1"],
+        ["t:✎ Problem Set 1"],   # glyph changed 2026-08-27 (➜ -> ✎)
     ],
     84: [  # shift table static; the Important rule box is the payoff
         ["grp:1"],
@@ -408,6 +408,47 @@ SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 PLANS[100] = [
     ["t:Property tax:"],
     ["t:\u2190 Back"],
+]
+
+# ---------------------------------------------------------------------------
+# 2026-08-26: the videos-first restructure. Everything above is keyed by the
+# OLD (101-deck) display number, which is what the dated comments refer to;
+# one map re-keys the whole config. The three slides the reorder ADDS carry
+# no build: the two section dividers are single-word slides and the second
+# copy of the module title slide is a title slide.
+# ---------------------------------------------------------------------------
+import sys as _sys                                            # noqa: E402
+_sys.path.insert(0, str(HERE))
+import _m1_order as _ORDER                                    # noqa: E402
+
+PLANS = _ORDER.remap_keys(PLANS)
+FIG_GROUP = _ORDER.remap_keys(FIG_GROUP)
+STATIC = _ORDER.remap_keys(STATIC)
+SKIP_TITLE = _ORDER.remap_set(SKIP_TITLE) | _ORDER.NEW_ONLY
+SKIP_AGENDA = _ORDER.remap_set(SKIP_AGENDA)
+SKIP_MEDIA = _ORDER.remap_set(SKIP_MEDIA)
+SKIP_STATIC = _ORDER.remap_set(SKIP_STATIC)
+SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
+
+# ---------------------------------------------------------------------------
+# 2026-08-27: the two Kroger–Albertsons slides adopted from the Example
+# Candidates deck. Keyed by DISPLAY number (they have no old-deck twin).
+# Chronology first: the case slide ends on "market definition would turn out
+# to be crucial", and the resolution slide's gold decision bar is its final
+# click.
+# ---------------------------------------------------------------------------
+PLANS[_ORDER.NEW_KROGER_CASE] = [
+    # bullet 1 (the deal) and both photos are visible from the start
+    ["pr:Oct 2022: Kroger agrees to buy:1:1"],   # "everything would hinge…"
+    ["pr:Oct 2022: Kroger agrees to buy:2:2"],   # the firms' market
+    ["pr:Oct 2022: Kroger agrees to buy:3:3"],   # the FTC's market
+]
+PLANS[_ORDER.NEW_KROGER_COSTCO] = [
+    ["t:THE MARKET"],
+    ["t:Outside the market", "t:Club stores", "t:Limited assortment",
+     "t:Dollar & convenience", "t:Online-only sellers"],
+    ["t:“A monthly trip to Costco"],
+    ["t:Dec 2024: federal and state courts"],
 ]
 
 

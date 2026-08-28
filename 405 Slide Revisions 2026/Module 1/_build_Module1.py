@@ -32,6 +32,11 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.oxml.ns import qn
 from pptx.util import Cm, Inches, Pt
 
+# Canonical slide order (2026-08-26 videos-first restructure). Every pass in
+# the pipeline imports this one module so a display-keyed config never has to
+# be hand-shifted again.
+import _m1_order as _ORDER
+
 # Reuse all primitives from the template script (single source of truth).
 from _build_template_samples import (
     FADED,
@@ -2321,8 +2326,13 @@ TAG_LOG      = "Module 1 · Logistics"
 TAG_MODELS   = "Module 1 · Economic Models"
 TAG_ROADMAP  = "Module 1 · Course Roadmap"
 TAG_OUTLINE  = "Module 1 · Outline"
-TAG_MARKETS  = "Module 1 · In Class · Markets"
-TAG_SD       = "Module 1 · In Class · Supply and Demand"
+# 2026-08-27 (Nico): slides that apply the VIDEO material in class carry
+# a four-level tag, "Module N · In Class · Examples · <topic>", so a
+# student can see the slide is an application of a taped topic rather
+# than a new agenda item. See Teaching CLAUDE.md, "In-class examples of
+# video material".
+TAG_MARKETS  = "Module 1 · In Class · Examples · Markets"
+TAG_SD       = "Module 1 · In Class · Examples · Supply and Demand"
 TAG_OPP      = "Module 1 · In Class · Opportunity Costs"
 TAG_SUNK     = "Module 1 · In Class · Sunk Costs"
 TAG_CBA      = "Module 1 · In Class · Cost-Benefit and Marginal Analysis"
@@ -2484,24 +2494,91 @@ def _add_styled_table(slide, left, top, width, height, rows_data, *,
     return gf
 
 
-# --------------------------------------------------------------------------
-# Handoff-group injection + Nico's hand-tuned Poll Break badge (from M2)
-# --------------------------------------------------------------------------
+# Poll Break badge — the ONE geometry from Teaching CLAUDE.md
+# ("The Poll Break parallelogram has ONE fixed geometry"), 2026-08-27.
+# Built from these numbers rather than copied from a hand-tuned sidecar,
+# so the rule alone is enough to regenerate it.
+POLLBREAK_XY = (9361444, 6190030)        # EMU: left 10.2377", top 6.7695"
+POLLBREAK_WH = (2697480, 487009)         # EMU: 2.9500 x 0.5326"
+POLLBREAK_SLANT = 0.72 / 2.95            # 0.72" slant on a 2.95" width
 
-def _inject_handoff_group(slide, fname, id_base=9500):
-    xml = (OUT_DIR / fname).read_text(encoding='utf-8')
-    el = ET.fromstring(xml)
+# custGeom path in the normalised 100000 x 100000 box: s = the slant as a
+# fraction of the width, r = the corner rounding, d = r*s/100000.
+_PB_S = int(round(POLLBREAK_SLANT * 100000))     # 24406
+_PB_R = 5000
+_PB_D = int(round(_PB_R * _PB_S / 100000.0))     # 1220
+
+_PB_PATH = (
+    '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/>'
+    '<a:rect l="{s}" t="0" r="{ws}" b="100000"/>'
+    '<a:pathLst><a:path w="100000" h="100000">'
+    '<a:moveTo><a:pt x="{sr}" y="0"/></a:moveTo>'
+    '<a:lnTo><a:pt x="{wr}" y="0"/></a:lnTo>'
+    '<a:cubicBezTo><a:pt x="100000" y="0"/><a:pt x="100000" y="0"/>'
+    '<a:pt x="{wd}" y="{r}"/></a:cubicBezTo>'
+    '<a:lnTo><a:pt x="{wsd}" y="{hr}"/></a:lnTo>'
+    '<a:cubicBezTo><a:pt x="{ws}" y="100000"/><a:pt x="{ws}" y="100000"/>'
+    '<a:pt x="{wsr}" y="100000"/></a:cubicBezTo>'
+    '<a:lnTo><a:pt x="{r}" y="100000"/></a:lnTo>'
+    '<a:cubicBezTo><a:pt x="0" y="100000"/><a:pt x="0" y="100000"/>'
+    '<a:pt x="{d}" y="{hr}"/></a:cubicBezTo>'
+    '<a:lnTo><a:pt x="{sd}" y="{r}"/></a:lnTo>'
+    '<a:cubicBezTo><a:pt x="{s}" y="0"/><a:pt x="{s}" y="0"/>'
+    '<a:pt x="{sr}" y="0"/></a:cubicBezTo>'
+    '<a:close/></a:path></a:pathLst></a:custGeom>'
+).format(s=_PB_S, r=_PB_R, d=_PB_D, sr=_PB_S + _PB_R, sd=_PB_S - _PB_D,
+         wr=100000 - _PB_R, wd=100000 - _PB_D, ws=100000 - _PB_S,
+         wsr=100000 - _PB_S - _PB_R, wsd=100000 - _PB_S + _PB_D,
+         hr=100000 - _PB_R)
+
+_PB_SHADOW = ('<a:effectLst><a:outerShdw blurRad="50800" dist="38100" '
+              'dir="2700000" algn="tl" rotWithShape="0">'
+              '<a:srgbClr val="000000"><a:alpha val="50000"/></a:srgbClr>'
+              '</a:outerShdw></a:effectLst>')
+
+_PB_XML = (
+    '<p:grpSp xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" '
+    'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'
+    '<p:nvGrpSpPr><p:cNvPr id="9600" name="PollBreakBadge"/>'
+    '<p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'
+    '<p:grpSpPr><a:xfrm><a:off x="{x}" y="{y}"/><a:ext cx="{cx}" cy="{cy}"/>'
+    '<a:chOff x="{x}" y="{y}"/><a:chExt cx="{cx}" cy="{cy}"/></a:xfrm></p:grpSpPr>'
+    # the gold parallelogram
+    '<p:sp><p:nvSpPr><p:cNvPr id="9601" name="PollBreakShape"/>'
+    '<p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr>'
+    '<a:xfrm><a:off x="{x}" y="{y}"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm>'
+    '{path}<a:solidFill><a:srgbClr val="E09F3E"/></a:solidFill>'
+    '<a:ln><a:noFill/></a:ln>{shadow}</p:spPr>'
+    '<p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/>'
+    '<a:p><a:pPr algn="ctr"/><a:endParaRPr/></a:p></p:txBody></p:sp>'
+    # the navy label, filling the parallel middle (W - 2S)
+    '<p:sp><p:nvSpPr><p:cNvPr id="9602" name="PollBreakLabel"/>'
+    '<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>'
+    '<a:xfrm><a:off x="{lx}" y="{y}"/><a:ext cx="{lcx}" cy="{cy}"/></a:xfrm>'
+    '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>'
+    '<p:txBody><a:bodyPr wrap="none" lIns="45720" tIns="18288" rIns="45720" '
+    'bIns="18288" anchor="ctr"><a:spAutoFit/></a:bodyPr><a:lstStyle/>'
+    '<a:p><a:pPr algn="ctr"/><a:r><a:rPr sz="2800" b="1">'
+    '<a:solidFill><a:srgbClr val="0B2B4E"/></a:solidFill>'
+    '<a:latin typeface="Calibri"/></a:rPr><a:t>Poll Break</a:t></a:r></a:p>'
+    '</p:txBody></p:sp></p:grpSp>'
+).format(x=POLLBREAK_XY[0], y=POLLBREAK_XY[1],
+         cx=POLLBREAK_WH[0], cy=POLLBREAK_WH[1],
+         lx=POLLBREAK_XY[0] + int(round(POLLBREAK_WH[0] * POLLBREAK_SLANT)),
+         lcx=POLLBREAK_WH[0] - 2 * int(round(POLLBREAK_WH[0] * POLLBREAK_SLANT)),
+         path=_PB_PATH, shadow=_PB_SHADOW)
+
+
+def _add_pollbreak_badge(slide, _ids=[9600]):
+    """The deck-standard Poll Break badge, bottom-right, IN FRONT of the
+    footer (it straddles the footer rule at y 7.15", so it must be the
+    LAST shape appended). Call AFTER _draw_footer."""
+    el = ET.fromstring(_PB_XML)
     for i, nv in enumerate(el.iter(qn('p:cNvPr'))):
-        nv.set('id', str(id_base + i))
+        nv.set('id', str(_ids[0] + i))
+    _ids[0] += 10
     slide.shapes._spTree.append(el)
     return el
-
-
-def _add_pollbreak_badge(slide):
-    """Nico's hand-tuned Poll Break badge (2026-08-15, from Module 2):
-    gold parallelogram + navy label, grouped, bottom-right IN FRONT of
-    the footer. Call AFTER _draw_footer."""
-    _inject_handoff_group(slide, "_handoff_pollbreak.xml", id_base=9600)
 
 
 # --------------------------------------------------------------------------
@@ -2810,8 +2887,20 @@ def _add_jump_pill(slide, target_slide, *, left, top, width, label,
     return pill, btn
 
 
-def _add_ps_pointer(slide, *, left, top, label="Problem Set 1",
+# Post-work reference box (Teaching CLAUDE.md): the glyph is a fixed
+# vocabulary — ✎ always means "a problem set", ▤ always "a teaching note" —
+# and the default position is the bottom-RIGHT corner, overlapping the
+# footer.  Route every call through these two constants (2026-08-27).
+PS_GLYPH = "✎"
+PS_BOX_XY = (Inches(10.17), Inches(6.53))
+
+
+def _add_ps_pointer(slide, *, left=None, top=None, label="Problem Set 1",
                     width=Inches(2.5), height=Inches(0.5)):
+    if left is None:
+        left = PS_BOX_XY[0]
+    if top is None:
+        top = PS_BOX_XY[1]
     shp = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
                                  int(left), int(top), int(width), int(height))
     try:
@@ -2831,7 +2920,7 @@ def _add_ps_pointer(slide, *, left, top, label="Problem Set 1",
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     p = tf.paragraphs[0]
     p.alignment = PP_ALIGN.CENTER
-    r1 = p.add_run(); r1.text = "➜  "
+    r1 = p.add_run(); r1.text = PS_GLYPH + "  "
     r1.font.name = "Calibri"; r1.font.size = Pt(16)
     r1.font.bold = True; r1.font.color.rgb = GOLD
     r2 = p.add_run(); r2.text = label
@@ -3451,7 +3540,88 @@ def make_roadmap(prs, page_num, *, tag=None):
 RED_MW = RGBColor(0xD5, 0x1A, 0x1A)        # MW's ▼ red
 
 
+# --------------------------------------------------------------------------
+# Title case for outline ITEM TITLES (2026-08-26, adopted from Module 2)
+# --------------------------------------------------------------------------
+# Agenda item titles follow the same title case as slide titles: every
+# significant word starts with a capital, while articles, coordinating
+# conjunctions and short prepositions stay lower case unless they open the
+# title, close it, or follow a colon.  The one-line description underneath
+# is a sentence, so it is left alone.
+#
+# The pass only ever RAISES a letter — it never lower-cases a word that is
+# already capitalised — so acronyms and Nico's own capitalisation choices
+# survive untouched.  Module 1 applies it to the outline items ONLY; the
+# deck's slide titles are not routed through it.
+
+TITLE_LOWER = {
+    "a", "an", "the",
+    "and", "but", "or", "nor", "for", "so", "yet",
+    "as", "at", "by", "in", "into", "of", "off", "on", "onto", "out",
+    "per", "to", "up", "via", "with", "from", "over", "than", "vs",
+}
+
+
+def _tc_word(word, force):
+    """Capitalise one whitespace-delimited token, hyphen parts included."""
+    parts = word.split("-")
+    out = []
+    for i, part in enumerate(parts):
+        core = part.lstrip("“‘\"'([")
+        lead = part[:len(part) - len(core)]
+        stripped = core.rstrip("”’\"')]:,.?!")
+        trail = core[len(stripped):]
+        low = stripped.lower().rstrip(".")
+        keep_low = (not force) and low in TITLE_LOWER
+        if stripped and not keep_low and stripped[0].islower():
+            stripped = stripped[0].upper() + stripped[1:]
+        out.append(lead + stripped + trail)
+        force = False          # only the first hyphen part can be forced
+    return "-".join(out)
+
+
+def _title_case(title):
+    words = title.split(" ")
+    idx = [i for i, w in enumerate(words) if w.strip()]
+    if not idx:
+        return title
+    first, last = idx[0], idx[-1]
+    out = []
+    force_next = True
+    for i, w in enumerate(words):
+        if not w.strip():
+            out.append(w)
+            continue
+        force = force_next or i == first or i == last
+        out.append(_tc_word(w, force))
+        force_next = w.rstrip().endswith((":", "?", "!", "—", "–"))
+    return " ".join(out)
+
+
+# 2026-08-25 (Nico): every outline item says where it is taught — a small
+# rounded pill at the right of the row, navy/white for a topic done in
+# class and gold/navy for one on video.  The pills name the video a
+# student actually has to watch, not a sequence number: Module 1's three
+# module topics live in videos 2, 3 and 4 (video 1 is the introduction).
+# 2026-08-26 (Nico): "Introduction" joins the outline as item 1, so the
+# three module topics move to items 2-4 and the in-class trio to 5-7.
+COVERAGE_LABEL = {
+    0: "Video 1", 1: "Video 2", 2: "Video 3", 3: "Video 4",
+    4: "In class", 5: "In class", 6: "In class",
+}
+IN_CLASS_ITEMS = {4, 5, 6}
+
+# 2026-08-25 (Nico, measured off the final video decks): an item with no
+# description shown renders its single line at the TOP of the reserved
+# two-row box, which sits high against the gold circle.  Every SHADED item
+# is nudged down by exactly this much to centre it; the current topic,
+# which fills its box with title + description, does not move.
+DIM_DROP = 85064                           # 0.093 in
+
+
 M1_OUTLINE = [
+    ("Introduction",
+     "Video 1: a brief introduction of the instructor and the class"),
     ("Markets",
      "Video 2: what a market is, and how far it extends"),
     ("Demand and supply",
@@ -3490,14 +3660,35 @@ def make_m1_outline(prs, page_num, *, tag=None, title="Outline of Module 1",
     if descriptions:
         hi = set(range(len(M1_OUTLINE)))
 
-    title_h = Inches(0.42)
-    desc_h = Inches(0.38)
-    gap = Inches(0.11)
-    pitch = title_h + desc_h + gap
-    total = pitch * len(M1_OUTLINE) - gap
-    top = Inches(1.60)
+    # 2026-08-26: with "Introduction" added the outline runs to SEVEN items,
+    # and the Module 2 metrics (0.42 + 0.38 + 0.11 = 0.91" pitch) no longer
+    # fit between the title rule and the footer. The pitch is therefore
+    # derived from the space available, capped at 0.91" so a six-item deck
+    # keeps the Module 2 geometry to the EMU. The cap on the last row keeps
+    # its coverage pill clear of the pointer box at y 6.68 (see the "watch
+    # the right edge" rule in Teaching CLAUDE.md).
+    n_items = len(M1_OUTLINE)
+    top = Inches(1.42)
     bottom = Inches(7.02)
-    y = int(top + max(0, (bottom - top - total) // 2))
+    gap = Inches(0.11) if n_items <= 6 else Inches(0.07)
+    PITCH_MAX = Inches(0.91)             # the Module 2 pitch
+    LAST_ROW_MAX = Inches(6.22)          # pill bottom then lands at 6.60"
+
+    def _row_y(pitch, i):
+        block = pitch * n_items - gap
+        y0 = top + max(0, (bottom - top - block) // 2)
+        return y0 + i * pitch
+
+    pitch = PITCH_MAX
+    while pitch > Inches(0.60) and (
+            _row_y(pitch, n_items - 1) > LAST_ROW_MAX
+            or pitch * n_items - gap > bottom - top):
+        pitch -= 4572                     # 0.005" steps
+    content = pitch - gap
+    title_h = int(content * 0.525)        # 0.42 / 0.80 at the Module 2 pitch
+    desc_h = content - title_h
+    total = pitch * n_items - gap
+    y = int(_row_y(pitch, 0))
 
     last_hi_y = None
     for i, (item, desc) in enumerate(M1_OUTLINE):
@@ -3541,16 +3732,35 @@ def make_m1_outline(prs, page_num, *, tag=None, title="Outline of Module 1",
         lit = descriptions or i in hi
         run.font.color.rgb = NAVY if lit else DIM
         run.font.name = "Calibri"
-        rows = [([(item[0].upper() + item[1:],
+        # 2026-08-26 (Nico): agenda item titles follow the same title case
+        # as slide titles (adopted from Module 2)
+        rows = [([(_title_case(item[0].upper() + item[1:]),
                    {'bold': True, 'size': 25,
                     'color': NAVY if lit else DIM})], 0,
                  {'bullet_style': 'none', 'space_before_pts': 0})]
         if i in hi:
             rows.append(([(desc, {'size': 22, 'color': GRAY})], 0,
                          {'bullet_style': 'none', 'space_before_pts': 0}))
+        # shaded one-line rows are nudged down to centre them in the
+        # reserved two-row box (see DIM_DROP)
         _add_hierarchical_bullets(
-            slide, Inches(2.05), y, Inches(11.0), title_h + desc_h,
+            slide, Inches(2.05), y if lit else int(y + DIM_DROP),
+            Inches(11.0), title_h + desc_h,
             rows, size=25, line_spacing_pts=0)
+        # where this topic is taught.  On a section agenda the pill dims
+        # with its row — only the current topic keeps its colour.
+        in_class = i in IN_CLASS_ITEMS
+        if lit:
+            pill_fill = NAVY if in_class else GOLD
+            pill_ink = WHITE if in_class else NAVY
+        else:
+            pill_fill, pill_ink = DIM, WHITE
+        pill_w = Inches(1.55)
+        _add_rounded_filled_box(
+            slide, int(Inches(12.85) - pill_w), int(y + Inches(0.02)),
+            int(pill_w), Inches(0.36), COVERAGE_LABEL[i],
+            fill=pill_fill, text_color=pill_ink,
+            size=13, corner_pct=0.30, shadow=lit)
         y = int(y + pitch)
 
     _draw_footer(slide, FOOTER_TEXT, page_num)
@@ -3560,6 +3770,9 @@ def make_m1_outline(prs, page_num, *, tag=None, title="Outline of Module 1",
         ptr_y = Inches(6.68)
         if last_hi_y is not None and last_hi_y > Inches(5.6):
             ptr_y = Inches(5.30)
+        # narrower than PS_BOX_XY and 0.38" further right: the coverage
+        # pills own the right edge of an agenda slide, and the 3.00" box
+        # collides with the last item's pill (checked 2026-08-27)
         _add_ps_pointer(slide, left=Inches(10.55), top=ptr_y)
     return slide
 
@@ -3569,9 +3782,6 @@ def slide_16_outline(prs):
                            ps_pointer=True)
 
 
-def slide_17_outline_now(prs):
-    # the three video topics are done; the in-class trio is next
-    return make_m1_outline(prs, 17, highlight_set={3, 4, 5})
 
 
 # --------------------------------------------------------------------------
@@ -3627,7 +3837,7 @@ def slide_20_netflix(prs):
                               width=Inches(4.4))
 
     return content_slide(
-        prs, 20, TAG_MARKETS, "Market Definition: the Case of Netflix",
+        prs, 20, TAG_MARKETS, "Market Definition: The Case of Netflix",
         [
             ("Define Netflix’s market", 0,
              {'bold': True, 'bullet_style': 'none'}),
@@ -3693,12 +3903,13 @@ def slide_23_swiftonomics(prs):
     _draw_footer(slide, FOOTER_TEXT, 24)
     _add_pollbreak_badge(slide)
     _set_notes(slide, (
-        "Adopted from Melanie Wasserman's Module 1 deck (2026): Taylor "
-        "Swift announced her engagement to Travis Kelce in August 2025, "
-        "posting a picture of her diamond ring. Ask the class what this "
-        "does to the demand curve for diamonds, then run the poll. NOTE: "
-        "the PollEv activity still carries the old wording about the 2023 "
-        "decline in engagements — reword it in PollEverywhere."))
+        "Taylor Swift announced her engagement to Travis Kelce in "
+        "August 2025 and posted a picture of her diamond ring. Before we "
+        "draw anything, what does that do to the demand curve for "
+        "diamonds? Answer in the poll and we will see whether the class "
+        "agrees. (Nico: the PollEv activity still carries the old wording "
+        "about the 2023 decline in engagements — reword it in "
+        "PollEverywhere.)"))
     return slide
 
 
@@ -3852,7 +4063,7 @@ def slide_28_disasters(prs):
                               width=Inches(4.4))
 
     return content_slide(
-        prs, 29, TAG_SD, "Shortages when Disasters Loom",
+        prs, 29, TAG_SD, "Shortages When Disasters Loom",
         [
             ("Why are there frequently shortages when major disasters loom "
              "(storms, the Covid pandemic…)?", 0),
@@ -4114,7 +4325,7 @@ RED_CELL = RGBColor(0xFF, 0x50, 0x50)       # fruit-table opp-cost fill
 
 
 def slide_36_outline_opp(prs):
-    return make_m1_outline(prs, 39, highlight_idx=3, tag=TAG_OPP)
+    return make_m1_outline(prs, 39, highlight_idx=4, tag=TAG_OPP)
 
 
 def slide_37_opp_costs(prs):
@@ -4218,7 +4429,7 @@ def slide_38_fruit_table(prs):
 def slide_39_present(prs):
     return content_slide(
         prs, 42, TAG_OPP,
-        "Example: Opportunity Costs when Buying a Present",
+        "Example: Opportunity Costs When Buying a Present",
         [
             ("3 possible presents, price of each is $30", 0),
             ("But different values to recipient", 0),
@@ -4234,7 +4445,7 @@ def slide_40_mba_cost(prs):
 
     return content_slide(
         prs, 43, TAG_OPP,
-        "What is the Full Economic Cost of an MBA Degree?",
+        "What Is the Full Economic Cost of an MBA Degree?",
         [
             ("Distinguish explicit vs. implicit", 0),
             ("  ", 0), ("  ", 0), ("  ", 0), ("  ", 0), ("  ", 0),
@@ -4248,6 +4459,8 @@ def slide_40_mba_cost(prs):
 
 def slide_41_flip_house(prs):
     def extras(slide):
+        # bottom-LEFT by exception: the Poll Break badge owns the
+        # bottom-right corner on this slide (Teaching CLAUDE.md)
         _add_ps_pointer(slide, left=MARGIN + Inches(0.2), top=Inches(6.35))
 
     slide = content_slide(
@@ -4294,7 +4507,7 @@ def slide_43_flip_solution(prs):
         ],
         size=24, sub_size=22, line_spacing_pts=12,
         notes=(
-            "Adopted from Melanie Wasserman's Module 1 deck. Walk through "
+            "Walk through "
             "the ledger: revenues of 700k, explicit costs of 600k (the "
             "purchase plus the remodel), and the implicit cost of 150k — "
             "the consulting salary you give up. The economic profit is "
@@ -4337,7 +4550,8 @@ def slide_44_another_opp(prs):
 def slide_45_child_cost(prs):
     def extras(slide):
         _add_media_image(slide, "ic_s41_rId3.png",
-                         left=Inches(2.65), top=Inches(2.55),
+                         # top hand-tweaked from 2.55 on 2026-08-27 (Nico)
+                         left=Inches(2.65), top=Inches(2.21),
                          width=Inches(8.05), rounded=False, shadow=True)
 
     return content_slide(
@@ -4399,7 +4613,7 @@ def slide_47_us_2022(prs):
 # --------------------------------------------------------------------------
 
 def slide_48_outline_sunk(prs):
-    return make_m1_outline(prs, 51, highlight_idx=4, tag=TAG_SUNK)
+    return make_m1_outline(prs, 51, highlight_idx=5, tag=TAG_SUNK)
 
 
 def slide_49_sunk_costs(prs):
@@ -4419,7 +4633,7 @@ def slide_49_sunk_costs(prs):
 
 def slide_50_sunk_examples(prs):
     return content_slide(
-        prs, 53, TAG_SUNK, "Examples of Sunk Costs (you should ignore!)",
+        prs, 53, TAG_SUNK, "Examples of Sunk Costs (You Should Ignore!)",
         [
             ("Individual consumers", 0),
             ("Dessert in fixed-price dinners", 1),
@@ -4494,7 +4708,7 @@ def slide_52_sunk_takeaway(prs):
 # --------------------------------------------------------------------------
 
 def slide_53_outline_cba(prs):
-    return make_m1_outline(prs, 56, highlight_idx=5, tag=TAG_CBA)
+    return make_m1_outline(prs, 56, highlight_idx=6, tag=TAG_CBA)
 
 
 def slide_54_cba(prs):
@@ -4619,7 +4833,9 @@ def slide_55_exercise(prs):
                       RGBColor(0x6E, 0x0A, 0x1A))
         # white MC label inside the red base
         _add_text(slide, Inches(x), Inches(base_y - 0.42),
-                  Inches(col_w), Inches(0.3), "MC", size=14, bold=True,
+                  # 16 pt: the chart-internal floor (Teaching CLAUDE.md);
+                  # raised from 14 on 2026-08-27
+                  Inches(col_w), Inches(0.3), "MC", size=16, bold=True,
                   color=WHITE, font="Calibri", align=PP_ALIGN.CENTER)
         # net-benefit callouts for the first two hours
         if k < 2:
@@ -4637,7 +4853,7 @@ def slide_55_exercise(prs):
         elif k == 3:
             _add_text(slide, Inches(x - 0.22), Inches(base_y + 0.14),
                       Inches(col_w + 0.44), Inches(0.3), "indifferent",
-                      size=13, italic=True, color=NAVY, font="Calibri",
+                      size=16, italic=True, color=NAVY, font="Calibri",
                       align=PP_ALIGN.CENTER)
         else:
             _add_arrow_shape(slide, Inches(x + 0.08), Inches(base_y + 0.14),
@@ -4655,8 +4871,8 @@ def slide_56_continuous(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_CBA)
     _add_text(slide, MARGIN, Inches(0.55), RULE_W, Inches(0.7),
-              "Maximizing Net Benefit: The Standard Analysis that You’ll "
-              "See throughout the Class",
+              "Maximizing Net Benefit: The Standard Analysis That You’ll "
+              "See Throughout the Class",
               size=26, bold=True, color=NAVY, font="Calibri")
     _add_rect(slide, MARGIN, Inches(1.25), RULE_W, Inches(0.02), RULE)
     _add_rect(slide, MARGIN, Inches(1.235), GOLD_W, Inches(0.05), GOLD)
@@ -4729,10 +4945,11 @@ def slide_58_next_steps(prs):
         ],
         size=26, sub_size=24, line_spacing_pts=14,
         notes=(
-            "Adopted from Melanie Wasserman's Module 1 deck as a closing "
-            "slide: problem set logistics plus a preview of Module 2. The "
-            "due date is a placeholder; the last two sub-bullets are her "
-            "pre-class routine — keep or cut as fits Nico's flow."),
+            "Problem Set 1 is posted on BruinLearn and is worked in your "
+            "study group; the TA will send the submission instructions. "
+            "Before the next session, read the news article and take the "
+            "short survey, both linked on BruinLearn. Module 2 picks up "
+            "with buyers, value and demand."),
     )
 
 
@@ -4773,7 +4990,9 @@ def slide_59_v1_title(prs):
 
 
 def slide_60_v1_roadmap(prs):
-    return make_roadmap(prs, 63, tag=TAG_V1)
+    # 2026-08-27 (Nico): this copy sits in the IN-CLASS part, so it is
+    # tagged Introduction, not Video 1 (display 7 is the Video-1 copy).
+    return make_roadmap(prs, 63, tag=TAG_INTRO)
 
 
 def slide_61_v1_outline(prs):
@@ -4787,7 +5006,7 @@ def slide_62_v2_title(prs):
 
 
 def slide_63_v2_outline(prs):
-    return make_m1_outline(prs, 66, tag=TAG_V2, highlight_idx=0)
+    return make_m1_outline(prs, 66, tag=TAG_V2, highlight_idx=1)
 
 
 def slide_64_v2_market_def(prs):
@@ -4993,7 +5212,7 @@ def slide_65_v2_netflix(prs):
                               width=Inches(5.9))
 
     return content_slide(
-        prs, 68, TAG_V2, "Market Definition: the Case of Netflix",
+        prs, 68, TAG_V2, "Market Definition: The Case of Netflix",
         [
             ("Define Netflix’s market", 0,
              {'bold': True, 'bullet_style': 'none'}),
@@ -5055,7 +5274,7 @@ def slide_67_v3_title(prs):
 
 
 def slide_68_v3_outline(prs):
-    return make_m1_outline(prs, 71, tag=TAG_V3, highlight_idx=1)
+    return make_m1_outline(prs, 71, tag=TAG_V3, highlight_idx=2)
 
 
 def slide_69_v3_ds_analysis(prs):
@@ -5073,9 +5292,30 @@ def slide_69_v3_ds_analysis(prs):
     )
 
 
+# 2026-08-27: the same note used to sit on all three demand-curve
+# slides (the definition, ceteris paribus, and the curve itself).
+# Split into three so each note is about its own slide; the Pike Place
+# thought experiment stays with the slide that draws the curve.
 DEMAND_DEF_NOTE = (
-    "Note: aside from price, we are holding everything else constant, "
-    "including consumers’ income, tastes, price of other goods.\n"
+    "The demand curve is the relationship between the quantity of a "
+    "good that consumers are willing to buy and its price. The second "
+    "half of the definition is the half people forget: everything else "
+    "is held constant — income, tastes, the prices of other goods. "
+    "The next slide is about what that clause really means.")
+
+CETERIS_PARIBUS_NOTE = (
+    "Ceteris paribus is Latin for “all else equal”, and it is "
+    "the assumption that makes a demand curve possible. We want to know "
+    "how the quantity of ice cream cones demanded responds to a price "
+    "increase, so we hold constant everything else that could move it: "
+    "income, the outside temperature, the prices of related goods, and "
+    "the size and quality of the cone itself. The two cones in the "
+    "picture differ in more than price, which is exactly the comparison "
+    "the assumption rules out.")
+
+DEMAND_CURVE_NOTE = (
+    "Here is the curve itself, and it slopes downward: consumers buy "
+    "more as the price falls, all else constant.\n"
     "Thought experiment: suppose you show up at Pike Place Market on a "
     "Saturday and observe the price of tomatoes and total quantity that "
     "consumers buy. Suppose you can go back in time to that same Saturday "
@@ -5085,7 +5325,7 @@ DEMAND_DEF_NOTE = (
     "people will buy. If they are $1/pound, additional people will buy. As "
     "price declines, more consumers want to purchase it. This will make "
     "the demand curve downward sloping.\n"
-    "We will get into this in much more detail next week.")
+    "We will get into this in much more detail in Module 2.")
 
 
 def _add_definition_box(slide, body, *, top=Inches(1.70),
@@ -5152,7 +5392,7 @@ def slide_71_v3_ceteris_paribus(prs):
         size=22, sub_size=20, line_spacing_pts=10,
         bullets_width=Inches(7.3), title_size=26,
         extras=extras,
-        notes=DEMAND_DEF_NOTE,
+        notes=CETERIS_PARIBUS_NOTE,
     )
     return slide
 
@@ -5185,7 +5425,7 @@ def slide_72_v3_demand_curve(prs):
               weight_pt=2.75)
     _fig_curve_label(slide, fig, 7.8, 1.9, "D", color=NAVY)
     _draw_footer(slide, FOOTER_TEXT, 75)
-    _set_notes(slide, DEMAND_DEF_NOTE)
+    _set_notes(slide, DEMAND_CURVE_NOTE)
     return slide
 
 
@@ -5466,7 +5706,7 @@ def slide_77_v4_title(prs):
 
 
 def slide_78_v4_outline(prs):
-    return make_m1_outline(prs, 81, tag=TAG_V4, highlight_idx=2)
+    return make_m1_outline(prs, 81, tag=TAG_V4, highlight_idx=3)
 
 
 def slide_79_v4_mechanism(prs):
@@ -5745,6 +5985,9 @@ def slide_83_v4_shift_both(prs):
                         # on 2026-08-24 (Nico) to clear this slide's
                         # two-line header
                         ylab_pos=(7.300, 2.020))
+        # bottom-LEFT by exception: the chart's x-axis and its "Quantity"
+        # title run into the convention corner on this slide (checked at
+        # PS_BOX_XY on 2026-08-27 — the box covered the axis title)
         _add_ps_pointer(slide, left=MARGIN + Inches(0.2), top=Inches(6.35))
 
     return content_slide(
@@ -5883,11 +6126,11 @@ def slide_84_shift_table(prs):
     # hidden by Nico 2026-08-23 (kept in the deck, skipped in the show)
     slide._element.set("show", "0")
     _set_notes(slide, (
-        "Adopted from Melanie Wasserman's Module 1 deck: the four "
-        "single-curve shifts and their price/quantity effects, plus the "
-        "rule that simultaneous shifts pin down only one of the two "
-        "directions with certainty. Good closing recap after the "
-        "shift-in-supply-and-demand slide."))
+        "A summary table of the four single-curve shifts and what each "
+        "one does to the equilibrium price and quantity. The line "
+        "underneath is the part worth remembering: when both curves shift "
+        "at once, only one of the two directions is pinned down, and "
+        "which one depends on the relative size of the two shifts."))
     return slide
 
 
@@ -5927,7 +6170,7 @@ def slide_ac_solution(prs):
         bullets_width=Inches(6.6),
         extras=extras,
         notes=(
-            "Adopted from Melanie Wasserman's Module 1 deck: closes the "
+            "This closes the "
             "AC-heatwave poll. A heatwave is a non-price factor that "
             "raises the quantity demanded at every price, so the demand "
             "curve for air conditioners shifts outward, to the right."),
@@ -6038,6 +6281,16 @@ def _draw_footer_nonum(slide):
     _add_rect(slide, MARGIN, Inches(7.135), GOLD_W, Inches(0.05), GOLD)
     _add_text(slide, MARGIN, Inches(7.20), Inches(11), Inches(0.32),
               FOOTER_TEXT, size=12, color=GRAY)
+
+
+def _slide_by_old(prs, old_disp):
+    """Resolve an OLD (101-deck) display number to the built slide.
+
+    2026-08-26: the back pills below were wired to hardcoded display
+    indices, which the videos-first reorder invalidated. Keeping the old
+    number at the call site and resolving it here means the target follows
+    the slide, not its position."""
+    return prs.slides[_ORDER.new(old_disp) - 1]
 
 
 def _add_back_pill(slide, target_slide):
@@ -6154,7 +6407,7 @@ def slide_94_backup_leaders(prs):
         slide, "movie", left=Inches(4.687), top=Inches(5.364),
         url="https://www.youtube.com/watch?v=sOB5hmEXjdE")
     _draw_footer_nonum(slide)
-    _add_back_pill(slide, prs.slides[1])          # -> display 2
+    _add_back_pill(slide, _slide_by_old(prs, 2))   # -> old display 2
     _set_notes(slide, (
         "Backup on my paper with Sebastian Ottinger, “History's "
         "Masters: The Effect of European Monarchs on State Performance” "
@@ -6199,7 +6452,7 @@ def slide_96_backup_sw2008(prs):
                      left=Inches(3.90), top=Inches(1.50),
                      height=Inches(5.40), rounded=False, shadow=True)
     _draw_footer_nonum(slide)
-    _add_back_pill(slide, prs.slides[11])         # -> display 12
+    _add_back_pill(slide, _slide_by_old(prs, 12))  # -> old display 12
     _set_notes(slide, (
         "Stevenson and Wolfers (2008) revisit the Easterlin paradox with "
         "richer cross-country data: life satisfaction rises with income "
@@ -6226,7 +6479,7 @@ def slide_97_backup_anderson(prs):
         size=22, sub_size=20, line_spacing_pts=6)
     box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
     _draw_footer_nonum(slide)
-    _add_back_pill(slide, prs.slides[11])         # -> display 12
+    _add_back_pill(slide, _slide_by_old(prs, 12))  # -> old display 12
     slide._element.set('show', '0')               # hidden in the source deck
     _set_notes(slide, (
         "Hidden backup: Anderson faculty work related to the "
@@ -6264,7 +6517,7 @@ def slide_98_backup_portland(prs):
                      left=Inches(7.30), top=Inches(4.05),
                      width=Inches(4.2), rounded=False, shadow=True)
     _draw_footer_nonum(slide)
-    _add_back_pill(slide, prs.slides[8])          # -> display 9
+    _add_back_pill(slide, _slide_by_old(prs, 9))   # -> old display 9
     _set_notes(slide, (
         "This picture provides an excellent example on how to think like "
         "an economist. Do you notice anything strange? Some of the windows "
@@ -6300,7 +6553,7 @@ def slide_98_backup_portland(prs):
 def slide_99_backup_prices(prs):
     slide = _blank_slide(prs)
     _draw_top_bar_tc(slide, TAG_BACKUP)
-    _draw_action_title(slide, "Can These Prices be Optimal?")
+    _draw_action_title(slide, "Can These Prices Be Optimal?")
     _add_media_image(slide, "ws68_fares_top_crop.png",
                      left=Inches(2.17), top=Inches(1.42),
                      width=Inches(9.0), rounded=False, shadow=True)
@@ -6308,7 +6561,7 @@ def slide_99_backup_prices(prs):
                      left=Inches(2.17), top=Inches(4.50),
                      width=Inches(9.0), rounded=False, shadow=True)
     _draw_footer_nonum(slide)
-    _add_back_pill(slide, prs.slides[16])         # -> display 17
+    _add_back_pill(slide, _slide_by_old(prs, 17))  # -> old display 17
     _set_notes(slide, (
         "Two Lufthansa bookings for the same November 2024 dates: on top, "
         "Los Angeles–Istanbul return connecting in Frankfurt "
@@ -6333,11 +6586,21 @@ def wire_backup_links(prs):
     The x positions below are the measured end of each linked line
     (PIL / Calibri: 9.72" at 24 pt, 11.20" at 28 pt, both from a text
     origin of 0.28" + 0.375" marL); the y positions are the line centres
-    from the rendered layout. Re-check both after any font pass."""
-    sl = lambda d: prs.slides[d - 1]
+    from the rendered layout. Re-check both after any font pass.
+
+    2026-08-26: the arguments below are still the OLD (101-deck) display
+    numbers — they are what the hand-tweak comments refer to — and `sl`
+    resolves them through the reorder map, so the videos-first restructure
+    needed no edits here."""
+    sl = lambda d: prs.slides[_ORDER.new(d) - 1]
     # top hand-tweaked from 4.555 on 2026-08-24 (the new visiting-
     # positions sub-bullet pushes the linked line down)
     _add_jump_button(sl(2), sl(96), left=Inches(9.80), top=Inches(4.765),
+                     width=Inches(0.434), height=Inches(0.210))
+    # 2026-08-27: the second copy of the introduction slide, which opens
+    # the in-class part, carries the same jump button.
+    _add_jump_button(prs.slides[_ORDER.NEW_INTRO_AGAIN - 1], sl(96),
+                     left=Inches(9.80), top=Inches(4.765),
                      width=Inches(0.434), height=Inches(0.210))
     _add_jump_button(sl(9), sl(100), left=Inches(11.28), top=Inches(3.941),
                      width=Inches(0.490), height=Inches(0.238))
@@ -6501,11 +6764,8 @@ FILL_NOTES = {
         "they meet at an equilibrium. The last three are the principles we "
         "work through together in class. Problem Set 1 covers this "
         "material.",
-    19: "You have watched the videos, so markets, demand and supply, and "
-        "equilibrium are behind us. What we do together today is the three "
-        "principles highlighted here, opportunity cost, sunk cost and "
-        "marginal analysis, together with a set of mini-cases that put the "
-        "supply-and-demand framework to work.",
+    # 19 (the Markets section agenda) was replaced on 2026-08-26 by the
+    # "Some Applications ..." divider, which carries its own notes.
     20: "A quick recall from Video 2. The practical test for whether two "
         "products sit in the same market is simple: if the price of the "
         "other product changes, does demand for yours move? That question "
@@ -6747,9 +7007,15 @@ FILL_NOTES_OVERWRITE = {31, 39}
 
 
 def _m1_disp_shift(k):
-    """2026-08-23: the two Tapestry slides were inserted at displays
-    73-74, so every display from 73 on moved down by two."""
-    return k + 2 if k >= 73 else k
+    """FILL_NOTES keys are in the 99-slide numbering.
+
+    2026-08-23: the two Tapestry slides were inserted at displays 73-74, so
+    every display from 73 on moved down by two — that gives the 101-deck
+    display.  2026-08-26: the videos-first reorder then maps that onto the
+    current display.  2026-08-27: Nico's hand pass deleted a dozen slides,
+    so a key can now point at a slide that no longer exists -- those return
+    None and are skipped."""
+    return _ORDER.OLD_TO_NEW.get(k + 2 if k >= 73 else k)
 
 
 def apply_fill_notes(prs):
@@ -6759,6 +7025,8 @@ def apply_fill_notes(prs):
     n = 0
     for key, text in FILL_NOTES.items():
         disp = _m1_disp_shift(key)
+        if disp is None:            # slide deleted in the 2026-08-27 pass
+            continue
         slide = prs.slides[disp - 1]
         if key not in FILL_NOTES_OVERWRITE:
             if slide.has_notes_slide:
@@ -6770,122 +7038,529 @@ def apply_fill_notes(prs):
     return n
 
 
+# --------------------------------------------------------------------------
+# Section dividers for the 2026-08-26 restructure
+# --------------------------------------------------------------------------
+# Nico tapes the four videos first and then meets in class, so the deck now
+# opens with the four video blocks.  Two dividers mark what follows: the
+# slides from the opening part that never made it into a video, and the
+# start of the in-class part.  Same treatment as the BACKUP divider (54 pt
+# navy centred, gold strip under it), but with the standard footer, since
+# these sit inside the deck's main flow rather than closing it.
+
+LINE_H_54 = Inches(0.75)                   # one 54 pt Calibri line
+
+
+def _make_divider(prs, word, page_num, strip_w=Inches(4.0), notes=None):
+    """``word`` is one line, or a list of lines for a two-line divider.
+
+    The block (text + gold strip) keeps the same optical centre whatever the
+    line count: a one-line divider reproduces the BACKUP divider exactly
+    (text at y 3.00, strip at 4.25), and each extra line pushes the text up
+    and the strip down by half a line.
+    """
+    lines = [word] if isinstance(word, str) else list(word)
+    n = len(lines)
+    text_h = n * LINE_H_54
+    text_top = int(Inches(3.375) - text_h // 2)
+    strip_top = int(text_top + text_h + Inches(0.50))
+
+    slide = _blank_slide(prs)
+    box = _add_text(slide, 0, text_top, SLIDE_W, int(text_h + Inches(0.35)),
+                    lines[0], size=54, bold=True, color=NAVY, font="Calibri",
+                    align=PP_ALIGN.CENTER)
+    for extra in lines[1:]:
+        para = box.text_frame.add_paragraph()
+        para.alignment = PP_ALIGN.CENTER
+        run = para.add_run()
+        run.text = extra
+        run.font.name = "Calibri"
+        run.font.size = Pt(54)
+        run.font.bold = True
+        run.font.color.rgb = NAVY
+    _add_rect(slide, int((SLIDE_W - strip_w) / 2), strip_top,
+              int(strip_w), 54864, GOLD)
+    _draw_footer(slide, FOOTER_TEXT, page_num)
+    if notes:
+        _set_notes(slide, notes)
+    return slide
+
+
+# 2026-08-27 (Nico): the "Slides Not Used in the Videos" divider was
+# dropped — the front matter simply belongs to the in-class part now.
+# `slide_div_leftovers` is kept only so the earlier build is reproducible.
+def slide_div_leftovers(prs):
+    # strip widened to sit under the whole phrase (PIL/Calibri Bold 54 pt
+    # measures it at 9.14"); the BACKUP divider's 4.0" would look mean
+    return _make_divider(
+        prs, "Slides Not Used in the Videos", 34, strip_w=Inches(9.65),
+        notes=(
+            "What follows are the slides from the opening part of the "
+            "module that did not make it into the four videos. They are "
+            "parked here as a group rather than woven back into the video "
+            "sequence."))
+
+
+def slide_div_applications(prs):
+    """Replaces the old Markets section agenda (Nico, 2026-08-26).
+
+    The applications are a category of their own, but deliberately NOT one
+    of the agenda's items, so this divider sits here instead of an agenda
+    slide. Two lines because the phrase measures 18.4" on one line at 54 pt;
+    the strip follows the wider line (10.69" + 0.5").
+    """
+    return _make_divider(
+        prs, ["Some Applications of the Material",
+              "Covered in Videos 2 to 4"], 47, strip_w=Inches(11.20),
+        notes=(
+            "The next stretch of slides applies what the videos covered on "
+            "markets, demand and supply, and equilibrium. These are "
+            "applications rather than a new topic, which is why they are "
+            "not a separate item on the module outline."))
+
+
+def slide_01_title_again(prs):
+    """The module title slide, shown a second time to open the in-class part.
+
+    Its first appearance (inside the Video 1 block) is the one FILL_NOTES
+    keys, so this copy needs its own note.
+    """
+    slide = slide_01_title(prs)
+    _set_notes(slide, (
+        "The module title slide comes back here to mark the start of the "
+        "in-class part. You have watched the four videos; from now on we "
+        "work through the material together."))
+    return slide
+
+
+def slide_div_in_class(prs):
+    return _make_divider(
+        prs, "In-Class Part", 72,
+        notes=(
+            "From here on we are in the classroom. The videos have covered "
+            "markets, demand and supply, and equilibrium; the in-class part "
+            "takes on opportunity costs, sunk costs, and cost-benefit and "
+            "marginal analysis."))
+
+
+def slide_02_introduction_again(prs):
+    """The "Introduction / about the instructor" slide, a second time.
+
+    2026-08-27 (Nico): he copied it in to open the in-class part, for the
+    students meeting him in the room rather than on video. Its backup jump
+    button is wired in `wire_backup_links` alongside the first copy's.
+    """
+    slide = slide_02_introduction(prs)
+    _set_notes(slide, FILL_NOTES[2])
+    return slide
+
+
+# --------------------------------------------------------------------------
+# Kroger–Albertsons — adopted 2026-08-27 (Nico) from
+# "Module 1 - Example Candidates.pptx" (`exp_kroger_case` / `exp_costco_run`).
+# Same layout; the candidates deck's tag and footer are replaced by the main
+# deck's, the market header box is 0.20" wider so the line does not wrap,
+# and the research notes are rewritten as teaching notes.
+# --------------------------------------------------------------------------
+
+def slide_kroger_case(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_MARKETS)
+    _draw_action_title(slide,
+                       "Market Definition Mini-Case: Kroger–Albertsons")
+    box = _add_hierarchical_bullets(
+        slide, left=MARGIN, top=Inches(1.50), width=Inches(7.9),
+        height=Inches(5.3),
+        items=[
+            ("Oct 2022: Kroger agrees to buy Albertsons for $24.6B — the "
+             "largest US supermarket merger ever proposed", 0),
+            ([("Once again, everything would hinge on ", {}),
+              ("how you define the market", {'bold': True}),
+              (":", {})], 0, {}),
+            ([("The firms: we are small next to ", {}),
+              ("Walmart, Amazon, Costco", {'color': RED})], 1, {}),
+            ([("FTC: the market is ", {}),
+              ("“supermarkets”", {'color': RED}),
+              (" — assessed city by city, where #1 was buying #2",
+               {})], 1, {}),
+        ],
+        size=24, sub_size=22, line_spacing_pts=16,
+        sub_line_spacing_pts=8)
+    box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+    _add_media_image(slide, "web_kroger.jpg",
+                     left=Inches(8.75), top=Inches(1.70),
+                     width=Inches(3.27), rounded=True)     # h ≈ 2.45
+    _add_media_image(slide, "web_albertsons.jpg",
+                     left=Inches(8.26), top=Inches(4.30),
+                     width=Inches(4.25), rounded=True)     # h ≈ 2.43
+    _photo_caption(slide, Inches(8.26), Inches(6.80), Inches(4.25))
+    _draw_footer(slide, FOOTER_TEXT, 53)
+    _set_notes(slide, (
+        "The second market-definition case, and the biggest one. In "
+        "October 2022 Kroger agreed to buy Albertsons for 24.6 billion "
+        "dollars, the largest supermarket merger ever proposed in the "
+        "United States. Everything turned on the same question we just "
+        "asked about Netflix. The companies said they were small players "
+        "next to Walmart, Amazon and Costco; the FTC said the relevant "
+        "market was supermarkets, assessed city by city, and that in many "
+        "of those cities the number one chain was buying the number two. "
+        "Hold that disagreement — the next slide shows how the court "
+        "resolved it."))
+    return slide
+
+
+def slide_kroger_costco(prs):
+    slide = _blank_slide(prs)
+    _draw_top_bar_tc(slide, TAG_MARKETS)
+    _draw_action_title(slide,
+                       "Is a “Costco Run” a Substitute for Everyday "
+                       "Shopping?")
+    # in-the-market box. 2026-08-27: 6.90" -> 7.10" so the header fits on
+    # ONE line (PIL / Calibri Bold 18 pt measures it at 6.81"); the photo
+    # starts at 8.05", so there is room.
+    _add_rounded_filled_box(
+        slide, Inches(0.75), Inches(1.62), Inches(7.10), Inches(0.95),
+        "THE MARKET:  “supermarkets” — Kroger · Albertsons · Safeway …",
+        fill=NAVY, text_color=WHITE, size=18)
+    _add_text(slide, Inches(0.75), Inches(2.76), Inches(6.9), Inches(0.34),
+              "Outside the market:", size=18, bold=True, color=GRAY,
+              font="Calibri")
+    outs = ["Club stores — Costco, Sam's Club",
+            "Limited assortment — Aldi, Trader Joe's",
+            "Dollar & convenience stores",
+            "Online-only sellers"]
+    for i, t in enumerate(outs):
+        r, c = divmod(i, 2)
+        _add_rounded_filled_box(
+            slide, Inches(0.75 + c * 3.55), Inches(3.18 + r * 0.92),
+            Inches(3.35), Inches(0.78), t,
+            fill=FADED, text_color=WHITE, size=18, bold=False)
+    # Costco photo
+    _add_media_image(slide, "web_costco.jpg",
+                     left=Inches(8.05), top=Inches(1.85),
+                     width=Inches(4.55), rounded=True)     # h ≈ 2.57
+    _photo_caption(slide, Inches(8.05), Inches(4.50), Inches(4.55),
+                   "Photo: Wikimedia Commons")
+    _quote_box(slide, MARGIN + Inches(0.35), Inches(5.15),
+               RULE_W - Inches(0.7), Inches(1.15),
+               "“A monthly trip to Costco to stock up … does not make a "
+               "‘Costco run’ a reasonable substitute for a weekly one-stop "
+               "visit to a supermarket.”",
+               "Judge Adrienne Nelson, D. Or. (Dec 2024)")
+    # the case resolution: gold takeaway bar (sources live in the notes)
+    _add_rounded_filled_box(
+        slide, Inches(0.90), Inches(6.44), Inches(11.53), Inches(0.60),
+        "Dec 2024: federal and state courts block the deal — some "
+        "substitution is not enough substitution",
+        fill=GOLD, text_color=NAVY, size=19, bold=True, corner_pct=0.18)
+    _draw_footer(slide, FOOTER_TEXT, 54)
+    _set_notes(slide, (
+        "This is how the court drew the boundary. Inside the market: "
+        "supermarkets — Kroger, Albertsons, Safeway and the like. Outside "
+        "it: club stores such as Costco and Sam's Club, limited-assortment "
+        "chains such as Aldi and Trader Joe's, dollar and convenience "
+        "stores, and online-only sellers. The reasoning is in the quote. A "
+        "monthly Costco trip to stock up is not a substitute for the "
+        "weekly one-stop shop, so Costco does not discipline supermarket "
+        "prices the way another supermarket does. In December 2024 a "
+        "federal court in Oregon and a Washington state court both blocked "
+        "the deal. The lesson to take away is that some substitution is "
+        "not the same as enough substitution — which is exactly the test "
+        "from the start of this section."))
+    return slide
+
+
+# --------------------------------------------------------------------------
+# Top-bar tags — ONE table, applied deck-wide (2026-08-27)
+# --------------------------------------------------------------------------
+# Teaching CLAUDE.md, "The top-bar tag names the CURRENT AGENDA ITEM", as
+# revised 2026-08-27.  Module 1 is a TAPED module, so:
+#   * every content slide inside video k's block reads
+#     `Module 1 · Video k · <topic>` — the video number is spliced into the
+#     middle, the topic level is whatever the slide already said;
+#   * agenda / outline slides read `Module 1 · Video k · Agenda` inside a
+#     video block and `Module 1 · Agenda` in the in-class part;
+#   * in-class slides that APPLY the taped material read
+#     `Module 1 · In Class · Examples · <video topic>`;
+#   * in-class slides that teach an agenda item of their own read
+#     `Module 1 · <agenda item title>`, copied from M1_OUTLINE;
+#   * the summary closer is exempt and reads `Module 1 · Summary`;
+#   * backup slides keep `Module 1 · Backup` -- a genuine backup slide DOES
+#     carry a tag (2026-08-27, Nico); the no-tag case is only a backup built
+#     as a full-bleed figure, which has no top bar to begin with;
+#   * title slides, video title cards, dividers and PollEverywhere slides
+#     carry no top bar at all, so they are simply absent from the table.
+# The builders still draw whatever tag they were written with; this pass is
+# the single source of truth and rewrites them at the end of build().
+
+def _m1_top_bar_tags():
+    t = {}
+    # --- Video 1 (1 = title card, 8 = the module title slide: no top bar)
+    for d, topic in ((2, "Introduction"), (3, "Introduction"),
+                     (4, "Economic Models"), (5, "Economic Models"),
+                     (6, "Introduction"), (7, "Course Roadmap"),
+                     (9, "Agenda")):
+        t[d] = "Module 1 \u00b7 Video 1 \u00b7 " + topic
+    # --- Video 2 (10 = title card)
+    t[11] = "Module 1 \u00b7 Video 2 \u00b7 Agenda"
+    for d in range(12, 17):
+        t[d] = "Module 1 \u00b7 Video 2 \u00b7 Markets"
+    # --- Video 3 (17 = title card)
+    t[18] = "Module 1 \u00b7 Video 3 \u00b7 Agenda"
+    for d in range(19, 27):
+        t[d] = "Module 1 \u00b7 Video 3 \u00b7 Demand and Supply"
+    # --- Video 4 (27 = title card)
+    t[28] = "Module 1 \u00b7 Video 4 \u00b7 Agenda"
+    for d in range(29, 35):
+        t[d] = "Module 1 \u00b7 Video 4 \u00b7 Market Equilibrium"
+    # --- In-class front matter (35 divider, 37 title slide: no top bar).
+    # It sits OUTSIDE every video block, so it keeps a two-level tag.
+    t[36] = TAG_INTRO
+    for d in range(38, 42):
+        t[d] = TAG_LOG
+    for d in (44, 45, 46, 47, 48):
+        t[d] = TAG_INTRO
+    # --- agenda slides in the in-class part
+    for d in (49, 66, 79, 84):
+        t[d] = "Module 1 \u00b7 Agenda"
+    # --- applications of the taped material (50 = divider)
+    for d in (51, 52, 53, 54):
+        t[d] = TAG_MARKETS
+    for d in (55, 57, 58, 60, 61, 62, 63, 64, 65):
+        t[d] = TAG_SD
+    # --- the three agenda items taught only in class: the item title,
+    # title-cased exactly as the outline slides render it
+    for d in range(67, 79):
+        t[d] = "Module 1 \u00b7 " + _title_case(M1_OUTLINE[4][0])
+    for d in range(80, 84):
+        t[d] = "Module 1 \u00b7 " + _title_case(M1_OUTLINE[5][0])
+    for d in range(85, 88):
+        t[d] = "Module 1 \u00b7 " + _title_case(M1_OUTLINE[6][0])
+    t[88] = "Module 1 \u00b7 Summary"          # the exempt summary closer
+    t[89] = TAG_WRAP                        # Next Steps: post-work, not a summary
+    # --- 90 = BACKUP divider (no top bar); 91-95 keep their own tag
+    for d in range(91, 96):
+        t[d] = TAG_BACKUP
+    return t
+
+
+# Displays whose stub is thrown away by _splice_media.py (PollEverywhere),
+# so whatever tag the stub carries never reaches the shipped deck.
+_M1_SPLICED = {42, 43, 56, 59, 72, 73}
+
+
+def apply_top_bar_tags(prs):
+    """Rewrite every top-bar tag from `_m1_top_bar_tags()`. Loud on drift:
+    a slide with a tag that the table does not cover, or a table entry with
+    no top bar to write to, is reported rather than silently ignored."""
+    want = _m1_top_bar_tags()
+    n = 0
+    missing, extra = [], []
+    for i, slide in enumerate(prs.slides, start=1):
+        bar = None
+        for shape in slide.shapes:
+            if not shape.has_text_frame:
+                continue
+            if shape.top is None or shape.top >= Inches(0.45):
+                continue
+            if (shape.height or 0) >= Inches(0.7):
+                continue
+            if shape.text_frame.text.strip().startswith("Module 1"):
+                bar = shape
+                break
+        if i in want:
+            if bar is None:
+                if i not in _M1_SPLICED:
+                    missing.append(i)
+                continue
+            para = bar.text_frame.paragraphs[0]
+            runs = para.runs
+            if not runs:
+                continue
+            if runs[0].text != want[i]:
+                runs[0].text = want[i]
+                n += 1
+            for r in runs[1:]:
+                r._r.getparent().remove(r._r)
+        elif bar is not None and i not in _M1_SPLICED:
+            extra.append((i, bar.text_frame.text.strip()))
+    if missing:
+        print("  WARNING top-bar tag wanted but no bar on:", missing)
+    if extra:
+        print("  WARNING top bar not covered by the tag table:", extra)
+    return n
+
+
+# --------------------------------------------------------------------------
+# Live page numbers: keep the CACHED value honest
+# --------------------------------------------------------------------------
+# The footer number is a live `slidenum` field, so PowerPoint recomputes it
+# on open — but the cached <a:t> is what shows until it does, and the
+# page_num arguments threaded through the slide builders are frozen in the
+# numbering of whatever deck they were written for.  This pass rewrites
+# every cached value from the slide's ACTUAL position, which makes the
+# build immune to any future reorder (2026-08-26).
+
+def renumber_cached_pagenums(prs):
+    n = 0
+    for i, slide in enumerate(prs.slides, start=1):
+        for shape in slide.shapes:
+            if not shape.has_text_frame:
+                continue
+            for fld in shape.text_frame._txBody.iter(qn('a:fld')):
+                if fld.get('type') != 'slidenum':
+                    continue
+                t = fld.find(qn('a:t'))
+                if t is None:
+                    continue
+                if t.text != str(i):
+                    t.text = str(i)
+                    n += 1
+    return n
+
+
 def build(out_path=None):
     prs = Presentation()
     prs.slide_width = int(SLIDE_W)
     prs.slide_height = int(SLIDE_H)
 
-    slide_01_title(prs)                                            #  1
-    slide_02_introduction(prs)                                     #  2
-    slide_03_logistics1(prs)                                       #  3
-    slide_04_logistics2(prs)                                       #  4
-    slide_05_logistics3(prs)                                       #  5
-    slide_06_office_hours(prs)                                     #  6
-    slide_poll_coffee_q(prs)                                       #  7 NEW poll
-    slide_poll_coffee_results(prs)                                 #  8 NEW poll
-    slide_07_why_econ(prs)                                         #  9
-    slide_08_models(prs)                                           # 10
-    slide_09_find_model(prs)                                       # 11
-    slide_10_homo_economicus(prs)                                  # 12
-    slide_11_hedgehogs(prs)                                        # 13
-    slide_12_making_most_1(prs)                                    # 14
-    slide_13_making_most_2(prs)                                    # 15
-    slide_14_teaching_philosophy(prs)                              # 16
-    make_roadmap(prs, 17)                                          # 17
-    slide_16_outline(prs)                                          # 18
-    slide_17_outline_now(prs)                                      # 19
-    slide_18_recall_market_def(prs)                                # 20
-    slide_19_adm(prs)                                              # 21
-    slide_20_netflix(prs)                                          # 22
-    slide_21_heatwaves(prs)                                        # 23
-    slide_22_poll_ac(prs)                                          # 24
-    slide_poll_ac_results(prs)                                     # 25 NEW poll
-    slide_ac_solution(prs)                                         # 26
-    slide_23_swiftonomics(prs)                                     # 27
-    slide_24_poll_diamonds(prs)                                    # 28
-    slide_poll_diamonds_results(prs)                               # 29 NEW poll
-    slide_25_swift_solution(prs)                                   # 30
-    slide_26_tea(prs)                                              # 31
-    slide_27_tea_market(prs)                                       # 32
-    slide_28_disasters(prs)                                        # 33
-    slide_29_avocado_clip(prs)                                     # 34
-    slide_30_avocado_bullets(prs)                                  # 35
-    slide_31_avocado_market(prs)                                   # 36
-    slide_32_steps(prs)                                            # 37
-    slide_33_wheat(prs)                                            # 38
-    slide_34_la_case(prs)                                          # 39
-    slide_35_la_market(prs)                                        # 40
-    slide_copper_case(prs)                                         # 41
-    slide_copper_market(prs)                                       # 42
-    slide_36_outline_opp(prs)                                      # 43
-    slide_37_opp_costs(prs)                                        # 44
-    slide_38_fruit_table(prs)                                      # 45
-    slide_39_present(prs)                                          # 46
-    slide_40_mba_cost(prs)                                         # 47
-    slide_41_flip_house(prs)                                       # 48
-    slide_42_poll_flip(prs)                                        # 49
-    slide_poll_flip_results(prs)                                   # 50 NEW poll
-    slide_43_flip_solution(prs)                                    # 51
-    slide_44_another_opp(prs)                                      # 52
-    slide_45_child_cost(prs)                                       # 53
-    slide_46_child_penalty(prs)                                    # 54
-    slide_47_us_2022(prs)                                          # 55
-    slide_48_outline_sunk(prs)                                     # 56
-    slide_49_sunk_costs(prs)                                       # 57
-    slide_50_sunk_examples(prs)                                    # 58
-    slide_51_concorde(prs)                                         # 59
-    slide_52_sunk_takeaway(prs)                                    # 60
-    slide_53_outline_cba(prs)                                      # 61
-    slide_54_cba(prs)                                              # 62
-    slide_55_exercise(prs)                                         # 63
-    slide_56_continuous(prs)                                       # 64
-    slide_57_summary(prs)                                          # 65
-    slide_58_next_steps(prs)                                       # 66
-    slide_59_v1_title(prs)                                         # 67
-    slide_60_v1_roadmap(prs)                                       # 68
-    slide_61_v1_outline(prs)                                       # 69
-    slide_62_v2_title(prs)                                         # 70
-    slide_63_v2_outline(prs)                                       # 71
-    slide_64_v2_market_def(prs)                                    # 72
-    slide_tapestry_case(prs)                                       # 73 NEW
-    slide_tapestry_evidence(prs)                                   # 74 NEW
-    slide_65_v2_netflix(prs)                                       # 73
-    slide_66_v2_actors(prs)                                        # 74
-    slide_67_v3_title(prs)                                         # 75
-    slide_68_v3_outline(prs)                                       # 76
-    slide_69_v3_ds_analysis(prs)                                   # 77
-    slide_70_v3_demand_def(prs)                                    # 78
-    slide_71_v3_ceteris_paribus(prs)                               # 79
-    slide_72_v3_demand_curve(prs)                                  # 80
-    slide_73_v3_move_vs_shift_d(prs)                               # 81
-    slide_74_v3_ai_chips(prs)                                      # 82
-    slide_75_v3_supply_curve(prs)                                  # 83
-    slide_76_v3_move_vs_shift_s(prs)                               # 84
-    slide_77_v4_title(prs)                                         # 85
-    slide_78_v4_outline(prs)                                       # 86
-    slide_79_v4_mechanism(prs)                                     # 87
-    slide_80_v4_terminology(prs)                                   # 88
-    slide_81_v4_shift_demand(prs)                                  # 89
-    slide_82_v4_shift_supply(prs)                                  # 90
-    slide_83_v4_shift_both(prs)                                    # 91
-    slide_84_shift_table(prs)                                      # 92
-    slide_93_backup_divider(prs)                                   # 93 BACKUP
-    slide_94_backup_leaders(prs)                                   # 94 BACKUP
-    slide_95_backup_happiness(prs)                                 # 95 BACKUP
-    slide_96_backup_sw2008(prs)                                    # 96 BACKUP
-    slide_97_backup_anderson(prs)                                  # 97 BACKUP (hidden)
-    slide_98_backup_portland(prs)                                  # 98 BACKUP
-    slide_99_backup_prices(prs)                                    # 99 BACKUP
+    # ------------------------------------------------------------------
+    # 2026-08-26 restructure (Nico): the module is taught videos-first, so
+    # the four `Videos Final` decks open the deck, the opening-part slides
+    # that never made it into a video follow in their own section, and the
+    # in-class part restarts from the module title slide.  The order lives
+    # in `_m1_order.py`, which every downstream pass imports; the trailing
+    # "<- old N" comments are the 101-slide deck of 2026-08-24.
+    # page_num arguments below are stale by design — renumber_cached_pagenums
+    # rewrites every cached footer number from the slide's real position.
+    # ------------------------------------------------------------------
+    # --- Video 1 - Introduction (Videos Final, minus its own BACKUP pair)
+    slide_59_v1_title(prs)                         #   1  <- old 67
+    slide_02_introduction(prs)                     #   2  <- old 2
+    slide_07_why_econ(prs)                         #   3  <- old 9
+    slide_08_models(prs)                           #   4  <- old 10
+    slide_09_find_model(prs)                       #   5  <- old 11
+    slide_11_hedgehogs(prs)                        #   6  <- old 13
+    make_roadmap(prs, 17)                          #   7  <- old 17
+    slide_01_title(prs)                            #   8  <- old 1
+    slide_61_v1_outline(prs)                       #   9  <- old 69
+
+    # --- Video 2 - Markets
+    slide_62_v2_title(prs)                         #  10  <- old 70
+    slide_63_v2_outline(prs)                       #  11  <- old 71
+    slide_64_v2_market_def(prs)                    #  12  <- old 72
+    slide_tapestry_case(prs)                       #  13  <- old 73
+    slide_tapestry_evidence(prs)                   #  14  <- old 74
+    slide_65_v2_netflix(prs)                       #  15  <- old 75
+    slide_66_v2_actors(prs)                        #  16  <- old 76
+
+    # --- Video 3 - Demand and Supply
+    slide_67_v3_title(prs)                         #  17  <- old 77
+    slide_68_v3_outline(prs)                       #  18  <- old 78
+    slide_69_v3_ds_analysis(prs)                   #  19  <- old 79
+    slide_70_v3_demand_def(prs)                    #  20  <- old 80
+    slide_71_v3_ceteris_paribus(prs)               #  21  <- old 81
+    slide_72_v3_demand_curve(prs)                  #  22  <- old 82
+    slide_73_v3_move_vs_shift_d(prs)               #  23  <- old 83
+    slide_74_v3_ai_chips(prs)                      #  24  <- old 84
+    slide_75_v3_supply_curve(prs)                  #  25  <- old 85
+    slide_76_v3_move_vs_shift_s(prs)               #  26  <- old 86
+
+    # --- Video 4 - Market Equilibrium
+    slide_77_v4_title(prs)                         #  27  <- old 87
+    slide_78_v4_outline(prs)                       #  28  <- old 88
+    slide_79_v4_mechanism(prs)                     #  29  <- old 89
+    slide_80_v4_terminology(prs)                   #  30  <- old 90
+    slide_81_v4_shift_demand(prs)                  #  31  <- old 91
+    slide_82_v4_shift_supply(prs)                  #  32  <- old 92
+    slide_83_v4_shift_both(prs)                    #  33  <- old 93
+    slide_84_shift_table(prs)                      #  34  <- old 94
+
+    # --- In-class part.  2026-08-27 (Nico): the "Slides Not Used in the
+    # Videos" divider is gone — the front matter simply belongs to the
+    # in-class part now — and a second copy of the introduction slide
+    # opens it, ahead of the module title slide.
+    slide_div_in_class(prs)                        #  35  NEW divider
+    slide_02_introduction_again(prs)               #  36  <- old 2, 2nd copy
+    slide_01_title_again(prs)                      #  37  module title, 2nd copy
+    slide_03_logistics1(prs)                       #  38  <- old 3
+    slide_04_logistics2(prs)                       #  39  <- old 4
+    slide_05_logistics3(prs)                       #  40  <- old 5
+    slide_06_office_hours(prs)                     #  41  <- old 6
+    slide_poll_coffee_q(prs)                       #  42  <- old 7
+    slide_poll_coffee_results(prs)                 #  43  <- old 8
+    slide_12_making_most_1(prs)                    #  44  <- old 14
+    slide_13_making_most_2(prs)                    #  45  <- old 15
+    slide_14_teaching_philosophy(prs)              #  46  <- old 16
+    slide_60_v1_roadmap(prs)                       #  47  <- old 68
+    slide_10_homo_economicus(prs)                  #  48  <- old 12
+    slide_16_outline(prs)                          #  49  <- old 18
+    slide_div_applications(prs)                    #  50  NEW divider (replaces old 19)
+    slide_18_recall_market_def(prs)                #  51  <- old 20
+    slide_20_netflix(prs)                          #  52  <- old 22
+    slide_kroger_case(prs)                         #  53  NEW (from Candidates)
+    slide_kroger_costco(prs)                       #  54  NEW (from Candidates)
+    slide_21_heatwaves(prs)                        #  55  <- old 23
+    slide_poll_ac_results(prs)                     #  56  <- old 25
+    slide_ac_solution(prs)                         #  57  <- old 26
+    slide_23_swiftonomics(prs)                     #  58  <- old 27
+    slide_poll_diamonds_results(prs)               #  59  <- old 29
+    slide_25_swift_solution(prs)                   #  60  <- old 30
+    slide_28_disasters(prs)                        #  61  <- old 33
+    slide_32_steps(prs)                            #  62  <- old 37
+    slide_33_wheat(prs)                            #  63  <- old 38
+    slide_34_la_case(prs)                          #  64  <- old 39
+    slide_35_la_market(prs)                        #  65  <- old 40
+    slide_36_outline_opp(prs)                      #  66  <- old 43
+    slide_37_opp_costs(prs)                        #  67  <- old 44
+    slide_38_fruit_table(prs)                      #  68  <- old 45
+    slide_39_present(prs)                          #  69  <- old 46
+    slide_40_mba_cost(prs)                         #  70  <- old 47
+    slide_41_flip_house(prs)                       #  71  <- old 48
+    slide_42_poll_flip(prs)                        #  72  <- old 49
+    slide_poll_flip_results(prs)                   #  73  <- old 50
+    slide_43_flip_solution(prs)                    #  74  <- old 51
+    slide_44_another_opp(prs)                      #  75  <- old 52
+    slide_45_child_cost(prs)                       #  76  <- old 53
+    slide_46_child_penalty(prs)                    #  77  <- old 54
+    slide_47_us_2022(prs)                          #  78  <- old 55
+    slide_48_outline_sunk(prs)                     #  79  <- old 56
+    slide_49_sunk_costs(prs)                       #  80  <- old 57
+    slide_50_sunk_examples(prs)                    #  81  <- old 58
+    slide_51_concorde(prs)                         #  82  <- old 59
+    slide_52_sunk_takeaway(prs)                    #  83  <- old 60
+    slide_53_outline_cba(prs)                      #  84  <- old 61
+    slide_54_cba(prs)                              #  85  <- old 62
+    slide_55_exercise(prs)                         #  86  <- old 63
+    slide_56_continuous(prs)                       #  87  <- old 64
+    slide_57_summary(prs)                          #  88  <- old 65
+    slide_58_next_steps(prs)                       #  89  <- old 66
+
+    # --- BACKUP section
+    slide_93_backup_divider(prs)                   #  90  <- old 95
+    slide_94_backup_leaders(prs)                   #  91  <- old 96
+    slide_95_backup_happiness(prs)                 #  92  <- old 97
+    slide_96_backup_sw2008(prs)                    #  93  <- old 98
+    slide_98_backup_portland(prs)                  #  94  <- old 100
+    slide_99_backup_prices(prs)                    #  95  <- old 101
+
+    assert len(prs.slides._sldIdLst) == _ORDER.N_SLIDES, (
+        "built %d slides, _m1_order expects %d"
+        % (len(prs.slides._sldIdLst), _ORDER.N_SLIDES))
 
     wire_backup_links(prs)
+    n_tags = apply_top_bar_tags(prs)
     n_notes = apply_fill_notes(prs)
     n_sym = apply_symbol_subscripts(prs)
+    n_pg = renumber_cached_pagenums(prs)
 
     out = Path(out_path) if out_path else OUT_DIR / "Module 1 - Revised.pptx"
     prs.save(str(out))
     print(f"saved {out} — {len(prs.slides._sldIdLst)} slides "
           f"({n_sym} paragraph(s) with subscripted symbols, "
-          f"{n_notes} slide(s) given fill-in notes)")
+          f"{n_tags} top-bar tag(s) rewritten, "
+          f"{n_notes} slide(s) given fill-in notes, "
+          f"{n_pg} cached page number(s) corrected)")
     return out
 
 

@@ -4,19 +4,18 @@ param([string]$Deck = "Module 1 - Revised.pptx")
 $folder = $PSScriptRoot
 $deck = Join-Path $folder $Deck
 
-# expected on-click counts (renumbered 2026-08-22 for the poll-pair +
-# backup inserts, then the 2 Tapestry slides on 2026-08-23;
-# deck is 101 slides with 67 animated.
-# 2026-08-24 (Videos-Final port): 72 5->6, 84 3->2, 91/92 3->2,
-# 75 now STATIC, and backup 100 gained a 2-click build.)
+# expected on-click counts, DISPLAY numbers in the 95-slide deck of
+# 2026-08-27 (Nico's hand pass: 12 slides deleted, the Kroger-Albertsons
+# pair adopted, the introduction slide duplicated to open the in-class
+# part). Regenerated from the deck's own <p:timing> after that port and
+# cross-checked against the previous canonical deck slide by slide.
 $expected = @{
-    2=2; 3=1; 4=2; 5=3; 6=3; 9=2; 10=3; 11=2; 12=2; 13=2; 14=1; 15=2;
-    16=1; 20=3; 21=5; 22=4; 23=1; 26=1; 27=1; 30=2; 31=1; 32=6; 33=2;
-    35=2; 36=10; 37=2; 38=4; 39=4; 40=4; 41=2; 42=4; 44=2; 45=3; 46=1;
-    47=2; 48=2; 51=1; 52=2; 53=2; 55=2; 57=1; 58=1; 59=2; 60=3; 62=4;
-    63=7; 64=3; 65=2; 66=2; 72=6; 73=3; 74=7; 76=2; 79=2; 81=3;
-    82=1; 83=4; 84=2; 85=1; 86=2; 89=3; 90=3; 91=2; 92=2; 93=4; 94=1;
-    100=2
+    2=2; 3=2; 4=3; 5=2; 6=2; 12=6; 13=3; 14=7; 16=2; 19=2; 21=3; 22=1;
+    23=4; 24=2; 25=1; 26=2; 29=3; 30=3; 31=2; 32=2; 33=4; 34=1; 36=2;
+    38=1; 39=2; 40=3; 41=3; 44=1; 45=2; 46=1; 48=2; 51=3; 52=4; 53=3;
+    54=4; 55=1; 57=1; 58=1; 60=2; 61=2; 62=2; 63=4; 64=4; 65=4; 67=2;
+    68=3; 69=1; 70=2; 71=2; 74=1; 75=2; 76=2; 78=2; 80=1; 81=1; 82=2;
+    83=3; 85=4; 86=7; 87=3; 88=2; 89=2; 94=2
 }
 
 $pp = New-Object -ComObject PowerPoint.Application
@@ -40,5 +39,5 @@ for ($i = 1; $i -le $pres.Slides.Count; $i++) {
 }
 Write-Host "slides: $($pres.Slides.Count)"
 $pres.Close()
-if ($bad -eq 0) { Write-Host "ALL CLICK COUNTS MATCH (67 animated slides)" }
+if ($bad -eq 0) { Write-Host "ALL CLICK COUNTS MATCH (63 animated slides)" }
 else { Write-Host "$bad slides off" }

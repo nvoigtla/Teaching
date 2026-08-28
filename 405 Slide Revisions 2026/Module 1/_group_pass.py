@@ -129,6 +129,20 @@ CHART_GROUPS = {
                "sdxlab:Q1"],
     },
 }
+
+# --------------------------------------------------------------------------
+# 2026-08-26: the videos-first reorder. Every display-keyed table above is
+# written in the OLD (101-deck) numbering — that is what the dated comments
+# refer to — and is re-keyed here through the one canonical order map.
+# --------------------------------------------------------------------------
+_sys.path.insert(0, str(HERE))
+import _m1_order as _ORDER                                   # noqa: E402
+
+SPLICED = _ORDER.remap_set(SPLICED)
+OUTLINE_SLIDES = _ORDER.remap_set(OUTLINE_SLIDES)
+LINK_LABEL_SLIDES = _ORDER.remap_set(LINK_LABEL_SLIDES)
+CHART_GROUPS = _ORDER.remap_keys(CHART_GROUPS)
+
 ACTION_BUTTON_PRSTS = {
     "actionButtonSound", "actionButtonDocument", "actionButtonMovie",
     "actionButtonEnd", "actionButtonBeginning", "actionButtonInformation",

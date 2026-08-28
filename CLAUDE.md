@@ -63,6 +63,23 @@ For work in this folder, you are assisting with **teaching materials**
   `_add_rounded_filled_box` as the ONLY helper for content-filled boxes
   and audit any remaining `_add_filled_box` call sites (they are almost
   always wrong outside chrome internals).
+- **Rounding is for CARDS, not for grid cells** (2026-08-27, Nico). The
+  rule above applies to a box that stands on its own — a scenario card, a
+  comparison column header, a callout, a takeaway bar. It does NOT apply
+  to the small cells of a hand-built table or number grid: those stay
+  flat and square, because a rounded 2.5 × 0.4" cell in a row of like
+  cells reads as a mistake rather than as a lifted card. The practical
+  test is whether the box sits in a row / column of similarly sized
+  siblings (grid cell → flat) or on its own (card → rounded + shade).
+  Module 3 slides 49 and 54 are the reference: the 6.00 × 0.70" navy
+  headers, the 6.00 × 2.65" cream panels and the 5.50 × 1.40" comparison
+  cards are rounded and shaded, while the 2.50 × 0.40" cost chips inside
+  slide 54's container and the whole of slides 48 and 56 stay flat.
+- **Set the corner radius as a RENDERED length, not one shared `adj`.**
+  A `roundRect`'s `adj` is a fraction of the shape's SHORT side, so the
+  same `adj` gives a thin header bar and a tall panel visibly different
+  corners. Pick the radius in inches (~0.08" is the deck's "slightly
+  rounded") and compute `adj = radius / min(w, h) × 100000` per shape.
 - **A figure's shade is part of the figure — group them.** Pictures
   carry their own drop shadow directly, so they need nothing extra. But
   PowerPoint can't put a shadow on a table or chart frame
@@ -256,21 +273,134 @@ title relative to the others.
   outline item 2, so its tag reads `Module 3 · Short Run: Hiring
   Decisions`. A student can therefore always tell from the top bar where
   in the agenda s/he is. Rules:
-  - **Agenda / outline slides read `Module N · Agenda`.**
+  - **In a TAPED module the video number sits in the middle:
+    `Module N · Video k · <topic>`** (2026-08-27, Nico). Once a module
+    has been converted for taping, every content slide inside video k's
+    block carries that video's number, so a student can see which video
+    a slide came from as well as which topic it teaches – slide 6 of
+    Module 3 reads `Module 3 · Video 1 · Course Roadmap`, slide 12
+    reads `Module 3 · Video 2 · The Production Function`. **The block
+    is delimited by the video title cards**: a slide belongs to video k
+    if it sits between card k and card k+1. The `<topic>` level is
+    whatever the slide already said, so the video number is SPLICED in
+    rather than the topic retyped.
+  - **Agenda / outline slides read `Module N · Video k · Agenda`** in a
+    taped module (`Module N · Agenda` in an untaped one). The word
+    stays "Agenda"; only the video level is added.
   - **Rename the item, rename the tag.** The outline list is the single
     source of both, so a build script derives the tag from it rather
     than repeating the wording per slide.
-  - Slides ahead of the first agenda slide (logistics, announcements,
-    recap of the previous module, course roadmap, big picture, concept
-    map) keep their own two-level tag — `Module 3 · Recap`, `Module 3 ·
-    Big Picture` — as does the summary closer (`Module 3 · Summary`).
-    They belong to no agenda item.
-  - Slides with no top bar at all (title, poll, backup) stay as they
-    are.
+  - The module front matter (logistics, announcements, recap of the
+    previous module, course roadmap, big picture) is INSIDE the
+    introduction video's block once the module is taped, so it takes
+    that video's number – `Module 3 · Video 1 · Recap`, `Module 3 ·
+    Video 1 · Big Picture`. In an untaped module it keeps its own
+    two-level tag.
+  - **Two slides are deliberately exempt and keep a two-level tag:** the
+    **concept map** (`Module N · Concept Map`) and the **summary
+    closer** (`Module N · Summary`). They are reference slides that
+    belong to no single video, and the concept map is exempt in every
+    copy of it – the one in the video block and the one in the appendix
+    alike.
+  - Slides with no top bar at all stay as they are, and none of these
+    ever gets a tag: the deck title slide, the video title cards, the
+    section / appendix dividers, and the PollEverywhere slides.
+  - **A backup slide DOES get a tag: `Module N · Backup`** (2026-08-27,
+    Nico – this corrects an earlier version of this rule that put backup
+    slides on the no-tag list). Everything after the BACKUP divider is
+    ordinary chrome: navy top bar, `Module N · Backup`, action title,
+    footer. Module 1's backup section (displays 91–95 of
+    `Module 1 - Revised.pptx`) is the model, and the tag is the same on
+    every backup slide – it does not name the topic the slide backs up.
+    - **The one exception is a backup slide built as a FULL-BLEED
+      figure.** Where the picture has been enlarged to fill the canvas
+      and the text pulled on top of it – Module 3's two MPL photos,
+      slides 91–92 of `Module 3 - Revised.pptx` – there is no top bar
+      to put a tag in, and none is added. That is a deliberate choice
+      about a particular slide (the figure needed the room), not the
+      default. **Do not strip the top bar off an ordinary backup slide
+      to reach it**, and do not add a bar to a full-bleed one.
+    - The BACKUP divider itself carries no top bar, like every other
+      divider.
   - This SUPERSEDES the older three-level `Module · Part · Section` tag
     (`Module 3 · Production · Short Run`), whose middle level drifted
     away from the agenda wording. (A non-module deck family may still
     use a two-level tag.)
+  - **In-class examples of video material get a four-level tag**
+    (2026-08-27, Nico). When a module is taught videos-first, some
+    slides APPLY the taped material and are kept back to be shown on
+    campus — the mini-cases, worked applications and polls I work
+    through with the class after they have watched the videos. Those
+    slides read `Module N · In Class · Examples · <topic>`: the module
+    number, then `In Class`, then `Examples`, then the topic the
+    examples cover (`Module 1 · In Class · Examples · Markets`,
+    `Module 1 · In Class · Examples · Supply and Demand`). The student
+    can then see at a glance that the slide is an application of
+    something s/he has already watched, not a new agenda item — which
+    is exactly why these slides are not one of the outline's items and
+    sit under a divider of their own instead.
+    - **The test is what the slide is FOR, not where it sits.** A slide
+      gets this tag when it applies taped material and is planned for
+      class. Where such slides are parked is a per-deck layout choice
+      and changes nothing about the tag. Two arrangements exist so far:
+      an **"Applications" divider mid-deck**, with the block running to
+      the next agenda slide (Module 1, displays 51–65), and an
+      **examples APPENDIX at the end** of a taped deck (Module 3). A
+      deck uses whichever fits; **a module with no appendix simply has
+      no appendix**, and the mid-deck arrangement carries the whole
+      rule on its own. Module 1 is that case — it has no "slides not
+      used in the videos" section, and nothing in the appendix
+      sub-rules below applies to it.
+    - **`Examples` never appears inside a video block.** A slide sitting
+      between two video title cards is part of that video and carries
+      `Module N · Video k · <topic>`, even when its content is a worked
+      example. The four-level tag is for the copies kept back for class.
+    - The `<topic>` is the wording of the VIDEO topic being applied,
+      not a new heading invented for the slide.
+    - The tag covers the whole applications block, from the
+      applications divider to the next agenda slide. Never let it stop
+      in the middle of a two-slide mini-case (set-up tagged one way,
+      resolution another).
+    - Slides in the in-class part that teach a topic of their OWN (the
+      agenda items taught only in class) keep the ordinary agenda-item
+      tag; `Examples` is only for applications of taped material.
+    - Route it through the deck's tag constants, one per topic, never
+      per call site. Module 1's `TAG_MARKETS` / `TAG_SD` in
+      `_build_Module1.py` are the reference.
+    - A slide that was copied out of a video block into the in-class
+      part keeps its CONTENT but loses the video's tag: the in-class
+      copy of Module 1's course roadmap is tagged `Module 1 ·
+      Introduction`, while the copy inside Video 1 keeps `Module 1 ·
+      Course Roadmap`. A `Video k` tag never appears outside that
+      video's own block.
+    - **The same tag applies to an examples APPENDIX at the end of a
+      taped deck** (2026-08-27, Nico) — *when the deck has one; this
+      sub-rule and the two after it are about that arrangement only.* A
+      video deck may close with an
+      appendix of slides that were cut from the videos – Module 3's
+      "SLIDES NOT USED IN THE VIDEOS" – and the example slides in it are
+      shown on campus. They get the same four-level tag, so the block
+      reads `Module 3 · In Class · Examples · Wage Searchers`, `… · Cost
+      Concepts`, and so on. The block runs from the first example slide
+      to the END of the deck.
+    - **The appendix's own front matter keeps its tag.** The appendix
+      divider has no top bar, and a reference slide carried into the
+      appendix (Module 3's concept-map copy) keeps its own two-level
+      tag. Only the example slides are retagged – in Module 3 that is
+      slides 95–110, not 93–94.
+    - **Splice the level in, never retype the topic.** An appendix slide
+      is a copy of a video slide, so it already carries the video
+      topic's wording. Insert `In Class · Examples ·` after `Module N ·`
+      and leave the rest of the string untouched. That satisfies the
+      "topic = the video topic's wording" rule automatically and
+      survives a later renaming of the outline item.
+    - **Measure the result.** Four levels is a long tag, so check the
+      label in the real font (PIL ImageFont, Calibri Bold at the tag's
+      own size) against the tag box width and fail loudly rather than
+      shipping a wrapped or clipped tag. Module 3's longest, `Module 3 ·
+      In Class · Examples · Long Run: The Optimal Input Mix`, measures
+      4.4" in a 12" box. Reference pass: `_retag_inclass.py` in
+      `Module 3/`.
 - **Action title** = the takeaway, not the topic; navy bold ~30 pt.
 - Under the title, above the footer: a **thin gray rule** with a short
   **gold accent strip** on the left.
@@ -312,6 +442,22 @@ are the additional layout rules.)
   attribution and source captions stay at caption size (11–13 pt
   italic gray). If 18 pt does not fit, shorten the text or grow the
   box – don't shrink the font.
+  - **Exception – a label written INSIDE a narrow object** (2026-08-27,
+    Nico). Where a label has to sit inside a narrow figure element, a
+    narrow table cell, or a similarly constrained object whose width is
+    fixed by the data rather than by layout – the caption inside a thin
+    bar of a bar chart, a value written into a slim column, a label on
+    a narrow timeline segment – the floor does not apply. Fit the text
+    to the object at whatever size it takes, and keep it as large as
+    the object allows. The alternative (a shorter, vaguer label, or a
+    wider bar that misrepresents the data) is worse than small type.
+    Module 1's exercise chart is the reference: "Net Benefit of Hour 1"
+    is set at 9 pt inside a 0.95"-wide bar and stays that way.
+  - The exception is narrow, in both senses. It covers labels *inside*
+    a constrained object only. Body bullets, callouts, teaching cards,
+    quote boxes and free-standing chart labels keep their floors – a
+    crowded slide is not a narrow object. Don't reach for the exception
+    before trying to shorten the text or grow the box.
 
 ## Figures, charts, and tables – native, not screenshots
 **Standing rule: reproduce every table, chart, and equation as a native,
@@ -463,6 +609,66 @@ artifact.
   (`wrap="none"` + `spAutoFit`) at ~70% of the parallelogram width, right
   edge anchored in the corner; measure the label in Calibri Bold, don't
   guess.
+  - **A poll runs over three slides, and the badge alternates** (2026-08-27,
+    Nico). Slide 1 is the set-up / question slide and carries the **Poll
+    Break parallelogram**. Slide 2 is the PollEverywhere slide itself – the
+    live poll or its screenshot – and carries the **round POLL pill**
+    instead: a fully-rounded rectangle (`roundRect`, adj 50000) with gold
+    `E09F3E` fill, no border, soft drop shadow, and navy `0B2B4E` bold
+    Calibri **"POLL"** centered, about 1.49 × 0.51". Slide 3 is the
+    solution slide and carries the **Poll Break parallelogram** again.
+    Reference: slides 9–11 of `Module 3 - Video 3 - Short Run Hiring.pptx`
+    (set-up → PollEv screenshot → "Solution: MRPL of Rivian").
+  - **Both marks sit in the bottom-RIGHT corner, overlaying the footer**, and
+    both are grouped box + text. Neither is ever animated (see Animations).
+  - **The Poll Break parallelogram has ONE fixed geometry, and this rule
+    is the whole spec** (2026-08-27, Nico — rewritten the same day so a
+    build script can generate the badge from these numbers alone, with no
+    reference deck or hand-tuned sidecar file to copy from). On the
+    13.33 × 7.5" canvas:
+
+    | | |
+    |---|---|
+    | Badge position (`off`) | left **10.2377"**, top **6.7695"** (EMU **9361444 / 6190030**) |
+    | Badge size (`ext`) | **2.9500 × 0.5326"** (EMU **2697480 × 487009**) |
+    | Slant offset `S` | **0.72"** horizontally, on each slanted side |
+    | Label box | left = badge left **+ S**, same top, **1.51 × 0.5326"** (EMU x **10019812**, cx **1380744**) — it fills the parallel middle, `W − 2S` |
+    | Label | "Poll Break", **Calibri Bold 28 pt**, navy `0B2B4E`, centred, `wrap="none"` + `spAutoFit` |
+    | Fill / border | gold `E09F3E`, **no** border |
+    | Shadow | `outerShdw` blurRad **50800**, dist **38100**, dir **2700000**, black at **50 %** alpha |
+    | Grouping | one `grpSp` (parallelogram behind, label in front), `off`/`ext` as above with `chOff`/`chExt` **equal** to them |
+
+    - **It must be in the FOREGROUND, covering the footer rule.** The badge
+      spans y 6.7695" – 7.302" and the footer's thin horizontal rule sits at
+      y **7.15"**, so the badge STRADDLES it by design — tucked into the very
+      corner rather than floating above the rule. **Draw the badge LAST**
+      (append it at the end of the `spTree`, after the footer, the rule and
+      the page number) so it renders in front of them. Drawn earlier, the
+      footer rule cuts a line straight across the badge.
+    - **The parallelogram is a `custGeom`, not a preset**, authored in the
+      normalised 100000 × 100000 path box. With `s` = the slant as a
+      fraction of the width (0.72 / 2.95 → **24406**), `r` = **5000** for the
+      rounded corners and `d` = `r·s/100000` = **1220**, the path is:
+      `moveTo(s+r, 0)` → `lnTo(100000−r, 0)` →
+      `cubicBezTo (100000,0)(100000,0)(100000−d, r)` →
+      `lnTo(100000−s+d, 100000−r)` →
+      `cubicBezTo (100000−s,100000)(100000−s,100000)(100000−s−r, 100000)` →
+      `lnTo(r, 100000)` → `cubicBezTo (0,100000)(0,100000)(d, 100000−r)` →
+      `lnTo(s−d, r)` → `cubicBezTo (s,0)(s,0)(s+r, 0)` → `close`; with
+      `<a:rect l="24406" t="0" r="75594" b="100000"/>`. Because the path is
+      normalised, the height can be set straight to 0.5326" — the shape
+      squashes and the 0.72" slant survives. The label stays 28 pt.
+    - Route the position and size through ONE constant in the build script
+      (`POLLBREAK_XY` / `POLLBREAK_WH`), never per call site. Reference
+      implementation: **`_add_pollbreak_badge` in Module 1's
+      `_build_Module1.py`**, which builds the badge from exactly these
+      numbers.
+    - **Decks retrofitted to this geometry:** all 22 badges in
+      `Module 3 - Revised.pptx` and all three in `Module 1 - Revised.pptx`
+      (2026-08-27). Only Module 3's seven per-video decks still carry a mix
+      of the older positions (y 6.25 at full 0.72" height, and a
+      2.585 × 0.512" variant); they are finished and are not retrofitted
+      unless asked.
 - **Convention callout** – see "Concept-explanation textboxes" above.
 - **Quote callout** – verbatim quotes (CEO memos, court opinions,
   named executives) go in the cream convention box: italic quote
@@ -882,6 +1088,15 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     declines under **negative** marginal product, which this course does not
     reach unless we deliberately exaggerate. Keep those two distinct, and in
     general state each result no more strongly than the economics supports.
+  - **Keep the language measured – go easy on "massive"** (2026-08-27,
+    Nico). The hosts reach for extreme words – "massive", "huge",
+    "enormous", "incredible", "game-changing" – every other sentence, and
+    it wears out fast. The words are not banned; ask for them
+    **occasionally**, a handful of times across an episode, where the size
+    of something is the actual point. Otherwise say it plainly and let the
+    fact carry the emphasis ("the largest supermarket merger ever
+    proposed" needs no "massive" in front of it). Put this in BOTH the
+    in-doc host instructions and the paste-ready Audio Overview prompt.
   - **Keep returning to the module's one unifying idea** (the throughline).
   - **Lead with real-world stories** and let them carry the ideas.
   - Warm, curious, conversational tone – smart colleagues (or two students)
@@ -942,6 +1157,16 @@ taped video) follows one idea at a time. Calibrated defaults:
 - **Chrome stays put.** The top bar, section tag, title, thin rule, footer,
   page number, and a chart's axes and axis labels are visible from the
   start and are never animated.
+- **Poll chrome is never animated.** The gold "Poll Break" parallelogram and
+  the gold round POLL pill are visible from the moment the slide appears – no
+  click, no fade. Students should see that a poll is coming while I talk
+  through the slide's build, rather than be surprised by it at the end. Treat
+  both marks as chrome: leave them out of the per-slide animation plan
+  entirely (in `_animate.py`, drop any `t:Poll Break` / `t:POLL` selector –
+  anything not selected stays visible from the start). The same applies to a
+  "Discussion Break" / "Group Discussion" badge. Because the badge sits on
+  top of the footer rule, it is also drawn LAST – see its fixed position
+  under Layout patterns.
 - **Two figures on one slide should not overlap at all — and if they must,
   the later one has to cover the earlier one completely.** First try to
   size and place them so they sit apart: shrinking both and stacking them

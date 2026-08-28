@@ -69,6 +69,15 @@ SPLICE_MAP = {
     50: ("WS", 46),   # flip-a-house poll (results view)
 }
 
+# 2026-08-26: the videos-first restructure. The keys above are the OLD
+# (101-deck) target displays; the one canonical order map moves them onto
+# the 104-deck positions. Source displays are untouched — they index the
+# In Class decks, which did not change.
+sys.path.insert(0, str(HERE))
+import _m1_order as _ORDER                                    # noqa: E402
+
+SPLICE_MAP = _ORDER.remap_keys(SPLICE_MAP)
+
 
 def display_to_part(z):
     pres = ET.fromstring(z.read('ppt/presentation.xml'))
@@ -259,6 +268,24 @@ def splice(deck_path):
             e.set('ContentType', typ)
     items['[Content_Types].xml'] = ET.tostring(
         ct, xml_declaration=True, encoding='UTF-8')
+
+    # 2026-08-26: a spliced slide arrives with the SOURCE deck's cached
+    # footer number, which undoes the build's renumber pass for exactly
+    # these slides. The number is a live `slidenum` field, so PowerPoint
+    # recomputes it — but the cached value is what shows until it does, so
+    # rewrite it here from the slide's real position. String-level, because
+    # an ElementTree round-trip would break mc:AlternateContent.
+    n_pg = 0
+    for disp, t_part in enumerate(tgt_parts, start=1):
+        xml = items[t_part].decode('utf-8')
+        new_xml, n = re.subn(
+            r'(<a:fld[^>]*type="slidenum"[^>]*>.*?<a:t>)\d+(</a:t>)',
+            lambda m: m.group(1) + str(disp) + m.group(2), xml, flags=re.S)
+        if n and new_xml != xml:
+            items[t_part] = new_xml.encode('utf-8')
+            n_pg += n
+    if n_pg:
+        print('cached page number(s) corrected: %d' % n_pg)
 
     with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as zout:
         for name, data in items.items():

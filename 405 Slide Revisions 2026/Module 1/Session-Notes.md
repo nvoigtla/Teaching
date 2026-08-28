@@ -1,40 +1,301 @@
 # Session Notes — Module 1 (combined In-Class + Videos deck)
 
-## PENDING (updated 2026-08-24 — deck is 101 slides)
+## PENDING (updated 2026-08-27 — deck is 95 slides)
 
-Nico's open requests on **Module 1 - Revised.pptx**:
+Open items on **Module 1 - Revised.pptx**:
 0. **Podcast URL for display 12** — the Sound button is a marker until
-   he supplies the link (one line in `_build_Module1.py`).
-0b. **Display 31's speaker note mentions lithium, not tea** — the WSJ
-   lithium link was kept underneath the new tea notes; it looks like it
-   drifted onto the wrong slide. Awaiting his word.
-0c. **Slide 82** — the AI-accelerator image has no attribution line;
-   add one if the source needs crediting. Title ("AI and the Demand
-   for Computer Chips") and the dropped In-Class-Discussion badge are
-   mine, not his.
-1. **Font-upsize rule, first batch** (then Nico reviews; only after
-   convergence add the rule to Teaching CLAUDE.md — NOT yet):
-   whenever bullet font < 28pt and space allows, enlarge up to 28pt
-   main / 24pt sub. Proposed fitting rule: for each bullet box try
-   (28/24) → (26/24) → (24/22), keep the largest pair whose PIL-
-   measured wrapped height (Calibri, with 12/3pt spacing-before)
-   fits the box height with ~5% headroom and no line >2 lines;
-   sibling boxes on a slide get equal sizes; slide 6 must fit
-   Nico's hand-set box (2.21"/4.13"). Nico's "slides 1–10" refer to
-   the pre-insert numbering — that's now displays 1–12 (7–8 are
-   spliced polls, nothing to resize there). NOTE: the click-overlay
-   hotspots on slides 2 and 9 (`wire_backup_links`) are positioned
-   for the CURRENT font sizes — recheck them after the font pass.
-2. **Economic Models full-bleed rebuild — now display 10** (was 8):
-   integrate Nico's background image (hiker+map+mountains, text-free
-   variant) as background; overlay EDITABLE text exactly like his
-   mock: 3 bullet lines top-left (bold navy key phrases), navy circle
-   icons per line (head-bulb / quotes / map), "THE REAL WORLD" and
-   "THE MODEL (A MAP)" labels right, navy takeaway bar bottom-right
-   with compass icon: "Find a model that " white + "matches your
-   needs." gold. Images saved as `Image_Hiker_Mountain_with_text` /
-   `_no_text` (in `_source_images/`, .png). Update the slide's
-   animation plan afterward (PLANS key 8 pre-shift → 10).
+   Nico supplies the link (one line in `_build_Module1.py`).
+0c. **Display 24** — the AI-accelerator image has no attribution line.
+1. **PollEv rewording (Nico's account).** The diamonds activity on
+   display 59 still asks "How does the decline in engagements affect the
+   demand for diamonds?" — with the Swift-engagement example the answer
+   flips (demand shifts RIGHT). The embed URL stays valid; the static
+   screenshot keeps the old wording until it is re-captured.
+2. *(resolved 2026-08-27)* The backup slides keep `Module 1 · Backup` —
+   the rule was corrected, not the deck. See "Round 4" below.
+3. Two smaller flags remain open from round 1: display 53 shares one
+   "Photos: Wikimedia Commons" caption across two photos, and the four
+   video title cards (1, 10, 17, 27) carry one-line notes the
+   video-conversion rule says they should not have.
+
+## 2026-08-27 — adopting Nico's hand pass; format audit; podcasts
+
+**One-line summary.** Nico's hand-edited 95-slide deck was diffed against
+a fresh pipeline build of the 104-slide deck; every one of his edits was
+ported back into the build scripts, a formatting audit against the latest
+Teaching CLAUDE.md was run and its findings fixed, and the two NotebookLM
+podcast source docs were written.
+
+### His hand-edits, all adopted into the pipeline
+Found with a whole-deck text-signature match plus a member-level
+geometry / text / format / notes / timing diff (`_diff2.py`, new —
+canonical vs. a side-path build). It matches slides across a REORDER,
+which the older `_diff_slides.py` cannot.
+
+- **12 slides deleted:** the "Slides Not Used in the Videos" divider; the
+  ADM mini-case; both COVID/tea slides; all three avocado slides; both
+  copper slides; the "Related Work by Anderson Faculty" backup; and the
+  QUESTION slide of the AC and the diamonds poll pairs (each of those
+  polls now runs set-up → PollEv results → solution; the Econ & Coffee
+  and flip-house polls keep both views).
+- **3 slides added:** the Kroger–Albertsons pair from `Module 1 - Example
+  Candidates.pptx` (after Netflix), and a second copy of the
+  "Introduction / about the instructor" slide opening the in-class part.
+- **2 moves:** the shift-combination table now CLOSES Video 4 (display
+  34, still hidden); Homo Economicus moved after the course roadmap.
+- **1 geometry tweak:** display 76's child-cost figure raised 2.55 → 2.21.
+- The whole front matter now simply belongs to the in-class part.
+
+`_m1_order.py` was rewritten to the 95-slide ORDER; every downstream pass
+re-keys through it, so `_splice_media.py`, `_group_pass.py` and
+`_animate.py` needed no manual renumbering. `_build_Module1.py` gained
+`slide_kroger_case`, `slide_kroger_costco` and
+`slide_02_introduction_again`; `apply_fill_notes` now skips keys whose
+slide was deleted.
+
+### Formatting fixes applied
+- **Tags + footers on 53/54:** the candidates deck's "Module 1 ·
+  Candidates · Market Definition" tag and its "Example Candidates (for
+  review)" footer replaced by the main deck's.
+- **Grouping on 53/54** (group pass): the quote box with its text, and
+  each picture with its caption.
+- **Animation on 53/54:** 3 clicks on the case slide (chronology first —
+  the deal and the photos are static, the market-definition argument
+  builds), 4 on the resolution slide with the gold decision bar last.
+- **Title case (7 titles):** "…: The Case of Netflix" (×2), "Shortages
+  When Disasters Loom", "…Costs When Buying a Present", "What Is the Full
+  Economic Cost…", "…(You Should Ignore!)", "…That You'll See Throughout
+  the Class", "Can These Prices Be Optimal?".
+- **Problem-set pointers:** glyph ➜ → ✎ (the fixed-vocabulary rule),
+  routed through new `PS_GLYPH` / `PS_BOX_XY` constants. The convention
+  bottom-right corner was TRIED on displays 33 and 49 and reverted with a
+  dated comment: on 33 the box covers the chart's "Quantity" axis title,
+  on 49 a 3.00"-wide box collides with the last coverage pill.
+- **Display 86:** "MC" and "indifferent" raised 14/13 → 16 pt (the
+  chart-label floor).
+- **Display 54:** the navy market header box widened 6.90 → 7.10" so the
+  line stops wrapping with "…" alone on line 2 (measured at 6.81" in
+  Calibri Bold 18 pt).
+- **Speaker notes:** build-provenance and to-do text removed from the
+  notes on displays 34, 53, 54, 57, 58, 74, 89 and rewritten as
+  student-facing guidance; the Pike Place demand-curve note, which sat
+  IDENTICALLY on displays 20, 21 and 22, was split into three
+  (`DEMAND_DEF_NOTE` / `CETERIS_PARIBUS_NOTE` / `DEMAND_CURVE_NOTE`).
+  The PollEv rewording reminder was kept, marked "(Nico: …)".
+
+### Flagged, NOT changed (awaiting Nico)
+- **Display 36** duplicates display 2 and sits BETWEEN the "In-Class
+  Part" divider and the module title slide. Intentional, or should it
+  follow the title slide?
+- **Display 47** ("Agenda for the Class") carries the tag "Module 1 ·
+  Video 1 · Introduction" while sitting in the in-class part; display 7
+  is the same slide tagged "Module 1 · Course Roadmap" inside Video 1.
+  The two tags look swapped.
+- **Display 86:** "Net Benefit of Hour 1 / 2" are 9 pt inside 0.95"-wide
+  bars. Reaching the 16 pt floor needs shorter wording ("Net benefit") or
+  the label moved outside the bar — a content call.
+- **Poll Break badges** (55, 58, 71) sit at 9.991 / 6.770, 2.525 × 0.590
+  rather than the CLAUDE.md constant 10.238 / 6.769, 2.95 × 0.533. They
+  come verbatim from Nico's hand-tuned `_handoff_pollbreak.xml`, so they
+  were left alone.
+- **Display 53** uses one shared "Photos: Wikimedia Commons" caption for
+  two photos; the animation rule prefers one caption per picture.
+- Video title cards (1, 10, 17, 27) carry one-line notes; the
+  video-conversion rule says a title card carries none.
+
+### Verification
+- `_diff2.py` canonical vs. rebuild: every remaining difference is one of
+  the fixes above — nothing of Nico's was lost.
+- `_verify_anim.ps1` (expected map regenerated for the 95-slide deck):
+  ALL CLICK COUNTS MATCH, 63 animated slides; the deck opens in
+  PowerPoint.
+- `_slideshow_probe.ps1` on 1, 42, 53, 54, 56, 59, 72, 86, 95: PASS — all
+  four live PollEv activities render in the real slideshow.
+- All 95 slides eyeballed as contact sheets.
+
+### Podcasts (NotebookLM source docs, new)
+`Podcast Module 1 -- Intro.md` (~1,580 words, about 5 minutes, future
+tense, prepared host briefing an unprepared one) and `Podcast Module 1 --
+Wrap-up.md` (~3,250 words, about 15 minutes, past tense, two students
+talking it through). Both follow the Module 3 pattern: H1 exactly
+`Module 1 - Podcast Intro` / `Module 1 - Podcast Wrap-Up`, a paste-ready
+Audio Overview prompt at the top, then the standing host instructions.
+Module-1-specific guard rails in those instructions: movement ALONG a
+curve vs. SHIFT of the curve (never "the price went up so demand went
+up"); a sunk cost is ignored, which is not "always quit"; opportunity
+cost is the NEXT-BEST alternative, not the sum of alternatives; Concorde
+failed on operating costs, not merely on expense; the house flip is
+accounting-profit-positive and economic-profit-negative; Los Angeles was
+BOTH curves shifting left; and the supermarket ruling was "some
+substitution, not enough substitution". Upload each to its OWN notebook.
+
+### Round 2 the same day — Nico's answers on the four flagged items
+
+1. **Display 36** (the duplicated introduction slide before the module
+   title) — keep as is.
+2. **Tags.** Display 47 is now `Module 1 · Introduction` (it is the
+   in-class copy of the course roadmap; display 7, inside Video 1, keeps
+   `Module 1 · Course Roadmap`). The whole applications block — displays
+   **51–65** — moved to the new four-level tag: `Module 1 · In Class ·
+   Examples · Markets` (51–54) and `Module 1 · In Class · Examples ·
+   Supply and Demand` (55–65). Nico asked for "47–64"; the block was
+   taken through 65 so the two-slide Los Angeles mini-case does not end
+   up with two different tags. Done in the two tag constants
+   (`TAG_MARKETS`, `TAG_SD`), never per call site. **New rule added to
+   `Teaching/CLAUDE.md`** ("In-class examples of video material get a
+   four-level tag") so this is the convention wherever slides that apply
+   taped material are moved into an in-class deck.
+3. **Display 86** — the 9 pt bar labels stay. **New exception added to
+   `Teaching/CLAUDE.md`** under the box/callout text floor: a label
+   written INSIDE a narrow object (a thin bar, a slim column, a narrow
+   table cell) is exempt from the 18/16 pt floors; fit the text to the
+   object. The exception covers labels inside constrained objects only —
+   not crowded slides.
+4. **Poll Break badge** — the CLAUDE.md rule was rewritten as a complete,
+   self-contained spec (position, size, slant, label box, font, fill,
+   shadow, grouping, the parametric `custGeom` path, and the
+   draw-it-LAST / covers-the-footer-rule requirement), so a build script
+   can generate the badge from the rule alone. Module 1's three badges
+   (55, 58, 71) were then retrofitted to it: `_add_pollbreak_badge` in
+   `_build_Module1.py` now BUILDS the badge from `POLLBREAK_XY` /
+   `POLLBREAK_WH` instead of injecting `_handoff_pollbreak.xml`. The
+   badge moved from 9.45 / 6.77, 3.607 × 0.590 to **10.238 / 6.769,
+   2.950 × 0.533** — the same geometry as Module 3's 22 badges.
+   `_handoff_pollbreak.xml` is now unused by the pipeline (kept as the
+   provenance of the design).
+
+Re-verified after both rounds: `_diff2.py` shows only the intended
+changes; `_verify_anim.ps1` ALL CLICK COUNTS MATCH (63 animated slides);
+slideshow probe on 1, 55, 56, 58, 59, 71 PASS.
+
+**Backups:** deliberately NOT rolled a third time within the session. The
+two kept predecessors are the more useful pair — `_t-2` is Nico's own
+hand-edited 95-slide deck of 17:08 and `_t-1` is the first rebuild after
+the port. Rolling again would have dropped his hand-edited original for a
+build that differs only in tags.
+
+### Podcasts — one addition
+Both source docs (and the standing rules in `Teaching/CLAUDE.md`) now ask
+the hosts to **keep the language measured**: "massive", "huge",
+"incredible" and the like only occasionally, not every other sentence.
+Added to the in-doc host instructions AND the paste-ready Audio Overview
+prompt.
+
+**How to produce the audio (it is Google NotebookLM, not a Microsoft
+tool):** notebooklm.google.com → **Create new** notebook → **Add source**
+→ upload `Podcast Module 1 -- Intro.md` → **Studio** panel → **Audio
+Overview** → **Customize**, paste the prompt block from the top of that
+file → **Generate**. Wait a few minutes, play it back, then download.
+Repeat in a **separate** notebook for the Wrap-up file — NotebookLM
+blends every source in a notebook into one audio, so the two episodes
+must never share a notebook. There is no editor for the finished audio:
+to change an episode, edit the source doc and regenerate.
+
+
+### Round 3 the same day — retag under the revised top-bar rule
+
+The `Teaching/CLAUDE.md` tag rule changed after round 2 (the video number
+now sits in the MIDDLE level of a taped module's tag, agenda slides read
+"… · Agenda", the summary closer is exempt, and BACKUP slides get no
+tag). Module 1 was re-tagged against it, using `Module 3 - Revised.pptx`
+as the reference implementation.
+
+**New machinery.** `_build_Module1.py` gained `_m1_top_bar_tags()` — ONE
+table, display-keyed — and `apply_top_bar_tags(prs)`, a deck-wide pass run
+at the end of `build()`. The slide builders still draw whatever tag they
+were written with; the pass is now the single source of truth and rewrites
+them. It is loud on drift: a top bar the table does not cover, or a table
+entry with no bar to write to, is reported (the six spliced PollEverywhere
+displays are excluded, since their stubs are thrown away).
+
+**34 tags rewritten:**
+
+| Displays | was | now |
+|---|---|---|
+| 2, 3, 6 | `Module 1 · Introduction` | `Module 1 · Video 1 · Introduction` |
+| 4, 5 | `Module 1 · Economic Models` | `Module 1 · Video 1 · Economic Models` |
+| 7 | `Module 1 · Course Roadmap` | `Module 1 · Video 1 · Course Roadmap` |
+| 9 | `Module 1 · Video 1 · Introduction` | `Module 1 · Video 1 · Agenda` |
+| 11 | `Module 1 · Video 2 · Markets` | `Module 1 · Video 2 · Agenda` |
+| 18 | `Module 1 · Video 3 · Demand and Supply` | `Module 1 · Video 3 · Agenda` |
+| 28 | `Module 1 · Video 4 · Market Equilibrium` | `Module 1 · Video 4 · Agenda` |
+| 49, 66, 79, 84 | `Module 1 · Outline` / `… · In Class · <section>` | `Module 1 · Agenda` |
+| 67–78 | `Module 1 · In Class · Opportunity Costs` | `Module 1 · Economic Costs Include Opportunity Costs` |
+| 80–83 | `Module 1 · In Class · Sunk Costs` | `Module 1 · Ignore Sunk Costs` |
+| 85–87 | `Module 1 · In Class · Cost-Benefit and Marginal Analysis` | `Module 1 · Use Cost-Benefit and Marginal Analysis` |
+| 88 | `Module 1 · Wrap-Up` | `Module 1 · Summary` |
+
+The three in-class agenda items are now the outline item titles, taken
+from `M1_OUTLINE` through `_title_case()` rather than retyped, so renaming
+an outline item renames the tags with it. The old three-level
+`Module · Part · Section` form is gone from the deck.
+
+**Unchanged, deliberately:**
+- 12–16, 19–26, 29–34 already had the video number in the middle.
+- 51–65 keep the four-level `Module 1 · In Class · Examples · <topic>`.
+- 36, 38–41, 44–48 are front matter sitting OUTSIDE every video block (it
+  lives in the in-class part in this deck), so it keeps its own two-level
+  tag — the rule's "front matter takes the introduction video's number"
+  applies only when that matter is inside the video block, as in Module 3.
+- 89 ("Next Steps") keeps `Module 1 · Wrap-Up`: it is post-work
+  logistics, not the summary closer.
+- 1, 8, 10, 17, 27, 35, 37, 50, 90 and the six poll slides have no top bar
+  and are untouched.
+
+**Open question — the five backup slides (91–95).** The rule lists BACKUP
+slides among those that "never get a tag", but its justification ("a
+backup slide is a full-bleed figure with a caption") describes Module 3's
+backups, which have no top bar at all and never did. Module 1's five are
+ordinary content slides with a navy bar, an action title and bullets, so
+obeying the rule literally means STRIPPING the top bar from all five. That
+was left alone pending Nico's word; they still read `Module 1 · Backup`.
+
+**Verification:** `_diff2.py` vs. the previous canonical shows the top-bar
+text shape as the only difference on any slide; `_verify_anim.ps1` ALL
+CLICK COUNTS MATCH (63 animated slides); slideshow probe on 1, 9, 42, 67,
+88, 95 PASS; top bars on 9 / 67 / 88 rendered and checked (the longest tag
+fits the bar comfortably).
+
+**Backups:** again not rolled — `_t-2` remains Nico's hand-edited 95-slide
+deck of 17:08 and `_t-1` the first rebuild after the port. Every
+intermediate since is script-reproducible; his hand-edited original is not.
+
+
+### Round 4 the same day — the backup-tag rule was wrong, not the deck
+
+Nico's call on the open question from round 3: **a genuine backup slide
+DOES carry `Module N · Backup`**, and Module 1's five (91–95) are the
+model. Module 3's two tagless backups are the exception, not the pattern —
+there he enlarged the picture to fill the canvas and pulled the text on top
+of it, so there is no top bar to put a tag in. **No change to Module 1's
+deck**; the fix was to `Teaching/CLAUDE.md`:
+
+- BACKUP slides were REMOVED from the "never gets a tag" list, and a new
+  sub-rule says every backup slide carries `Module N · Backup` with
+  ordinary chrome, the same tag on all of them (it does not name the topic
+  being backed up). Module 1 displays 91–95 are cited as the model. The
+  full-bleed backup is written up as the single exception, with an explicit
+  "do not strip the top bar off an ordinary backup slide to reach it".
+- The `In Class · Examples` clause was sharpened so the TEST is what a
+  slide is FOR, not where it sits: it applies to slides that apply taped
+  material and are kept back to be shown in class. Where they are parked is
+  a per-deck layout choice — an "Applications" divider mid-deck (Module 1,
+  displays 51–65) or an examples appendix at the end (Module 3) — and a
+  module with no appendix simply has none, so the appendix sub-rules do not
+  apply to it. Added alongside: `Examples` never appears inside a video
+  block; a slide between two title cards carries `Module N · Video k ·
+  <topic>` even when its content is a worked example.
+- `_build_Module1.py`'s tag-pass comment gained a line on the backup case,
+  so the script and the rule say the same thing. Comment only — the deck
+  was not rebuilt.
+
+Audited the shipped deck against the finalized rule: 15 slides with no top
+bar (title slides, video title cards, three dividers, six polls), the four
+video blocks tagged `Module 1 · Video k · <topic>` with `… · Agenda` on
+each video's outline slide, `Module 1 · Agenda` on the four in-class agenda
+slides, the two four-level Examples tags across displays 51–65, the three
+in-class agenda items under their outline titles, `Module 1 · Summary`,
+`Module 1 · Wrap-Up`, and `Module 1 · Backup` five times. Conforms.
 
 ## 2026-08-24 — porting the polished "Videos Final" decks back in
 
