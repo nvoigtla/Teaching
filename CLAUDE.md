@@ -1033,7 +1033,7 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     Module X." Two hosts: **one who did the reading and is prepared**,
     briefing **one who did not and just wants a quick sense of what's
     coming.**
-  - **Wrap-up / recap – about 15 minutes.** Lets students *recall* what they
+  - **Wrap-up / recap – 15 to 20 minutes.** Lets students *recall* what they
     saw. Covers all the main ideas. **Past tense** ("as we saw in
     Module X…"). Two hosts: **two students who just took the class, talking
     it through** to lock it in.
@@ -1052,6 +1052,17 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
   in chat **and** as a labeled block at the very top of the source doc, so I
   can drop it straight into NotebookLM as a redundancy on top of the in-doc
   instructions.
+  - **Print BOTH prompts in the chat window every time, unprompted**
+    (2026-08-28, Nico). Whenever I ask for a module's podcast scripts – a
+    first draft, a revision, or a fix to one episode – end the turn by
+    printing the intro prompt and the wrap-up prompt in the chat as two
+    separate copyable blocks, each labelled with its episode. I paste them
+    into NotebookLM's Customize box from the chat, not out of the file, so
+    "it is in the doc" is not enough. Print both even when only one episode
+    changed, so I never have to hunt for the other one, and print the CURRENT
+    text – re-read it from the docs rather than reproducing an earlier
+    version from the conversation. A module with a Wrap-Up **Video** gets its
+    Video Overview prompt the same way, as a third block.
   - **Write it as an ANSWER to the question the Customize box actually
     asks** (2026-08-27, Nico): *"What should the AI hosts focus on in this
     episode?"* So it opens "Focus on …" and stays in that register
@@ -1090,14 +1101,31 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     right. E.g., Waterworld's disaster was the runaway, over-budget
     **production cost** (now sunk), not weak box-office revenue; saying only
     "the movie was a disaster" is ambiguous and misleads.
-  - **Convey each concept correctly — don't overstate the result.** The
-    hosts ad-lib and tend to exaggerate. Guard the classic slip:
-    **diminishing** marginal product means output keeps **rising**, just by
-    smaller and smaller amounts as you add workers — it does NOT mean output
-    falls or that "adding workers slows production." Output only actually
-    declines under **negative** marginal product, which this course does not
-    reach unless we deliberately exaggerate. Keep those two distinct, and in
-    general state each result no more strongly than the economics supports.
+  - **Diminishing marginal product: smaller and smaller, and possibly
+    negative** (2026-08-28, Nico — an earlier version of this rule produced
+    a factual error in the Module 3 intro episode). As we add more and more
+    workers to the same fixed capital, the **marginal** return to each extra
+    worker gets smaller and smaller, and eventually it **can even turn
+    negative** — a factory floor so crowded that people get in each other's
+    way, or too many cooks in one kitchen. Say that in a sentence; it does
+    not need detail. Then be clear that **for the purposes of this class we
+    never end up in that range**: we work where the marginal product is
+    still **positive**, so each extra worker does add value, and the
+    question is how many extra workers it makes sense to hire at the going
+    wage.
+    - **Do NOT have a host deny the negative range.** The previous rule
+      said diminishing returns "does NOT mean output falls", and the hosts
+      hardened it into "So it never means that production slows down or
+      falls?" / "Absolutely not." That is wrong: marginal returns to labor
+      really can go negative, and Module 3's backup slides make exactly
+      that point with the cramped factory floor. What is true is that
+      economists usually work with a total-output curve that flattens
+      toward zero marginal product, and that the class stays in the
+      positive range — not that the negative range does not exist.
+  - **In general, state each result no more strongly than the economics
+    supports.** The hosts ad-lib and tend to exaggerate in whichever
+    direction the instructions lean, so a rule phrased as a flat denial
+    will come back as a flat denial.
   - **Keep the language measured – go easy on "massive"** (2026-08-27,
     Nico). The hosts reach for extreme words – "massive", "huge",
     "enormous", "incredible", "game-changing" – every other sentence, and
@@ -1108,6 +1136,12 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     proposed" needs no "massive" in front of it). Put this in BOTH the
     in-doc host instructions and the paste-ready Audio Overview prompt.
   - **Keep returning to the module's one unifying idea** (the throughline).
+  - **Follow the MAIN part of the deck, and ignore any appendix**
+    (2026-08-28, Nico). A finished module deck can end with a block of
+    slides held back for in-class use – Module 3's "SLIDES NOT USED IN THE
+    VIDEOS – FOR In-Class APPLICATIONS", slides 95 onward. Take the
+    episode's structure from the main part only; those extra examples are
+    for the classroom, not the podcast.
   - **Lead with real-world stories** and let them carry the ideas.
   - Warm, curious, conversational tone – smart colleagues (or two students)
     connecting the dots, not a lecture; define terms in plain language, go
@@ -1141,7 +1175,7 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
 ## Wrap-Up Video (NotebookLM Video Overview)
 A module can also get a **video** wrap-up, produced with **NotebookLM's
 Video Overview** from a source doc I write (I don't produce the video). It's
-the video sibling of the Wrap-up podcast: a ~15-minute, **past-tense** recap
+the video sibling of the Wrap-up podcast: a 15- to 20-minute, **past-tense** recap
 for students to recall the module.
 
 - **Reuse the Wrap-up podcast body verbatim** (same corrected content), with
@@ -1153,8 +1187,10 @@ for students to recall the module.
   never "the source material"; numbers sparingly; intuition over arithmetic;
   be explicit about which regime a rule lives in — MRPL = w is short-run,
   bang-for-the-buck is long-run; precise example framing, e.g. Waterworld =
-  runaway *production* cost, not weak box office; diminishing ≠ negative
-  marginal product; keep returning to MB = MC).
+  runaway *production* cost, not weak box office; diminishing marginal
+  product means smaller and smaller additions that can eventually turn
+  negative, with the class staying in the positive range; keep returning
+  to MB = MC).
 - **Video-specific:** tell it to let clean visuals carry each point — one
   simple diagram / label / image per idea (a rising-then-flattening output
   curve, a U-shaped average-cost curve, a short-run vs. long-run split, the
