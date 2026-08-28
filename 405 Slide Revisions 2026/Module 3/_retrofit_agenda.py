@@ -71,10 +71,16 @@ from lxml import etree as ET
 sys.stdout.reconfigure(encoding='utf-8')
 HERE = Path(__file__).parent
 DECK = HERE / "Module 3 - Revised.pptx"
-M2_DIR = HERE.parent / "Module 2"
-sys.path.insert(0, str(M2_DIR))
 
-import _build_Module2InClass as M2  # noqa: E402  (helper layer)
+import _m3_helpers as H  # noqa: E402  (Module 3's own helper layer)
+
+# This pass REWRITES the deck at module level - there is no main().  On
+# 2026-08-27 an import check ran the whole pipeline and overwrote the
+# canonical deck, so refuse to be imported.
+if __name__ != "__main__":                                       # noqa: E402
+    raise ImportError(
+        "_retrofit_agenda rewrites 'Module 3 - Revised.pptx' as soon as it "
+        "runs; it is a pass, not a library. Run it as a script.")
 
 from pptx.enum.shapes import MSO_SHAPE  # noqa: E402
 from pptx.enum.text import PP_ALIGN  # noqa: E402
@@ -180,9 +186,9 @@ def make_m3_outline(prs, page_num, *, section_tag=TAG, title=TITLE,
     pixel-identical across all agenda slides. Every item RESERVES the
     description row; the description shows only for the current
     topic(s), or for all items when descriptions=True."""
-    slide = M2._blank_slide(prs)
-    M2._draw_top_bar_tc(slide, section_tag)
-    M2._draw_action_title(slide, title)
+    slide = H._blank_slide(prs)
+    H._draw_top_bar_tc(slide, section_tag)
+    H._draw_action_title(slide, title)
 
     hi = set(highlight_set or ())
     if descriptions:
@@ -222,7 +228,7 @@ def make_m3_outline(prs, page_num, *, section_tag=TAG, title=TITLE,
         # items not currently covered are shaded; a slide that lights
         # every item (descriptions=True) keeps them all navy
         lit = descriptions or i in hi
-        ink = M2.NAVY if lit else M2.DIM
+        ink = H.NAVY if lit else H.DIM
         if not descriptions and i in hi:
             band = slide.shapes.add_shape(
                 MSO_SHAPE.ROUNDED_RECTANGLE, int(Inches(0.90)),
@@ -230,16 +236,16 @@ def make_m3_outline(prs, page_num, *, section_tag=TAG, title=TITLE,
                 int(title_h + desc_h + Inches(0.10)))
             band.adjustments[0] = 0.35
             band.fill.solid()
-            band.fill.fore_color.rgb = M2.CREAM
-            band.line.color.rgb = M2.GOLD
+            band.fill.fore_color.rgb = H.CREAM
+            band.line.color.rgb = H.GOLD
             band.line.width = Pt(1.0)
             band.shadow.inherit = False
-            M2._add_drop_shadow(band)
+            H._add_drop_shadow(band)
         circ = slide.shapes.add_shape(
             MSO_SHAPE.OVAL, int(Inches(1.15)), int(y + Inches(0.02)),
             int(Inches(0.58)), int(Inches(0.58)))
         circ.fill.solid()
-        circ.fill.fore_color.rgb = M2.GOLD
+        circ.fill.fore_color.rgb = H.GOLD
         circ.line.fill.background()
         circ.shadow.inherit = False
         tf = circ.text_frame
@@ -258,38 +264,38 @@ def make_m3_outline(prs, page_num, *, section_tag=TAG, title=TITLE,
         # item titles follow the same title case as slide titles; the
         # one-line description underneath is a sentence, so it is left
         # alone
-        rows = [([(M2._title_case(item[0].upper() + item[1:]),
+        rows = [([(H._title_case(item[0].upper() + item[1:]),
                    {'bold': True, 'size': 25, 'color': ink})], 0,
                  {'bullet_style': 'none', 'space_before_pts': 0})]
         if i in hi:
-            rows.append(([(desc, {'size': 22, 'color': M2.GRAY})], 0,
+            rows.append(([(desc, {'size': 22, 'color': H.GRAY})], 0,
                          {'bullet_style': 'none', 'space_before_pts': 0}))
         # a shaded item renders its single line at the TOP of the
         # reserved two-row box, which sits high against the gold circle;
         # nudge it down to centre it (the current topic, which fills its
         # box with title + description, does NOT move)
-        M2._add_hierarchical_bullets(
-            slide, Inches(2.05), y if lit else int(y + M2.DIM_DROP),
+        H._add_hierarchical_bullets(
+            slide, Inches(2.05), y if lit else int(y + H.DIM_DROP),
             Inches(11.0), title_h + desc_h, rows, size=25,
             line_spacing_pts=0)
         # where this topic is taught — the pill dims with its row, so on a
         # section agenda only the current topic keeps its colour
         in_class = i in IN_CLASS_ITEMS
         if lit:
-            pill_fill = M2.NAVY if in_class else M2.GOLD
-            pill_ink = M2.WHITE if in_class else M2.NAVY
+            pill_fill = H.NAVY if in_class else H.GOLD
+            pill_ink = H.WHITE if in_class else H.NAVY
         else:
-            pill_fill, pill_ink = M2.DIM, M2.WHITE
+            pill_fill, pill_ink = H.DIM, H.WHITE
         pill_w = Inches(1.55)
         pill_y = y + Inches(0.02) + PILL_DROP
-        M2._add_rounded_filled_box(
+        H._add_rounded_filled_box(
             slide, int(Inches(12.85) - pill_w), int(pill_y),
             int(pill_w), Inches(0.36), COVERAGE_LABEL[i],
             fill=pill_fill, text_color=pill_ink,
             size=13, corner_pct=0.30, shadow=lit)
         y = int(y + pitch)
 
-    M2._draw_footer(slide, FOOTER, page_num)
+    H._draw_footer(slide, FOOTER, page_num)
     return slide
 
 
@@ -529,9 +535,9 @@ if inserted_at is not None:
     finals.insert(INSERT_SPEC, inserted_at)
 
 # --- generate the replacement slides --------------------------------------
-prs = M2.Presentation()
-prs.slide_width = int(M2.SLIDE_W)
-prs.slide_height = int(M2.SLIDE_H)
+prs = H.Presentation()
+prs.slide_width = int(H.SLIDE_W)
+prs.slide_height = int(H.SLIDE_H)
 for spec, disp in zip(SPECS, finals):
     make_m3_outline(prs, disp, descriptions=spec.get("descriptions", False),
                     highlight_set=spec.get("highlight"))

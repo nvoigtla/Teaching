@@ -39,10 +39,16 @@ from lxml import etree as ET
 sys.stdout.reconfigure(encoding="utf-8")
 HERE = Path(__file__).parent
 DECK = HERE / "Module 3 - Revised.pptx"
-M2_DIR = HERE.parent / "Module 2"
-sys.path.insert(0, str(M2_DIR))
 
-import _build_Module2InClass as M2  # noqa: E402
+import _m3_helpers as H  # noqa: E402  (Module 3's own helper layer)
+
+# This pass REWRITES the deck at module level - there is no main().  On
+# 2026-08-27 an import check ran the whole pipeline and overwrote the
+# canonical deck, so refuse to be imported.
+if __name__ != "__main__":                                       # noqa: E402
+    raise ImportError(
+        "_video_prep rewrites 'Module 3 - Revised.pptx' as soon as it runs; "
+        "it is a pass, not a library. Run it as a script.")
 
 from pptx.enum.text import PP_ALIGN  # noqa: E402
 from pptx.util import Inches  # noqa: E402
@@ -85,25 +91,25 @@ def slide_text(blob):
 def make_video_title(prs, main, video_line):
     """Copied from _video_title_slide in _build_Module2Video.py so the two
     decks' title cards stay identical to the EMU."""
-    slide = M2._blank_slide(prs)
-    M2._add_text(slide, 0, Inches(2.10), M2.SLIDE_W, Inches(1.1), main,
-                 size=60, bold=True, color=M2.NAVY, font="Calibri",
+    slide = H._blank_slide(prs)
+    H._add_text(slide, 0, Inches(2.10), H.SLIDE_W, Inches(1.1), main,
+                 size=60, bold=True, color=H.NAVY, font="Calibri",
                  align=PP_ALIGN.CENTER)
-    M2._add_text(slide, 0, Inches(3.25), M2.SLIDE_W, Inches(0.75),
-                 video_line, size=40, bold=True, color=M2.GOLD,
+    H._add_text(slide, 0, Inches(3.25), H.SLIDE_W, Inches(0.75),
+                 video_line, size=40, bold=True, color=H.GOLD,
                  font="Calibri", align=PP_ALIGN.CENTER)
-    M2._add_rect(slide, int((M2.SLIDE_W - Inches(4.0)) / 2), Inches(4.28),
-                 Inches(4.0), 54864, M2.GOLD)
-    M2._add_text(slide, 0, Inches(4.62), M2.SLIDE_W, Inches(0.55),
-                 "Management 405", size=26, bold=True, color=M2.GRAY,
+    H._add_rect(slide, int((H.SLIDE_W - Inches(4.0)) / 2), Inches(4.28),
+                 Inches(4.0), 54864, H.GOLD)
+    H._add_text(slide, 0, Inches(4.62), H.SLIDE_W, Inches(0.55),
+                 "Management 405", size=26, bold=True, color=H.GRAY,
                  font="Calibri", align=PP_ALIGN.CENTER)
-    M2._add_text(slide, 0, Inches(5.32), M2.SLIDE_W, Inches(0.5),
+    H._add_text(slide, 0, Inches(5.32), H.SLIDE_W, Inches(0.5),
                  "Prof. Nico Voigtländer  ·  UCLA Anderson",
-                 size=22, color=M2.GRAY, font="Calibri",
+                 size=22, color=H.GRAY, font="Calibri",
                  align=PP_ALIGN.CENTER)
-    M2._add_rect(slide, 0, Inches(7.15), M2.SLIDE_W, Inches(0.02), M2.RULE)
-    M2._add_rect(slide, M2.MARGIN, Inches(7.135), M2.GOLD_W, Inches(0.05),
-                 M2.GOLD)
+    H._add_rect(slide, 0, Inches(7.15), H.SLIDE_W, Inches(0.02), H.RULE)
+    H._add_rect(slide, H.MARGIN, Inches(7.135), H.GOLD_W, Inches(0.05),
+                 H.GOLD)
     return slide
 
 
@@ -156,9 +162,9 @@ def insert_slide(data, after_display, sld_xml):
 
 
 # --- generate the six cards ------------------------------------------------
-prs = M2.Presentation()
-prs.slide_width = int(M2.SLIDE_W)
-prs.slide_height = int(M2.SLIDE_H)
+prs = H.Presentation()
+prs.slide_width = int(H.SLIDE_W)
+prs.slide_height = int(H.SLIDE_H)
 for i in sorted(VIDEOS):
     vid, main, _ = VIDEOS[i]
     make_video_title(prs, main, SUBTITLE % vid)
