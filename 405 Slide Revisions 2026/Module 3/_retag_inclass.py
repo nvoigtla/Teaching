@@ -36,6 +36,8 @@ EMU = base.EMU
 DECK = base.DECK
 DRY = "--dry-run" in sys.argv
 
+from _deck_guard import require_committed
+
 FIRST, LAST = 95, 110
 SEP = "\u00b7"                       # the deck's middle dot
 PREFIX = "Module 3 " + SEP + " "
@@ -79,6 +81,8 @@ def measure(text, pt):
 
 
 def main():
+    if not DRY:
+        require_committed(DECK)
     pkg = base.Pkg(DECK)
     slides = pkg.slides()
     log = []

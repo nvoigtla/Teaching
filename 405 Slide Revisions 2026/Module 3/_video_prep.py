@@ -50,6 +50,10 @@ if __name__ != "__main__":                                       # noqa: E402
         "_video_prep rewrites 'Module 3 - Revised.pptx' as soon as it runs; "
         "it is a pass, not a library. Run it as a script.")
 
+from _deck_guard import require_committed  # noqa: E402
+
+require_committed(DECK)
+
 from pptx.enum.text import PP_ALIGN  # noqa: E402
 from pptx.util import Inches  # noqa: E402
 

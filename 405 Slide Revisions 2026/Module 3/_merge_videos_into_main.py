@@ -39,6 +39,8 @@ import zipfile
 
 from lxml import etree as ET
 
+from _deck_guard import require_committed
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE)
 
@@ -599,6 +601,8 @@ def prune_orphans(pkg):
 # ==========================================================================
 
 def main(dry=False):
+    if not dry:
+        require_committed(MAIN)
     dst = Pkg(MAIN)
     order = dst.slide_order()
     assert len(order) == 88, "expected the 88-slide main deck, got %d" % len(order)

@@ -41,6 +41,8 @@ GOLD = "E09F3E"
 DECK = "Module 3 - Revised.pptx"
 DRY = "--dry-run" in sys.argv
 
+from _deck_guard import require_committed
+
 # Fixed badge geometry (Teaching CLAUDE.md, 2026-08-27).
 BADGE_XY = (9361444, 6190030)                # 10.238", 6.769"
 BADGE_WH = (2697480, 487009)                 # 2.95",   0.533"
@@ -202,6 +204,8 @@ def canonical_template(pkg, slides):
 
 
 def main():
+    if not DRY:
+        require_committed(DECK)
     pkg = Pkg(DECK)
     slides = pkg.slides()
     template = canonical_template(pkg, slides)

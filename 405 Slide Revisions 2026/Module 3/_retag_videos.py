@@ -43,6 +43,8 @@ EMU = base.EMU
 DECK = base.DECK
 DRY = "--dry-run" in sys.argv
 
+from _deck_guard import require_committed
+
 MODULE = "Module 3"
 SEP = "·"
 PREFIX = MODULE + " " + SEP + " "
@@ -103,6 +105,8 @@ def card_video(spTree):
 
 
 def main():
+    if not DRY:
+        require_committed(DECK)
     pkg = base.Pkg(DECK)
     slides = pkg.slides()
     log = []
