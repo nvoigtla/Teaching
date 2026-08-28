@@ -1049,10 +1049,20 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
   fine.
 - **Always supply a ready-to-paste Audio Overview prompt for each episode** –
   a short single-paragraph version of that episode's instructions. Give it
-  in chat **and** as a labeled block at the very top of the source doc
-  ("Audio Overview prompt — paste this into NotebookLM's Audio Overview /
-  Customize box:") so I can drop it straight into NotebookLM's Customize box
-  as a redundancy on top of the in-doc instructions.
+  in chat **and** as a labeled block at the very top of the source doc, so I
+  can drop it straight into NotebookLM as a redundancy on top of the in-doc
+  instructions.
+  - **Write it as an ANSWER to the question the Customize box actually
+    asks** (2026-08-27, Nico): *"What should the AI hosts focus on in this
+    episode?"* So it opens "Focus on …" and stays in that register
+    throughout – instructions TO the hosts, not a description of the
+    episode. Label the block in the doc with that question, verbatim, so
+    the destination is unambiguous.
+  - **No Markdown inside the prompt.** Asterisks and underscores are read
+    as literal characters in that box; write the emphasis out in words.
+  - The workflow the prompt belongs to: **Add sources → upload the
+    episode's `.md`**, then **Studio → Audio Overview → Customize → paste
+    the prompt → Generate**. One episode per notebook.
 - **Every source doc starts with an "Instructions for the audio hosts (read
   this first)" block** carrying these standing rules:
   - **Audience = "executives pursuing an MBA at UCLA Anderson"** (this
@@ -1106,10 +1116,27 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
   (NotebookLM blends all sources in a notebook into one audio), so the two
   files must never share a notebook. There is **no editor for the finished
   audio** – to change an episode, edit the source doc (especially the
-  instruction block) and regenerate. Length isn't exact; the "about N
-  minutes" instruction plus a correspondingly short/long source doc pushes
-  it the right way. No invented facts or numbers, and spot-check the
-  generated audio since the hosts ad-lib.
+  instruction block) and regenerate. No invented facts or numbers, and
+  spot-check the generated audio since the hosts ad-lib.
+- **Length: the source doc controls it, not the prompt** (2026-08-27, Nico).
+  NotebookLM expands whatever it is given, so an "about 5 minutes" line on a
+  full-length doc is ignored -- Module 1's intro was written that way and
+  came out at **18 minutes**. Three levers, in order of strength:
+  1. **The panel's length control.** If the Audio Overview panel offers
+     Shorter / Default / Longer, set it. It beats any wording.
+  2. **The length of the source doc.** For a 5-minute episode the body
+     wants to be ~400 words -- one sentence per idea, no example worked
+     through, no connective narrative. For a 15-20 minute episode it can
+     run to ~2,400. Write the doc to the target; do not write a long doc
+     and ask for a short reading of it.
+  3. **A hard, quantified instruction, stated more than once.** "No longer
+     than 5 minutes -- roughly 700 spoken words in total", plus a structural
+     cap ("about a dozen short exchanges", "name each idea, give it one
+     plain sentence, and move on") and a closing "Above all, stay under 5
+     minutes." Put it at the START of the prompt as well as the end.
+  Current targets: **intro 5 minutes MAXIMUM**, **wrap-up 15-20 minutes**
+  (20 is the ceiling). Say "maximum"/"ceiling" rather than "about" wherever
+  the length actually matters -- "about" reads as advisory.
 
 ## Wrap-Up Video (NotebookLM Video Overview)
 A module can also get a **video** wrap-up, produced with **NotebookLM's
@@ -1669,6 +1696,29 @@ python-pptx, integer EMUs only, one master.)
   together. Debug technique that found this: drive the real slideshow via
   COM, screenshot the `screenClass` window via PrintWindow, and bisect with
   `sldIdLst`-subset decks.
+- **Splice live content from a SIDECAR deck, not from the full source deck**
+  (2026-08-27, Nico). `_splice_media.py` needs the original only for a
+  handful of slides, but pointing it at the source decks keeps tens of
+  megabytes in the folder forever (Module 1: 65 MB of source decks serving
+  6 poll slides). Carve the needed slides into a small sidecar instead:
+  - **Build the sidecar with PowerPoint via COM**, not with python-pptx and
+    not by hand: copy the source deck, delete every slide except the ones
+    the splice map names, and Save. PowerPoint does all the rel / tags /
+    media bookkeeping correctly, and drops the orphaned media on save
+    (Module 1: 68 slides / 34 MB -> 5 slides / 2.4 MB). One sidecar per
+    source deck, named `_handoff_polls_<KEY>.pptx` to match the splice
+    map's source keys.
+  - **Re-key the splice map to the sidecar's own slide numbers** (the kept
+    slides keep their relative order, so 7, 8, 25, 29, 46 become 1-5), and
+    **delete map entries whose target slide no longer exists** rather than
+    leaving them pointing at slides the sidecar does not contain.
+  - **The sidecars are BUILD INPUTS — never delete them**, and never
+    round-trip them through python-pptx.
+  - **Verify before deleting the originals:** rebuild, diff the result
+    against the shipped deck (it must be identical), confirm every spliced
+    slide still has its `tags` + `notesSlide` + `image` rels, and run the
+    full-screen slideshow probe on EVERY poll slide — the notes-part trap
+    above is exactly what a sidecar built the wrong way would spring.
 - **My hand-edits often arrive as scaled groups.** PowerPoint hand-edits come
   as `grpSp` with `off/ext` differing from `chOff/chExt`; decode each child
   to its RENDERED position (`off + (child − chOff) × ext/chExt`) and port

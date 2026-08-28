@@ -297,6 +297,43 @@ slides, the two four-level Examples tags across displays 51–65, the three
 in-class agenda items under their outline titles, `Module 1 · Summary`,
 `Module 1 · Wrap-Up`, and `Module 1 · Backup` five times. Conforms.
 
+### Round 5 the same day — poll sidecars, folder cleanup, podcast lengths
+
+**Cleanup.** The folder went from ~230 MB / 100 items to **103 MB / 24
+items**. Deleted: both rolling backups, `Videos Final/`, the render and
+probe folders, 36 one-off diagnostic / probe / video-port scripts, 4 extra
+export scripts, the stale `_anim_config_m1.txt`, all loose contact sheets,
+`Module 1 - MW.pptx` (the colleague comparison deck — its five approved
+imports live in the build script), and `_handoff_pollbreak.xml` with its
+now-dead injector.
+
+**Poll sidecars.** `_splice_media.py` was reading two 65 MB source decks
+for six slides. Both were carved down with PowerPoint via COM —
+`_handoff_polls_WS.pptx` (68 slides → 5, 2.4 MB) and
+`_handoff_polls_IC.pptx` (53 → 1, 2.2 MB) — and the splice map re-keyed to
+the sidecars' own numbering (WS 7/8/25/29/46 → 1–5, IC 39 → 1). The two
+entries for the deleted AC and diamonds question polls were removed rather
+than left dangling. Verified before deleting the originals: the rebuild is
+identical to the shipped deck, every spliced slide still carries
+tags + notesSlide + image, click counts match, and the full-screen
+slideshow probe on all six poll slides renders all four live activities.
+The pattern is now a rule in `Teaching/CLAUDE.md`.
+
+**Podcast lengths.** Nico generated the episodes: the wrap-up came out at
+15 minutes (fine, ceiling raised to 20), but the **intro ran 18 minutes
+against a 5-minute target**. Diagnosis: NotebookLM expands whatever it is
+given, so "about 5 minutes" on a full-length doc is ignored — the intro
+body was 788 words of module narrative. Fixes: the intro body cut to **396
+words** (one sentence per idea, no worked examples, no connective
+narrative); the prompt rewritten with a hard quantified cap stated at both
+ends ("no longer than 5 minutes — roughly 700 spoken words", "about a dozen
+short exchanges", "Above all, stay under 5 minutes"); and a note added at
+the top of the doc to set the panel's length control to **Shorter** if it
+offers one. The wrap-up was relaxed to 15–20 minutes in its subtitle,
+prompt and host instructions; its body was left alone. Recorded in
+`Teaching/CLAUDE.md` as "Length: the source doc controls it, not the
+prompt", with the three levers and the per-episode targets.
+
 ## 2026-08-24 — porting the polished "Videos Final" decks back in
 
 **One-line summary.** Nico deleted the four old video decks, split polished

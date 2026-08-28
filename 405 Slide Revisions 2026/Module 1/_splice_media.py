@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Splice the 3 live PollEverywhere slides from "Module 1 - In Class.pptx"
-into the built deck — phase-3 media step, RERUNNABLE so _build_Module1.py
-never freezes.
+"""Splice the 6 live PollEverywhere slides into the built deck —
+phase-3 media step, RERUNNABLE so _build_Module1.py never freezes.
+
+2026-08-27: the sources are now two SIDECAR decks, `_handoff_polls_WS.pptx`
+and `_handoff_polls_IC.pptx`, each holding only the poll slides this deck
+needs (5 + 1). They were carved out of "Module 1 - In Class with
+Solutions.pptx" and "Module 1 - In Class.pptx" with PowerPoint itself, so
+every poll slide kept its tags part, its notes part and its media; the two
+original decks (65 MB between them) were then deleted. The sidecars are
+BUILD INPUTS — never delete them, and never round-trip them through
+python-pptx.
 
 Pipeline:  python _build_Module1.py -> python _splice_media.py [deck]
 
@@ -29,7 +37,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).parent
-ORIGINAL = HERE / "Module 1 - In Class.pptx"
+ORIGINAL = HERE / "_handoff_polls_IC.pptx"
 
 NS_P = 'http://schemas.openxmlformats.org/presentationml/2006/main'
 NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
@@ -56,17 +64,22 @@ CT_NOTES = ('application/vnd.openxmlformats-officedocument.'
 # uploaded "In Class with Solutions" deck, which carries 5 extra PollEv
 # activities (the Econ&Coffee pair + a results-view slide per poll, each
 # with its own __PE_POLL_EMBED_ID).
-SOLUTIONS = HERE / "Module 1 - In Class with Solutions.pptx"
+SOLUTIONS = HERE / "_handoff_polls_WS.pptx"
 SOURCES = {"IC": ORIGINAL, "WS": SOLUTIONS}
+# target display (in the OLD 101-deck numbering, re-keyed below) -> (sidecar,
+# slide number IN THAT SIDECAR). The sidecars hold the poll slides in their
+# original relative order, so WS 1-5 are the old deck's 7, 8, 25, 29, 46 and
+# IC 1 is the old deck's 39.
+# The QUESTION slides of the AC and diamonds polls (old targets 24 and 28)
+# were deleted from the deck by Nico on 2026-08-27 and are NOT in the
+# sidecars; their entries are gone from this map rather than left dangling.
 SPLICE_MAP = {
-    7: ("WS", 7),     # Econ & Coffee weekend-slot poll (question)
-    8: ("WS", 8),     # Econ & Coffee weekend-slot poll (results view)
-    24: ("IC", 22),   # heatwaves / AC demand poll
-    25: ("WS", 25),   # heatwaves / AC demand poll (results view)
-    28: ("IC", 24),   # diamond-demand poll (wording update pending in PollEv)
-    29: ("WS", 29),   # diamond-demand poll (results view)
-    49: ("IC", 39),   # flip-a-house economic-profit poll
-    50: ("WS", 46),   # flip-a-house poll (results view)
+    7: ("WS", 1),     # Econ & Coffee weekend-slot poll (question)
+    8: ("WS", 2),     # Econ & Coffee weekend-slot poll (results view)
+    25: ("WS", 3),    # heatwaves / AC demand poll (results view)
+    29: ("WS", 4),    # diamond-demand poll (wording update pending in PollEv)
+    49: ("IC", 1),    # flip-a-house economic-profit poll (question)
+    50: ("WS", 5),    # flip-a-house poll (results view)
 }
 
 # 2026-08-26: the videos-first restructure. The keys above are the OLD
