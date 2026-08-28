@@ -319,6 +319,15 @@ tags + notesSlide + image, click counts match, and the full-screen
 slideshow probe on all six poll slides renders all four live activities.
 The pattern is now a rule in `Teaching/CLAUDE.md`.
 
+**Kept, decided 2026-08-27:** `Module 1 - Example Candidates.pptx` and its
+build script stay in the folder. They are not needed to rebuild the module
+deck, but they hold the researched runners-up Nico has not picked from yet
+(DRAM / AI memory, United's marginal flights, Meta Reality Labs,
+return-to-office, eggs, the Apple Car exit math, plus two bench slides).
+Do not propose deleting them again. `_source_images/` also stays whole: it
+stopped being redundant when the two In-Class source decks were deleted, so
+the extracted `slide{N}_{rId}` images now have no other copy.
+
 **Podcast lengths.** Nico generated the episodes: the wrap-up came out at
 15 minutes (fine, ceiling raised to 20), but the **intro ran 18 minutes
 against a 5-minute target**. Diagnosis: NotebookLM expands whatever it is
