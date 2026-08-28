@@ -1956,3 +1956,120 @@ Teaching/CLAUDE.md.
 - The Introduction has no section agenda of its own (the overview serves).
 - Not done: box+text grouping on the concept map (would invalidate its
   animations), and the new title cards / agenda slides carry no animations.
+
+## 2026-08-27 – Videos merged back in, poll chrome normalised, tag scheme reworked, folder cleaned (deck 88 → 110 slides)
+
+**One-line summary.** The seven hand-revised video decks were merged back
+into the in-class deck (88 → 110 slides, with an appendix of the slides cut
+from the videos), all poll chrome was normalised to the fixed corner badge
+and the round POLL pill, the top-bar tag scheme gained a video-number level
+and an In-Class-Examples level, and the folder was cleaned down to what is
+needed to come back and edit the deck. **Module 3 is DONE.**
+
+### Deck structure (110 slides) – read this first when resuming
+- **Video blocks, delimited by the seven video title cards** at slides 1,
+  10, 16, 30, 40, 51, 74: V1 = 2–9, V2 = 11–15, V3 = 17–29, V4 = 31–39,
+  V5 = 41–50, V6 = 52–73, V7 = 75–88.
+- **89** summary closer · **90** BACKUP divider · **91–92** backup figures
+  (full-bleed, no top bar) · **93** appendix divider · **94** concept-map
+  copy · **95–110** the in-class examples block.
+- **Slide 93's divider reads, in three 90 pt paragraphs:**
+  `SLIDES NOT USED` / `IN THE VIDEOS` / `-- FOR In-Class APPLICATIONS`.
+  Nico added the third line by hand in PowerPoint on 2026-08-27 to say what
+  the appendix is FOR. It is carried in `APPENDIX_TITLE` in
+  `_merge_videos_into_main.py`; keep the third line on any regeneration.
+
+### Merge of the video decks (`_merge_videos_into_main.py`)
+47 main-deck slides REPLACED by their video counterparts (so Nico's hand
+edits came across in full – text, pictures, grouping, `<p:timing>`), 4
+slides INSERTED that exist only in the videos ("Do You See Diminishing
+MPL… and MPK?", the Rivian-designer example + solution, "Accounting for
+Opportunity Costs"), and 17 cut teaching slides copied into the appendix.
+Decisions: both the AI-researcher and the Rivian-designer wage-searcher
+examples are kept; no PollEv slides in the appendix (a duplicate
+`__PE_POLL_EMBED_ID` would have two slides claiming one poll); the BACKUP
+block stays at the end with its two MPL-image links re-pointed at the main
+deck's own backup slides.
+
+### Poll chrome (`_poll_chrome_pass.py`)
+- **22 Poll Break badges** rebuilt at the FIXED position left 10.238", top
+  6.769", 2.95 × 0.533" – grouped box + label, LAST in the spTree so the
+  badge renders in front of the footer rule, and never animated. 9 loose
+  pairs were grouped, 11 moved in front of the footer, 4 de-animated
+  (slides 36, 84, 95, 108 each had the badge on its own click).
+- The canonical badge XML is the one on **slides 34/35**; the pass copies
+  it verbatim rather than rebuilding it from numbers.
+- **6 PollEverywhere slides** (26, 37, 47, 63, 86, 87) each carry the round
+  gold POLL pill, all now at one position (11.337, 6.205, 1.49 × 0.51").
+  The pill is deliberately NOT aligned to the badge's x – the poll slides
+  are full-bleed screenshots whose frame ends at 13.125", so the badge's
+  right edge would hang over the edge.
+- Complete poll trios: 25→26→27, 36→37→38, 45+46→47→48, 62→63→64,
+  84+85→86+87→88. Slides 34/35 and 54 carry a badge with no PollEv slide –
+  verbal discussion breaks, deliberate, do not add placeholders.
+
+### Top-bar tag scheme (`_retag_videos.py`, `_retag_inclass.py`)
+Reworked with Nico on 2026-08-27 and written into `Teaching/CLAUDE.md`:
+- **`Module 3 · Video k · <topic>`** on every content slide in video k's
+  block (73 tags rewritten). The block comes from the title cards; the
+  topic level is SPLICED in, never retyped.
+- **`Module 3 · Video k · Agenda`** on the agenda slides.
+- **`Module 3 · In Class · Examples · <topic>`** on slides 95–110.
+- **Exempt, two levels:** the concept map (both copies, 9 and 94) and the
+  summary closer (89).
+- **No tag at all:** deck title slide, the seven video cards, the
+  dividers, the six poll slides, and the backup slides.
+- **When a slide's topic disagrees with the block it sits in, the block
+  wins** – slide 21 ("Do You See Diminishing MPL… and MPK?") came over
+  tagged "The Production Function" and was changed to "Short Run: Hiring
+  Decisions", because MPL/MPK there is about diminishing returns.
+
+### Other fixes this session
+- Slide 71 title: "we will often usually use" → "we will often use"
+  (lower-case kept deliberately – it is a sentence, not a heading).
+- Slide 22: trailing period after "(labor)" stripped.
+- Slides 49 and 54: the LARGE filled cards got slightly rounded corners
+  (a constant RENDERED 0.08" radius, so `adj` is computed per shape from
+  its own short side) plus the deck's soft shadow. The small 2.50 × 0.40"
+  cost chips and all of slides 48 and 56 stay flat – rounding a grid cell
+  reads as a mistake.
+
+### Verification used (repeat these after any structural edit)
+- `_audit_poll2.py <deck>` – badge geometry, z-order, animation targeting.
+- Open via PowerPoint COM as the real integrity check (python-pptx and
+  `zipfile.testzip()` both accept files PowerPoint rejects).
+- Full-screen slideshow probe: run `SlideShowSettings.Run()`, find the
+  `screenClass` window by enumerating the POWERPNT process's windows
+  (`FindWindow` alone returned 0), and capture it with `PrintWindow(h, dc, 2)`.
+  A plain `CopyFromScreen` grabs whatever is in the foreground and proves
+  nothing.
+- All 6 poll slides keep their `tags` part AND their notes part with the
+  poll URL – a poll slide missing its notes crashes the slideshow DECK-WIDE.
+
+### Gotchas confirmed again
+- The Bash heredoc really does eat one backslash level: `"...\n"` inside a
+  `<<'EOF'` Python script arrived as a literal newline and broke the file.
+  Write such scripts with the Write tool and run them by path.
+- A geometry-only "top bar tag" test mistakes a backup slide's caption for
+  a tag. Require the navy `0B2B4E` full-width bar at y≈0 first.
+
+### Folder cleanup (2026-08-27, at Nico's request)
+Deleted: `Module 3 - Revised_t-1/_t-2.pptx`; the seven
+`Module 3 - Video N - *.pptx` (Nico copied them to his other folder);
+`__pycache__/`; `Thumbs.db`; and the one-off diagnostic / fix / porting
+scripts. Kept: the deck, the original `Module 3.pptx`, the template, the
+outline, the podcast and video-wrap-up sources, `Images/`,
+`_source_images/`, `Background Material/`, `_build_Module3.py`,
+`_m3_outline.py`, and the rerunnable passes named in `Teaching/CLAUDE.md`
+(`_poll_chrome_pass.py`, `_retag_inclass.py`, `_retag_videos.py`,
+`_retrofit_agenda.py`, `_video_prep.py`, `_merge_videos_into_main.py`).
+
+### Open / pending
+- Module 3 is DONE. The `.pptx` is the source of truth – edit it in place;
+  `_build_Module3.py` is STALE and must not be re-run.
+- Still not done from the previous round: box+text grouping on the concept
+  map, and on slide 54's "Costs associated with your car" container. Both
+  would invalidate hand-tuned animations, so they need an animation rebuild.
+- `Teaching/CLAUDE.md` was edited this session (tag scheme, poll badge spec,
+  card-vs-grid-cell rounding) but is NOT part of the Module 3 commits;
+  another session was editing it concurrently.
