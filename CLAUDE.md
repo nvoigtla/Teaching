@@ -1622,6 +1622,32 @@ matrices, best responses, Nash equilibria); ignore them for other decks.
   chat so I can decide whether the notes had a good reason.
 
 ### Build discipline: verification and manual tweaks
+- **NEVER verify a pass by importing it.** (2026-08-27 – this destroyed
+  work.) These passes do their job at MODULE level; many have no `main()`,
+  so `import _retrofit_agenda` runs the entire pipeline and rewrites the
+  canonical deck on the spot. Checking "does this script still work?" that
+  way silently regenerated seven agenda slides and overwrote every top-bar
+  tag, including a hand edit made minutes earlier. Verify **statically**
+  instead: `ast.parse` for structure, `py_compile.compile(f, doraise=True)`
+  for syntax, and an AST walk to confirm the symbols a pass calls exist in
+  the helper module it imports. Only ever RUN a pass deliberately, by path,
+  with `--dry-run` first.
+- **Two guards belong on every pass that rewrites a deck**, and it is worth
+  adding them the moment a script grows past a one-off:
+  - an **import guard** – `if __name__ != "__main__": raise ImportError(...)`
+    for a pass whose work sits at module level (or put the work in a
+    `main()` behind `if __name__ == "__main__":`);
+  - a **pre-flight git check** – refuse to run when the deck has
+    uncommitted changes, overridable with `--force`. The rolling `_t-1` /
+    `_t-2` backups are in `.gitignore`, so they never protected against a
+    bad script, and a finished module has had them deleted: **git is the
+    only way back.** Reference: `_deck_guard.require_committed(DECK)` in
+    `Module 3/`, called by all six of that folder's passes (skipped on
+    `--dry-run`, which writes nothing).
+- **Commit the deck BEFORE running anything destructive over it** – a pass,
+  a splice, a rebuild. This, not any code, is what saved the Module 3 deck
+  on 2026-08-27; the pre-flight check above simply makes the habit
+  enforceable rather than remembered.
 - **Default: rebuild the canonical deck in place, no verification.** The
   build script is the source of truth and the start-of-day Git snapshot is
   the safety net – write straight to the canonical filename and stop. Don't
