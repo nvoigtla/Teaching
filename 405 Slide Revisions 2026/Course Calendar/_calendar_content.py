@@ -50,11 +50,13 @@ LINKS = {
     # embedded on p.2 (Images/Panopto-Login-Picture.png) and the link points to
     # the Panopto site itself (Nico's hand-edit).
     "panopto_site": "https://ucla-anderson.hosted.panopto.com",
-    # Module 1
-    "m1v1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=cc1704c7-022f-435d-8494-b1d9011557da",
-    "m1v2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=91643db7-8b35-499b-a6e1-b1d9011557e1",
-    "m1v3": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=cd6c89f2-d9a9-4e50-b8cb-b1d9012a8bf3",
-    "m1v4": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=16a4d72f-1b8f-44e4-bec4-b1d9012a8bd4",
+    # Module 1 -- videos re-recorded and re-uploaded as NEW Panopto
+    # sessions 2026-08-28 (ids b4b3...; the old b1d9... ids were last
+    # year's recordings). Running times still unmeasured -> "(++)".
+    "m1v1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=45ebea5c-ce47-4f69-9693-b4b30104a768",
+    "m1v2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=ea13ec98-9412-41fc-accd-b4b30104a761",
+    "m1v3": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7ad4fc39-0070-4aa6-90a9-b4b30104a761",
+    "m1v4": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8bd7e577-22b2-4da6-888d-b4b30104a76a",
     "recap1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2f3c674d-13da-4308-ada2-b08b0134d2ff",
     # Podcasts
     "pod_cb":  "https://podcasts.apple.com/us/podcast/core-principle-1-the-cost-benefit-principle-the-pros-cons/id1523898793?i=1000488478204",
@@ -141,12 +143,56 @@ MATH_REFRESHER_ITEMS = [
 SIGNIN_NOTE = [("t", "Sign-in to watch videos: Use option "),
                ("l", "panopto_site", "“ASM Panopto”")]
 
+# ============================== PODCASTS ==============================
+# Two NotebookLM Audio Overviews per module, hosted on Dropbox:
+#   Module-<N>-Podcast-Intro.m4a     -- preview, listened to BEFORE
+#   Module-<N>-Podcast-Wrap-Up.m4a   -- recap, listened to AFTER
+#
+# The FILE NAME follows that convention, but a Dropbox "scl/fi" share
+# URL also carries a random per-file id and a random rlkey, so a new
+# module's two links CANNOT be derived from the module number -- paste
+# them in below as each module is uploaded.
+#
+# minutes: read straight off the audio file by _podcast_minutes.py
+# (run it after pasting new links; it prints the numbers to copy here).
+# (None, None) = not uploaded yet -> the bullet renders as plain text,
+# with no link and no duration.
+PODCASTS = {
+    1: {"intro": ("https://www.dropbox.com/scl/fi/mghl9davv7sy6a7qeja20/Module-1-Podcast-Intro.m4a?rlkey=cof0c2gtljwud3kbtnoq87ryh&st=93b14l1z&dl=0", 6),
+        "wrap":  ("https://www.dropbox.com/scl/fi/e010i3je3iaqdo0a6785l/Module-1-Podcast-Wrap-Up.m4a?rlkey=yqwuudwo4bqosg9yvu6ojawsy&st=4d59ssha&dl=0", 16)},
+    2: {"intro": ("https://www.dropbox.com/scl/fi/w3ib5t12sxbekrtja6co7/Module-2-Podcast-Intro.m4a?rlkey=nujut9txx5zfyn8yrd76lfdju&st=rkmi76yc&dl=0", 4),
+        "wrap":  ("https://www.dropbox.com/scl/fi/o2p9rnwnb276apb1jbfis/Module-2-Podcast-Wrap-Up.m4a?rlkey=m8tjqy0qnk5ts42etrljgd3ps&st=0dzo4j5u&dl=0", 20)},
+    3: {"intro": ("https://www.dropbox.com/scl/fi/fto3ouj9gcum5gjs8128b/Module-3-Podcast-Intro.m4a?rlkey=vcpxzwex5r4ad6dm09nrr72qh&st=6cepogg8&dl=0", 7),
+        "wrap":  ("https://www.dropbox.com/scl/fi/0geb6malz4suoruqbnp24/Module-3-Podcast-Wrap-Up.m4a?rlkey=j51911drl9t8173ep5zx4w3cy&st=gy4ocrqp&dl=0", 23)},
+    4: {"intro": (None, None), "wrap": (None, None)},
+    5: {"intro": (None, None), "wrap": (None, None)},
+    6: {"intro": (None, None), "wrap": (None, None)},
+    7: {"intro": (None, None), "wrap": (None, None)},
+    8: {"intro": (None, None), "wrap": (None, None)},
+}
+
+
+def podcast_items(mod):
+    """The two podcast bullets for module `mod`, as
+    ("p", url, text, minutes) items. url and minutes are None until the
+    episode has been uploaded."""
+    ep = PODCASTS.get(mod, {})
+    out = []
+    for key, text in (("intro", "Podcast: Intro to Module %d" % mod),
+                      ("wrap", "Podcast: Wrap-Up of Module %d" % mod)):
+        url, mins = ep.get(key, (None, None))
+        out.append(("p", url, text, mins))
+    return out
+
+
 # ============================== WEEKS ==============================
 # item forms:
 #   ("t", "plain text")                      plain bullet
 #   ("b", "bold text")                       bold navy bullet (class topics)
-#   ("v", linkkey, "Link text", minutes)     video link + duration
+#   ("v", linkkey|None, "Text", min|None)    video link + duration;
+#                                            min None prints "(++)"
 #   ("l", linkkey, "Link text")              plain link (podcasts, quiz, ...)
+#   ("p", url|None, "Text", min|None)        module podcast (see PODCASTS)
 #   ("note", "text")                         italic gray, no bullet
 #   ("mix", [segments])                      segments as in MATH_REFRESHER_ITEMS
 # group: {"label": "...", "items": [...]}    label is the italic navy lead-in
@@ -160,12 +206,15 @@ WEEKS = [
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
             {"cat": "video", "label": "Watch before class:",
-             "items": [("v", "m1v1", "Module 1 – Video 1: Introduction", 8),
-                       ("v", "m1v2", "Module 1 – Video 2: Markets", 7),
-                       ("v", "m1v3", "Module 1 – Video 3: Demand and Supply", 12),
-                       ("v", "m1v4", "Module 1 – Video 4: Market Equilibrium", 8)]},
+             # names verbatim from the video title cards in
+             # Module 1/_build_Module1.py (make_video_title); lengths
+             # lengths read off Panopto 2026-08-28 by _video_minutes.py
+             "items": [("v", "m1v1", "Module 1 – Video 1: Introduction", 9),
+                       ("v", "m1v2", "Module 1 – Video 2: Markets", 10),
+                       ("v", "m1v3", "Module 1 – Video 3: Demand and Supply", 8),
+                       ("v", "m1v4", "Module 1 – Video 4: Market Equilibrium", 7)]},
             {"cat": "podcast", "label": "On class material:",
-             "items": [("t", "Posted on Bruin Learn (episodes generated for this class)")]},
+             "items": podcast_items(1)},
             {"cat": "podcast", "label": "Other podcasts:",
              "items": [("l", "pod_cb", "The Cost-Benefit Principle"),
                        ("l", "pod_oc", "The Opportunity-Cost Principle"),
@@ -189,13 +238,17 @@ WEEKS = [
         "topics": ["Module 2: Demand Analysis (remaining videos)"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
+            {"cat": "podcast", "label": "On class material:",
+             "items": podcast_items(2)},
             {"cat": "video", "label": "Recap (optional):",
              "items": [("v", "recap1", "Recap of Module 1", 7)]},
             {"cat": "video", "label": "Remaining videos for Module 2 [material not "
                       "covered in the on-campus class] – watch by the weekend:",
-             "items": [("v", "m2v1", "Module 2 – Video 1: Elasticity and Revenue", 27),
-                       ("v", "m2v2", "Module 2 – Video 2: Marginal Revenue", 22),
-                       ("v", "m2v3", "Module 2 – Video 3: Demand Estimation", 30)]},
+             # names verbatim from Module 2/Videos Final/ (and the
+             # _video_title_slide calls in _build_Module2Video.py)
+             "items": [("v", "m2v1", "Module 2 – Video 1: Elasticity and Revenue", None),
+                       ("v", "m2v2", "Module 2 – Video 2: Marginal Revenue", None),
+                       ("v", "m2v3", "Module 2 – Video 3: Demand Estimation", None)]},
             {"cat": "video", "label": "Practice videos for Module 2:",
              "items": [("v", "m2p1", "Module 2 – Practice Video 1: Elasticity and Revenues", 7),
                        ("v", "m2p2", "Module 2 – Practice Video 2: Revenue Maximization", 6)]},
@@ -216,6 +269,8 @@ WEEKS = [
         "topics": ["Module 3: Production & Costs"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
+            {"cat": "podcast", "label": "On class material:",
+             "items": podcast_items(3)},
             {"cat": "video", "label": "Recap (optional):",
              "items": [("v", "recap2", "Recap of Module 2", 8)]},
             {"cat": "read", "label": "In preparation for the Module 3 videos:",
@@ -223,12 +278,19 @@ WEEKS = [
                        ("t", "Ch. 7")]},
             {"cat": "video", "label": "Module 3: Production & Costs – videos to "
                       "watch by the weekend:",
-             "items": [("v", "m3v1", "Video 1: Production Functions", 15),
-                       ("v", "m3v2", "Video 2: Short-Run Production Decisions", 29),
-                       ("v", "m3v3", "Video 3: Wage Searchers", 9),
-                       ("v", "m3v4", "Video 4: Long-Run Production Decisions", 19),
-                       ("v", "m3v5", "Video 5: Cost Types", 26),
-                       ("v", "m3v6", "Video 6: Long-Run Costs and Economies of Scale", 17)]},
+             # 2026-08-28: Module 3 was retaped as SEVEN videos. Names
+             # verbatim from M3_OUTLINE in Module 3/_m3_outline.py, the
+             # single source of the deck's video title cards. The new
+             # "Introduction to Module 3" joins at the front and has no
+             # Panopto link yet, so the six old link keys shift down one
+             # topic (m3v1 = the production-function video, and so on).
+             "items": [("v", None, "Video 1: Introduction to Module 3", None),
+                       ("v", "m3v1", "Video 2: The Production Function", None),
+                       ("v", "m3v2", "Video 3: Short Run: Hiring Decisions", None),
+                       ("v", "m3v3", "Video 4: Wage Searchers", None),
+                       ("v", "m3v4", "Video 5: Long Run: The Optimal Input Mix", None),
+                       ("v", "m3v5", "Video 6: Cost Concepts", None),
+                       ("v", "m3v6", "Video 7: Economies of Scale and Scope", None)]},
             {"cat": "read", "label": "Advanced reading (optional):",
              "items": [("t", "Ch. 6.6 and 6.7")]},
         ],
@@ -239,6 +301,8 @@ WEEKS = [
         "topics": ["Module 4 (Part I): Competitive Markets and Market Interventions"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
+            {"cat": "podcast", "label": "On class material:",
+             "items": podcast_items(4)},
             {"cat": "video", "label": "Recap (optional):",
              "items": [("v", "recap3", "Recap of Module 3", 7)]},
             {"cat": "video", "label": "Practice on Module 3 (optional):",
@@ -262,6 +326,8 @@ WEEKS = [
                    "Module 5: Monopoly and Monopolistic Competition"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
+            {"cat": "podcast", "label": "On class material:",
+             "items": podcast_items(5)},
             {"cat": "read", "label": "In preparation for class:",
              "items": [("t", "For Module 4 (Part II): Ch. 3.1 – 3.4; Ch. 17 (pp. 513 – 524)"),
                        ("t", "For Module 5: Ch. 9.1 – 9.3; Ch. 9.5 – 9.7; Ch. 11.7")]},
@@ -302,6 +368,8 @@ WEEKS = [
         "topics": ["Module 6: Complex Pricing and Advanced Pricing Strategies"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
+            {"cat": "podcast", "label": "On class material:",
+             "items": podcast_items(6)},
             {"cat": "video", "label": "Module 6: Complex Pricing and Advanced Pricing "
                       "Strategies – videos to watch by the weekend:",
              "items": [("v", "m6v1", "Video 1: Simple vs. Complex Pricing", 13),
@@ -323,6 +391,8 @@ WEEKS = [
         "topics": ["Module 7 (Part I): Oligopoly with Homogenous Goods"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
+            {"cat": "podcast", "label": "On class material:",
+             "items": podcast_items(7)},
             {"cat": "video", "label": "Practice on Module 6 (required):",
              "items": [("v", "m6p1", "Practice Video: Optimal Pricing in two Markets", 19)]},
             {"cat": "video", "label": "Recap (optional):",
@@ -346,7 +416,7 @@ WEEKS = [
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
             {"cat": "podcast", "label": "On class material:",
-             "items": [("t", "Posted on Bruin Learn (episodes generated for this class)")]},
+             "items": podcast_items(8)},
             {"cat": "podcast", "label": "Other podcasts:",
              "items": [("l", "pod_tlae", "Economics For All Your Decisions In Life")]},
             {"cat": "read", "label": "In preparation for class:",

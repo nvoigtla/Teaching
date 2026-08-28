@@ -29,7 +29,11 @@ from _calendar_content import (ANCHOR_FRIDAY, TERM, LINKS, COURSE_TITLE, SUBTITL
                                MATH_REFRESHER_ITEMS, SIGNIN_NOTE, WEEKS,
                                dt, fmt, span)
 
-OUT = r"c:\Users\nvoigtla\Claude Code\Teaching\405 Slide Revisions 2026\Course Calendar\Calendar EMBA Hybrid -- Fall 2026.docx"
+# OUT is derived from this script's own folder: the project lives on
+# different drive letters on different machines (C:, D:, H:).
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.environ.get("CALENDAR_OUT") or os.path.join(
+    HERE, "Calendar EMBA Hybrid -- Fall 2026.docx")
 
 # ---------------- palette ----------------
 NAVY  = "0B2B4E"
@@ -41,18 +45,40 @@ LIGHT = "C8CDD3"
 HDRGRAY = "D9D9D9"     # weekend deadline header
 BODYGRAY = "F3F4F6"    # weekend deadline body / agenda deadline rows
 AGGRAY = "E9EBEE"
+
+# Category coding, matching the slide decks (2026-08-28, Nico):
+#   in class = dark blue   videos = light yellow   exams = darker yellow
+# (was: in class = gold, videos = gray, exams = pale gold)
+INCLASS  = NAVY         # in-class rows / card headers
+PALEBLUE = "E7EDF4"     # light-blue body of an in-class card
+VIDEOYEL = PALEGOLD     # light yellow: video rows / video card bodies
+EXAMYEL  = GOLD         # darker yellow: exam rows / exam card header
+AGHDRGRAY = GRAY        # dark-gray agenda header row (was navy)
+AGHDR_SZ = 12           # agenda header text (was 10.5)
+AGHDR_GAP_PT = 8.0      # white spacer row under the agenda header
 BLUEGRAY = "9DB0C4"   # thin week separators in the agenda
 LINKC = "365F91"
 BLACK = "1A1A1A"
 
 CONTENT_W = 6.9   # 8.5 - 2*0.8
 
+# Vertical rhythm of the week pages. EVERY week has to fit on one page
+# (2026-08-28, Nico); week 1 is the tightest, so these are snug. Card
+# backing shapes are sized from the same numbers via _measure_par, so
+# changing one here moves the drawn box with the text.
+BULLET_AFTER_PT = 1     # gap under a bullet / note line (was 2)
+GLABEL_BEFORE_PT = 4    # gap above an italic group label (was 5)
+CARD_GAP_PT = 4         # gap before a weekend / exam / holiday card (was 6)
+CONTAINER_AFTER_PT = 6  # clearance under the prep container (was 10)
+CARD_PAR_BEFORE_PT = 1  # gap above a rounded card (was 2)
+CARD_PAR_AFTER_PT = 2   # gap below a rounded card (was 3)
+
 KIND_META = {
     # agenda fill, band right label builder
-    "oncampus":     dict(fill=GOLD,     legend="On-campus class"),
-    "deadline":     dict(fill=AGGRAY,   legend="Video deadline (suggested)"),
-    "midterm":      dict(fill=PALEGOLD, legend="Exam"),
-    "final":        dict(fill=PALEGOLD, legend=None),
+    "oncampus":     dict(fill=INCLASS,  legend="On-campus class"),
+    "deadline":     dict(fill=VIDEOYEL, legend="Video content"),
+    "midterm":      dict(fill=EXAMYEL,  legend="Exam"),
+    "final":        dict(fill=EXAMYEL,  legend=None),
     "thanksgiving": dict(fill="FFFFFF", legend=None),
     "examprep":     dict(fill="FFFFFF", legend=None),
 }
@@ -371,8 +397,8 @@ def rounded_card(doc, populate, fill="FFFFFF", border=NAVY, border_w=9525,
     # insert shape paragraph (centered), drop the temp table
     par = doc.add_paragraph()
     par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    par.paragraph_format.space_before = Pt(2)
-    par.paragraph_format.space_after = Pt(3)
+    par.paragraph_format.space_before = Pt(CARD_PAR_BEFORE_PT)
+    par.paragraph_format.space_after = Pt(CARD_PAR_AFTER_PT)
     run = par.add_run()
     run._r.append(drawing)
     t._tbl.getparent().remove(t._tbl)
@@ -516,7 +542,7 @@ def bullet_par(container, size=11, indent=0.30):
     pf.first_line_indent = Inches(-0.16)
     pf.tab_stops.add_tab_stop(Inches(indent))
     pf.space_before = Pt(0)
-    pf.space_after = Pt(2)
+    pf.space_after = Pt(BULLET_AFTER_PT)
     add_run(p, "•\t", color=NAVY, size=size)
     return p
 
@@ -527,7 +553,7 @@ def render_item(container, item, size=11):
         p = container.add_paragraph()
         p.paragraph_format.left_indent = Inches(0.30)
         p.paragraph_format.space_before = Pt(0)
-        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_after = Pt(BULLET_AFTER_PT)
         add_run(p, item[1], italic=True, color=GRAY, size=size - 0.5)
         return
     p = bullet_par(container, size=size)
@@ -536,8 +562,25 @@ def render_item(container, item, size=11):
     elif kind == "b":
         add_run(p, item[1], bold=True, color=NAVY, size=size)
     elif kind == "v":
-        add_hyperlink(p, LINKS[item[1]], item[2], size=size)
-        add_run(p, f"  ({item[3]} min)", color=GRAY, size=size - 1)
+        # ("v", linkkey|None, text, minutes|None). minutes None prints
+        # "(++)" -- the video has been re-recorded and not yet measured;
+        # linkkey None prints the title as plain text (no Panopto link).
+        if item[1]:
+            add_hyperlink(p, LINKS[item[1]], item[2], size=size)
+        else:
+            add_run(p, item[2], size=size)
+        mins = f"({item[3]} min)" if item[3] is not None else "(++)"
+        add_run(p, "  " + mins, color=GRAY, size=size - 1)
+    elif kind == "p":
+        # module podcast: ("p", url|None, text, minutes|None). The url is
+        # a literal Dropbox share link, not a LINKS key; both it and the
+        # duration stay absent until the episode has been uploaded.
+        if item[1]:
+            add_hyperlink(p, item[1], item[2], size=size)
+        else:
+            add_run(p, item[2], size=size)
+        if item[3]:
+            add_run(p, f"  ({item[3]} min)", color=GRAY, size=size - 1)
     elif kind == "l":
         add_hyperlink(p, LINKS[item[1]], item[2], size=size)
     elif kind == "mix":
@@ -547,19 +590,22 @@ def render_item(container, item, size=11):
 def render_group(container, group, size=11, budget=True):
     if group.get("label"):
         p = container.add_paragraph()
-        p.paragraph_format.space_before = Pt(5)
-        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_before = Pt(GLABEL_BEFORE_PT)
+        p.paragraph_format.space_after = Pt(BULLET_AFTER_PT)
         add_run(p, group["label"], italic=True, color=NAVY, size=size)
     for item in group["items"]:
         render_item(container, item, size=size)
     if budget:
-        mins = sum(i[3] for i in group["items"] if i[0] == "v")
-        n_vid = sum(1 for i in group["items"] if i[0] == "v")
-        if n_vid >= 2 and mins >= 20:
+        vids = [i for i in group["items"] if i[0] == "v"]
+        known = [i[3] for i in vids if i[3] is not None]
+        mins = sum(known)
+        n_vid = len(vids)
+        # a group with any unmeasured video has no meaningful total
+        if n_vid >= 2 and mins >= 20 and len(known) == n_vid:
             p = container.add_paragraph()
             p.paragraph_format.left_indent = Inches(0.30)
             p.paragraph_format.space_before = Pt(1)
-            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.space_after = Pt(BULLET_AFTER_PT)
             add_run(p, f"≈ {mins} min of video in total",
                     italic=True, color=GRAY, size=9.5)
 
@@ -686,7 +732,8 @@ def build_page1(doc):
     head_h = (5 + 2 + 14 * 1.26 + 4 + 9.5 * 1.26) / 72
 
     widths = [0.82, 1.58, 2.98, 1.32]        # 6.70 total, inset on the backing
-    t = fixed_table(doc, widths, rows=1 + len(WEEKS))
+    # +1 header row, +1 white spacer row separating it from Week 1
+    t = fixed_table(doc, widths, rows=2 + len(WEEKS))
     # explicit width + centered, with w:jc in proper schema position
     # (appending w:jc after w:tblLook makes Word's placement unreliable)
     tblW = t._tbl.tblPr.find(qn('w:tblW'))
@@ -699,46 +746,71 @@ def build_page1(doc):
     mar = t._tbl.tblPr.find(qn('w:tblCellMar'))
     for side in ('top', 'bottom'):
         mar.find(qn(f'w:{side}')).set(qn('w:w'), '20')
-    row_fills = ["NAVY_HDR"] + [KIND_META[wk["kind"]]["fill"] for wk in WEEKS]
     hdr = t.rows[0]
     for i, htxt in enumerate(("Week", "Dates", "Topics Covered", "Due / Exams")):
         c = hdr.cells[i]
-        shade_cell(c, NAVY)
-        add_run(cp(c), htxt, bold=True, color="FFFFFF", size=10.5)
+        shade_cell(c, AGHDRGRAY)
+        add_run(cp(c), htxt, bold=True, color="FFFFFF", size=AGHDR_SZ)
         c.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
-    for ri, wk in enumerate(WEEKS, start=1):
+    # white gap row, so the dark-gray header reads apart from Week 1's
+    # dark-blue row instead of merging into one dark block
+    gap = t.rows[1]
+    for c in gap.cells:
+        shade_cell(c, "FFFFFF")
+        cell_borders(c, top="nil", bottom="nil", left="nil", right="nil")
+        gp = cp(c)
+        gp.paragraph_format.space_before = Pt(0)
+        gp.paragraph_format.space_after = Pt(0)
+        gp.paragraph_format.line_spacing = Pt(AGHDR_GAP_PT)
+        add_run(gp, "", size=1)
+    gtr = gap._tr.get_or_add_trPr()
+    gth = OxmlElement('w:trHeight')
+    gth.set(qn('w:val'), str(int(AGHDR_GAP_PT * 20)))
+    gth.set(qn('w:hRule'), 'exact')
+    gtr.append(gth)
+
+    last_ri = len(WEEKS) + 1
+    for ri, wk in enumerate(WEEKS, start=2):
         row = t.rows[ri]
-        fill = KIND_META[wk["kind"]]["fill"]
+        kind = wk["kind"]
+        fill = KIND_META[kind]["fill"]
+        # text colors follow the category fill: white on the dark-blue
+        # in-class rows, navy on the darker-yellow exam rows, black else
+        if kind == "oncampus":
+            maintxt, subtxt, linkc = "FFFFFF", PALEGOLD, "FFFFFF"
+        elif kind in ("midterm", "final"):
+            maintxt, subtxt, linkc = NAVY, NAVY, NAVY
+        else:
+            maintxt, subtxt, linkc = BLACK, GRAY, LINKC
         d1, d2 = week_span_dates(wk)
         cells = row.cells
         for c in cells:
             if fill != "FFFFFF":
                 shade_cell(c, fill)
             # thin blue-gray rule after each week (not after the last row)
-            if ri < len(WEEKS):
+            if ri < last_ri:
                 cell_borders(c, bottom=(4, BLUEGRAY))
             c.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-        # Week link (navy on the dark-gold on-campus rows for contrast)
+        # Week link
         p = cp(cells[0])
         add_internal_link(p, f"Week{wk['num']}", f"Week {wk['num']}", size=10.5,
-                          color=(NAVY if wk["kind"] == "oncampus" else LINKC))
+                          color=linkc)
         # Dates
         p = cp(cells[1])
-        add_run(p, span(d1, d2), size=10.5, bold=(wk["kind"] in ("oncampus", "final")))
+        add_run(p, span(d1, d2), size=10.5, color=maintxt,
+                bold=(kind in ("oncampus", "final")))
         sub = None
-        if wk["kind"] == "oncampus":
+        if kind == "oncampus":
             f, s = dt(wk["num"], "Fri"), dt(wk["num"], "Sat")
             sub = f"class: Fri/Sat {fmt(f)}/{s.day}"
         if sub:
             p2 = cells[1].add_paragraph()
-            add_run(p2, sub, italic=True, size=8.5,
-                    color=(NAVY if wk["kind"] == "oncampus" else GRAY))
+            add_run(p2, sub, italic=True, size=8.5, color=subtxt)
         # Topics Covered (original notation)
         p = cp(cells[2])
         add_run(p, "; ".join(wk["topics"]), size=10.5,
-                bold=(wk["kind"] in ("midterm", "final")),
-                color=(NAVY if wk["kind"] in ("midterm", "final") else BLACK))
+                bold=(kind in ("midterm", "final")), color=maintxt)
         # Due
         parts = agenda_due_text(wk)
         p = cp(cells[3])
@@ -748,11 +820,11 @@ def build_page1(doc):
             if not first:
                 p = cells[3].add_paragraph()
             first = False
-            add_run(p, lines[0], bold=True, color=NAVY, size=9.5)
+            add_run(p, lines[0], bold=True, size=9.5,
+                    color=("FFFFFF" if kind == "oncampus" else NAVY))
             for extra in lines[1:]:
                 p2 = cells[3].add_paragraph()
-                add_run(p2, extra, size=9,
-                        color=(NAVY if wk["kind"] == "oncampus" else GRAY))
+                add_run(p2, extra, size=9, color=subtxt)
 
     # measure rows; force all data rows to the SAME height (the tallest one)
     hdr_h = 0.0
@@ -765,12 +837,12 @@ def build_page1(doc):
             row_h = max(row_h, cell_pt)
         if idx == 0:
             hdr_h = row_h
-        else:
+        elif idx > 1:            # idx 1 is the fixed-height white gap row
             data_hs.append(row_h)
     # uniform height = typical (median) row; rows with longer topic lists
     # (weeks 5, 9) keep growing via the atLeast rule
     uniform_pt = sorted(data_hs)[len(data_hs) // 2] + 4
-    for row in t.rows[1:]:
+    for row in t.rows[2:]:
         trPr = row._tr.get_or_add_trPr()
         th = OxmlElement('w:trHeight')
         th.set(qn('w:val'), str(int(uniform_pt * 20)))
@@ -794,8 +866,9 @@ def build_page1(doc):
     ljc.set(qn('w:val'), 'center')
     ltW.addnext(ljc)
     lrow = lt.rows[0]
-    legend = [(GOLD, "On-campus class"), (AGGRAY, "Video deadline (suggested)"),
-              (PALEGOLD, "Exam")]
+    legend = [(INCLASS, "On-campus class"),
+              (VIDEOYEL, "Video content"),
+              (EXAMYEL, "Exam")]
     for i, (fill, label) in enumerate(legend):
         sw = lrow.cells[2 * i]
         shade_cell(sw, fill)
@@ -806,7 +879,7 @@ def build_page1(doc):
 
     # white rounded, shadowed backing card behind heading + table + legend
     # (Word renders rows ~7% taller than the twip setting)
-    table_h = (hdr_h + 8) / 72 + sum(
+    table_h = (hdr_h + 8 + AGHDR_GAP_PT) / 72 + sum(
         max(uniform_pt, h + 4) for h in data_hs) * 1.07 / 72
     container_box(anchor_par, CONTENT_W,
                   head_h + table_h + legend_h + 0.05 + 0.10,
@@ -860,11 +933,27 @@ def build_page2(doc):
     p.paragraph_format.space_before = Pt(4)
     p.paragraph_format.space_after = Pt(2)
     add_run(p, "Screenshot:", bold=True, italic=True, color=NAVY, size=11)
-    rounded_picture(doc, os.path.join(os.path.dirname(OUT),
+    rounded_picture(doc, os.path.join(HERE,
                                       "Images", "Panopto-Login-Picture.png"),
                     width_in=4.4)
 
 # ---------------- week pages ----------------
+
+BAND_W = (4.3, 2.6)        # week band: left cell, right label cell
+BAND_LBL_PT = 9.5          # right label size
+
+
+def _check_band_label(txt):
+    """The band's right label has to stay on ONE line -- a wrap makes that
+    week's band taller than every other page's. Measure it in the real
+    font and fail loudly rather than shipping the wrap."""
+    usable = BAND_W[1] - 2 * (110 / 1440.0)   # fixed_table cell margins
+    w_in = _mfont(BAND_LBL_PT, True, False).getlength(txt) / 4 / 72.0
+    if w_in > usable:
+        raise SystemExit("week band label wraps (%.3f in > %.3f in): %r"
+                         % (w_in, usable, txt))
+    return txt
+
 
 def band_right_label(wk):
     n = wk["num"]
@@ -872,7 +961,8 @@ def band_right_label(wk):
     if k == "oncampus":
         return f"On-campus class: Fri, {fmt(dt(n, 'Fri'))} & Sat, {fmt(dt(n, 'Sat'))}"
     if k == "deadline":
-        return f"Video deadline (suggested): Sun, {fmt(dt(n, 'Sun'))}"
+        return (f"Video content  \u00b7  suggested: "
+                f"Sun, {fmt(dt(n, 'Sun'))}")
     if k == "midterm":
         return f"Midterm window: {span(dt(n, 'Thu'), dt(n, 'Sun'))}"
     if k == "thanksgiving":
@@ -891,7 +981,7 @@ def build_week(doc, wk):
     d1, d2 = week_span_dates(wk)
 
     # navy band with gold underline
-    t = fixed_table(doc, [4.3, 2.6])
+    t = fixed_table(doc, list(BAND_W))
     row = t.rows[0]
     for c in row.cells:
         shade_cell(c, NAVY)
@@ -904,7 +994,8 @@ def build_week(doc, wk):
     add_run(p, f"   ·   {span(d1, d2)}", bold=True, color=PALEGOLD, size=13)
     p = cp(row.cells[1])
     p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    add_run(p, band_right_label(wk), bold=True, color="FFFFFF", size=9.5)
+    add_run(p, _check_band_label(band_right_label(wk)),
+            bold=True, color="FFFFFF", size=BAND_LBL_PT)
 
     spacer(doc, 2)
 
@@ -959,43 +1050,44 @@ def build_week(doc, wk):
             c = g.get("cat", "other")
             (others if c == "other" else cats.setdefault(c, [])).append(g)
         for key, title, glyph, fill in (
-                ("video", "Videos", "▶", AGGRAY),
+                ("video", "Videos", "▶", VIDEOYEL),
                 ("podcast", "Podcasts", "\U0001F3A7", "FFFFFF"),
                 ("read", "Suggested Reading", "\U0001F4D6", "FFFFFF")):
             if key not in cats:
                 continue
             h = build_rounded_box(doc, title, glyph, fill, cats[key])
-            total_h += h + 8 / 72           # card + paragraph spacing/slack
+            # card + its paragraph spacing + 3 pt slack
+            total_h += h + (CARD_PAR_BEFORE_PT + CARD_PAR_AFTER_PT + 3) / 72
         if others:
             total_h += render_groups_measured(doc, others)
         if heading_par is not None:
             total_h += 0.06 + 0.10          # top offset + bottom padding
             container_box(heading_par, WEEK_CARD_W, total_h)
-            spacer(doc, 10)                 # clear the container's bottom edge
+            spacer(doc, CONTAINER_AFTER_PT)  # clear the container's bottom edge
 
     # weekend / exam / holiday blocks
     if wk.get("weekend"):
-        spacer(doc, 6)
+        spacer(doc, CARD_GAP_PT)
         we = wk["weekend"]
         da, db = we["days"]
         if wk["kind"] == "oncampus":
             title = (f"On-campus class   ·   Fri, {fmt(dt(n, 'Fri'))}, 4:00 – 5:30 pm"
                      f"   ·   Sat, {fmt(dt(n, 'Sat'))}, 9:00 am – 12:30 pm")
-            hdr_fill, fill, border = GOLD, PALEGOLD, GOLD
+            hdr_fill, fill, border = INCLASS, PALEBLUE, NAVY
         else:
             title = (f"Videos to watch   ·   suggested deadline: "
                      f"{fmt(dt(n, da), wd=True)} / {fmt(dt(n, db), wd=True)}")
-            hdr_fill, fill, border = HDRGRAY, BODYGRAY, LIGHT
+            hdr_fill, fill, border = INCLASS, VIDEOYEL, NAVY
 
         def pop_weekend(cell, inner_w):
-            card_header(cell, title, hdr_fill, text_color=NAVY, size=11.5)
+            card_header(cell, title, hdr_fill, text_color="FFFFFF", size=11.5)
             for g in we["groups"]:
                 render_group(cell, g)
         rounded_card(doc, pop_weekend, fill=fill, border=border,
                      width_in=WEEK_CARD_W)
 
     if wk.get("exam"):
-        spacer(doc, 6)
+        spacer(doc, CARD_GAP_PT)
         ex = wk["exam"]
         (wd0, off0), (wd1, off1) = ex["window"]
         w0 = fmt(dt(n + off0, wd0), wd=True)
@@ -1003,14 +1095,14 @@ def build_week(doc, wk):
 
         def pop_exam(cell, inner_w):
             card_header(cell, f"{ex['title']}   ·   online   ·   {w0} – {w1}",
-                        PALEGOLD, text_color=NAVY, size=11.5)
+                        EXAMYEL, text_color=NAVY, size=11.5)
             for line in ex["lines"]:
                 render_item(cell, ("t", line.format(w0=w0, w1=w1)))
         rounded_card(doc, pop_exam, fill=CREAM, border=GOLD,
                      width_in=WEEK_CARD_W)
 
     if wk.get("holiday"):
-        spacer(doc, 6)
+        spacer(doc, CARD_GAP_PT)
         ho = wk["holiday"]
         (wd0, off0), (wd1, off1) = ho["window"]
 
