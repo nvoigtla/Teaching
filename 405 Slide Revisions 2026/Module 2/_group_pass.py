@@ -113,6 +113,14 @@ _M2_INCLASS_GROUPS_POST = {
     19: [
         [(5.500, 2.870), (4.092, 3.850)],
     ],
+    # 2026-08-28 (Nico's hand-grouping): on slide 38 the CONVENTION card
+    # and the two arrows that point from it at the two denominators are
+    # ONE object - rule 1 has already paired the card with its text, so
+    # this folds the two connectors into that group.  Result bbox:
+    # (6.477, 2.770) 4.603 x 1.614, exactly his group.
+    38: [
+        [(8.120, 2.770), (6.477, 3.070), (6.477, 3.721)],
+    ],
     # 2026-08-26 (Nico): the photo panel on slide 53 is picture +
     # header + the message line underneath - rule 3 has already paired
     # the picture with its header, so this folds the message in.

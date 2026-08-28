@@ -54,9 +54,11 @@ SKIP_MEDIA = {4, 5, 11, 12, 13, 32, 36, 40, 45, 46,
                                      #  placeholder, 2026-08-25)
 SKIP_STATIC = {44,                   # single-thought poll setup (Q=10−P)
                26, 35,               # builds removed by hand 2026-08-25
-               16, 17}                # Gates quote + Inglehart panel —
+               16, 17,                # Gates quote + Inglehart panel —
                                       # Nico removed the builds by hand
                                       # (2026-08-23)
+               70}                    # post-work outline: he made the
+                                      # link box static (2026-08-28)
 SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 
 # figures ride on this animated-bullet index by default (0 = first
@@ -189,10 +191,12 @@ PLANS = {
         ["pr:Is demand for yoga:0:0"],
         ["pr:Is demand for yoga:1:2"],
     ],
-    38: [  # method 1: the formula and its convention card, the caveat,
-           # then the two pointers (2026-08-25)
-        ["t:E D", "t:CONVENTION"],
-        ["pr:This method approximates:0:0"],
+    38: [  # method 1 (2026-08-28, Nico's hand-choreography): the formula
+           # is on screen from the start; click 1 brings the CONVENTION
+           # card WITH the two arrows it points with (one group now),
+           # click 2 the navy "approximates" box, click 3 the pointers
+        ["t:CONVENTION"],
+        ["t:This method"],
         ["t:▶  TA Math Review Videos", "t:✎  Problem Set 2"],
     ],
     39: [  # Mega Millions setup: the two facts, then the question
@@ -211,8 +215,11 @@ PLANS = {
         ["osp:3", "t:Slope of the demand curve", "cxn:0"],
         # 2026-08-26: the ΔQ/ΔP term is its own red run now, so the
         # shape text carries an extra space - match on the short prefix
+        # 2026-08-28: the fourth bullet is deleted, so the text box is
+        # one beat; the navy "exact elasticity" box is the payoff and
+        # takes the last click with the problem-set pointer
         ["pr:ΔQ/ΔP:0:2"],
-        ["pr:ΔQ/ΔP:3:3", "t:✎  Problem Set 2"],
+        ["t:This method", "t:✎  Problem Set 2"],
     ],
     43: [  # 2026-08-25: three steps now (the "solve for Q" step is
            # gone, the example starts from the demand function)
@@ -313,10 +320,17 @@ PLANS = {
         ["t:E X"],
         ["pr:Popcorn and movie tickets:0:0"],
     ],
-    67: [  # cross-price news: whole panel one beat, then the
-           # message box (2026-08-26, Nico)
+    67: [  # cross-price news (2026-08-28): the clipping and the
+           # fuel-hungry pickup it is about, then the EV that demand
+           # moves to, then the message box that names both
+        # 2026-08-28 (Nico's choreography): three beats.  The clipping
+        # and the fuel-hungry vehicles at the pumps, then the
+        # complements line, then the EV and the substitute line
+        # TOGETHER - the photo and the sentence that explains it land
+        # on the same click.
         ["pic:0", "pic:1", "pic:2"],
-        ["grp:0"],
+        ["t:As the price of fuel"],
+        ["pic:3", "t:Demand then shifts to a"],
     ],
     68: [  # cereal table: table + boxes static; takeaway line builds
         ["t:Larger cross-price"],
@@ -327,12 +341,10 @@ PLANS = {
         ["t:Computing elasticity", "t:Two observed", "t:E d",
          "t:Whole demand", "t:E d", "t:ΔQ/ΔP = slope"],
     ],
-    70: [  # post-work videos box + caption + arrow
-        ["t:▶"],
-    ],
-    71: [  # post-work PS2 box, then the estimation note
-        ["t:▶"],
-        ["grp:0"],
+    # 70 is static now (SKIP_STATIC) — Nico dropped its one click
+    71: [  # post-work PS2 box static (2026-08-28, his edit); the
+           # estimation note is the slide's only build
+        ["t:Note:"],
     ],
 }
 

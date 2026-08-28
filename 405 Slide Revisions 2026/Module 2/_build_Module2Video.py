@@ -24,10 +24,18 @@ from _video_notes import NOTES as VNOTES
 
 VDECK = "Module 2 - Video Part Revised.pptx"
 
-TAG_V1 = "Module 2 · Video 1 · Demand and Revenue"
+# 2026-08-28 (Nico): tags follow the current convention - inside a video
+# block a content slide reads "Module 2 · Video k · <agenda item>", and
+# an agenda slide reads "Module 2 · Video k · Agenda".  Video 1's topic
+# was "Demand and Revenue" (outline item 3, the PARENT of both video
+# topics), which contradicted Video 2 already naming its own sub-item;
+# it now names item 3a, the same wording as Video 1's title card.
+TAG_V1 = "Module 2 · Video 1 · Elasticity and Revenue"
 TAG_V2 = "Module 2 · Video 2 · Marginal Revenue"
 TAG_V3 = "Module 2 · Video 3 · Demand Estimation"
-TAG_VOUT = "Module 2 · Outline"
+TAG_VOUT1 = "Module 2 · Video 1 · Agenda"
+TAG_VOUT2 = "Module 2 · Video 2 · Agenda"
+TAG_VOUT3 = "Module 2 · Video 3 · Agenda"
 
 ROSE = RGBColor(0xF2, 0xC4, 0xC4)        # pale red (revenue lost)
 PALE_GREEN = RGBColor(0xC9, 0xE3, 0xC9)  # pale green (revenue gained)
@@ -210,7 +218,7 @@ def _tr_parabola(slide, figT, *, color=GOLD, weight_pt=3.0):
 # ==========================================================================
 
 def v02_outline(prs):
-    slide = make_m2_outline(prs, 2, section_tag=TAG_VOUT,
+    slide = make_m2_outline(prs, 2, section_tag=TAG_VOUT1,
                             highlight_set={2, 3})
     # back to the convention position 2026-08-25: at 6.272 the box ran
     # into the new coverage pill on item 4
@@ -977,7 +985,7 @@ def v18_megamillions_revisited(prs):
 # ==========================================================================
 
 def v20_outline(prs):
-    return make_m2_outline(prs, 14, section_tag=TAG_VOUT,
+    return make_m2_outline(prs, 14, section_tag=TAG_VOUT2,
                            highlight_set={4})
 
 
@@ -1472,7 +1480,7 @@ def v31_insideout_solution(prs):
 # ==========================================================================
 
 def v33_outline(prs):
-    slide = make_m2_outline(prs, 24, section_tag=TAG_VOUT,
+    slide = make_m2_outline(prs, 24, section_tag=TAG_VOUT3,
                             highlight_set={5})
     return slide
 

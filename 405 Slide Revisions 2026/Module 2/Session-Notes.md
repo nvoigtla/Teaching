@@ -1,5 +1,138 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
+## 2026-08-28 (round 10) — Module 2 FINISHED: last edits, tags, podcasts, cleanup
+
+**One-line summary.** Nico's last four rounds of hand-edits ported, the
+top-bar tags moved to the current agenda-item convention deck-wide, the
+two podcast source docs written, and the folder cleaned up — Module 2 is
+done.
+
+### Deck edits (all ported into the build scripts, all verified)
+- **38** — his grouping adopted: the CONVENTION card and the two arrows
+  that point from it are ONE object (`_M2_INCLASS_GROUPS_POST[38]`,
+  bbox 6.477 / 2.770, 4.603 × 1.614). His choreography too: the formula
+  is static, 3 clicks. The "approximates" caveat left the bullet list and
+  became a **navy box** (0.426 / 5.15, 8.50 × 0.75, 22 pt, the key word
+  in gold).
+- **42** — his deleted fourth bullet ("For a linear demand curve, the
+  slope is constant") is gone; the matching navy box says "This method
+  computes the **exact** elasticity at a given (P, Q) point". Same
+  geometry as 38 so the two method slides read as a pair. 4 clicks.
+- **61** — his rewritten cream-box line adopted with its run emphasis.
+- **67** — rebuilt over four rounds. Ended with HIS two photos
+  (`nv_gulf_station.png` top, `nv_rivian_charger.png` bottom) at his
+  positions, deck photo treatment applied, and the message split into
+  **two cream cards** so they reveal separately. His final choreography:
+  3 clicks — clipping + pumps, then the complements card, then the EV
+  **and** the substitute card together.
+- **70 / 71** — his titles ("Upcoming Videos 1+2" / "Upcoming Video 3"),
+  link boxes static, and the estimation note moved to the middle
+  (5.55 / 3.55, 5.50 × 1.50) as a **WARNING box** — transparent dark-red
+  tint, dark-red border, 18 pt. Moving it also fixed a latent bug: at its
+  old corner position it swallowed item 2's coverage pill, which the
+  grouping pass then paired with the box instead of the note text.
+
+### Slide 13 (the live Excel embed) — chrome, and a sidecar
+"The header looks strange": the spliced slide had no top bar, tag, rule
+or footer, plus an empty body placeholder at 0,0. All three placeholders
+are now dropped in `_splice_media.py` and the deck's standard chrome is
+**appended after** the OLE frame (so the thin rule draws over the frame's
+top edge). Geometry copied from slide 10, its sibling.
+
+**The trap worth remembering:** he had resized the OLE frame to
+12290425 × 5330825 EMU — the embed's native 2.305 aspect, which is what
+makes the table and chart read correctly. PowerPoint **regenerated the
+cached EMF preview** at that size on save. Splicing the ORIGINAL deck's
+preview and stretching it to the same frame renders a blown-up crop of
+the chart. Fix: carve his slide 13 into `_handoff_excel_s13.pptx` (one
+slide, 71 KB, made with PowerPoint via COM) and splice from that.
+`_splice_media.py` gained a per-slide source override,
+`SRC_FOR = {13: (EXCEL_SIDECAR, 1, False)}` — deck, source display, and
+whether to apply the 4:3 → 16:9 x-shift (a 16:9 sidecar must NOT be
+shifted again). **The sidecar is a BUILD INPUT — never delete it.**
+
+### Tags: the current convention, deck-wide
+The old three-level `Module 2 · Part N · Section` tag is gone. Now:
+- content slides name the **agenda item** — `Module 2 · The Law of
+  Demand`, `Module 2 · Elasticities` (own-price / income / cross-price
+  are sub-sections of outline item 2, not agenda items, so the three
+  constants all resolve to the same string);
+- outline slides read `Module 2 · Agenda`, and inside a video block
+  `Module 2 · Video k · Agenda`;
+- front matter keeps its own two-level tag (Logistics, Recap, Course
+  Roadmap);
+- **Video 1's topic changed** from "Demand and Revenue" (outline item 3,
+  the parent) to "Elasticity and Revenue" (item 3a) — Video 2 already
+  named its own sub-item, so the two had contradicted each other. This
+  also changes the standalone video deck, whose tags now differ slightly
+  from what was on screen when the videos were taped.
+- Three slides spliced verbatim from the final Video 1 deck carried a
+  baked-in tag, so `_splice_video.py` rewrites it from the build
+  script's constant (`TAG_REWRITES`). A tag change in a build script
+  alone would silently skip them.
+
+Result: 17 untagged slides deck-wide, all correctly exempt — the title
+slide, 13 PollEv slides, and the 3 video title cards. (Slide 13 is
+tagged now.)
+
+### Podcasts
+`Podcast Module 2 -- Intro.md` (H1 `Module 2 - Podcast Intro`, ~470-word
+body for the 5-minute ceiling) and `Podcast Module 2 -- Wrap-up.md` (H1
+`Module 2 - Podcast Wrap-Up`, ~2,630-word body for 15–20 min). Grounded
+in the deck's own speaker notes. Both instruction blocks lean hard on the
+four things the hosts reverse: the minus sign and that elastic/inelastic
+are defined on the absolute value; **inelastic → a price rise raises
+revenue**; "don't sit on the inelastic part" is about the firm's price
+choice, not a verdict on inelastic demand; and Novo Nordisk is a price
+*cut* that *reduced* revenue, which is what reveals inelasticity.
+Both docs also carry an **Episode title** instruction (name it exactly
+per the H1, and do not read it aloud) — best-effort, since the Customize
+box steers content rather than metadata. **Unverified against NotebookLM.**
+No Wrap-Up Video doc for Module 2 yet; say the word if wanted.
+
+### Cleanup (folder is finished: 63 items / ~290 MB → 32 items / 132 MB)
+Deleted: all rolling `_t-1` / `_t-2` backups; `__pycache__/` and
+`_probe/`; 21 one-off diagnostic / verification / asset-prep scripts
+(`_ctdump`, `_diff_all`, `_diff_video`, `_dump*`, `_fix_boxes`,
+`_mk_slice`, `_notes_audit`, `_rawshape`, `_shade_audit`, `_slidetext`,
+`_timing_all`, `_titles3`, `_vf_*`, `_setup_assets`,
+`_setup_video_assets`, `_mk_pricechart`); 53 unreferenced source images
+(~15 MB); and three source decks — `CT Module 2 - In Class.pptx`,
+`CT Module 2 - Video Part.pptx`, `Module 2 - Video Part.pptx`.
+`_splice_video.py`'s now-dead `ORIGINAL` constant was removed with it.
+Everything deleted was git-tracked, so **history is the archive**.
+
+Kept: the deliverables + outlines, this file, both podcast docs, the ten
+pipeline scripts, the four verification tools (`_diff_slides.py`,
+`_ic_diff.py`, `_render.ps1`, `_slideshow_probe.ps1`), and the build
+inputs that actually feed a rebuild — `Module 2 - In Class with
+Solutions.pptx`, `Videos Final/`, both `_handoff_*` sidecars, the two
+trimmed image folders, and the two `_source_inventory*.md` dumps (now the
+only record of what CT's slides looked like).
+`Module 2 - Potential Practice Exercises.pptx` kept at his request.
+
+### Verification used all session (worth reusing)
+    IC_SHIFT_FROM=0 IC_HIS="<his deck>" IC_BUILD="<build>" python _ic_diff.py --all
+    IC_SHIFT_FROM=0 IC_HIS=... IC_BUILD=... python _ic_diff.py 67 --anim
+Each round: extract his hand-edited deck to scratch first, diff, port,
+rebuild, then diff again until it prints **zero rows**. The final
+post-cleanup rebuild diffs identical to the pre-cleanup deck across all
+116 slides, and the slideshow probe passes on 1 / 13 / 67 / 90 / 99.
+
+### Open / flagged
+- The **video part still has speaker notes on only 19 of its 45 slides**
+  (carried over unchanged; open since round 9).
+- The standalone video deck's tags now differ from the taped videos (see
+  above) — deliberate, but worth knowing.
+- The podcast **Episode title** instruction is unverified; if a host
+  reads the title aloud, pull that sentence out of the prompt and leave
+  it in the doc only.
+- `Module 2 - In Class with Solutions.pptx` is 24 MB serving 12 spliced
+  slides. The Module 1 sidecar trick would cut that to ~2 MB, but it is
+  new work with its own verification — not done.
+- The 405 project `CLAUDE.md` still does not document the merge step.
+
+
 ## 2026-08-26 (round 9) — "Module 2 - Revised.pptx": the full module
 
 **One-line summary.** The in-class deck and the video part are now joined

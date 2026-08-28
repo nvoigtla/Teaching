@@ -41,6 +41,87 @@ NS_CT = 'http://schemas.openxmlformats.org/package/2006/content-types'
 R_ID = '{%s}id' % NS_R
 X_SHIFT_EMU = 1524000          # +1.667" to center 10" content on 13.33"
 
+# ---------------------------------------------------------------------------
+# Deck chrome for the ONE spliced slide that needs it (2026-08-28, Nico:
+# slide 13's header "looks strange").  A spliced slide is copied verbatim
+# from the original deck, so it never went through _draw_top_bar_tc /
+# _draw_action_title / _draw_footer.  Rather than hand-tune a second
+# style here, these EMU values are copied from slide 10 - slide 13's
+# sibling, built by those helpers - so the two slides are identical:
+#   navy bar   (0, 0)              13.333 x 0.42
+#   tag        (0.276, 0)          12.00  x 0.42   Calibri 16 pt bold white
+#   title      (0.276, 0.55)       12.782 x 0.70   Calibri 32 pt bold navy
+#   rule       (0.276, 1.25)       12.782 x 0.02   C8CDD3
+#   gold strip (0.276, 1.235)       2.20  x 0.05   E09F3E
+#   footer rule/strip/text at y 7.15 / 7.135 / 7.20
+# The page number is NOT emitted here: every spliced slide already gets a
+# live slidenum field from the generic block further down.
+# The tag comes from the build script's own constant (it is import-safe:
+# all deck building sits behind its __main__ guard), so a tag rename
+# still has ONE home.
+from _build_Module2InClass import (                       # noqa: E402
+    TAG_LAW as TAG_LAW_13,
+    FOOTER_TEXT as FOOTER_TEXT_13,
+)
+TITLE_13 = '1. MORE Customers Buy the Product'
+
+_STYLE = ('<p:style><a:lnRef idx="1"><a:schemeClr val="accent1"/></a:lnRef>'
+          '<a:fillRef idx="3"><a:schemeClr val="accent1"/></a:fillRef>'
+          '<a:effectRef idx="2"><a:schemeClr val="accent1"/></a:effectRef>'
+          '<a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef>'
+          '</p:style>')
+
+
+def _chrome_rect(sid, name, x, y, cx, cy, fill):
+    return ('<p:sp><p:nvSpPr><p:cNvPr id="%d" name="%s"/><p:cNvSpPr/>'
+            '<p:nvPr/></p:nvSpPr><p:spPr><a:xfrm>'
+            '<a:off x="%d" y="%d"/><a:ext cx="%d" cy="%d"/></a:xfrm>'
+            '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
+            '<a:solidFill><a:srgbClr val="%s"/></a:solidFill>'
+            '<a:ln><a:noFill/></a:ln><a:effectLst/></p:spPr>%s'
+            '<p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/>'
+            '<a:p><a:pPr algn="ctr"/><a:endParaRPr/></a:p></p:txBody>'
+            '</p:sp>' % (sid, name, x, y, cx, cy, fill, _STYLE))
+
+
+def _chrome_text(sid, name, x, y, cx, cy, text, sz, color,
+                 bold=False, middle=False):
+    return ('<p:sp><p:nvSpPr><p:cNvPr id="%d" name="%s"/>'
+            '<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm>'
+            '<a:off x="%d" y="%d"/><a:ext cx="%d" cy="%d"/></a:xfrm>'
+            '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
+            '<a:noFill/></p:spPr><p:txBody>'
+            '<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0"%s>'
+            '<a:spAutoFit/></a:bodyPr><a:lstStyle/><a:p><a:pPr algn="l"/>'
+            '<a:r><a:rPr sz="%d" b="%d" i="0" u="none">'
+            '<a:solidFill><a:srgbClr val="%s"/></a:solidFill>'
+            '<a:latin typeface="Calibri"/></a:rPr><a:t>%s</a:t></a:r>'
+            '</a:p></p:txBody></p:sp>'
+            % (sid, name, x, y, cx, cy,
+               ' anchor="ctr"' if middle else '',
+               sz, 1 if bold else 0, color, text))
+
+
+def _chrome_xml(tag_text, title_text):
+    """The deck's standard bar / tag / title / rules / footer, as XML."""
+    return ''.join([
+        _chrome_rect(9810, 'TopBar', 0, 0, 12191695, 384048, '0B2B4E'),
+        _chrome_text(9811, 'SectionTag', 251999, 0, 10972800, 384048,
+                     tag_text, 1600, 'FFFFFF', bold=True, middle=True),
+        _chrome_text(9812, 'ActionTitle', 251999, 502920, 11687697,
+                     640080, title_text, 3200, '0B2B4E', bold=True),
+        _chrome_rect(9813, 'TitleRule', 251999, 1143000, 11687697,
+                     18288, 'C8CDD3'),
+        _chrome_rect(9814, 'TitleGold', 251999, 1129284, 2011680,
+                     45720, 'E09F3E'),
+        _chrome_rect(9815, 'FooterRule', 0, 6537960, 12191695, 18288,
+                     'C8CDD3'),
+        _chrome_rect(9816, 'FooterGold', 251999, 6524244, 2011680,
+                     45720, 'E09F3E'),
+        _chrome_text(9817, 'FooterText', 251999, 6583680, 10058400,
+                     292608, FOOTER_TEXT_13, 1200, '555B66'),
+    ])
+
 CT_BY_EXT = {
     'png': 'image/png', 'jpeg': 'image/jpeg', 'jpg': 'image/jpg',
     'emf': 'image/x-emf', 'gif': 'image/gif',
@@ -64,6 +145,24 @@ SPLICE_MAP = {
     32: 31, 36: 36,
     45: 46, 46: 47,
     57: 57, 58: 58, 64: 64, 65: 65,
+}
+
+# Per-slide source override: (deck, source display, apply the 4:3 -> 16:9
+# x-shift).  Slide 13 (the live Excel embed) comes from its own 16:9
+# SIDECAR rather than the original 4:3 deck (2026-08-28).  Why: Nico
+# resized the OLE frame in PowerPoint from the source deck's squashed
+# 7034213 x 4767263 to 12290425 x 5330825 EMU, which is the embed's
+# native aspect (imgW/imgH = 2.305) and is what makes the table and the
+# chart read correctly.  PowerPoint REGENERATED the cached EMF preview
+# at that size when he saved; stretching the original deck's preview to
+# the same frame instead renders a blown-up crop of the chart.  So the
+# slide is carried whole - his frame, his preview, his workbook - from a
+# one-slide sidecar carved out of his deck with PowerPoint via COM.
+# The sidecar is a BUILD INPUT: never delete it, never round-trip it
+# through python-pptx.
+EXCEL_SIDECAR = HERE / "_handoff_excel_s13.pptx"
+SRC_FOR = {
+    13: (EXCEL_SIDECAR, 1, False),
 }
 
 
@@ -171,9 +270,16 @@ def _copy_part_tree(src, src_name, disp, new_parts, tgt_names,
 
 
 def splice(deck_path):
-    src = zipfile.ZipFile(ORIGINAL)
-    src_parts = display_to_part(src)
-    src_names = set(src.namelist())
+    # one open handle per distinct source deck (slide 13 comes from its
+    # own sidecar, everything else from the original In-Class deck)
+    _zips = {}
+
+    def _source(path):
+        key = str(path)
+        if key not in _zips:
+            z = zipfile.ZipFile(path)
+            _zips[key] = (z, display_to_part(z), set(z.namelist()))
+        return _zips[key]
 
     tmp = deck_path.with_suffix('.splice_tmp.pptx')
     with zipfile.ZipFile(deck_path) as tgt:
@@ -192,6 +298,10 @@ def splice(deck_path):
     assert notes_master, "built deck has no notesMaster part"
 
     for disp, s_disp in sorted(SPLICE_MAP.items()):
+        s_deck, s_disp, do_shift = SRC_FOR.get(disp,
+                                               (ORIGINAL, s_disp, True))
+        src, src_parts, src_names = _source(s_deck)
+
         t_part = tgt_parts[disp - 1]
         t_base = t_part.split('/')[-1]
         t_rels = ET.fromstring(items['ppt/slides/_rels/%s.rels' % t_base])
@@ -290,11 +400,15 @@ def splice(deck_path):
             slide_xml)
 
         # center 4:3 content on the 16:9 canvas (string-level edit; an
-        # ElementTree round-trip would break mc:AlternateContent)
-        slide_xml = re.sub(
-            r'<a:off x="(-?\d+)"',
-            lambda m: '<a:off x="%d"' % (int(m.group(1)) + X_SHIFT_EMU),
-            slide_xml)
+        # ElementTree round-trip would break mc:AlternateContent).  A
+        # slide taken from a 16:9 sidecar is already positioned and must
+        # NOT be shifted again.
+        if do_shift:
+            slide_xml = re.sub(
+                r'<a:off x="(-?\d+)"',
+                lambda m: '<a:off x="%d"' % (int(m.group(1))
+                                             + X_SHIFT_EMU),
+                slide_xml)
         # ...but NOT the spTree's own <p:grpSpPr> transform: the blanket
         # regex hits it too, and while the modern renderer ignores it
         # (ext = 0), the legacy VML path on the slide-13 OLE embed honours
@@ -303,35 +417,41 @@ def splice(deck_path):
             r'(<p:grpSpPr><a:xfrm><a:off x=")(-?\d+)(")',
             lambda m: '%s0%s' % (m.group(1), m.group(3)), slide_xml)
 
-        # slide 13 (live Excel): the title/number placeholders carry no
-        # xfrm and inherit the stub layout's default spots — pin the
-        # title to the standard action-title position/style and drop
-        # the old number placeholder (2026-08-16)
+        # slide 13 (live Excel): give the spliced slide the deck's own
+        # chrome (2026-08-28, Nico: "the header looks strange").  It
+        # arrived from the original deck with three defects:
+        #   * a bare title in a layout PLACEHOLDER, no navy top bar, no
+        #     section tag, no rule / gold strip and no footer, so it did
+        #     not look like any other content slide;
+        #   * an EMPTY body placeholder sitting at 0,0 in the top-left
+        #     corner (invisible, but it is a real shape);
+        #   * a number placeholder inheriting the stub layout's spot.
+        # All three placeholders are dropped and the chrome is APPENDED
+        # after the OLE frame, so the thin rule draws over the frame's
+        # top edge (the frame starts at y 1.26, the rule sits at 1.25)
+        # rather than under it.  Geometry is copied from slide 10, this
+        # slide's sibling, so the two are pixel-identical.  The OLE
+        # object itself is untouched — the embed keeps working.
         if disp == 13:
-            i_ph = slide_xml.index('<p:ph type="title"')
-            i_sp0 = slide_xml.rindex('<p:sp>', 0, i_ph)
-            i_sp1 = slide_xml.index('</p:sp>', i_ph) + len('</p:sp>')
-            title_sp = (
-                '<p:sp><p:nvSpPr><p:cNvPr id="9801" name="Title 1"/>'
-                '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>'
-                '<p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr>'
-                '<p:spPr><a:xfrm><a:off x="252374" y="502920"/>'
-                '<a:ext cx="11687932" cy="640080"/></a:xfrm>'
-                '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
-                '</p:spPr><p:txBody><a:bodyPr lIns="0" tIns="0" rIns="0"'
-                ' bIns="0" anchor="ctr"/><a:lstStyle/><a:p>'
-                '<a:pPr algn="l"/>'
-                '<a:r><a:rPr lang="en-US" sz="3000" b="1" dirty="0">'
-                '<a:solidFill><a:srgbClr val="0B2B4E"/></a:solidFill>'
-                '<a:latin typeface="Calibri"/></a:rPr>'
-                '<a:t>1. MORE Customers Buy the Product</a:t></a:r>'
-                '</a:p></p:txBody></p:sp>')
-            slide_xml = slide_xml[:i_sp0] + title_sp + slide_xml[i_sp1:]
-            i_num = slide_xml.find('<p:ph type="sldNum"')
-            if i_num != -1:
-                j0 = slide_xml.rindex('<p:sp>', 0, i_num)
-                j1 = slide_xml.index('</p:sp>', i_num) + len('</p:sp>')
-                slide_xml = slide_xml[:j0] + slide_xml[j1:]
+            for _ph in ('<p:ph type="title"', '<p:ph type="body"',
+                        '<p:ph type="sldNum"'):
+                _i = slide_xml.find(_ph)
+                if _i == -1:
+                    continue
+                _j0 = slide_xml.rindex('<p:sp>', 0, _i)
+                _j1 = slide_xml.index('</p:sp>', _i) + len('</p:sp>')
+                slide_xml = slide_xml[:_j0] + slide_xml[_j1:]
+            # the sidecar already carries a PageNum textbox (this pass
+            # put it there on an earlier run); drop it so the generic
+            # block below does not add a second one
+            _i = slide_xml.find('name="PageNum"')
+            if _i != -1:
+                _j0 = slide_xml.rindex('<p:sp>', 0, _i)
+                _j1 = slide_xml.index('</p:sp>', _i) + len('</p:sp>')
+                slide_xml = slide_xml[:_j0] + slide_xml[_j1:]
+            slide_xml = slide_xml.replace(
+                '</p:spTree>', _chrome_xml(TAG_LAW_13, TITLE_13)
+                + '</p:spTree>')
 
         # live page-number field on every spliced slide (2026-08-16:
         # "slide numbers throughout") — same look/position as

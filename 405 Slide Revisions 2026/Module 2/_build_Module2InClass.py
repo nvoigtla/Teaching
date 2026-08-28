@@ -2561,16 +2561,29 @@ PALE_BLUE = RGBColor(0xEA, 0xF3, 0xFC)
 # gold on the point-elasticity slide (2026-08-25)
 DARK_RED = RGBColor(0xA5, 0x1C, 0x1C)
 
+# 2026-08-28 (Nico): the top-bar tag names the CURRENT AGENDA ITEM, so
+# every content slide reads "Module 2 · <outline item title>" taken
+# verbatim from M2_OUTLINE.  This SUPERSEDES the old three-level
+# "Module 2 · Part N · Section" tag, whose middle level had drifted away
+# from the agenda wording (Teaching CLAUDE.md, "Canvas, palette, and
+# chrome").  Own-price / income / cross-price are sub-sections of
+# outline item 2 ("Elasticities"), not agenda items of their own, so
+# they all resolve to the same tag - the constants stay separate only so
+# a future split of item 2 needs one edit here rather than 40 call sites.
+# The module front matter (logistics, recap, course roadmap) keeps its
+# own two-level tag; the outline slides read "Module 2 · Agenda".
 TAG_LOGISTICS = "Module 2 · Logistics"
 TAG_RECAP     = "Module 2 · Recap"
 TAG_ROADMAP   = "Module 2 · Course Roadmap"
-TAG_OUTLINE   = "Module 2 · Outline"
-TAG_LAW       = "Module 2 · Part 1 · The Law of Demand"
-TAG_ELAST     = "Module 2 · Part 2 · Elasticities"
-TAG_OWN       = "Module 2 · Part 2 · Own-Price Elasticity"
-TAG_INCOME    = "Module 2 · Part 2 · Income Elasticity"
-TAG_CROSS     = "Module 2 · Part 2 · Cross-Price Elasticity"
-TAG_WRAP      = "Module 2 · Wrap-Up"
+TAG_OUTLINE   = "Module 2 · Agenda"
+TAG_LAW       = "Module 2 · The Law of Demand"
+TAG_ELAST     = "Module 2 · Elasticities"
+TAG_OWN       = "Module 2 · Elasticities"
+TAG_INCOME    = "Module 2 · Elasticities"
+TAG_CROSS     = "Module 2 · Elasticities"
+# 2026-08-28: the cheat sheet is still an item-2 slide; the two
+# post-work outline slides are agenda slides and take TAG_OUTLINE
+TAG_WRAP      = "Module 2 · Elasticities"
 
 
 # --------------------------------------------------------------------------
@@ -4661,13 +4674,19 @@ def slide_40_method1(prs):
           {'bullet_style': 'none', 'align': PP_ALIGN.CENTER,
            'size': 17, 'color': NAVY, 'space_before_pts': 2})],
         size=17)
-    _add_hierarchical_bullets(
-        slide, MARGIN + Inches(0.15), Inches(5.25), Inches(7.6),
-        Inches(1.2),
-        [
-            ("This method approximates the percentage changes", 0),
-        ],
-        size=24, line_spacing_pts=10)
+    # 2026-08-28 (Nico): the caveat leaves the bullet list and becomes a
+    # navy box, so the limitation of Method 1 reads as a statement in
+    # its own right.  Its sibling sits on slide 42 (Method 2, exact) -
+    # same geometry and type size, so the two read as a matched pair.
+    # The one word that carries the point is set in gold.
+    _add_convention_box(
+        slide, MARGIN + Inches(0.15), Inches(5.15), Inches(8.50),
+        Inches(0.75),
+        runs=[("This method ", {'color': WHITE}),
+              ("approximates", {'bold': True, 'color': GOLD}),
+              (" the percentage changes", {'color': WHITE})],
+        size=22, align=PP_ALIGN.CENTER, corner_pct=0.14,
+        fill_rgb=NAVY, border=NAVY)
     # 2026-08-25 (Nico): the TA video pointer is a reference box now
     _add_reference_box(
         slide, Inches(4.30), Inches(6.36), Inches(3.90), Inches(0.62),
@@ -5001,9 +5020,27 @@ def slide_46_method2(prs):
               ("P", {'italic': True}), (" :  ", {}),
               ("dQ/dP", {'italic': True})], 1, {}),
             ("See TA Math Review videos", 1),
-            ("For a linear demand curve, the slope is constant", 0),
+            # 2026-08-28 (Nico's hand edit): the fourth bullet ("For a
+            # linear demand curve, the slope is constant") is deleted -
+            # the ringed callout beside the formula already says it.
+            # The box below replaces it.
         ],
         size=24, sub_size=22, line_spacing_pts=10)
+    # 2026-08-28 (Nico): the counterpart of slide 38's navy box - same
+    # geometry, same type size, so Method 1 (approximate) and Method 2
+    # (exact) read as a matched pair
+    _add_convention_box(
+        slide, MARGIN + Inches(0.15), Inches(6.10), Inches(8.50),
+        Inches(0.75),
+        runs=[("This method computes the ", {'color': WHITE}),
+              ("exact", {'bold': True, 'color': GOLD}),
+              (" elasticity at a given (", {'color': WHITE}),
+              ("P", {'italic': True, 'color': WHITE}),
+              (", ", {'color': WHITE}),
+              ("Q", {'italic': True, 'color': WHITE}),
+              (") point", {'color': WHITE})],
+        size=22, align=PP_ALIGN.CENTER, corner_pct=0.14,
+        fill_rgb=NAVY, border=NAVY)
     # 2026-08-26 (Nico): the pointer moves to the bottom-right corner,
     # the deck's default position for a post-work reference box
     _add_reference_box(slide, PS_BOX_XY[0], PS_BOX_XY[1], Inches(3.00),
@@ -5869,8 +5906,15 @@ def slide_66_inferior_news(prs):
     # this clipping is here to make goes in it
     _add_convention_box(
         slide, Inches(0.95), Inches(4.75), Inches(6.10), Inches(1.55),
-        runs=[("Inferior ≠ low quality: ", {'bold': True}),
-              ("demand RISES when incomes fall. Secondhand clothing, "
+        # 2026-08-28 (Nico's hand edit): he rewrote this line - it
+        # leads with the recession framing instead of the
+        # "inferior ≠ low quality" caveat, and "rises" carries the
+        # emphasis (was: "Inferior ≠ low quality: demand RISES when
+        # incomes fall. …")
+        runs=[("Inferior goods and recessions: ", {'bold': True}),
+              ("Demand ", {}),
+              ("rises", {'bold': True}),
+              (" when incomes fall. Secondhand clothing, "
                "discount grocers, store brands and public transit all "
                "grow in a downturn", {})],
         size=20)
@@ -6030,12 +6074,38 @@ def slide_72_crossprice_news(prs):
     _add_media_image(slide, "ct_crossprice_image29.png",
                      left=Inches(2.48), top=Inches(1.75),
                      width=Inches(2.6), rounded=False, shadow=False)
-    _add_media_image(slide, "ct_crossprice_image35.png",
-                     left=Inches(7.56), top=Inches(1.97),
-                     width=Inches(5.26))
+    # 2026-08-28 (Nico): the right-hand column now carries BOTH sides of
+    # the cross-price story, stacked - the fuel-hungry truck on top (the
+    # complement whose demand falls) and the EV that demand moves to
+    # underneath.  This replaces the single Toyota plug-in photo
+    # (ct_crossprice_image35.png at 7.56 / 1.97, 5.26" wide), which the
+    # slide had no text to explain.  Both photos are 16:9 so they stack
+    # cleanly; the F-250 shot was cropped from 4:3 to 16:9 on download.
+    # 2026-08-28 (Nico's hand edit): he replaced BOTH photos with two of
+    # his own and deleted the "Photos: Wikimedia Commons" caption.  His
+    # pictures and positions are adopted verbatim (they sit at their
+    # native aspect ratios); the deck's photo treatment - rounded
+    # corners + soft drop shadow - is applied on top, since he inserted
+    # them raw.  (An earlier round used two Wikimedia photos here; those
+    # files were removed at cleanup on 2026-08-28.)
+    # 2026-08-28 (Nico, second pass): the top photo is a Gulf station
+    # with a pickup and an Escalade at the pumps, replacing the
+    # close-up nozzle shot (which carried 123RF watermarks)
+    _add_media_image(slide, "nv_gulf_station.png",
+                     left=Inches(7.995), top=Inches(1.573),
+                     width=Inches(4.963), height=Inches(2.532))
+    _add_media_image(slide, "nv_rivian_charger.png",
+                     left=Inches(8.294), top=Inches(4.402),
+                     width=Inches(4.531), height=Inches(2.690))
     # 2026-08-26 (Nico): the slide's message, in the empty lower-left
+    # 2026-08-28 (Nico): a second line explains the EV photo - demand
+    # moves to the substitute once electricity is relatively cheaper.
+    # Split into TWO boxes the same evening, so the complements point
+    # and the substitution point can be revealed on separate clicks.
+    # Each pairs with the photo above it in the build: the Gulf station
+    # with the complements box, the Rivian with the substitute box.
     _add_convention_box(
-        slide, Inches(0.61), Inches(4.45), Inches(6.83), Inches(1.35),
+        slide, Inches(0.61), Inches(4.12), Inches(6.83), Inches(1.20),
         runs=[
             ("As the price of fuel goes up, demand for fuel-powered "
              "vehicles goes down", {}),
@@ -6044,12 +6114,31 @@ def slide_72_crossprice_news(prs):
                              'color': RGBColor(0x00, 0x70, 0xC0)}),
         ],
         size=20, align=PP_ALIGN.CENTER, line_spacing_pct=110)
+    _add_convention_box(
+        slide, Inches(0.61), Inches(5.50), Inches(6.83), Inches(1.20),
+        runs=[
+            ("Demand then shifts to a ", {}),
+            ("substitute", {'bold': True,
+                            'color': RGBColor(0x00, 0x70, 0xC0)}),
+            (" for fuel-powered vehicles: electric vehicles, as "
+             "electricity has become ", {}),
+            ("relatively", {'bold': True}),
+            (" cheaper", {}),
+        ],
+        size=20, align=PP_ALIGN.CENTER, line_spacing_pct=110)
     _set_notes(slide, (
         "Cross-price elasticity in action: when gasoline prices spike, "
         "sales of hybrid cars surge. Gasoline and conventional cars are "
         "complements — expensive gas makes gas-guzzlers less attractive "
         "— while hybrids are a substitute for conventional cars. The "
-        "sticker shock at the pump shows up directly in the showroom."))
+        "sticker shock at the pump shows up directly in the showroom. "
+        "The two photos make the same point: the fuel-hungry pickup on "
+        "top is the complement whose demand falls, and the electric "
+        "truck below is the substitute demand moves to.\n\n"
+        "Photo credits (Wikimedia Commons): top — "
+        "File:19 Ford F-250 Super Duty XLT.jpg, HJUdall, CC0, cropped "
+        "to 16:9; bottom — File:EV Charging Station (53857454477).jpg, "
+        "ajay_suresh, CC BY 2.0 (a Rivian R1T at a charging station)."))
     _draw_footer(slide, FOOTER_TEXT, 67)
     return slide
 
@@ -6204,7 +6293,12 @@ def slide_74_cheatsheet(prs):
 # --------------------------------------------------------------------------
 
 def slide_75_postwork_videos(prs):
-    slide = make_m2_outline(prs, 70, section_tag=TAG_WRAP,
+    # 2026-08-28 (Nico's hand edit): the title names the videos this
+    # slide is pointing at (was the bare "Outline of Module 2").  The
+    # tag is TAG_OUTLINE now - these are agenda slides.
+    slide = make_m2_outline(prs, 70, section_tag=TAG_OUTLINE,
+                            title="Outline of Module 2: Upcoming "
+                                  "Videos 1+2",
                             highlight_set={2, 3, 4})
     # bottom-right link box overlaying the footer (deck convention),
     # drawn last so it sits in front
@@ -6219,14 +6313,30 @@ def slide_75_postwork_videos(prs):
 
 
 def slide_76_postwork_ps2(prs):
-    slide = make_m2_outline(prs, 71, section_tag=TAG_WRAP,
+    # 2026-08-28 (Nico's hand edit): title names the upcoming video
+    slide = make_m2_outline(prs, 71, section_tag=TAG_OUTLINE,
+                            # 2026-08-28: he corrected this to Video 3,
+                            # which is what the slide points at
+                            title="Outline of Module 2: Upcoming "
+                                  "Video 3",
                             highlight_set={5})
+    # 2026-08-28 (Nico): the note moves off the right edge towards the
+    # middle of the slide and becomes a WARNING box - the deck's
+    # transparent dark-red tint with a dark-red border (same device as
+    # slides 48 and 53) - so it stands out.  Its old corner position
+    # (9.05 / 1.75, 3.9 x 1.5) also swallowed item 2's coverage pill,
+    # which the grouping pass then paired with the box instead of the
+    # note text; at 5.70 the box clears the pill column entirely.
+    # Text goes 14 -> 18 pt (the deck's box-text floor).
     _add_convention_box(
-        slide, Inches(9.05), Inches(1.75), Inches(3.9), Inches(1.5),
-        prefix="Note: ",
-        body="You do not need to perform the actual estimation "
-             "(regression). But you need to understand how to interpret "
-             "regression coefficients", size=14)
+        # 2026-08-28 (Nico's hand edit): pulled down and right a touch,
+        # from 5.45 / 3.00, so it sits clear of item 3's row
+        slide, Inches(5.55), Inches(3.55), Inches(5.50), Inches(1.50),
+        runs=[("Note: ", {'bold': True, 'color': RED}),
+              ("You do not need to perform the actual estimation "
+               "(regression). But you need to understand how to "
+               "interpret regression coefficients", {})],
+        size=18, fill_rgb=RED, fill_alpha_pct=12, border=RED)
     _add_outlined_box(slide, Inches(8.15), Inches(5.30), Inches(4.9),
                       Inches(0.72),
                       "\u25b6  Module 2 Video 3   \u00b7   "

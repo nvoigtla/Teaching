@@ -29,7 +29,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).parent
-ORIGINAL = HERE / "Module 2 - Video Part.pptx"
+# 2026-08-28 (cleanup): the ORIGINAL 4:3 deck constant is gone.  Every
+# entry in SPLICE_MAP now comes from the three FINAL video decks in
+# "Videos Final", so the original was dead weight and its file was
+# deleted; it is in git history if a slide ever has to come back.
 VF = HERE / "Videos Final"
 VF1 = VF / "Module 2 - Video 1 - Elasticity and Revenue.pptx"
 VF2 = VF / "Module 2 - Video 2 - Marginal Revenue.pptx"
@@ -41,6 +44,17 @@ NS_REL = 'http://schemas.openxmlformats.org/package/2006/relationships'
 NS_CT = 'http://schemas.openxmlformats.org/package/2006/content-types'
 R_ID = '{%s}id' % NS_R
 X_SHIFT_EMU = 1524000          # +1.667" to center 10" content on 13.33"
+
+# 2026-08-28 (Nico): slides spliced verbatim from the FINAL video decks
+# carry the top-bar tag those decks were taped with, so a tag change in
+# the build script would silently skip them.  Rewrite the tag text here
+# instead, sourcing the target from the build script's own constant so
+# there is still ONE place that names the tag.  The build script is
+# import-safe (all work sits behind its __main__ guard).
+from _build_Module2Video import TAG_V1 as _TAG_V1        # noqa: E402
+TAG_REWRITES = [
+    ('Module 2 · Video 1 · Demand and Revenue', _TAG_V1),
+]
 
 CT_BY_EXT = {
     'png': 'image/png', 'jpeg': 'image/jpeg', 'jpg': 'image/jpg',
@@ -240,6 +254,15 @@ def splice(deck_path):
                 r'<a:off x="(-?\d+)"',
                 lambda m: '<a:off x="%d"' % (int(m.group(1)) + x_shift),
                 slide_xml)
+
+        # 2026-08-28: bring a verbatim-spliced slide's top-bar tag up to
+        # the deck's current wording (string-level, like the x_shift
+        # above - an ElementTree round-trip would break
+        # mc:AlternateContent).  The tag is a single run in every one of
+        # these slides, so an exact <a:t> match is safe.
+        for _old_tag, _new_tag in TAG_REWRITES:
+            slide_xml = slide_xml.replace('<a:t>%s</a:t>' % _old_tag,
+                                          '<a:t>%s</a:t>' % _new_tag)
 
         # live page-number field on every spliced slide (2026-08-16:
         # "slide numbers throughout") — same look/position as
