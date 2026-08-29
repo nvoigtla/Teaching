@@ -22,8 +22,8 @@ __pycache__/
 # convention, but never committed) and in-place build temp files
 *_backup_*.pptx
 *_backup_*.docx
-*_t-1.pptx
-*_t-2.pptx
+*_t-1.*
+*_t-2.*
 *.pptx.tmp
 
 # Render / probe output and side-path test builds
