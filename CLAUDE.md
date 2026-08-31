@@ -21,6 +21,27 @@ For work in this folder, you are assisting with **teaching materials**
 - They respond well to **case-based reasoning, real-world examples,
   and stories** that connect concepts to executive decision-making.
 
+## Economics Terminology Conventions
+Fixed wording for concepts the courses return to. Once a convention is
+listed here it holds in EVERY slide, speaker note, podcast script and
+teleprompter script of the deck – if a change lands on one slide, sweep
+the whole deck for the old wording rather than fixing the one instance.
+
+- **Short run = "stop production"; long run = "shut down"** (2026-08-30,
+  Nico). The two horizons are different decisions and must not share a
+  verb:
+  - In the **SHORT run** the firm can only **stop production** (equivalently
+    "not produce" / "continue to produce"). Its fixed costs are already
+    committed and are owed whether or not it produces, so stopping is a
+    temporary halt with the option to restart.
+  - In the **LONG run** the firm **shuts down** – it exits the industry
+    altogether, and thereby also escapes the fixed costs.
+  - So the short-run rule reads "**continue to produce** if P ≥ AVC,
+    **stop production** if P < AVC", never "operate / shut down". Reserve
+    "shut down" and "exit" for the long-run rule.
+  - Do NOT use "operate" for either decision – it blurs exactly the
+    distinction the two slides are drawing.
+
 ## Language and Framing
 - **Big-picture first.** Every new topic in a slide deck should lead with
   the "why this matters" before any technical content.
@@ -263,6 +284,51 @@ accent, one neutral.
   definition. Deck-specific accents (green `#1B5E20` for "Market demand";
   red / green for revenue lost / gained) are fine as examples but are not
   part of the structural palette – don't use them for chrome.
+- **A DEMAND curve is dark red `C00000` – curve and label alike**
+  (2026-08-30, Nico). This is the deck-wide default for every demand
+  curve: the market demand in a supply-and-demand diagram, a firm's
+  `d = MR` line, a labour-demand curve, the `D (MB of …)` line on an
+  externality panel. Supply stays navy, so the two curves read apart at a
+  glance and the price line and demand share one colour. Sweep the whole
+  deck when it changes rather than fixing one panel – a lone dark-red
+  demand curve among navy ones reads as an error. A slide may still make a
+  deliberate exception (Module 4 slide 10 draws market demand in dark
+  yellow because that slide is *about* telling the two curves apart), but
+  it has to be a choice, not a leftover.
+- **Consumer / producer surplus areas have fixed colours** (2026-08-30,
+  Nico, adopted from MW's deck). Consumer surplus is a **red wash
+  `C0201B` at ~26 %** with a `C0201B` outline; producer surplus is a
+  **blue wash `4E79B5` at ~34 %** with a `4E79B5` outline. The explanatory
+  card beside each panel is WHITE-filled with a border in the matching
+  tone (`C0201B` for CS, `2E5AA8` for PS), and its text names the term in
+  full with the abbreviation in parentheses – "Consumer surplus (CS) is
+  the area …", "Producer surplus (PS) is the area …". The `CS` / `PS`
+  label sits INSIDE its own triangle (place it at the triangle's
+  centroid, computed – not eyeballed).
+- **A surplus triangle's hypotenuse IS the curve it lies on.** Build the
+  polygon from the curve's own intercept and the equilibrium point, so
+  the sloped edge coincides with the demand (CS) or supply (PS) line
+  exactly. And derive the equilibrium from the two lines rather than
+  typing it in: Module 4 carried `(3.75, 5.5)` as "the exact crossing"
+  for months when it was a point on the supply line only, which put the
+  dot, `P*`, `Q*` and both triangles off the demand curve.
+- **Profit / loss region shading on cost-curve panels** (2026-08-30, Nico).
+  Wherever a diagram shades the rectangle between price and average cost,
+  the fill says which case it is, at ~20 – 25 % opacity so the curves stay
+  readable through it:
+  | Case | Fill |
+  |---|---|
+  | Positive profit | dark red `C00000` |
+  | Loss, but the firm keeps producing | gray `555B66` |
+  | Loss so large the firm shuts down / stops producing | DARK gray |
+  The dark-gray step is the visual cue that this is the shut-down case, so
+  keep it clearly darker than the ordinary-loss gray.
+  - **Write the word into the box.** Whenever the shaded rectangle is big
+    enough to hold it, put **Profit** or **Loss** (with `π > 0` / `π < 0`
+    where it fits) INSIDE the shaded region rather than captioning it
+    underneath. Where the region is too thin or a curve cuts through it,
+    the short form `π > 0` / `π < 0` alone is enough – the panel heading
+    already names the case.
 
 **Chrome** – keep identical across content slides; never enlarge one slide's
 title relative to the others.
@@ -474,9 +540,62 @@ artifact.
   shadow a `graphicFrame`); **group the backing with the chart** (see the
   shade-grouping rule under Slide Design Principles).
 - **Axes:** straight navy connectors with a triangle arrowhead
-  (`<a:tailEnd type="triangle"/>`). Y-axis title above the top arrow, X-axis
-  title below the right arrow; axis titles italic-bold navy, tick labels
-  regular navy.
+  (`<a:tailEnd type="triangle"/>`). Axis titles italic-bold navy, tick
+  labels regular navy.
+- **Axis titles are anchored to the ARROW TIP, in a box sized tight to the
+  label** (2026-08-30, Nico – geometry measured off the placement he set
+  by hand on Module 4 slide 36, after two earlier versions of this rule
+  guessed wrong). Not floating above the plot, not trailing off the end of
+  it, and never in a generous fixed-width box with an alignment: a wide box
+  puts the glyphs somewhere the arithmetic cannot see, so the title reads
+  as detached from its arrow even when the anchor is right.
+  - **Measure the label's rendered width in the real font** (PIL
+    ImageFont, Calibri Bold Italic at the title's own size) and make the
+    text box exactly that wide. At 17 pt, "P" measures 0.135" and "Q"
+    0.167" – the box is that narrow.
+  - **Y-axis title:** its vertical MIDDLE sits exactly at the arrow tip,
+    and its right border **0.08" clear of the axis line** – sitting ON
+    the axis reads as too tight. So `left = axis_x − width − 0.08` and
+    `top = tip_y − height/2`. Route the clearance through ONE constant
+    (`Y_TITLE_GAP`), never per call site.
+  - **X-axis title:** its horizontal MIDPOINT sits exactly at the
+    x-arrow's tip, and its TOP **0.05"** below the axis. So
+    `left = tip_x − width/2` and `top = axis_y + 0.05`.
+  - The tip is **0.18" beyond the plot bound** (the arrowhead's length),
+    so it is computed from the figure, never eyeballed.
+  - **A price axis is labelled `P`**, not `$/Q`.
+  - This is the DECK-WIDE default, not an opt-in per chart.
+- **EVERY label in a figure sits in a box sized to the label** (2026-08-30,
+  Nico). Not just the axis titles – curve labels, tick labels, region
+  letters, annotation text. Measure the string in the real font (PIL
+  ImageFont on Calibri at the label's own size, plus ~0.08" of slack so a
+  wide glyph cannot wrap) and make the box that wide, keeping whatever
+  edge the label is anchored by: a right-aligned y tick keeps its right
+  edge on the axis, a centred x tick keeps its midpoint on the tick, a
+  left-aligned curve label keeps its left edge. The box then re-fits
+  itself when the wording changes, and a stray wide box never sits
+  invisibly across the plot catching the cursor. Route this through the
+  label helpers, never per call site.
+- **A legend mark for an AREA copies that area's shape – and a
+  combination of areas copies their arrangement** (2026-08-30, Nico).
+  Wherever a diagram shades lettered regions (A, B, C …) and a list
+  beside it refers to them, each line carries a small mark in the
+  region's colour AND shape: a square for a rectangular region, a right
+  triangle for a triangular one, flipped when the region's right angle is
+  on top. At ~0.20" and the same wash as the region itself.
+  - **When a line names several regions, lay their marks out the way the
+    regions sit in the graph.** Side by side (~0.02" apart) when the
+    areas sit side by side; **stacked** (~0.01" apart) when one sits above
+    the other. "Firms lose A + B" gets the two marks in a row because A
+    and B are neighbours; "Deadweight loss: B + C" gets them one above the
+    other because B sits on top of C. The reader can then match the legend
+    to the figure without reading the letters.
+  - The line's text is vertically **centred on the mark block**, so a
+    stacked pair pushes its text down, and the next row clears the taller
+    block rather than keeping a fixed pitch.
+  - Reference implementation: `_welfare_rows` in `Module 4/_m4_helpers.py`,
+    with rows given as `(layout, marks, text)` where layout is `"h"` or
+    `"v"`. Module 4 slides 64, 68 and 72 are the worked examples.
 - **Lines** (demand, MC, MR, fitted line) = connectors. **Curves**
   (parabolas, step functions) = one editable freeform built from a **few
   Bézier anchor points** (`quadBezTo` / `cubicBezTo`), not a dense polyline,
@@ -532,6 +651,21 @@ artifact.
 - **Flat exceptions** (no shadow / rounding): logos and brand marks; book
   covers, posters, screenshots with their own border / background; source
   images that already include a shadow or frame.
+- **No institutional branding mark on ANY slide** (2026-08-29, Nico). The
+  UCLA Anderson wordmark – or any other school, university, or department
+  logo – does not belong on the title slide, in the chrome, or anywhere
+  else in a deck. The affiliation is already carried by the title slide's
+  "Prof. Nico Voigtländer · UCLA Anderson" byline and by the footer, so the
+  mark adds nothing; and it is set in UCLA blue, which fights the deck's
+  navy / gold palette. When a rebuild inherits one from an original deck,
+  DROP it rather than reproducing it in the build script – this is how
+  Module 4 kept one at 0.60 / 6.42" on slide 1 through the whole rebuild.
+  - **This does NOT cover company logos used as CONTENT.** A brand mark
+    that illustrates the point of the slide stays – Boeing and Airbus
+    standing for an oligopoly, LADWP for a regulated monopoly (Module 4
+    slide 7), a firm's logo in a mini-case. Those keep the flat treatment
+    above. The test is whether the logo is the SUBJECT of the slide or the
+    letterhead on it; only letterhead is banned.
 - **Keep the original image assets** for screenshots, poll captures, news
   clippings, product photos, and photographs – pull the actual asset from
   the source deck, not a re-creation. Rebuild only charts / tables /
@@ -621,6 +755,25 @@ artifact.
     (set-up → PollEv screenshot → "Solution: MRPL of Rivian").
   - **Both marks sit in the bottom-RIGHT corner, overlaying the footer**, and
     both are grouped box + text. Neither is ever animated (see Animations).
+  - **The poll marks OWN their corner; other corner boxes give way**
+    (2026-08-30, Nico). The Poll Break parallelogram and the round POLL
+    pill always take their designated bottom-right position – they never
+    move to make room. Any OTHER corner-dwelling box that would otherwise
+    occupy that spot (the Yi-family example tab, a problem-set pointer, a
+    practice-video link) is the one that moves: **up, to sit directly
+    above the badge, or left, to sit beside it – whichever direction the
+    slide has more free space in.**
+    - Moving UP, keep the box's own right-hand alignment so the two read
+      as one column. On the 13.33 × 7.5" canvas that puts the displaced
+      box at **top 6.10"**, directly above the badge at 6.77" (Module 4
+      slides 30 – 34 are the reference).
+    - Moving LEFT, keep it on the badge's own baseline so the two read as
+      one row.
+  - **Both are drawn LAST, so they sit in the FOREGROUND** (2026-08-30,
+    Nico). The mark straddles the footer rule by design, so anything
+    emitted after it – the rule, the page number, a chart element –
+    cuts a line straight across it. Append the badge or pill at the end
+    of the `spTree`, after the footer, on EVERY slide that carries one.
   - **The Poll Break parallelogram has ONE fixed geometry, and this rule
     is the whole spec** (2026-08-27, Nico — rewritten the same day so a
     build script can generate the badge from these numbers alone, with no
@@ -1487,6 +1640,7 @@ When I ask for fresh, current examples for a module's concepts:
   headline equation on a "rule" / "concept" slide (e.g. `Q = a + b·P`).
 - **Bullets with embedded variables:** Unicode subscripts (`pₖ`, `MPₗ`) are
   an acceptable middle ground inline; standalone formulas stay OMML.
+- **Profit is a LOWER-CASE pi** (2026-08-30, Nico). In every equation write profit as π (and a change in profit as Δπ), never the capital Π. Set it as an OMML variable run so it comes through in Cambria Math italic like any other symbol. Where a line needs to name the quantity as well, label it "Profit:" in upright text and then give the formula in π.
 - **Elasticity symbol (econ decks):** render with the **D as a subscript –
   Eᴅ** – everywhere it appears (titles, bullets, equations), consistently.
 - **Worked-solution slides** mirror the source's "1. / 2. / 3." numbered
@@ -1680,10 +1834,24 @@ matrices, best responses, Nash equilibria); ignore them for other decks.
     only way back.** Reference: `_deck_guard.require_committed(DECK)` in
     `Module 3/`, called by all six of that folder's passes (skipped on
     `--dry-run`, which writes nothing).
-- **Commit the deck BEFORE running anything destructive over it** – a pass,
-  a splice, a rebuild. This, not any code, is what saved the Module 3 deck
-  on 2026-08-27; the pre-flight check above simply makes the habit
-  enforceable rather than remembered.
+- **Do NOT ask to commit before a routine rebuild** (2026-08-29, Nico –
+  this replaces an earlier "commit the deck BEFORE running anything
+  destructive over it – a pass, a splice, a rebuild", which turned every
+  rebuild into a commit prompt). Running the build script is
+  **reproducible**: the script is the source of truth, so a rebuild
+  destroys nothing and needs no commit. The safety net for ordinary work is
+  the start-of-session git snapshot plus the rolling `_t-1` / `_t-2`
+  backups. Commits and pushes happen when I ask for them – the universal
+  CLAUDE.md governs.
+  - **The one exception is UNPORTED HAND-EDITS.** When the deck carries
+    changes I made in PowerPoint that are not yet in the build script, a
+    rebuild would destroy work that no script can regenerate. Then port the
+    hand-edits first, roll the `_t-1` / `_t-2` backups, and **offer** a
+    commit in one line – never block on it, and never stop work waiting for
+    an answer.
+  - The `--force`-able pre-flight git check above stays as it is. It guards
+    against a script running by accident; it is not a reason to raise a
+    commit prompt in conversation.
 - **Default: rebuild the canonical deck in place, no verification.** The
   build script is the source of truth and the start-of-day Git snapshot is
   the safety net – write straight to the canonical filename and stop. Don't
@@ -1811,6 +1979,26 @@ python-pptx, integer EMUs only, one master.)
   mismatches on OMML), and compares position AND size to ~0.01".
   "Adopted" means that diff prints clean, the same way the timing check
   must be beat-for-beat and the slideshow probe must PASS.
+- **A repeated instruction means the MEASUREMENT is wrong, not the edit**
+  (2026-08-30, Nico – after the same slide-28 box size had to be pointed
+  out four times). If the same hand-edit has to be pointed out twice,
+  STOP. Do not re-apply the same change harder, and do not re-read the
+  same dump. The second request is evidence that the number being read is
+  not the number on screen – almost always a `grpSp` whose `ext` differs
+  from its `chExt`, so the child shape still reports its ORIGINAL size
+  while the card renders at another. Re-measure with a different,
+  transform-aware tool before touching the build script, and say which
+  number changed.
+  - **One geometry reader per folder, and it decodes groups.** A probe
+    that prints raw child coordinates is a trap dressed as a
+    convenience. Where a second script exists because it shows run-level
+    formatting (fonts, bold, colour), use it for FORMATTING ONLY – every
+    coordinate comes from the transform-aware reader.
+  - **Run the closing diff and REPORT it.** `_diff_slides.py <deck>
+    <fresh build>` belongs at the END of a hand-edit port, not only at
+    the start to find the edits. "Adopted" is a claim about that output:
+    if the diff was not run, say the port is unverified rather than
+    done.
 - **Company logos:** fetch from Wikimedia Commons via
   `Special:FilePath/<File>.svg?width=N` (the server rasterizes SVG → PNG);
   Wikipedia's REST page-summary API helps locate a company's logo file. Store

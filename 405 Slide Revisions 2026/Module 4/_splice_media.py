@@ -57,12 +57,7 @@ SOURCES = {"M4": ORIGINAL}
 # THE SIDECAR).  The sidecar keeps the poll slides in their original
 # relative order, so its 1-6 are the original deck's 20, 30, 37, 50, 62, 66.
 SPLICE_MAP = {
-    21: ("M4", 1),    # optimal quantity at P = 230 (question view)
-    32: ("M4", 2),    # optimal quantity at P = 160 (chart view)
-    39: ("M4", 3),    # the coffee bean producer should...
-    52: ("M4", 4),    # to reduce drug use, the government should...
-    66: ("M4", 5),    # guess the monthly rent
-    70: ("M4", 6),    # how would you vote on rent control?
+    24: ("M4", 1),    # optimal quantity at P = 230 (question view)
 }
 
 def display_to_part(z):

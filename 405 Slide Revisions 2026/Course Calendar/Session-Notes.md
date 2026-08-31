@@ -118,3 +118,39 @@ $d.ExportAsFixedFormat("<abs path>.pdf", 17); $d.Close(0); $w.Quit()
   session that were not made from it, including the Course Calendar commit
   itself and a large Module 4 rebuild. Check `git log` before assuming the
   working tree is yours alone.
+
+---
+
+## 2026-08-30 – Module 4 re-split into five videos
+
+**One-line summary:** Module 4's deck was converted for taping with a
+different split than the calendar carried, so the Session-4 prep block was
+updated to list five videos with placeholder lengths.
+
+### What changed
+`_calendar_content.py`, the Session-4 `"video"` group for Module 4 (Part I):
+
+    Video 1: Introduction to Market Structures      (++)
+    Video 2: Perfect Competition                    (++)
+    Video 3: Profit Maximization of a Price Taker – Short Run  (++)
+    Video 4: Firm-Level and Market Supply           (++)
+    Video 5: Long-Run Competitive Equilibrium       (++)
+
+Was four videos with real running times (13 / 47 / 6 / 11 min).
+
+### Decisions
+- **Lengths are `None`, which the builder already prints as `(++)`** — the
+  same placeholder Modules 2 and 3 use. It also suppresses the
+  "≈ N min of video in total" line, which would be meaningless.
+- **Links are `None` too.** The four Panopto URLs (`m4v1` – `m4v4`) point at
+  the OLD four-video cut, where Video 2 was the profit-max video and there
+  was no separate Perfect Competition video — linking them would send
+  students to the wrong recording. The URLs are still in `VIDEO_LINKS`,
+  untouched, ready to be re-pointed.
+
+### Open
+1. Re-record the five videos, then put the real minutes in as the fourth
+   element of each tuple (~line 313) and re-point `m4v1` – `m4v5`.
+   `_video_minutes.py` can read the lengths off Panopto.
+2. **The PDF was not regenerated** — it still shows the old four-video
+   version. Export it from Word once the deck is final.

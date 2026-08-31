@@ -46,11 +46,15 @@ M = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
 
-SPLICED = {21, 32, 39, 52, 66, 70}          # the PollEverywhere slides
+SPLICED = {24, 34, 35, 36, 46, 60, 75}          # the PollEverywhere slides (43 is now a bare placeholder)
 
 # The agenda slides: their cream highlight band is a layout band, not a
 # callout, so rule 1 must not swallow it together with the item text.
-OUTLINE_SLIDES = {4, 5, 8, 12, 42, 46, 55, 76}
+# 2026-08-30: refreshed against the built deck (every slide titled
+# "Outline of Module 4").  Was {4, 5, 8, 12, 42, 46, 55, 76}, which
+# predated the slides inserted since and left 50 / 59 / 80
+# unprotected, so their highlight bands were being grouped.
+OUTLINE_SLIDES = {5, 6, 10, 15, 50, 55, 64, 83}
 
 # Module 4 has no label + action-button pairs and no hand-authored chart
 # groupings to reproduce, so rules 4 and 5 are inert here.

@@ -226,3 +226,65 @@ Full-screen slideshow probe on 7 slides: clean.
 2. The $400 vs $425.70 price question above, if he wants the deck and the
    spreadsheet to agree to the cent.
 3. Nothing is committed yet.
+
+---
+
+## 2026-08-30 – Round 2: hand-edit rounds, notes, and the video split
+
+**One-line summary:** A long sequence of hand-edit rounds across almost
+every slide, then speaker notes for the whole deck, then conversion for
+taping — five videos plus an in-class Part II. The deck is now **90
+slides**, 63 animated, 0 mismatches. This is the round after which we
+FREEZE the build script and start editing the .pptx by hand.
+
+### What changed
+- **Hand-edit ports, many rounds.** Slides 25, 27, 28, 30, 36–41, 44, 48,
+  49, 51, 55, 58, 60–65, 67–69, 71–76, 79, 81–84 — geometry, wording,
+  colours and emphasis, each read off Nico's saved deck and ported into
+  the build script with a dated comment.
+- **Deck order changed three times:** the simple/complex cost panels were
+  interleaved (36–41); the long-run summary moved to the end of its
+  subsection; slides 73–74 (Prop 33 + its poll) were deleted.
+- **Conventions added to the Teaching CLAUDE.md** (all committed with
+  this round):
+  - a repeated instruction means the MEASUREMENT is wrong, not the edit;
+  - axis titles anchored to the arrow tip, y-title 0.08" clear of the axis;
+  - dark red `C00000` is the deck default for a demand curve;
+  - CS / PS surplus colours and the "hypotenuse IS the curve" rule;
+  - every figure label sits in a box sized to the label;
+  - a legend mark copies its area's SHAPE, and a combination of areas
+    copies their ARRANGEMENT (side by side vs stacked).
+- **Speaker notes for the whole deck.** Coverage went 21 → 69 slides. Built
+  as `WRITTEN_NOTES` (display-keyed) applied by `_apply_written_notes()`
+  at the end of `build()`. It never overwrites: slides 53, 67, 71, 76
+  carried nothing but a source URL, so the note goes IN FRONT of it.
+- **Converted for taping.** Five videos (Introduction to Market Structures /
+  Perfect Competition / Profit Maximization – Short Run / Firm-Level and
+  Market Supply / Long-Run Competitive Equilibrium), agenda items 3 and 4
+  in class. Five title cards, Video 1's opening the deck; coverage pills on
+  every agenda slide; top-bar tags now `Module 4 · Video k · <topic>` inside
+  a video block, two-level outside one; front matter inside Video 1.
+
+### Decisions
+- Five videos, not the calendar's original four: Perfect Competition got
+  its own video, and the "Introduction to Module 4" agenda item we briefly
+  added was dropped again because the agenda looked crowded.
+- The build script is **FROZEN as of this commit.** From here the .pptx is
+  the source of truth and edits are made in place (zip + lxml surgery,
+  never a python-pptx round-trip — 7 live poll slides would break).
+
+### Gotchas worth remembering
+- Paragraph-level properties (bullets: `buChar`, `marL`, `indent`) are
+  invisible to both the geometry diff and the text dump. Slide 64's card
+  bullets took four attempts for exactly this reason; `_bullets.py` in the
+  scratchpad reads them straight from the XML.
+- A heredoc eats one backslash level, so any edit script containing `\n`
+  or `\uXXXX` match strings must be written with the Write tool.
+- `_animate.py` now refuses an indexed selector that resolves to CHROME —
+  slide 52's `osp:7` had been animating the footer rule after LMC changed
+  from a freeform to a connector.
+
+### Open
+1. Nothing outstanding on the deck.
+2. Video links and running times in the calendar are placeholders.
+3. Nico is about to hand-edit the finalized deck.

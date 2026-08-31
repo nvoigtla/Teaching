@@ -50,12 +50,13 @@ EMU = 914400.0
 # --------------------------------------------------------------------------
 #  Module 4 configuration
 # --------------------------------------------------------------------------
-SKIP_TITLE = {1}                             # the deck title slide
-SKIP_AGENDA = {3, 4, 5, 8, 12, 42, 46,       # roadmap + the 8 outline slides
-               55, 76}
-SKIP_MEDIA = {21, 32, 39, 52, 66, 70}        # the spliced PollEverywhere slides
+SKIP_TITLE = {1, 2, 9, 14, 49, 54}   # deck title + the five video title cards                             # the deck title slide
+SKIP_AGENDA = {4, 5, 6, 10, 15, 50, 55, 64, 83}   # roadmap + the outline slides
+SKIP_MEDIA = {24, 34, 35, 36, 46, 60, 75}        # the spliced PollEverywhere slides
 # single-thought slides: one table, one map, or deliberately blank
-SKIP_STATIC = {9, 53, 54, 62, 72}
+# 2026-08-30: the drug-policy pair moved up one when the long-run
+# summary was sent to the end of the subsection (57/58 -> 56/57).
+SKIP_STATIC = {11, 61, 62, 71, 79}
 SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 
 # figures ride on this animated-bullet index by default (0 = first
@@ -81,263 +82,395 @@ STATIC = {}
 # stale one fails the run rather than animating the wrong shape.
 PLANS = {
     # --- 1 - introduction ------------------------------------------------
-    7: [["t:(Price takers)"],
-        ["t:(Price searchers)"],
+    # 2026-08-29: the takeaway bar now carries a leftward direction arrow
+    # inside it (cxn:0), which has to land on the SAME click as the bar.
+    7: [["grp:0"],
+        ["t:More firms", "cxn:0"]],
+
+    # 2026-08-29: the price-taker / price-searcher labels became filled
+    # pills (hence the capitalised selectors) and the closing "Today: firms
+    # with no market power at all" bar is gone, so the build ends on the
+    # dark-red frame + TODAY pill.
+    8: [["t:(Price Takers)"],
+        ["t:(Price Searchers)"],
         ["grp:0"],
         ["grp:1"],
         ["pic:0", "grp:2"],
         ["grp:3"],
-        ["osp:6", "t:TODAY"],
-        ["t:Today: firms"]],
+        ["osp:6", "t:TODAY"]],
 
     # --- 2 - perfect competition -----------------------------------------
-    10: [["cxn:4", "t:S"],
+    # 2026-08-29: cxn:8 is the new arrow dropping onto the equilibrium — it
+    # belongs to the "Market equilibrium" beat, which pushes the firm's
+    # d = MR line from cxn:8 to cxn:9.
+    12: [["cxn:4", "t:S"],
          ["cxn:5", "t:D"],
-         ["osp:3", "t:Market equilibrium"],
+         ["osp:3", "t:Market equilibrium", "cxn:8"],
          ["cxn:7", "t:P*"],
          ["cxn:6"],
-         ["cxn:8", "t:P*", "t:Demand curve"]],
+         ["cxn:9", "t:P*", "t:Demand curve"]],
 
     # --- 2a - short-run profit maximization -------------------------------
-    14: [["grp:0"], ["grp:1"], ["grp:2"], ["grp:3"]],
+    # 2026-08-29: topic 2a was reordered (theory first), so these keys were
+    # remapped 14->18, 15->19, 16->17, 18->13, 19->15 and no longer read in
+    # numeric order.  Keys are DISPLAY numbers: 13 = revenue conditions,
+    # 15 = TR/TC visual, 17 = business relevance, 18 = cost table,
+    # 19 = total-cost chart.
+    # The default rollout put the "Find Q* such that P = MC" box on the FIRST
+    # click, ahead of the closing bullet.  The rule is the payoff, so it gets
+    # the last click, together with its ➜ badge.
+    17: [["pr:Set MR = MC:1:3"],
+         ["pr:Set MR = MC:4:4"],
+         ["t:Find", "t:➜"]],
 
-    15: [["osp:3", "t:TC#2"],
-         ["t:TC#1"],
-         ["cxn:2", "t:60,000", "t:TFC"]],
+    21: [["grp:0"], ["grp:1"], ["grp:2"], ["grp:3"]],
 
-    18: [["grp:0"],
+    # 2026-08-29: rebuilt for the reworked TC slide — the cost table, then the
+    # six observations, then the fitted line together with the boxed equation
+    # that names it.  (The old plan targeted the TFC guide line and its
+    # caption, both of which are gone.)
+    22: [["grp:0"],
+         ["osp:4", "osp:5", "osp:6", "osp:7", "osp:8", "osp:9"],
+         ["osp:3", "t:Regression line"]],
+
+    # the boxed closing question is the payoff, so it lands last
+    23: [["t:TC ="],
+         ["pr:Q is the quantity:0:0"],
+         ["pr:Q is the quantity:1:1"],
+         ["t:How many tons"]],
+
+    # 2026-08-29: the derivation gained two steps; each line of reasoning
+    # arrives with the equation it justifies, and Q* = 662.5 lands alone
+    25: [["pr:We need to set:1:1"],
+         ["t:MC ="],
+         ["t:The cabbage market", "t:MR ="],
+         ["t:MR = MC thus", "t:135 +"],
+         ["t:Solve for"],
+         ["t:Q *"]],
+
+    16: [["grp:0"],
          ["cxn:2", "t:TR ="],
          ["cxn:3", "cxn:4", "t:10", "t:30"],
          ["cxn:7", "t:3", "t:d ="],
          ["grp:1"]],
 
-    19: [["cxn:2", "t:TR#1"],
-         ["osp:3", "t:TC#1"],
-         ["cxn:3", "t:TFC"],
-         ["t:TR slope"],
-         ["t:TC slope"],
-         ["cxn:4", "cxn:5", "osp:4", "osp:5", "t:Q*"],
+    # 2026-08-29: rebuilt for the restored original-deck figure — each curve
+    # arrives with its own label and note, then the two zero-profit and
+    # equal-slope beats, and the callout box last.  (The old plan targeted
+    # "TR slope" / "TC slope" text that no longer exists.)
+    18: [["cxn:2", "t:TR", "t:(TR has constant"],
+         ["osp:3", "t:TC", "t:TFC"],
+         ["osp:4", "t:(Profit is the"],
+         ["cxn:8", "t:Profit = 0", "cxn:9"],
+         ["cxn:3", "osp:5", "osp:6", "cxn:4", "cxn:5", "t:Q*"],
+         ["t:Slope of TR", "cxn:6"],
+         ["osp:7", "t:Maximum profit", "cxn:7"],
          ["grp:0"]],
 
-    25: [["cxn:2", "t:MC"],
-         ["osp:3", "t:ATC"],
+    # 2026-08-29: the MC formula and the ATC(Q*) callout were added, and
+    # the profit rectangle now precedes ATC in document order, so the two
+    # osp indices swapped (region 4 -> 3, ATC 3 -> 4).
+    28: [["cxn:2", "t:MC", "t:135", "t:MC = 135"],
+         ["osp:4", "t:ATC"],
          ["cxn:3", "t:P = MR", "t:400"],
          ["cxn:4", "t:Q*", "osp:5"],
-         ["osp:4", "t:Profit", "t:358"]],
+         ["osp:3", "t:Profit", "t:358"],
+         # the engine reads the plain run before the OMML, so this box
+         # indexes under "where ATC ...", not under "Profit ..."
+         ["t:where ATC"]],
 
-    27: [["t:Positive Profit", "cxn:2", "cxn:3", "osp:3", "osp:4", "osp:5",
-          "t:MC#1", "t:ATC#1", "t:P#2", "t:Q*#1", "t:Profit,"],
+    # 2026-08-29: the "Profit Levels for Different Market Prices" banner is
+    # static (frame, not build) but it still COUNTS in document order, so
+    # every t:P#n index moved up one: 2 -> 3, 4 -> 5, 6 -> 7.  Each panel's
+    # d = MR label rides with its own price line.
+    30: [["t:Positive Profit", "cxn:2", "cxn:3", "osp:3", "osp:4", "osp:5",
+          "t:MC#1", "t:ATC#1", "t:P#3", "t:Q*#1", "t:π >", "t:d = MR"],
          ["t:Zero Profit", "cxn:6", "cxn:7", "osp:6", "osp:7",
-          "t:MC#2", "t:ATC#2", "t:P#4", "t:Q*#2", "t:P = ATC"],
+          "t:MC#2", "t:ATC#2", "t:P#4", "t:Q*#2", "t:P = ATC", "t:d = MR"],
          ["t:Negative Profit", "cxn:10", "cxn:11", "osp:8", "osp:9",
-          "osp:10", "t:MC#3", "t:ATC#3", "t:P#6", "t:Q*#3", "t:Loss,"],
+          "osp:10", "t:MC#3", "t:ATC#3", "t:P#6", "t:Q*#3",
+          "t:π <", "t:d = MR"],
          ["t:Profit = ("]],
 
-    30: [["t:Option 1", "t:Profit#1", "t:The fixed"],
-         ["t:Option 2", "t:Profit#2", "t:Operating adds"],
-         ["t:Difference"],
-         ["t:Operate if"]],
+    # 2026-08-29: the horizon boxes, then the decision, then the
+    # short-run identity the shut-down rule rests on.  The navy banner
+    # is the slide's frame and stays visible from the start.
+    31: [["grp:0"],
+         ["grp:1"],
+         ["t:We analyze the short"],
+         ["t:Short run:"],
+         ["t:Profit:", "cxn:0", "t:Fixed costs still"]],
 
-    35: [["osp:4", "t:MC"],
+    # 2026-08-30: option 1 is now "continue to produce" (the left column,
+    # with the (P - AVC)Q - TFC identity and the "producing adds" note) and
+    # option 2 "stop production"; the two arrows come in with the comparison.
+    32: [["t:Option 1", "t:Profit#1", "t:Producing adds"],
+         ["t:Option 2", "t:Profit#2", "t:The fixed"],
+         ["cxn:0", "cxn:1", "t:Difference"],
+         ["t:⇒"]],          # the rule bar now opens with the double arrow
+
+    39: [["osp:4", "t:MC"],
          ["osp:5", "t:ATC"],
          ["osp:6", "t:AVC"],
-         ["cxn:2", "t:P high"],
+         ["cxn:2", "t:P high", "t:d = MR"],
          ["cxn:3", "t:Q*"],
-         ["osp:3", "t:Profit"],
+         ["osp:3", "t:Profit#1"],
          ["grp:0"]],
 
-    36: [["osp:4", "t:MC"],
+    # 2026-08-30 (Nico) reordered 36-41 so each price case is followed by
+    # its complex-cost twin: the simple panels are now 36 / 38 / 40 and the
+    # complex ones sit at 37 / 39 / 41 (static, as before).
+    41: [["osp:4", "t:MC"],
          ["osp:5", "t:ATC"],
          ["osp:6", "t:AVC"],
-         ["cxn:2", "t:P low"],
+         ["cxn:2", "t:P low", "t:d = MR"],
          ["cxn:3", "t:Q*"],
-         ["osp:3", "t:Loss if"],
+         ["osp:3", "t:Loss#1"],
          ["grp:0"]],
 
-    37: [["osp:4", "t:MC"],
-         ["osp:5", "t:ATC"],
-         ["osp:6", "t:AVC"],
-         ["cxn:2", "t:P very"],
-         ["cxn:3", "t:Q*"],
-         ["osp:3", "t:Loss if"],
+    # no Q* and no loss rectangle on this panel (see the note in
+    # _price_case_slide), so the build is MC / ATC / AVC, then the price line
+    # with its "P < AVC at every output" note, then the explanation bar.
+    43: [["osp:3", "t:MC"],
+         ["osp:4", "t:ATC"],
+         ["osp:5", "t:AVC"],
+         ["cxn:2", "t:P very", "t:d = MR", "t:P < AVC"],
          ["grp:0"]],
 
     # --- 2b - firm and market supply --------------------------------------
-    43: [["cxn:2", "t:MC", "cxn:14", "t:AVC"],
+    51: [["cxn:2", "t:MC", "cxn:14", "t:AVC"],
          ["cxn:3", "cxn:4", "t:210#1", "t:187.5#1", "osp:3"],
          ["cxn:5", "cxn:6", "t:400#1", "t:662.5#1", "osp:4"],
          ["cxn:9", "t:S"],
          ["cxn:10", "cxn:11", "t:210#2", "t:187.5#2", "osp:5"],
          ["cxn:12", "cxn:13", "t:400#2", "t:662.5#2", "osp:6"],
-         ["t:Read the quantity"]],
+         ["t:MC curve"]],
 
-    44: [["cxn:2", "t:MC0"],
+    # 2026-08-30: the "High-yield seeds reduce MC" annotation became a
+    # cream card, so the grouping pass makes it grp:0.
+    52: [["cxn:2", "t:MC₀"],
          ["cxn:4", "t:P = MR"],
-         ["cxn:5", "t:q0", "osp:3"],
-         ["t:High-yield", "cxn:3", "t:MC1"],
-         ["cxn:6", "t:q1", "osp:4", "cxn:7"]],
+         ["cxn:5", "t:q₀", "osp:3"],
+         ["grp:0", "cxn:3", "t:MC₁", "cxn:8"],
+         ["cxn:6", "t:q₁", "osp:4", "cxn:7"]],
 
-    45: [["cxn:4", "t:S0", "cxn:6", "t:D"],
-         ["cxn:7", "cxn:8", "t:Q0", "t:P0", "osp:3"],
-         ["cxn:11", "t:MC0", "cxn:13", "t:MR0"],
-         ["cxn:15", "t:q0", "osp:5"],
-         ["cxn:12", "t:MC1"],
-         ["cxn:17", "t:q1", "osp:7"],
-         ["cxn:5", "t:S1"],
-         ["cxn:9", "cxn:10", "t:Q1", "t:P1", "osp:4"],
-         ["cxn:14", "t:MR1"],
-         ["cxn:16", "t:q2", "osp:6"],
+    # 2026-08-30: the firm panel lost its three dots, and each panel gained
+    # a dark-yellow shift arrow (market cxn:11, firm cxn:19) which reveals
+    # WITH the curve it points to.
+    53: [["cxn:4", "t:S₀", "cxn:6", "t:D"],
+         ["cxn:7", "cxn:8", "t:Q₀", "t:P₀", "osp:3"],
+         ["cxn:12", "t:MC₀", "cxn:14", "t:MR₀"],
+         ["cxn:16", "t:q₀"],
+         ["cxn:13", "t:MC₁", "cxn:19"],
+         ["cxn:18", "t:q₁"],
+         ["cxn:5", "t:S₁", "cxn:11"],
+         ["cxn:9", "cxn:10", "t:Q₁", "t:P₁", "osp:4"],
+         ["cxn:15", "t:MR₁"],
+         ["cxn:17", "t:q₂"],
          ["t:Everyone's costs"]],
 
     # --- 2c - long run -----------------------------------------------------
-    48: [["osp:3", "t:LAC"],
-         ["osp:4", "t:LMC"],
-         ["cxn:4", "t:MR = P#2", "t:PLR", "cxn:5", "t:QLR", "osp:6"],
-         ["cxn:2", "t:MR = P#1", "t:P1", "cxn:3", "t:Q1", "osp:5"],
-         ["cxn:8", "t:Entry"],
-         ["cxn:6", "t:MR = P#3", "t:P2", "cxn:7", "t:Q2", "osp:7"],
-         ["cxn:9", "t:Exit"],
+    # 2026-08-30: LMC is a straight line (a CONNECTOR) rather than a
+    # freeform, so it is cxn:2 and the three dots shifted to osp:4-6.
+    57: [["osp:3", "t:LAC"],
+         ["cxn:2", "t:LMC"],
+         ["cxn:5", "t:MR = P#2", "t:PLR", "cxn:6", "t:QLR", "osp:5"],
+         ["cxn:3", "t:MR = P#1", "t:P1", "cxn:4", "t:Q1", "osp:4"],
+         ["cxn:9", "t:Entry"],
+         ["cxn:7", "t:MR = P#3", "t:P2", "cxn:8", "t:Q2", "osp:6"],
+         ["cxn:10", "t:Exit"],
          ["t:At QLR"]],
 
     # --- 3 - market distortions -------------------------------------------
-    57: [["cxn:2", "t:D"],
+    66: [["cxn:2", "t:D"],
          ["cxn:3", "t:S"],
          ["cxn:4", "cxn:5", "t:P*", "t:Q*", "osp:4"],
          ["osp:3", "t:CS#1"],
          ["grp:0"]],
 
-    58: [["cxn:2", "t:D"],
+    67: [["cxn:2", "t:D"],
          ["cxn:3", "t:S"],
          ["cxn:4", "cxn:5", "t:P*", "t:Q*", "osp:4"],
          ["osp:3", "t:PS#1"],
          ["grp:0"]],
 
-    60: [["cxn:2", "t:S#1"],
+    # 2026-08-30: rebuilt from my original slide 58 - S' pivots (cxn:3)
+    # with the tax arrow beside it, the bracket is osp:7, and the four
+    # consequences arrive one per click.
+    # 2026-08-30: the consequences are area-symbol rows now, so each one
+    # is a pair (or stack) of marks plus its line, one click each.
+    69: [["cxn:2", "t:S#1"],
          ["cxn:4", "t:D#1"],
          ["cxn:6", "t:P0", "cxn:9", "t:Q0"],
-         ["cxn:3", "t:S\u2019"],
+         ["cxn:3", "t:S#2", "cxn:10", "t:tax (t)"],
          ["cxn:5", "t:PB", "cxn:7", "t:PS", "cxn:8", "t:Q1"],
+         ["osp:7", "t:PB#2"],
          ["osp:3", "t:A", "osp:4", "t:C"],
          ["osp:5", "t:B", "osp:6", "t:D#2"],
          ["grp:0"],
-         ["t:Buyers lose"],
-         ["t:A tax on gasoline"]],
+         ["osp:8", "osp:9", "t:The buyers lose"],
+         ["osp:10", "osp:11", "t:The sellers lose"],
+         ["osp:12", "osp:13", "t:Deadweight loss"],
+         ["osp:14", "osp:15", "t:The government gets"],
+         ["grp:1"]],
 
-    63: [["cxn:3", "t:SLabor"],
+    # 2026-08-30 (Nico): the podcast slide moved AHEAD of the price-floor
+    # diagram, and the discussion card at the foot of it is gone.
+    # 2026-08-30: my original slide 59's wording, so the paragraph anchors
+    # changed; the three worker groups arrive together after the clippings.
+    72: [["pr:What is the expected:0:1"],
+         ["pr:What is the expected:2:4"],
+         ["pic:0"],
+         ["pic:1"],
+         ["grp:0"],
+         ["pr:What is the expected:5:7"],
+         ["pr:What is the expected:8:8"]],
+
+    # the welfare list is now four swatch + text rows, revealed one at a
+    # time, each with the square in its region's colour
+    # 2026-08-30: the unemployment gap is an under-brace (osp:6), so the
+    # swatches shifted up one; each welfare row reveals on its own click.
+    73: [["cxn:3", "t:SLabor"],
          ["cxn:2", "t:DLabor"],
          ["cxn:4", "cxn:5", "t:w*", "t:L*"],
          ["cxn:6", "t:wmin"],
-         ["cxn:7", "t:Ld", "cxn:8", "t:Ls"],
-         ["cxn:9", "t:Ls \u2212"],
+         ["cxn:7", "t:LD", "cxn:8", "t:LS"],
+         ["osp:6", "t:LS#2"],
          ["osp:3", "t:A"],
          ["osp:4", "t:B", "osp:5", "t:C"],
          ["t:Welfare effects"],
+         ["osp:7", "t:Some workers win"],
+         ["osp:8", "t:Some workers lose"],
+         ["osp:9", "osp:10", "t:Firms lose"],
+         ["osp:11", "osp:12", "t:Deadweight loss"],
          ["grp:0"]],
 
-    68: [["cxn:3", "t:S"],
+    # 2026-08-30: the shortage is an under-brace (osp:6) below the axis,
+    # and the welfare list is four swatch + text rows.
+    77: [["cxn:3", "t:S"],
          ["cxn:2", "t:D"],
          ["cxn:4", "cxn:5", "t:P*", "t:Q*"],
          ["cxn:6", "t:Pmax"],
-         ["cxn:7", "t:Qs", "cxn:8", "t:Qd"],
-         ["cxn:9", "t:Qd \u2212"],
+         ["cxn:7", "t:QS", "cxn:8", "t:QD"],
+         ["osp:6", "t:QD#2"],
          ["osp:3", "t:A"],
          ["osp:4", "t:B", "osp:5", "t:C"],
-         ["t:Welfare effects"]],
+         ["t:Welfare effects"],
+         ["osp:7", "t:Some renters win"],
+         ["osp:8", "t:Some renters lose"],
+         ["osp:9", "osp:10", "t:Landlords lose"],
+         ["osp:11", "osp:12", "t:Deadweight loss"]],
 
-    74: [["grp:0"],
-         ["grp:1"],
-         ["grp:2", "t:Source:"],
+    # 2026-08-30: the source line moved into the notes, so the panels are
+    # plain header + picture + trend line, one panel per click.
+    81: [["t:Impact on the price of decontrolled", "pic:0", "cxn:0"],
+         ["t:Impact on the price of never", "pic:1", "cxn:1"],
+         ["grp:0", "cxn:2"],
          ["t:Rents rose"]],
 
     # --- 4 - externalities -------------------------------------------------
-    79: [["cxn:2", "t:Demand"],
+    # 2026-08-30: the flat EMC line (cxn:9) is new, so the wedge arrow
+    # moved to cxn:10; each equilibrium now reveals its price as well as
+    # its quantity.
+    86: [["cxn:2", "t:Demand"],
          ["cxn:3", "t:Supply = internal"],
-         ["cxn:5", "cxn:6", "t:QMarket", "osp:3"],
-         ["cxn:4", "t:MCI + EMC"],
-         ["cxn:9", "t:EMC ="],
-         ["cxn:7", "cxn:8", "t:QExt", "osp:4"],
+         ["cxn:5", "cxn:6", "t:QMarket", "t:PMarket", "osp:3"],
+         ["cxn:9", "t:1.5", "t:External marginal"],
+         ["cxn:4", "t:Social marginal"],
+         ["cxn:10", "t:EMC ="],
+         ["cxn:7", "cxn:8", "t:QExt", "t:PExt", "osp:4"],
          ["grp:0"]],
 
-    80: [["cxn:2", "t:Demand"],
+    # 2026-08-30: on the tax slide the efficient price is labelled P_E^C
+    # (its plain P_Ext tick is gone), and the producer price P_E^P arrives
+    # with the tax wedge.
+    87: [["cxn:2", "t:Demand"],
          ["cxn:3", "t:Supply = internal"],
-         ["cxn:5", "cxn:6", "t:QMarket", "osp:3"],
-         ["cxn:4", "t:MCI + EMC"],
-         ["cxn:9", "t:Tax ="],
-         ["cxn:7", "cxn:8", "t:QExt", "osp:4"],
+         ["cxn:5", "cxn:6", "t:QMarket", "t:PMarket", "osp:3"],
+         ["cxn:9", "t:1.5", "t:External marginal"],
+         ["cxn:4", "t:Social marginal"],
+         ["cxn:11", "t:Tax ="],
+         ["cxn:7", "cxn:8", "t:QExt", "t:PEC", "osp:4"],
+         ["cxn:10", "t:PEP"],
          ["grp:0"],
          ["grp:1"]],
 
-    81: [["grp:0"],
+    88: [["grp:0"],
          ["pic:0"]],
 
-    82: [["cxn:2", "t:D (MB"],
+    # 2026-08-30: rebuilt from my original slide 76 - Q_current arrives
+    # with the pilots' own cost curve, and the circled corner solution is
+    # the payoff before the takeaway.
+    89: [["cxn:2", "t:D (MB"],
          ["cxn:3", "t:Pilots"],
+         ["cxn:6", "t:Qcurrent", "osp:3"],
          ["cxn:4", "t:MCI + tax"],
-         ["cxn:5", "t:Noise tax"],
-         ["osp:3", "t:Q* = 0"],
+         ["cxn:5", "t:Noise pollution", "t:Noise tax"],
+         ["t:Q* = 0", "osp:4"],
+         ["osp:5", "t:“Corner solution", "cxn:7"],
          ["t:SMC lies"]],
 }
 
 PLANS.update({
-    11: [["pr:Germany cut:1:1"],
+    13: [["pr:Germany cut:1:1"],
          ["grp:0"],
          ["grp:1"]],
 
-    16: [["t:Key questions"],
+    20: [["t:Key questions"],
          ["t:1", "t:Should the Yi"],
          ["t:2", "t:How much should"],
          ["pr:We start with:0:0"],
          ["pr:We start with:1:1"]],
 
-    26: [["grp:0"],
-         ["t:Cost of goods"],
-         ["t:The accounting"]],
+    # 2026-08-29: the three image crops and the glossary box became ONE
+    # native table, so the statement and its source line arrive together
+    # and the takeaway closes.
+    29: [["grp:0", "t:Ross Stores"],
+         ["t:Accounting costs"]],
 
-    38: [["pr:Your firm:1:1"],
+    45: [["pr:Your firm:1:1"],
          ["grp:0"],
          ["t:Should you continue"]],
 
-    49: [["pr:In the 1920s:1:1"],
+    58: [["pr:In the 1920s:1:1"],
          ["grp:0"],
          ["pr:In the 1920s:2:2"],
          ["t:Profit in a market"]],
 
-    59: [["pr:The inefficiency:1:1"],
+    # 2026-08-30: the Red Tape picture reveals with the first bullet, and
+    # the welfare box follows the deadweight-loss box on the last click.
+    68: [["pr:The inefficiency:1:1", "pic:0"],
          ["pr:The inefficiency:2:2"],
-         ["t:Deadweight loss", "t:with welfare"]],
+         ["t:Deadweight loss", "t:with"]],
 
-    61: [["grp:0"],
+    70: [["grp:0"],
          ["pr:Who hands:1:1"],
          ["pr:Who hands:2:2"],
          ["pr:Who hands:3:3"],
          ["t:The less price"]],
 
-    64: [["pr:Theory predicts:1:6"],
-         ["pic:0"],
-         ["pic:1"],
-         ["pic:2", "t:One way firms"],
-         ["pr:Theory predicts:7:7"],
-         ["grp:0"]],
-
-    65: [["pic:0"],
+    74: [["pic:0"],
          ["pr:1 bed:0:4"]],
 
-    67: [["pic:0"],
-         ["grp:0"],
+    # 2026-08-30: one MW screenshot plus the red box he drew on it.  The
+    # Poll Break badge is grp:0 here and stays static, as poll chrome must.
+    76: [["pic:0"],
+         ["osp:3"]],
+
+    # 2026-08-30: the picture captions are cut, so the two photos are
+    # plain pictures rather than picture + caption groups.
+    78: [["pr:Non-price:1:1"],
+         ["pr:Non-price:2:2"],
+         ["pic:0"],
          ["pic:1"]],
 
-    71: [["pr:Non-price:1:1"],
-         ["pr:Non-price:2:2"],
-         ["grp:0"],
-         ["grp:1"]],
-
-    75: [["pr:Argentina repealed:1:1"],
+    82: [["pr:Argentina repealed:1:1"],
          ["pr:Argentina repealed:2:2"]],
 
-    77: [["pr:Negative externality:1:2"],
+    84: [["pr:Negative externality:1:2"],
          ["pr:Negative externality:3:4"]],
 
-    78: [["t:Price mechanisms", "t:Tax the activity"],
+    85: [["t:Price mechanisms", "t:Tax the activity"],
          ["t:Quantity mechanisms", "pr:Negative externality:0:0"],
          ["pr:Negative externality:1:1"]],
 })
@@ -571,6 +704,16 @@ def resolve(sel, shapes, used):
     # indexed selectors
     for s in shapes:
         if s["idx"] == sel:
+            # 2026-08-30: a plan that has drifted out of step with the
+            # slide will happily land on the footer rule or the top bar and
+            # animate it, with nothing in the output to say so (this is how
+            # slide 52's osp:7 came to hide the footer rule when LMC turned
+            # from a freeform into a connector).  Chrome is never a target.
+            if is_chrome(s):
+                raise KeyError(
+                    "%s resolves to CHROME on this slide "
+                    "(%s at [%.2f, %.2f]) - the plan is out of step with "
+                    "the shape inventory" % (sel, s["tag"], s["x"], s["y"]))
             return (s["id"], None), None
     raise KeyError(sel)
 

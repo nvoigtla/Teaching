@@ -310,10 +310,19 @@ WEEKS = [
                        ("v", "m3pb", "Practice Video: Short-Run and Long-Run Costs", 26)]},
             {"cat": "video", "label": "Module 4 (Part I): Competitive Markets and "
                       "Market Interventions – videos to watch by the weekend:",
-             "items": [("v", "m4v1", "Video 1: Introduction to Market Structures", 13),
-                       ("v", "m4v2", "Video 2: Profit Max of a Price Taker – Short Run", 47),
-                       ("v", "m4v3", "Video 3: Firm-level and market supply", 6),
-                       ("v", "m4v4", "Video 4: Long-run competitive equilibrium", 11)]},
+             # 2026-08-30: Module 4 was re-split into FIVE videos when the
+             # deck was converted for taping - Perfect Competition is now
+             # a video of its own, and the module front matter sits inside
+             # Video 1.  Every video therefore has to be re-recorded, so
+             # the links and the running times are blank for now; a None
+             # length prints "(++)" and suppresses the total line.  The
+             # old Panopto URLs are still in VIDEO_LINKS (m4v1 - m4v4) and
+             # can be re-pointed once the new cuts are up.
+             "items": [("v", None, "Video 1: Introduction to Market Structures", None),
+                       ("v", None, "Video 2: Perfect Competition", None),
+                       ("v", None, "Video 3: Profit Maximization of a Price Taker – Short Run", None),
+                       ("v", None, "Video 4: Firm-Level and Market Supply", None),
+                       ("v", None, "Video 5: Long-Run Competitive Equilibrium", None)]},
             {"cat": "read", "label": "In preparation for the Module 4 (Part I) videos:",
              "items": [("t", "Ch. 8.1 – 8.3")]},
         ],

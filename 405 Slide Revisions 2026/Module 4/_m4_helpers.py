@@ -179,8 +179,10 @@ def _add_outlined_box(slide, left, top, width, height, label, *,
 
 
 def _add_convention_box(slide, left, top, width, height, *,
-                          prefix=None, body=None, runs=None,
-                          fill_rgb=None, border=None, line_w=1.0,
+                          prefix=None, body=None, runs=None, anchor=None,
+                          space_before_pts=None,
+                          fill_rgb=None, fill_alpha=None,
+                          border=None, line_w=1.0,
                           corner_pct=0.12, size=15, align=PP_ALIGN.LEFT,
                           font="Calibri", pad_h=None, pad_v=None,
                           line_spacing_pct=None):
@@ -211,6 +213,10 @@ def _add_convention_box(slide, left, top, width, height, *,
     )
     shp.fill.solid()
     shp.fill.fore_color.rgb = fill
+    # 2026-08-30 (Nico): a card can carry the SAME wash as the region it
+    # describes, so the two read as one object
+    if fill_alpha is not None:
+        _set_fill_alpha(shp, fill_alpha)
     shp.line.color.rgb = border
     shp.line.width = Pt(line_w)
     shp.shadow.inherit = False
@@ -230,7 +236,10 @@ def _add_convention_box(slide, left, top, width, height, *,
     tf.word_wrap = True
     tf.margin_left = Inches(0.05); tf.margin_right = Inches(0.05)
     tf.margin_top = Inches(0); tf.margin_bottom = Inches(0)
-    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    # `anchor` lets a caller TOP-anchor the text, so that two boxes of the
+    # same height line their headings up even when the bodies differ in
+    # length (Module 4 slide 28's short-run / long-run pair)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE if anchor is None else anchor
 
     def _style_run(r, opts):
         r.font.name = opts.get('font', font)
@@ -252,6 +261,21 @@ def _add_convention_box(slide, left, top, width, height, *,
                 # Same paragraph — append run to the most-recent paragraph.
                 p = tf.paragraphs[-1]
             p.alignment = align
+            # 2026-08-30 (Nico): a paragraph can carry a REAL bullet - an
+            # Arial round bullet with a hanging indent, the way PowerPoint
+            # writes one - rather than only plain text.  python-pptx has no
+            # API for this, so the pPr is written directly.
+            if opts.get('bullet'):
+                pPr = p._pPr if p._pPr is not None else p._p.get_or_add_pPr()
+                pPr.set('marL', str(opts.get('bullet_marL', 285750)))
+                pPr.set('indent', str(opts.get('bullet_indent', -285750)))
+                for tag, attrs in (
+                        ('a:buFont', {'typeface': 'Arial',
+                                      'panose': '020B0604020202020204',
+                                      'pitchFamily': '34', 'charset': '0'}),
+                        ('a:buChar', {'char': '\u2022'})):
+                    el = pPr.makeelement(qn(tag), attrs)
+                    pPr.append(el)
             r = p.add_run()
             r.text = text
             _style_run(r, opts)
@@ -266,6 +290,9 @@ def _add_convention_box(slide, left, top, width, height, *,
             r2 = p.add_run(); r2.text = body
             _style_run(r2, {'color': NAVY, 'size': size})
 
+    if space_before_pts is not None:
+        for p_obj in tf.paragraphs:
+            p_obj.space_before = Pt(space_before_pts)
     if line_spacing_pct is not None:
         for p_obj in tf.paragraphs:
             pPr = p_obj._p.get_or_add_pPr()
@@ -276,6 +303,29 @@ def _add_convention_box(slide, left, top, width, height, *,
             spcPct.set('val', str(int(line_spacing_pct * 1000)))
             pPr.insert(0, lnSpc)
     return shp
+
+
+def _set_fill_alpha(shape, opacity_pct):
+    """Make a shape's SOLID fill translucent.
+
+    ``opacity_pct`` is opacity, not transparency: 100 = fully opaque,
+    30 = mostly see-through.  OOXML carries this as an ``<a:alpha>`` child
+    of the colour element inside ``<a:solidFill>``, so the shape must
+    already have a solid fill.  Returns the shape, so the call can be
+    chained onto a box helper.
+    """
+    spPr = shape._element.spPr
+    sf = spPr.find(qn('a:solidFill'))
+    if sf is None:
+        return shape
+    clr = sf.find(qn('a:srgbClr'))
+    if clr is None:
+        return shape
+    for old in clr.findall(qn('a:alpha')):
+        clr.remove(old)
+    alpha = ET.SubElement(clr, qn('a:alpha'))
+    alpha.set('val', str(int(round(opacity_pct * 1000))))
+    return shape
 
 
 def _add_rounded_filled_box(slide, left, top, width, height, label, *,
@@ -325,7 +375,7 @@ def _add_rounded_filled_box(slide, left, top, width, height, label, *,
 
 
 def _add_arrow(slide, start_xy, end_xy, *, color=NAVY, weight_pt=1.5,
-               head=True, dash=None, head_size='med'):
+               head=True, dash=None, head_size='med', head_both=False):
     """Draw a line/arrow from start to end (in EMU/Inches values).
 
     EMU coordinates MUST be integers — PowerPoint rejects decimal values
@@ -338,6 +388,10 @@ def _add_arrow(slide, start_xy, end_xy, *, color=NAVY, weight_pt=1.5,
     ``'med'`` (default), or ``'lg'``.  Width and height are set
     together, so passing ``'lg'`` gives a noticeably larger tip while
     leaving the line weight unchanged.
+
+    ``head_both=True`` puts a triangle on BOTH ends (the market-power
+    spectrum arrow on slide 7).  Schema order inside <a:ln> is
+    fill → dash → join → headEnd → tailEnd, so headEnd is written first.
     """
     sx, sy = int(start_xy[0]), int(start_xy[1])
     ex, ey = int(end_xy[0]), int(end_xy[1])
@@ -350,7 +404,12 @@ def _add_arrow(slide, start_xy, end_xy, *, color=NAVY, weight_pt=1.5,
             ln.remove(old)
         prst = ET.SubElement(ln, qn('a:prstDash'))
         prst.set('val', dash)
-    if head:
+    if head_both:
+        headEnd = ET.SubElement(ln, qn('a:headEnd'))
+        headEnd.set('type', 'triangle')
+        headEnd.set('w', head_size)
+        headEnd.set('h', head_size)
+    if head or head_both:
         tailEnd = ET.SubElement(ln, qn('a:tailEnd'))
         tailEnd.set('type', 'triangle')
         tailEnd.set('w', head_size)
@@ -671,6 +730,11 @@ def _add_hierarchical_bullets(slide, left, top, width, height, items,
     box = slide.shapes.add_textbox(left, top, width, height)
     tf = box.text_frame
     tf.word_wrap = True
+    # 2026-08-30 (Nico): python-pptx writes <a:spAutoFit/> on a new
+    # textbox, which makes PowerPoint snap the height back to the text so
+    # the box cannot be dragged taller by hand.  Turning autofit off also
+    # makes the MIDDLE anchor mean what the docstring says it means.
+    tf.auto_size = MSO_AUTO_SIZE.NONE
     tf.margin_left = 0
     tf.margin_right = 0
     tf.margin_top = 0
@@ -1235,14 +1299,17 @@ def _add_takeaway_bar(slide, text, *, top=Inches(6.4), width=None,
     tf.margin_left = tf.margin_right = Inches(0.1)
     tf.margin_top = tf.margin_bottom = Inches(0.05)
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
-    p = tf.paragraphs[0]
-    p.alignment = PP_ALIGN.CENTER
-    run = p.add_run()
-    run.text = text
-    run.font.name = font
-    run.font.size = Pt(size)
-    run.font.bold = bold
-    run.font.color.rgb = text_color
+    # A newline breaks the bar onto a real second PARAGRAPH (not a soft
+    # line break), which is how Nico sets a two-line takeaway by hand.
+    for i, line in enumerate(str(text).split("\n")):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.alignment = PP_ALIGN.CENTER
+        run = p.add_run()
+        run.text = line
+        run.font.name = font
+        run.font.size = Pt(size)
+        run.font.bold = bold
+        run.font.color.rgb = text_color
     return shape
 
 
@@ -1621,7 +1688,7 @@ def _omml_fill(color):
     )
 
 
-def _omml_run(text, *, color=None):
+def _omml_run(text, *, color=None, bold=False):
     """OMML run for an italic variable (default math style).
 
     Inside an oMath, italic style is the math default for Latin letters;
@@ -1631,7 +1698,7 @@ def _omml_run(text, *, color=None):
     """
     return (
         f'<m:r xmlns:m="{M_NS}">'
-        f'<a:rPr xmlns:a="{A_NS}" lang="en-US" b="0" i="1">'
+        f'<a:rPr xmlns:a="{A_NS}" lang="en-US" b="{int(bold)}" i="1">'
         f'{_omml_fill(color)}'
         f'<a:latin typeface="Cambria Math"/>'
         f'<a:ea typeface="Cambria Math"/>'
@@ -1641,7 +1708,7 @@ def _omml_run(text, *, color=None):
     )
 
 
-def _omml_text(text, *, color=None):
+def _omml_text(text, *, color=None, bold=False):
     """Upright-style OMML run (for operators, numbers, acronyms).
 
     Force plain (upright) style via <m:rPr><m:sty m:val="p"/></m:rPr> – this
@@ -1651,7 +1718,7 @@ def _omml_text(text, *, color=None):
     return (
         f'<m:r xmlns:m="{M_NS}">'
         f'<m:rPr><m:sty m:val="p"/></m:rPr>'
-        f'<a:rPr xmlns:a="{A_NS}" lang="en-US" b="0" i="0">'
+        f'<a:rPr xmlns:a="{A_NS}" lang="en-US" b="{int(bold)}" i="0">'
         f'{_omml_fill(color)}'
         f'<a:latin typeface="Cambria Math"/>'
         f'</a:rPr>'
@@ -1671,6 +1738,40 @@ def _omml_sub(base, sub):
         f'<m:e>{base}</m:e>'
         f'<m:sub>{sub}</m:sub>'
         f'</m:sSub>'
+    )
+
+
+def _omml_underbrace(expr, label):
+    """OMML under-brace with a label beneath it — TeX's
+
+        \\underbrace{expr}_{label}
+
+    This is a <m:limLow> (lower limit) wrapped around a <m:groupChr> whose
+    character is U+23DF, the bottom curly bracket; that is exactly the
+    structure Word writes, so PowerPoint renders and edits it natively.
+    """
+    return (
+        f'<m:limLow xmlns:m="{M_NS}">'
+        f'<m:limLowPr><m:ctrlPr>'
+        f'<a:rPr xmlns:a="{A_NS}" lang="en-US" i="1">'
+        f'<a:latin typeface="Cambria Math"/></a:rPr>'
+        f'</m:ctrlPr></m:limLowPr>'
+        f'<m:e>'
+        f'<m:groupChr>'
+        f'<m:groupChrPr>'
+        f'<m:chr m:val="&#9183;"/>'
+        f'<m:pos m:val="bot"/>'
+        f'<m:vertJc m:val="top"/>'
+        f'<m:ctrlPr>'
+        f'<a:rPr xmlns:a="{A_NS}" lang="en-US" i="1">'
+        f'<a:latin typeface="Cambria Math"/></a:rPr>'
+        f'</m:ctrlPr>'
+        f'</m:groupChrPr>'
+        f'<m:e>{expr}</m:e>'
+        f'</m:groupChr>'
+        f'</m:e>'
+        f'<m:lim>{label}</m:lim>'
+        f'</m:limLow>'
     )
 
 
@@ -2293,7 +2394,8 @@ RED = RGBColor(0xC0, 0x00, 0x00)           # source red (C00000)
 RED_FF = RGBColor(0xFF, 0x00, 0x00)        # source bright red (FF0000)
 
 
-GREEN_DK = RGBColor(0x00, 0x7A, 0x33)      # the deck's shift green
+GREEN_DK = RGBColor(0x00, 0x7A, 0x33)
+EMC_PURPLE = RGBColor(0x70, 0x30, 0xA0)   # Nico's external-marginal-cost purple (2026-08-30)      # the deck's shift green
 
 
                                            # (2026-08-23, Nico: the
@@ -2571,8 +2673,34 @@ class SimpleFig:
         return Inches(self.b - self.h * yv / self.ymax)
 
 
+# Clearance between the y-axis line and the right edge of its title box
+# (inches).  Hand-set by Nico on slide 36, 2026-08-30.
+Y_TITLE_GAP = 0.08
+
+
+def _text_w_in(text, size_pt, *, bold=False, italic=False):
+    """Rendered width of `text` in INCHES, measured in the real Calibri face.
+
+    Axis titles are sized tight to their label (Teaching CLAUDE.md), so the
+    anchor arithmetic needs the true width rather than a guess.  Falls back
+    to a rough estimate if the font file is not present.
+    """
+    face = {(False, False): "calibri.ttf", (True, False): "calibrib.ttf",
+            (False, True): "calibrii.ttf", (True, True): "calibriz.ttf"}[
+                (bool(bold), bool(italic))]
+    try:
+        from PIL import ImageFont
+        f = ImageFont.truetype("C:/Windows/Fonts/" + face,
+                               int(round(size_pt * 96 / 72.0)))
+        b = f.getbbox(text)
+        return (b[2] - b[0]) / 96.0
+    except Exception:
+        return 0.62 * len(text) * size_pt / 72.0
+
+
 def _fig_axes(slide, fig, *, weight_pt=2.0,
-              x_title="Quantity", y_title="Price ($)", label_size=18):
+              x_title="Quantity", y_title="Price ($)", label_size=18,
+              titles_at_tip=True):
     """Navy arrow axes + axis titles (y above the top arrow, x right of
     the right arrow, per the source-chart convention)."""
     _add_arrow(slide, (fig.x(0), fig.y(0)),
@@ -2581,14 +2709,44 @@ def _fig_axes(slide, fig, *, weight_pt=2.0,
     _add_arrow(slide, (fig.x(0), fig.y(0)),
                (Inches(fig.l + fig.w + 0.18), fig.y(0)),
                color=NAVY, weight_pt=weight_pt, head=True)
+    # titles_at_tip: the y title sits just LEFT of the y-arrow's tip and
+    # level with it, the x title just BELOW the x-arrow's tip (Teaching
+    # CLAUDE.md, 2026-08-30).  This is the DECK-WIDE default as of
+    # 2026-08-30; pass False only for a chart that needs the old placement.
     if y_title:
-        _add_text(slide, Inches(fig.l - 0.75), Inches(fig.b - fig.h - 0.62),
-                  Inches(2.0), Inches(0.32), y_title, size=label_size,
-                  bold=True, italic=True, color=NAVY, font="Calibri")
+        if titles_at_tip:
+            # Box sized TIGHT to the label; its vertical MIDDLE sits exactly
+            # at the arrow tip, and its right border Y_TITLE_GAP clear of the
+            # axis line -- sitting ON the axis read as too tight.  (Gap
+            # measured off Nico's recalibration on slide 36, 2026-08-30:
+            # y-axis at x 3.050, "P" box right edge at 2.970.)
+            w = _text_w_in(y_title, label_size, bold=True,
+                           italic=True) + 0.08
+            tip_y = fig.b - fig.h - 0.18
+            _add_text(slide, Inches(fig.l - w - Y_TITLE_GAP),
+                      Inches(tip_y - 0.145),
+                      Inches(w), Inches(0.29), y_title, size=label_size,
+                      bold=True, italic=True, color=NAVY, font="Calibri")
+        else:
+            _add_text(slide, Inches(fig.l - 0.75),
+                      Inches(fig.b - fig.h - 0.62),
+                      Inches(2.0), Inches(0.32), y_title, size=label_size,
+                      bold=True, italic=True, color=NAVY, font="Calibri")
     if x_title:
-        _add_text(slide, Inches(fig.l + fig.w - 0.4), Inches(fig.b + 0.10),
-                  Inches(1.8), Inches(0.32), x_title, size=label_size,
-                  bold=True, italic=True, color=NAVY, font="Calibri")
+        if titles_at_tip:
+            # Box sized tight; its horizontal MIDPOINT sits exactly at the
+            # x-arrow's tip, and its top 0.05" under the axis.
+            w = _text_w_in(x_title, label_size, bold=True,
+                           italic=True) + 0.08
+            tip_x = fig.l + fig.w + 0.18
+            _add_text(slide, Inches(tip_x - w / 2.0), Inches(fig.b + 0.05),
+                      Inches(w), Inches(0.29), x_title, size=label_size,
+                      bold=True, italic=True, color=NAVY, font="Calibri")
+        else:
+            _add_text(slide, Inches(fig.l + fig.w - 0.4),
+                      Inches(fig.b + 0.10),
+                      Inches(1.8), Inches(0.32), x_title, size=label_size,
+                      bold=True, italic=True, color=NAVY, font="Calibri")
 
 
 def _fig_line(slide, fig, p0, p1, *, color=NAVY, weight_pt=2.5, dash=None,
@@ -2617,7 +2775,14 @@ def _fig_guide(slide, fig, pt, *, color=GRAY, to_x=True, to_y=True,
 
 
 def _fig_ylab(slide, fig, yv, label, *, color=NAVY, size=18, bold=False,
-              width_in=0.95):
+              width_in=None):
+    """A y-axis tick label, right-aligned against the axis.
+
+    2026-08-30 (Nico): the box is sized to the label, so it re-fits itself
+    when the text changes.  The right edge - and so the rendered text - is
+    unchanged.  Pass width_in only to pin a box."""
+    if width_in is None:
+        width_in = _text_w_in(label, size, bold=bold, italic=True) + 0.08
     return _add_text(slide, Inches(fig.l - width_in - 0.08),
                      fig.y(yv) - Inches(0.15),
                      Inches(width_in), Inches(0.3), label, size=size,
@@ -2625,17 +2790,162 @@ def _fig_ylab(slide, fig, yv, label, *, color=NAVY, size=18, bold=False,
                      align=PP_ALIGN.RIGHT)
 
 
+def _fig_ylab_subsup(slide, fig, yv, base, sub, sup, *, color=NAVY,
+                     size=16, bold=True):
+    """A y-axis tick label carrying a subscript AND a superscript, e.g.
+    P with a subscript E and a superscript C (2026-08-30, Nico — the
+    price paid by consumers once the externality is taxed).  Right-aligned
+    against the axis, in a box sized to the three runs."""
+    w = (_text_w_in(base, size, bold=bold, italic=True)
+         + _text_w_in(sub, size * 0.72, bold=bold, italic=True)
+         + _text_w_in(sup, size * 0.72, bold=bold, italic=True) + 0.10)
+    box = _add_text(slide, Inches(fig.l - w - 0.08),
+                    fig.y(yv) - Inches(0.15), Inches(w), Inches(0.30), "",
+                    size=size, color=color, font="Calibri",
+                    align=PP_ALIGN.RIGHT)
+    p = box.text_frame.paragraphs[0]
+    for text, base_ln in ((base, None), (sub, "-25000"), (sup, "30000")):
+        r = p.add_run()
+        r.text = text
+        r.font.name = "Calibri"
+        r.font.size = Pt(size)
+        r.font.bold = bold
+        r.font.italic = True
+        r.font.color.rgb = color
+        if base_ln:
+            r._r.find(qn("a:rPr")).set("baseline", base_ln)
+    return box
+
+
 def _fig_xlab(slide, fig, xv, label, *, color=NAVY, size=18, bold=False):
-    return _add_text(slide, fig.x(xv) - Inches(0.5), Inches(fig.b + 0.06),
-                     Inches(1.0), Inches(0.3), label, size=size,
+    """An x-axis tick label, centred on the tick in a box sized to it."""
+    w = _text_w_in(label, size, bold=bold, italic=True) + 0.08
+    return _add_text(slide, fig.x(xv) - Inches(w / 2), Inches(fig.b + 0.06),
+                     Inches(w), Inches(0.3), label, size=size,
                      bold=bold, italic=True, color=color, font="Calibri",
                      align=PP_ALIGN.CENTER)
 
 
+def _fig_vbrace(slide, fig, y_lo, y_hi, x_dev, label, *, color=NAVY,
+                size=14, depth=0.16, gap=0.08, label_w=1.55):
+    """A vertical brace spanning y_lo..y_hi at x_dev inches, opening to the
+    RIGHT (its point faces right, toward the figure), with `label` to its
+    left.  Used for Nico's P_B - P_S = t bracket on slide 64."""
+    y0, y1 = fig.y(y_hi), fig.y(y_lo)
+    span = y1 - y0
+    shp = slide.shapes.add_shape(
+        MSO_SHAPE.LEFT_BRACE, int(Inches(x_dev)), int(y0),
+        int(Inches(depth)), int(span))
+    shp.fill.background()
+    shp.line.color.rgb = color
+    shp.line.width = Pt(1.75)
+    shp.shadow.inherit = False
+    # the caller may place the label itself (pass label=None) when the
+    # left margin is too narrow to hold it
+    if label:
+        _add_text(slide, int(Inches(x_dev - gap) - Inches(label_w)),
+                  int(y0 + span / 2 - Inches(0.17)),
+                  int(Inches(label_w)), Inches(0.34), label, size=size,
+                  bold=True, color=color, font="Calibri",
+                  align=PP_ALIGN.RIGHT)
+    return shp
+
+
+def _fig_underbrace(slide, fig, x_lo, x_hi, y_dev, label, *,
+                    color=NAVY, size=14, depth=0.18, gap=0.06):
+    """A horizontal under-brace spanning x_lo..x_hi with `label` beneath.
+
+    Built from a LEFT_BRACE rotated 270 degrees, so its point faces DOWN;
+    PowerPoint rotates about the shape centre, so the un-rotated shape is
+    authored `depth` wide by `span` tall and centred on where the brace
+    should sit.  `y_dev` is the brace's vertical centre, in inches.
+    """
+    x0, x1 = fig.x(x_lo), fig.x(x_hi)
+    span = x1 - x0
+    cx, cy = (x0 + x1) / 2.0, int(Inches(y_dev))
+    shp = slide.shapes.add_shape(
+        MSO_SHAPE.LEFT_BRACE, int(cx - Inches(depth) / 2),
+        int(cy - span / 2), int(Inches(depth)), int(span))
+    shp.rotation = 270
+    shp.fill.background()
+    shp.line.color.rgb = color
+    shp.line.width = Pt(1.75)
+    shp.shadow.inherit = False
+    # the label needs its own width - a short span would wrap it
+    lw = max(span, int(Inches(3.0)))
+    _add_text(slide, int(cx - lw / 2),
+              int(cy + Inches(depth) / 2 + Inches(gap)),
+              int(lw), Inches(0.34), label, size=size, bold=True,
+              color=color, font="Calibri", align=PP_ALIGN.CENTER)
+    return shp
+
+
+_SWATCH_GEOM = {"sq": (MSO_SHAPE.RECTANGLE, False),
+                "tri": (MSO_SHAPE.RIGHT_TRIANGLE, False),
+                "tri_v": (MSO_SHAPE.RIGHT_TRIANGLE, True)}
+
+
+def _welfare_rows(slide, left, top, width, rows, *, pitch=0.46,
+                  size=19, swatch=0.20, alpha=30, text_dx=0.62):
+    """The welfare-effects legend: each line preceded by a mark in the
+    colour AND SHAPE of the region it names, and - where the line names a
+    COMBINATION of regions - with those marks arranged the way the regions
+    sit in the graph (2026-08-30, Nico).
+
+    A row is ``(layout, marks, text)``:
+      layout  "h" the marks sit side by side (areas side by side in the
+              graph), "v" they stack (one area above the other);
+      marks   a list of ``(colour, kind)``, kind in "sq" / "tri" / "tri_v"
+              ("tri_v" is flipped, mirroring a region whose right angle is
+              on top);
+      text    the line itself, vertically centred on the mark block.
+    """
+    y = top
+    for row in rows:
+        layout, marks, text = row
+        n = len(marks)
+        step = swatch + 0.02
+        block_h = swatch if layout == "h" else (n - 1) * (swatch + 0.01) + swatch
+        for j, mark in enumerate(marks):
+            col, kind = mark if isinstance(mark, tuple) else (mark, "sq")
+            geom, flip = _SWATCH_GEOM[kind]
+            dx = j * step if layout == "h" else 0.0
+            dy = 0.0 if layout == "h" else j * (swatch + 0.01)
+            sq = slide.shapes.add_shape(
+                geom, int(left + Inches(dx)), int(Inches(y + dy)),
+                int(Inches(swatch)), int(Inches(swatch)))
+            if flip:
+                xfrm = sq._element.find(".//" + qn("a:xfrm"))
+                if xfrm is not None:
+                    xfrm.set("flipV", "1")
+            sq.fill.solid()
+            sq.fill.fore_color.rgb = col
+            _set_fill_alpha(sq, alpha)
+            sq.line.color.rgb = NAVY
+            sq.line.width = Pt(0.75)
+            sq.shadow.inherit = False
+        _add_text(slide, int(left + Inches(text_dx)),
+                  int(Inches(y + block_h / 2.0 - 0.17)),
+                  int(width - Inches(text_dx)),
+                  Inches(0.34), text, size=size, color=NAVY,
+                  font="Calibri")
+        # a stacked row is taller than one line, so the next row clears it
+        y += max(pitch, block_h + 0.06)
+
+
 def _fig_curve_label(slide, fig, xv, yv, label, *, color=NAVY, size=20,
-                     bold=True):
+                     bold=True, width=None):
+    """A curve label, in a box just wide enough for the text.
+
+    2026-08-30 (Nico): every label in a figure - not only the axis titles
+    - is sized to its own text, so it re-fits itself when the wording
+    changes and never leaves a wide invisible box to catch the cursor.
+    Pass `width` only to pin a label whose box must stay a fixed size.
+    """
+    w = width if width is not None else (
+        _text_w_in(label, size, bold=bold, italic=True) + 0.08)
     return _add_text(slide, fig.x(xv), fig.y(yv) - Inches(0.16),
-                     Inches(0.9), Inches(0.32), label, size=size, bold=bold,
+                     Inches(w), Inches(0.32), label, size=size, bold=bold,
                      italic=True, color=color, font="Calibri")
 
 
@@ -2921,7 +3231,11 @@ def _title_case(title):
 DIM_DROP = 85064                           # 0.093 in
 
 
-SYMBOL_RE = re.compile(r"([PQDS])([\u2032\u2019']?)([0-9]|Peak)(?![A-Za-z0-9])")
+# 2026-08-30 (Nico): LR is an index like a digit — it means "long run",
+# so P_LR and Q_LR take a real subscript wherever they appear.
+SYMBOL_RE = re.compile(
+    r"(MC|MR|SMC|EMC|AVC|ATC|LAC|LMC|TC|[PQDSwL])([\u2032\u2019']?)"
+    r"(?:_(\w+)|([0-9]|Peak|LR|Labor|min|max))(?![A-Za-z0-9])")
 
 
 SUBSCRIPT_BASELINE = "-25000"      # what PowerPoint writes for subscript
@@ -2941,7 +3255,7 @@ def _split_symbol_runs(para):
             if m.start() > pos:
                 pieces.append((text[pos:m.start()], False))
             pieces.append((m.group(1) + m.group(2), False))
-            pieces.append((m.group(3), True))
+            pieces.append((m.group(3) or m.group(4), True))
             pos = m.end()
         if pos < len(text):
             pieces.append((text[pos:], False))
