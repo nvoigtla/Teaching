@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Splice the live PollEverywhere slides + the pizza Excel-embed slide from
-"Module 2 - In Class with Solutions.pptx" into the built deck — phase-3
+"_handoff_polls_INCLASS.pptx" (carved from "Module 2 - In
+Class with Solutions.pptx") into the built deck — phase-3
 media step, RERUNNABLE so _build_Module2InClass.py never freezes.
 
 Pipeline:  python _build_Module2InClass.py -> python _splice_media.py [deck]
@@ -29,7 +30,13 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).parent
-ORIGINAL = HERE / "Module 2 - In Class with Solutions.pptx"
+# 2026-08-26: the 24 MB original deck is gone from the folder.  The
+# 12 slides the splice needs live in a 2.8 MB SIDECAR carved out of
+# it with PowerPoint via COM (source displays 4, 5, 11, 12, 31, 36,
+# 46, 47, 57, 58, 64, 65, in that order -> sidecar 1..12).  It is a
+# BUILD INPUT: never delete it, never round-trip it through
+# python-pptx.
+ORIGINAL = HERE / "_handoff_polls_INCLASS.pptx"
 
 from _notes_m2 import SPLICED_NOTES
 
@@ -140,11 +147,15 @@ CT_NOTES = ('application/vnd.openxmlformats-officedocument.'
 # 2026-08-25: Nico kept only the CHART slide of the water and yoga
 # poll pairs (sources 31 and 36) and dropped the e-book pair (40/41)
 # with the rest of that example.
+# Values are displays in the SIDECAR, not in the original deck (the
+# kept slides keep their relative order, so 4, 5, 11, 12, 31, 36, 46,
+# 47, 57, 58, 64, 65 became 1..12).  Target 13's value is unused - the
+# SRC_FOR override below sends it to the Excel sidecar instead.
 SPLICE_MAP = {
-    4: 4, 5: 5, 11: 11, 12: 12, 13: 13,
-    32: 31, 36: 36,
-    45: 46, 46: 47,
-    57: 57, 58: 58, 64: 64, 65: 65,
+    4: 1, 5: 2, 11: 3, 12: 4, 13: 13,
+    32: 5, 36: 6,
+    45: 7, 46: 8,
+    57: 9, 58: 10, 64: 11, 65: 12,
 }
 
 # Per-slide source override: (deck, source display, apply the 4:3 -> 16:9

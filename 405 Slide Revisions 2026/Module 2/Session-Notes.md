@@ -1,5 +1,50 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
+## 2026-08-26 — Poll splice moved onto a sidecar; the 24 MB original deleted
+
+**One-line summary.** `Module 2 - In Class with Solutions.pptx` is gone
+from the folder; the 12 slides the In-Class splice needed now live in a
+2.8 MB sidecar, verified byte-equivalent before the original was
+removed.
+
+### What changed
+- **`_handoff_polls_INCLASS.pptx` (2.8 MB) is a BUILD INPUT.** Never
+  delete it and never round-trip it through python-pptx. It was carved
+  with PowerPoint via COM – copy the original, delete every slide
+  except the ones the splice map names, Save – which does all the
+  rel / tags / media bookkeeping and drops the orphaned media
+  (69 slides / 24 MB → 12 slides / 2.8 MB).
+- The kept source displays, in order, were **4, 5, 11, 12, 31, 36, 46,
+  47, 57, 58, 64, 65**, so `SPLICE_MAP` is re-keyed to sidecar slides
+  1–12. Target 13 is unaffected – `SRC_FOR` already sends it to
+  `_handoff_excel_s13.pptx`.
+- `Module 2 - In Class with Solutions.pptx` **deleted** (git history is
+  the archive). The CT comparison decks and the old
+  `Module 2 - Video Part.pptx` were already gone.
+- `_probe/` and `__pycache__/` removed.
+
+### How it was verified (all PASS)
+1. Built the deck once to a side path, then spliced the SAME base twice
+   – once from the original, once from the sidecar – and byte-compared
+   the two packages. The 24 renamed `media` / `tags` parts are
+   byte-identical; every differing shared part is explained by
+   `rId` / part renumbering, plus the cached text of the notes page's
+   live `slidenum` field (PowerPoint recomputes it).
+2. Every spliced slide still carries its `notesSlide` **and** `tags`
+   rels – the notes ARE the PollEverywhere payload, and a missing notes
+   part crashes the slideshow deck-wide.
+3. Full-screen slideshow probe on all 13 spliced slides plus slide 1 –
+   no error banner, and the live PollEv slides render with the add-in
+   bar active.
+
+### Gotcha
+A side-path build breaks `_group_pass.py`, whose `SPLICED_BY_DECK` table
+is keyed by deck FILENAME – grouping is then skipped on the spliced
+slides and `_animate.py` dies on a missing `grp:N`. Verify a splice
+change at the splice stage (build once, splice twice, diff) rather than
+end to end.
+
+
 ## 2026-08-28 (round 10) — Module 2 FINISHED: last edits, tags, podcasts, cleanup
 
 **One-line summary.** Nico's last four rounds of hand-edits ported, the
