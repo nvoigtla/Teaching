@@ -106,6 +106,18 @@ LINKS = {
     "m7p2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=1c65c0ce-2e5a-4527-9078-b08b0133e583",
     "recap7": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=71beb745-5142-4a78-84f2-b08b01355a2c",
     "m7adv": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=055b647a-0998-4ab9-92cf-b08b0133e57c",
+    # Practice exercises (TA Rafael Rubiao's site), added 2026-08-31.
+    # index: https://rafaelrubiao.github.io/mgmt405-practice/index.html
+    "prac_m1": "https://rafaelrubiao.github.io/mgmt405-practice/module-1.html",
+    "prac_m2": "https://rafaelrubiao.github.io/mgmt405-practice/module-2.html",
+    "prac_m3": "https://rafaelrubiao.github.io/mgmt405-practice/module-3.html",
+    "prac_m4a": "https://rafaelrubiao.github.io/mgmt405-practice/module-4-part-1.html",
+    "prac_m4b": "https://rafaelrubiao.github.io/mgmt405-practice/module-4-part-2.html",
+    "prac_m5": "https://rafaelrubiao.github.io/mgmt405-practice/module-5.html",
+    "prac_m6": "https://rafaelrubiao.github.io/mgmt405-practice/module-6.html",
+    "prac_m7a": "https://rafaelrubiao.github.io/mgmt405-practice/module-7-part-1.html",
+    "prac_m7b": "https://rafaelrubiao.github.io/mgmt405-practice/module-7-part-2.html",
+    "prac_m8": "https://rafaelrubiao.github.io/mgmt405-practice/module-8.html",
 }
 
 # ============================== HEADER / INTRO ==============================
@@ -213,7 +225,7 @@ WEEKS = [
                        ("v", "m1v2", "Module 1 – Video 2: Markets", 10),
                        ("v", "m1v3", "Module 1 – Video 3: Demand and Supply", 8),
                        ("v", "m1v4", "Module 1 – Video 4: Market Equilibrium", 7)]},
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(1)},
             {"cat": "podcast", "label": "Other podcasts:",
              "items": [("l", "pod_cb", "The Cost-Benefit Principle"),
@@ -238,7 +250,7 @@ WEEKS = [
         "topics": ["Module 2: Demand Analysis (remaining videos)"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(2)},
             {"cat": "video", "label": "Recap (optional):",
              "items": [("v", "recap1", "Recap of Module 1", 7)]},
@@ -261,6 +273,16 @@ WEEKS = [
              "items": [("t", "Teaching note: Marginal Revenue"),
                        ("t", "Teaching note: Demand Elasticity and Total Revenue"),
                        ("t", "Teaching note: Regressions")]},
+            # Practice exercises (TA site). Placement rule, confirmed
+            # 2026-08-31: the week AFTER the module's own teaching week.
+            # Modules 3 and 6 follow their VIDEO week, not the later
+            # "Applications" week, so Module 3's set is available before
+            # the Week 6 midterm (which covers through Module 3).
+            {"cat": "practice", "label": None,
+             "items": [("l", "prac_m1",
+                        "Online quiz on Module 1: Basic Concepts and Economic Principles"),
+                       ("l", "prac_m2",
+                        "Online quiz on Module 2: Demand Analysis")]},
         ],
         "due": [],
     },
@@ -269,7 +291,7 @@ WEEKS = [
         "topics": ["Module 3: Production & Costs"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(3)},
             {"cat": "video", "label": "Recap (optional):",
              "items": [("v", "recap2", "Recap of Module 2", 8)]},
@@ -301,7 +323,7 @@ WEEKS = [
         "topics": ["Module 4 (Part I): Competitive Markets and Market Interventions"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(4)},
             {"cat": "video", "label": "Recap (optional):",
              "items": [("v", "recap3", "Recap of Module 3", 7)]},
@@ -325,6 +347,9 @@ WEEKS = [
                        ("v", None, "Video 5: Long-Run Competitive Equilibrium", None)]},
             {"cat": "read", "label": "In preparation for the Module 4 (Part I) videos:",
              "items": [("t", "Ch. 8.1 – 8.3")]},
+            {"cat": "practice", "label": None,
+             "items": [("l", "prac_m3",
+                        "Online quiz on Module 3: Production & Costs")]},
         ],
         "due": [],
     },
@@ -335,13 +360,16 @@ WEEKS = [
                    "Module 5: Monopoly and Monopolistic Competition"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(5)},
             {"cat": "read", "label": "In preparation for class:",
              "items": [("t", "For Module 4 (Part II): Ch. 3.1 – 3.4; Ch. 17 (pp. 513 – 524)"),
                        ("t", "For Module 5: Ch. 9.1 – 9.3; Ch. 9.5 – 9.7; Ch. 11.7")]},
             {"cat": "read", "label": None,
              "items": [("t", "Assigned articles for discussion (posted on Bruin Learn)")]},
+            {"cat": "practice", "label": None,
+             "items": [("l", "prac_m4a",
+                        "Online quiz on Module 4 (Part I): Competitive Markets and Market Interventions")]},
         ],
         "weekend": {"days": ("Fri", "Sat"),
                     "groups": [
@@ -362,13 +390,16 @@ WEEKS = [
              "items": [("t", "Midterm Prep: TA Review Sessions and Practice Sessions")]},
         ],
         "exam": {
-            "title": "Individual Midterm Assignment",
-            "window": (("Thu", 0), ("Sun", 0)),   # weekday, week offset from this week
+            # 2026-08-31: header carries the name only; what used to sit in
+            # the header ("covers through Module 3") is now bullet 1.
+            "title": "Midterm Exam (online)",
+            "window": (("Fri", 0), ("Sat", 0)),   # weekday, week offset from this week
             "lines": [
                 "The midterm covers through Module 3.",
-                "2-hour window at home, any time between {w0}, 12:01 am and "
-                "{w1}, 11:59 pm (submission deadline).",
-                "The midterm takes place online.",
+                "3.5-hour window at home – exact time window to be "
+                "determined, will be announced in class.",
+                "The midterm takes place online, with proctoring software.",
+                "Open book, open notes. Calculator allowed.",
             ]},
         "due": [],
     },
@@ -377,7 +408,7 @@ WEEKS = [
         "topics": ["Module 6: Complex Pricing and Advanced Pricing Strategies"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(6)},
             {"cat": "video", "label": "Module 6: Complex Pricing and Advanced Pricing "
                       "Strategies – videos to watch by the weekend:",
@@ -392,6 +423,11 @@ WEEKS = [
             {"cat": "read", "label": "In preparation for the Module 6 videos:",
              "items": [("t", "Ch. 10.1 – 10.4"),
                        ("t", "Ch. 10.6")]},
+            {"cat": "practice", "label": None,
+             "items": [("l", "prac_m4b",
+                        "Online quiz on Module 4 (Part II): Market Distortions / Externalities"),
+                       ("l", "prac_m5",
+                        "Online quiz on Module 5: Monopoly and Monopolistic Competition")]},
         ],
         "due": [("Problem Set 3", 8, "Tue", None)],
     },
@@ -400,7 +436,7 @@ WEEKS = [
         "topics": ["Module 7 (Part I): Oligopoly with Homogenous Goods"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(7)},
             {"cat": "video", "label": "Practice on Module 6 (required):",
              "items": [("v", "m6p1", "Practice Video: Optimal Pricing in two Markets", 19)]},
@@ -414,6 +450,9 @@ WEEKS = [
                        ("v", "m7v4", "Video 4: Bertrand Competition", 12)]},
             {"cat": "read", "label": "In preparation for the Module 7 videos:",
              "items": [("t", "Ch. 11.1 – 11.4")]},
+            {"cat": "practice", "label": None,
+             "items": [("l", "prac_m6",
+                        "Online quiz on Module 6: Complex Pricing and Advanced Pricing Strategies")]},
         ],
         "due": [],
     },
@@ -424,7 +463,7 @@ WEEKS = [
                    "Module 8: Asymmetric Information; Auctions"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "On class material:",
+            {"cat": "podcast", "label": "About Class Material:",
              "items": podcast_items(8)},
             {"cat": "podcast", "label": "Other podcasts:",
              "items": [("l", "pod_tlae", "Economics For All Your Decisions In Life")]},
@@ -434,6 +473,9 @@ WEEKS = [
                        ("t", "For Module 8: Ch. 16.1 – 16.5")]},
             {"cat": "read", "label": None,
              "items": [("t", "Assigned articles for discussion (posted on Bruin Learn)")]},
+            {"cat": "practice", "label": None,
+             "items": [("l", "prac_m7a",
+                        "Online quiz on Module 7 (Part I): Oligopoly with Homogenous Goods")]},
         ],
         "weekend": {"days": ("Fri", "Sat"),
                     "groups": [
@@ -460,6 +502,11 @@ WEEKS = [
                       "those interested in the math – not required for the exam]:",
              "items": [("v", "m7adv", "Practice Video: Oligopoly with Differentiated "
                                       "Goods – Math", 11)]},
+            {"cat": "practice", "label": None,
+             "items": [("l", "prac_m7b",
+                        "Online quiz on Module 7 (Part II): Oligopoly with Diff. Goods; Game Theory"),
+                       ("l", "prac_m8",
+                        "Online quiz on Module 8: Asymmetric Information; Auctions")]},
         ],
         "holiday": {"window": (("Thu", 0), ("Sun", 0)),
                     "text": "Thanksgiving – no further videos"},
@@ -487,15 +534,20 @@ WEEKS = [
         "prep_days": None,
         "prep_groups": [],
         "exam": {
-            "title": "Final Exam",
-            "window": (("Fri", 0), ("Sun", 0)),
+            # 2026-08-31: header carries the name only; coverage moved to
+            # bullet 1, so the old "The exam will cover all material."
+            "title": "Final Exam (online)",
+            "window": (("Sat", 0), ("Sun", 0)),
             "lines": [
+                "The final exam covers all material, Modules 1 – 8.",
                 "The final exam will take place online, and you will have 3.5 hours "
                 "to solve the exam and upload your scanned solutions.",
-                "The exam window runs from {w0} to {w1}.",
-                "The exam will cover all material. There will be about 20 multiple "
-                "choice questions and 3 – 4 problem-solving questions.",
-                "Open book, open notes. See syllabus for further detail.",
+                "The exam window runs from {w0} to {w1} – exact time "
+                "window to be determined, will be announced in class.",
+                "There will be about 20 multiple choice questions and "
+                "3 – 4 problem-solving questions.",
+                "Open book, open notes. Calculator allowed. See syllabus for further detail.",
+                "We will use proctoring software.",
             ]},
         "due": [],
     },

@@ -656,6 +656,13 @@ def week_span_dates(wk):
     return dt(n, "Mon"), dt(n, "Sun")
 
 
+def exam_window(wk):
+    """(start, end) dates of an exam week's exam, read off its own window so
+    p.1, the week band and the exam box always agree (2026-08-31)."""
+    (wd0, off0), (wd1, off1) = wk["exam"]["window"]
+    return dt(wk["num"] + off0, wd0), dt(wk["num"] + off1, wd1)
+
+
 def agenda_due_text(wk):
     parts = []
     for label, w, d, note in wk["due"]:
@@ -665,11 +672,11 @@ def agenda_due_text(wk):
         else:
             parts.append(short)
     if wk["kind"] == "midterm":
-        a, b = dt(wk["num"], "Thu"), dt(wk["num"], "Sun")
-        parts.insert(0, f"Midterm\n{span(a, b)}")
+        a, b = exam_window(wk)
+        parts.insert(0, f"Midterm window\n{span(a, b)}")
     if wk["kind"] == "final":
-        a, b = dt(wk["num"], "Fri"), dt(wk["num"], "Sun")
-        parts.insert(0, f"Final exam\n{span(a, b)}")
+        a, b = exam_window(wk)
+        parts.insert(0, f"Final Exam window\n{span(a, b)}")
     return parts
 
 
@@ -964,13 +971,13 @@ def band_right_label(wk):
         return (f"Video content  \u00b7  suggested: "
                 f"Sun, {fmt(dt(n, 'Sun'))}")
     if k == "midterm":
-        return f"Midterm window: {span(dt(n, 'Thu'), dt(n, 'Sun'))}"
+        return f"Midterm window: {span(*exam_window(wk))}"
     if k == "thanksgiving":
         return "Thanksgiving week"
     if k == "examprep":
         return "Exam preparation"
     if k == "final":
-        return f"Final exam: {span(dt(n, 'Fri'), dt(n, 'Sun'))}"
+        return f"Final Exam window: {span(*exam_window(wk))}"
     return ""
 
 
@@ -1011,23 +1018,31 @@ def build_week(doc, wk):
         rounded_card(doc, pop_due, fill="FFFFFF", border=GOLD, border_w=15875,
                      width_in=WEEK_CARD_W)
 
-    # topics card
+    # topics card -- on an exam week the exam card takes its place, so the
+    # week opens with one dark-yellow-headed box instead of three (2026-08-31)
+    if wk.get("exam"):
+        ex = wk["exam"]
+        (wd0, off0), (wd1, off1) = ex["window"]
+        w0 = fmt(dt(n + off0, wd0), wd=True)
+        w1 = fmt(dt(n + off1, wd1), wd=True)
+
+        def pop_exam(cell, inner_w):
+            card_header(cell, ex["title"], EXAMYEL, text_color=NAVY, size=12)
+            for line in ex["lines"]:
+                render_item(cell, ("t", line.format(w0=w0, w1=w1)))
+        rounded_card(doc, pop_exam, fill=CREAM, border=GOLD,
+                     width_in=WEEK_CARD_W)
+
     def pop_topics(cell, inner_w):
-        if wk["kind"] in ("midterm", "final"):
-            # hand-edit 2026-08-15: exam weeks drop the "Topics covered"
-            # label; midterm card 14pt, final card 12pt (Nico's sizes)
-            sz = 14 if wk["kind"] == "midterm" else 12
-            p = cp(cell)
-            add_run(p, wk["topics"][0], bold=True, color=NAVY, size=sz)
-            return
         p = cp(cell)
         add_run(p, "Topics covered", bold=True, color=NAVY, size=11.5)
         for ti, topic in enumerate(wk["topics"]):
             p2 = cell.add_paragraph()
             p2.paragraph_format.space_before = Pt(2 if ti == 0 else 1)
             add_run(p2, topic, size=11)
-    rounded_card(doc, pop_topics, fill="FFFFFF", border=NAVY,
-                 width_in=WEEK_CARD_W)
+    if not wk.get("exam"):
+        rounded_card(doc, pop_topics, fill="FFFFFF", border=NAVY,
+                     width_in=WEEK_CARD_W)
 
     # prep section: Videos / Podcasts / Suggested Reading cards inside a
     # transparent thick-navy container box
@@ -1052,7 +1067,9 @@ def build_week(doc, wk):
         for key, title, glyph, fill in (
                 ("video", "Videos", "▶", VIDEOYEL),
                 ("podcast", "Podcasts", "\U0001F3A7", "FFFFFF"),
-                ("read", "Suggested Reading", "\U0001F4D6", "FFFFFF")):
+                ("read", "Suggested Reading", "\U0001F4D6", "FFFFFF"),
+                ("practice", "Suggested Additional Practice Exercises",
+                 "\u270E", "FFFFFF")):
             if key not in cats:
                 continue
             h = build_rounded_box(doc, title, glyph, fill, cats[key])
@@ -1084,21 +1101,6 @@ def build_week(doc, wk):
             for g in we["groups"]:
                 render_group(cell, g)
         rounded_card(doc, pop_weekend, fill=fill, border=border,
-                     width_in=WEEK_CARD_W)
-
-    if wk.get("exam"):
-        spacer(doc, CARD_GAP_PT)
-        ex = wk["exam"]
-        (wd0, off0), (wd1, off1) = ex["window"]
-        w0 = fmt(dt(n + off0, wd0), wd=True)
-        w1 = fmt(dt(n + off1, wd1), wd=True)
-
-        def pop_exam(cell, inner_w):
-            card_header(cell, f"{ex['title']}   ·   online   ·   {w0} – {w1}",
-                        EXAMYEL, text_color=NAVY, size=11.5)
-            for line in ex["lines"]:
-                render_item(cell, ("t", line.format(w0=w0, w1=w1)))
-        rounded_card(doc, pop_exam, fill=CREAM, border=GOLD,
                      width_in=WEEK_CARD_W)
 
     if wk.get("holiday"):
