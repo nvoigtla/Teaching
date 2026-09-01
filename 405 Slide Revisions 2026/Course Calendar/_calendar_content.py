@@ -53,7 +53,7 @@ LINKS = {
     # Module 1 -- videos re-recorded and re-uploaded as NEW Panopto
     # sessions 2026-08-28 (ids b4b3...; the old b1d9... ids were last
     # year's recordings). Running times still unmeasured -> "(++)".
-    "m1v1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=45ebea5c-ce47-4f69-9693-b4b30104a768",
+    "m1v1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b7207fac-c4f6-45fd-be9c-b4b800fc0e3f",  # re-uploaded 2026-09-01 (was 45ebea5c-...a768)
     "m1v2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=ea13ec98-9412-41fc-accd-b4b30104a761",
     "m1v3": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7ad4fc39-0070-4aa6-90a9-b4b30104a761",
     "m1v4": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8bd7e577-22b2-4da6-888d-b4b30104a76a",
@@ -176,7 +176,8 @@ PODCASTS = {
         "wrap":  ("https://www.dropbox.com/scl/fi/o2p9rnwnb276apb1jbfis/Module-2-Podcast-Wrap-Up.m4a?rlkey=m8tjqy0qnk5ts42etrljgd3ps&st=0dzo4j5u&dl=0", 20)},
     3: {"intro": ("https://www.dropbox.com/scl/fi/fto3ouj9gcum5gjs8128b/Module-3-Podcast-Intro.m4a?rlkey=vcpxzwex5r4ad6dm09nrr72qh&st=6cepogg8&dl=0", 7),
         "wrap":  ("https://www.dropbox.com/scl/fi/0geb6malz4suoruqbnp24/Module-3-Podcast-Wrap-Up.m4a?rlkey=j51911drl9t8173ep5zx4w3cy&st=gy4ocrqp&dl=0", 23)},
-    4: {"intro": (None, None), "wrap": (None, None)},
+    4: {"intro": ("https://www.dropbox.com/scl/fi/k0vaqb6u7yej6sjagrauv/Module-4-Podcast-Intro.m4a?rlkey=foc9ajsc0e8wmzsq7ttiyobgd&st=3rivyeff&dl=0", 4),
+        "wrap":  ("https://www.dropbox.com/scl/fi/n2ie2rqaud9n0u0477cs6/Module-4-Video-Wrap-Up.m4a?rlkey=zikuktu87plh008kil4yekt25&st=yieacety&dl=0", 22)},
     5: {"intro": (None, None), "wrap": (None, None)},
     6: {"intro": (None, None), "wrap": (None, None)},
     7: {"intro": (None, None), "wrap": (None, None)},
@@ -221,7 +222,7 @@ WEEKS = [
              # names verbatim from the video title cards in
              # Module 1/_build_Module1.py (make_video_title); lengths
              # lengths read off Panopto 2026-08-28 by _video_minutes.py
-             "items": [("v", "m1v1", "Module 1 – Video 1: Introduction", 9),
+             "items": [("v", "m1v1", "Module 1 – Video 1: Introduction", 9),  # 8:53, re-read 2026-09-01 after the re-upload
                        ("v", "m1v2", "Module 1 – Video 2: Markets", 10),
                        ("v", "m1v3", "Module 1 – Video 3: Demand and Supply", 8),
                        ("v", "m1v4", "Module 1 – Video 4: Market Equilibrium", 7)]},

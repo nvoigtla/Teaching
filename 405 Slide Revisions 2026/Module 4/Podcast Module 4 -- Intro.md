@@ -4,133 +4,74 @@ PRE-CLASS PREVIEW (5 MINUTES MAXIMUM)
 
 ---
 
-## Audio Overview prompt — paste this into the "Customize" box
-
-The box asks: **"What should the AI hosts focus on in this episode?"** Paste the
-paragraph below.
-
-> Focus on giving a short preview of Module 4 to executives pursuing an MBA at UCLA Anderson. The hard limit comes first: this episode must run no longer than 5 minutes, roughly 700 spoken words in total, about a dozen short exchanges. Name each idea, give it one plain sentence, and move on. Use two hosts: one who has done the reading and is briefing a colleague who has not and just wants a sense of what is coming. Speak in the future tense, as in "in Module 4 we will look at". Open with a line like "Here is a preview of what to expect from Module 4." Call it Module 4, never a masterclass, and say "the class covers" rather than "the source material" or "these notes". Give the listener an intuitive grasp of each core idea in plain language: what a price taker is and why a competitive firm cannot choose its price, why the profit-maximizing quantity is the one where marginal cost meets the market price, the difference between the short-run decision to stop production and the long-run decision to shut down and leave the industry, why entry and exit push economic profit to zero, and what consumer surplus, producer surplus and deadweight loss measure. Be explicit that the price-versus-average-variable-cost test is a SHORT-RUN rule, where capital is fixed and the fixed costs are owed either way, while the price-versus-long-run-average-cost test is a LONG-RUN rule, where capital can be adjusted. Use the words stop production for the short run, and shut down or exit for the long run, and never use the word operate for either decision. Hold back the payoff: mention that the class works through a family cabbage farm, a coffee bean producer, a chicken farmer, the minimum wage, rent control and a noisy airport, but do not work any example through, do not give figures, and do not say how any case turns out. Those are for the classroom. Keep returning to the one unifying idea: in a competitive market you do not set the price, you only choose the quantity, and you find it by weighing what one more unit brings in against what it costs. Keep the language measured and go easy on words like massive, huge and enormous; use them a couple of times at most, where the size of something is the actual point, and otherwise state the fact plainly. Warm, curious and conversational, not a lecture. Above all, stay under 5 minutes.
-
----
-
 ## Instructions for the audio hosts (read this first)
 
-- **Length is the binding constraint. No longer than 5 minutes – roughly 700
-  spoken words in total, about a dozen short exchanges.** Name each idea, give
-  it one plain sentence, and move on. Do not add connective narrative and do
-  not work any example through.
+- **This is an intuition episode, not a technical one.** Give the plain idea a
+  listener could repeat to a colleague over coffee. Name the QUESTION the class
+  answers, never the rule or formula that answers it. **No equations, no curve
+  names, no acronyms, no "X equals Y" rules.** If a sentence needs two pieces
+  of jargon to work, it does not belong in this episode.
+- **Length:** 5 minutes maximum, about a dozen short exchanges.
 - **Audience: executives pursuing an MBA at UCLA Anderson.** Never say
   "Executive MBA students".
-- **Call it "Module 4", never a "masterclass".**
-- **Say "the class covers…" or "Module 4 looks at…"** – never "the source
-  material", "this document", or "the notes".
-- **Two hosts:** one has done the reading and is prepared; the other has not,
-  and just wants a quick sense of what is coming. Future tense throughout.
-- **Open with:** "Here is a preview of what to expect from Module 4."
-- **Give an intuitive grasp of every core concept**, in plain language. This is
-  a preview, not a teaser – if you name a term, say in one sentence what it
-  means.
-- **But hold back the payoff.** Name the examples as illustrations; do not
-  work them through, do not quote figures, and do not say how any case
-  resolves. Those are the reward for showing up to class.
-- **Always say which regime a rule lives in.** The price-versus-average-
-  variable-cost test is a **short-run** rule: capital is fixed and the fixed
-  costs are owed whether or not the firm produces. The price-versus-long-run-
-  average-cost test is a **long-run** rule: capital is adjustable and there
-  are no fixed costs left to escape.
-- **Fixed vocabulary, and it matters.** In the short run a firm can only
-  **stop production** – a temporary halt, with the fixed costs still owed. In
-  the long run it **shuts down**, meaning it exits the industry and escapes
-  those fixed costs. Never use the word **operate** for either decision: it
-  blurs exactly the distinction the class is drawing.
-- **Explain decisions by intuition, not arithmetic.** "Does one more ton bring
-  in at least what it costs to grow?" – not derivatives.
-- **State each result no more strongly than the economics supports.** Do not
-  turn a qualified finding into a flat claim in either direction.
-- **On rising costs:** total cost curves upward because of the diminishing
-  returns from Module 3 – each extra unit costs a little more than the last.
-  That is about the *cost of another unit rising*, not about output falling.
-- **Keep the language measured.** Go easy on "massive", "huge", "enormous",
-  "game-changing" – a couple of times across the episode at most, where the
-  size of something is the actual point. Otherwise state the fact plainly.
-- **Keep returning to the throughline** (below).
-- Warm, curious, conversational – two smart colleagues, not a lecture. Define
-  terms plainly and go light on formulas.
-
-**The throughline:** in a competitive market you do not set the price. You
-choose the quantity, and you find it by weighing what one more unit brings in
-against what it costs. Everything in the second half of the module is judged
-by the same yardstick – the mutually beneficial trades an intervention
-prevents.
+- **Call it "Module 4", never a "masterclass".** Say "the class covers…" or
+  "Module 4 looks at…" — never "the source material" or "the notes".
+- **Two hosts:** one has done the reading and is briefing a colleague who has
+  not. Future tense throughout. Open with "Here is a preview of what to expect
+  from Module 4."
+- **Hold back the payoff.** Name the examples; do not work any through, do not
+  quote figures, do not say how a case resolves.
+- **One term may be named** — *price taker* — and it is explained in everyday
+  words in the same breath. Do not stack a second technical term on it.
+- **Vocabulary that matters:** in the short run a firm can only **stop
+  production**; in the long run it **shuts down** and leaves the business
+  altogether. Never say "operate" for either.
+- **Keep the language measured.** Go easy on "massive", "huge", "enormous".
+- **The throughline, returned to at the end:** in a fiercely competitive market
+  you do not get to choose your price — the only real decision left is how much
+  to make.
 
 ---
 
 ## What Module 4 will cover
 
-Module 4 starts with the most competitive market there is, works out how a firm
-behaves in it, then asks what happens when something interferes.
+Module 4 starts with the toughest kind of market a business can find itself in:
+one where you have no say over your own price. It works out how a company
+behaves there, and then asks what happens when someone interferes.
 
-### 1. Market structures
+**Where a business sits.** Some companies can set their price; some just have
+to take whatever the market is paying. Module 4 begins by sorting markets along
+that spectrum, and spends most of its time at the far end — the **price
+taker**, a seller so small relative to the market that its own decisions move
+nothing.
 
-Markets sort along a spectrum by three features: how many firms, how similar
-their products, how easy entry is. At one end, perfect competition, where a firm
-has no influence on price at all – a **price taker**. At the other, monopoly, a
-single seller. Monopolistic competition and oligopoly fall in between, where
-firms are **price searchers** with some room to set price.
+**The only decision left.** If the price is handed to you, the interesting
+question is how much to make. The class works out how a company answers that,
+and the answer turns out to be a way of thinking rather than a calculation:
+keep going while the next unit is still worth making.
 
-### 2. Perfect competition
+**When you are losing money.** This is the part most managers get wrong. A
+business in the red does not automatically stop — sometimes carrying on is the
+cheaper of two bad options, because some bills arrive whether you produce or
+not. Module 4 separates the temporary decision to **stop production** from the
+permanent decision to **shut down** and leave, and shows why they are not the
+same call.
 
-Three conditions: many firms, an identical product, free entry. Each firm then
-faces a flat demand curve at the market price – charge a little more and you sell
-nothing. The class uses farmers' protests over a subsidy cut to show what that
-feels like from inside.
+**Why good years do not last.** When a competitive business is doing unusually
+well, other people notice. The class follows what that does to profits over
+time, and why the comfortable margin tends to disappear.
 
-### 3. Producing in the short run
+**When someone steps in.** Governments tax things, cap rents, set minimum
+wages. Module 4 builds a way of seeing who actually gains, who loses, and how
+much value simply vanishes — value that nobody captures, because deals both
+sides wanted never happen. One finding worth waiting for: who ends up paying a
+tax has surprisingly little to do with who writes the cheque.
 
-Every profit maximiser sets marginal revenue equal to marginal cost. For a price
-taker marginal revenue is just the market price, so the rule becomes: produce
-where marginal cost equals price. Price is handed to you; quantity is the only
-decision left.
+**When the cost lands on someone else.** Sometimes the person making a decision
+is not the person who bears its full cost — pollution, noise, a neighbour's
+choices. The class asks what a market does on its own in that situation, and
+what can be done about it.
 
-Then the harder question: if the firm is losing money, should it stop? In the
-SHORT RUN capital is fixed and the fixed costs are owed whether or not anything
-is produced, so the comparison is price against average VARIABLE cost. A family
-cabbage farm and a coffee bean producer each get worked through, with the answers
-saved for class.
-
-### 4. From one firm's costs to market supply
-
-A price taker's marginal cost curve *is* its supply curve. The class then asks
-what happens when every firm's costs fall at once – not the same thing as one
-firm's costs falling.
-
-### 5. The long run
-
-Capital becomes adjustable, so no fixed costs remain and the benchmark is
-long-run average cost. Firms can also enter and leave. A firm that cannot cover
-long-run average cost **shuts down** and exits, and entry and exit push economic
-profit to zero. A story about a chicken farmer shows entry happening in real
-time.
-
-### 6. Market distortions and regulations
-
-Consumer surplus is the gap between what buyers would pay and what they do pay;
-producer surplus is the same gap on the selling side; deadweight loss is the
-trades both sides wanted that no longer happen. The class applies all three to a
-sales tax, to the minimum wage as a price floor, and to rent control as a price
-ceiling – including a natural experiment that tested rent control directly. One
-result worth waiting for: who bears a tax has little to do with who hands the
-money over.
-
-### 7. Externalities
-
-Some costs and benefits land on people outside the transaction – pollution on one
-side, a neighbour's well-kept front yard on the other. Left alone, a market does
-too much of the harmful thing, because the person deciding does not face the full
-cost. A tax equal to that outside cost can correct it. The module closes on a
-case where the arithmetic gives a startling answer.
-
-### Where it points
-
-You do not set the price. You choose the quantity, and you find it at the margin
-– where one more unit stops paying for itself.
+Along the way there is a family cabbage farm, a coffee bean producer, a chicken
+farmer, and a fight over a noisy airport. How each one turns out is the reward
+for showing up.

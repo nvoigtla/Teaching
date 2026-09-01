@@ -477,3 +477,52 @@ $1.50-a-gallon petrol externality.
 1. No Wrap-Up **Video** doc was asked for; say the word and it reuses the
    wrap-up body verbatim with a video-specific instruction block.
 2. One episode per NotebookLM notebook – the two files must never share one.
+
+---
+
+## 2026-09-01 - Round 5: the intro podcast rewritten for intuition
+
+Not my work - these changes were already in the working tree when the session
+began; this entry records them so the commit is documented.
+
+### Files worked on
+
+| File | Change |
+|---|---|
+| `Podcast Module 4 -- Intro.md` | rewritten to the intuition-only rule (+88 / -121 lines) |
+| `../../CLAUDE.md` (Teaching layer) | +26 lines: the new "preview gives INTUITION, never the technical apparatus" rule under Podcasts |
+
+### What changed
+
+1. **The preview no longer carries the technical apparatus.** Round 4's intro
+   named the rules themselves (produce where marginal cost meets price, compare
+   price to average variable cost, entry and exit drive economic profit to
+   zero). The rewrite states the QUESTION each section answers instead, in
+   plain words. The host instructions now open with "This is an intuition
+   episode, not a technical one" and ban equations, curve names, acronyms and
+   "X equals Y" rules.
+2. **The rule was promoted into the Teaching `CLAUDE.md`**, with the four
+   worked before/after pairs and the test to apply before sending: a body
+   sentence carrying two pieces of course jargon, or any "X equals Y" rule,
+   gets rewritten. The constraint is scoped to the PREVIEW - the wrap-up is a
+   recall episode and keeps the technical vocabulary.
+3. **Length:** the body is now 406 words (703 including the instruction
+   block), close to the ~400 target that Round 4's 536-word draft overshot.
+
+### Open items
+
+1. **The doc no longer carries its paste-ready Audio Overview prompt.** The
+   rewrite dropped the "## Audio Overview prompt - paste this into the
+   Customize box" block, so the file now opens straight into the host
+   instructions. The convention wants that block at the top of every source
+   doc as a redundancy on top of the in-doc instructions, and the prompt would
+   in any case need rewriting to match the intuition-only rule - the old one
+   listed the rules explicitly. Worth deciding whether to restore it.
+2. The wrap-up doc was NOT touched and keeps its technical vocabulary, which
+   is what the new rule intends.
+3. Both episodes are now recorded and linked in the course calendar: intro
+   4 min, wrap-up 22 min. The wrap-up file is named
+   `Module-4-Video-Wrap-Up.m4a` on Dropbox rather than
+   `Module-4-Podcast-Wrap-Up.m4a`; see the Course Calendar notes.
+4. Round 4's open item still stands: no Wrap-Up **Video** doc has been asked
+   for.

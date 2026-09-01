@@ -245,3 +245,71 @@ the podcast groups, and rebuilt both exam weeks as a single dark-yellow box.
   is no PyMuPDF / pdf2image on this machine).
 - Measure a label before trusting it to fit: PIL `ImageFont.truetype`
   on `C:/Windows/Fonts/calibrib.ttf`; practice-card text width is 5.566 in.
+
+---
+
+## 2026-09-01 - Module 4 podcast links, new Module 1 Video 1 session
+
+Pasted in Module 4's two podcast links, read their running times off Dropbox,
+and swapped Module 1's Video 1 for the re-uploaded Panopto session.
+
+### Files worked on
+
+| File | Change |
+|---|---|
+| `_calendar_content.py` | `PODCASTS[4]` intro + wrap links and minutes; `LINKS["m1v1"]` new session id; Week 1 `m1v1` length |
+| `Calendar EMBA Hybrid -- Fall 2026.docx` | rebuilt three times (intro only, then both podcasts, then the new video link) |
+
+### What changed in the document
+
+1. **Module 4 podcasts are live links**, replacing the plain-text
+   placeholders: intro **3:35 -> 4 min**, wrap-up **21:47 -> 22 min**, both
+   read by `_podcast_minutes.py` straight off the Dropbox files. Modules 5 - 8
+   are still placeholders.
+2. **Module 1, Video 1: Introduction** points at the re-uploaded session
+   `id=b7207fac-c4f6-45fd-be9c-b4b800fc0e3f` (was `45ebea5c-...a768`), length
+   **8:53 -> 9 min**. Week 1's four videos now read 9 / 10 / 8 / 7 min.
+
+### Decisions
+
+- **The wrap-up file is named `Module-4-Video-Wrap-Up.m4a`**, not
+  `Module-4-Podcast-Wrap-Up.m4a` like modules 1 - 3. It is an `.m4a` and Nico
+  supplied it as the wrap-up podcast, so it is wired to the
+  *Podcast: Wrap-Up of Module 4* bullet as-is. Renaming it on Dropbox would
+  change the share URL, so the naming inconsistency stays.
+- **A re-recorded video loses its old running time.** When the new m1v1
+  session was still private, the length was set to `None` (prints `(++)`)
+  rather than carrying the old 9 min forward - the old number described a
+  different file. It happened to come back as 9 min once the session was
+  shared.
+- **No PDF this round** (Nico: "you can create only the word file"), so the
+  committed `.pdf` now lags the `.docx`.
+- Backups were rolled before each content-changing rebuild, but NOT before
+  the one rebuild that only regenerated identical content - rolling there
+  would have pushed a good version off the end of the chain.
+
+### Open items
+
+1. **The `.pdf` is stale.** Word's COM `ExportAsFixedFormat` hung twice
+   (Word started, stayed Responding, wrote nothing; no modal dialog was
+   visible in an `EnumWindows` dump). Killing `WINWORD` and exporting to a
+   scratch path did not help either. Retry, or Save-As from Word by hand.
+2. **Dropbox share URLs cannot be derived from the file name** - the `fi` id
+   and `rlkey` are random per file. Two of the links pasted for Module 4 were
+   byte-identical, so the wrap-up had to be requested separately. Worth
+   checking the two URLs differ before building.
+3. **`(++)` remains on 15 videos** - Module 2 (3), Module 3 (7), Module 4 (5).
+   Their Panopto sessions are not shared publicly.
+   `python _video_minutes.py m2 m3 m4` fills them in as each is shared.
+
+### Commands worth remembering
+
+- Podcast lengths: `python _podcast_minutes.py` (range-GETs the Dropbox
+  `.m4a` and parses `moov/mvhd`; prints the minutes to paste into `PODCASTS`).
+- Video lengths: `python _video_minutes.py m1` - `LOCKED (not shared
+  publicly)` means the session needs its share setting changed, not that the
+  link is wrong. Panopto's `oembed` endpoint 404s here and `Embed.aspx`
+  carries no duration, so `DeliveryInfo.aspx` is the only route.
+- Confirm a link actually landed in the built file:
+  read `word/_rels/document.xml.rels` out of the `.docx` with `zipfile` and
+  grep the session id / file name.

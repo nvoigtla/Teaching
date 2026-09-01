@@ -1182,6 +1182,32 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     the specific numbers, and how each case resolves** – those are the
     payoff for class; name the example *types* as illustrations without
     working them through. **Future tense** ("in Module X we'll look at…").
+    - **The preview gives INTUITION, never the technical apparatus**
+      (2026-08-31, Nico – the Module 4 preview came out "very detailed and
+      technical"). "Intuitive grasp of each core concept" means the plain
+      idea a listener could repeat to a colleague over coffee – NOT the
+      rule, the test, or the formula that the class will spend an hour
+      building. So name the QUESTION the module answers, not the machinery
+      that answers it:
+      - "how a firm decides how much to make when it has no say over the
+        price it gets" – **not** "produce where marginal cost equals price";
+      - "when a business that is losing money should keep going anyway, and
+        when it should stop" – **not** "compare price to average variable
+        cost";
+      - "why unusually good profits in a competitive business never last" –
+        **not** "entry and exit drive economic profit to zero";
+      - "how to see who really gains and who loses when a government steps
+        in, and how much value simply vanishes" – **not** "consumer surplus,
+        producer surplus and deadweight loss".
+      A term may be NAMED as a label when the class will use it constantly
+      (*price taker*), but it is then dissolved into everyday words in the
+      same breath, and no second technical term is stacked on top of it.
+      **Test before sending:** if a sentence in the body contains two or
+      more pieces of course jargon, or any "X equals Y" rule, rewrite it.
+      No equations, no curve names, no acronyms.
+      - This constraint is on the PREVIEW only. The **wrap-up** is a recall
+        episode and SHOULD use the technical vocabulary, because the
+        listener has already sat through the class.
     Open with a line like "Here's a preview of what to expect from
     Module X." Two hosts: **one who did the reading and is prepared**,
     briefing **one who did not and just wants a quick sense of what's
