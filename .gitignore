@@ -29,3 +29,7 @@ __pycache__/
 # Render / probe output and side-path test builds
 _probe/
 *_test.pptx
+# Regenerable analysis dumps (diff reports and deck text extracts) - the
+# scripts that produce them are tracked, the output is not
+_diff_*.txt
+_deck_content.md

@@ -288,3 +288,192 @@ FREEZE the build script and start editing the .pptx by hand.
 1. Nothing outstanding on the deck.
 2. Video links and running times in the calendar are placeholders.
 3. Nico is about to hand-edit the finalized deck.
+
+## 2026-08-31 – Round 3: video hand-edits adopted, not-in-video block appended
+
+**One-line summary:** Adopted every hand edit Nico made in the five recorded
+per-video decks back into `Module 4 - Revised.pptx`, then appended the 36
+slides no video contains a second time behind two dividers — 90 → **128
+slides**.
+
+### First: the folder held the wrong decks
+`Recorded Video Slides/` initially contained Nico's **Module 1** video decks
+(Introduction / Markets / Demand and Supply / Equilibrium). Flagged rather
+than guessed; he replaced them with the five Module 4 decks. Worth
+re-checking the folder contents against the module before diffing anything.
+
+### The video ↔ deck mapping (`_video_map.py`)
+The five video decks hold 54 slides between them. Blocks are delimited by the
+video title cards at deck slides 1, 9, 14, 49, 54; video 5's block ends at 63.
+
+| Video | slides | maps to |
+|---|---|---|
+| 1 Introduction to Market Structures | 7 | 1, 2, 4 – 8 |
+| 2 Perfect Competition | 5 | 9 – 13 |
+| 3 Profit Maximization of a Price Taker | 31 | 14 – 28, 30 – 33, 37 – 48 |
+| 4 Firm-Level and Market Supply | 5 | 49 – 53 |
+| 5 Long-Run Competitive Equilibrium | 6 | 54 – 58, 63 |
+
+**Not in any video (36 slides):** 3 (Some Logistics), 29 (Ross Stores),
+34 – 36 (the three-slide poll run), 59 (Drug Market), 60 (its poll),
+61 – 62 (Arrest Dealers / Users), and 64 – 90 (the whole in-class part:
+agenda items 3 and 4 plus the summary). 54 + 36 = 90, asserted by
+`_video_map.check()`.
+
+### Chronology check before adopting anything
+Filesystem mtimes are misleading (local time vs the UTC in `core.xml`). All
+five video decks' internal `modified` timestamps (05:24 – 16:15Z) are LATER
+than the deck's (05:10Z), and `git status` showed the deck unmodified since
+commit db0616d — so every difference is a video-deck hand edit and adopting
+is the right direction. **Do this check first every time**; if the deck were
+the newer file, adopting would silently revert his work.
+
+### Method: wholesale slide-part transplant, not edit replay
+`_adopt_videos.py` replaces each mapped deck slide's part with the video
+deck's, verbatim, copying its images (deduplicated by SHA-1), notes part and
+tags part across and resetting the cached slide-number field. Replaying
+individual edits would have missed things — **paragraph-level bullet
+properties (`buChar` / `marL` / `indent`) are invisible to a geometry diff**,
+and 25 slides carried re-choreographed `<p:timing>`. Safe because the video
+decks were carved from this deck: layout and master are byte-identical apart
+from a cached date-placeholder string (`8/30/2026` vs `8/31/2026`).
+
+### What the hand edits were
+25 of 54 pairs differed. Two title changes (13 "Why Farmers Cannot Pass On
+Their Costs" → "Perfect Competition and Farmer Protests"; 37 and 38 put
+"Solution" first), a takeaway bar deleted from 30 with the three panels
+shifted down 0.17", `q` → `Q` axis labels on 51 and 53, new callout cards on
+53 ("Capital Q for market quantity", "Small q for firm quantity",
+"High-yield seeds reduce MC"), a resized photo on 56 and 58, and **new shape
+groupings on 10 chart slides** (16, 18, 25, 31, 40 – 44, 53) where he merged
+each guide line with its label. Animations changed on 25 slides.
+
+### The poll swap — worth knowing
+The deck carried exactly ONE live PollEverywhere embed (slide 24, "What is the
+optimal quantity produced?"); `SPLICE_MAP` in `_splice_media.py` has only that
+one entry, though `_handoff_polls_M4.pptx` holds six. In video 3 Nico
+**swapped** which poll is live: slide 11 (→ deck 24) is now a plain POLL
+placeholder, and slide 29 (→ deck 46) carries a live poll, "The Coffee Bean
+Producer Should…" (embed `9aba19fa`). Adopted as-is, so the deck still has
+exactly one live poll — now at **46** instead of 24. To put the cabbage poll
+back, add `24: ("M4", 1)` to `SPLICE_MAP` and re-run `_splice_media.py`.
+
+### The appended block
+- **91** divider "Slides Not Included / in the Videos"
+- **92 – 127** the 36 not-in-video slides again, in their original order,
+  byte-identical to their originals apart from the cached page number
+- **128** divider "Some Applications of the Material / Covered in Module 4,
+  Videos 1 – 5" — the empty section Nico will fill, then move to its own deck
+
+Both dividers are Module 1 slide 50's construction (navy Calibri 54 pt bold
+centred, gold strip at y 4.625", footer rule + gold strip + course line +
+live `slidenum` field, no top bar), with Module 4's footer string. Titles are
+title-cased per the deck rule, so "not included" became "Not Included".
+
+Duplicated slides get their **own copy** of their notes part — a notes slide
+carries a relationship back to its one slide, so sharing one is invalid. None
+of the 36 carries a `tags` part, so no PollEv embed id is duplicated.
+
+### New files (all rerunnable, all build inputs for this pass)
+| File | Role |
+|---|---|
+| `_video_map.py` | the 54-pair mapping + `NOT_IN_VIDEO`, self-asserting |
+| `_diff_videos.py` | 5-dimension diff: geom / runs / notes / groups / anim. `M4_DECK=<file>` to point it elsewhere |
+| `_match.py` | 3-pass shape matcher (exact → text → nearest blank) and the page-number filter |
+| `_adopt_videos.py` | the transplant + append pass; `--dry-run`, `--out` |
+| `_verify_adopt.py` | 5 structural checks on the result |
+
+**Gotcha that cost time:** a naive match on (kind, text) pairs every blank
+shape with whatever blank comes first, which turned one slide into 50 phantom
+"moved" reports. `_match.py` fixes it, and drops the footer page number
+(its cached value legitimately differs between a video deck and the deck).
+
+### Verification (all gates green)
+- `_diff_videos.py` on all five dimensions: **0 of 54** pairs differ.
+- Byte-hash of slides 1 – 90: 39 mapped slides changed, 15 mapped already
+  identical, **0 non-mapped slides touched**.
+- `_verify_adopt.py`: slide count, divider wording, all 36 duplicates
+  identical to source, all 121 cached page numbers correct, poll tag+notes
+  paired with no duplicated embed id, every rel target resolves.
+- PowerPoint COM open: 128 slides, 88 animated; the un-animated set is
+  exactly the title cards, agenda slides, poll slides, draw-live blanks 61/62
+  and the two dividers.
+- Full-screen slideshow probe on 1, 24, 34, 40, 46, 57, 91, 92, 120, 128 —
+  all captured, no "slide failed to open properly" banner (slide 1 is where a
+  broken poll tag would surface deck-wide), and slide 46's live poll renders.
+
+### Open
+1. `_build_Module4.py` stays FROZEN — the .pptx is the source of truth. This
+   pass did zip + lxml surgery only; do not re-run the build script.
+2. The **poll swap** above: confirm 46 live / 24 placeholder is what he wants.
+3. The duplicated copies of slides 3, 29, 34 – 36, 59 – 62 still carry their
+   `Module 4 · Video k · …` top-bar tags outside a video block, which the
+   tag rule would normally forbid. Left alone deliberately — the block is a
+   working copy he will break up. Retag if it survives.
+4. Scratch left in place (cleanup is its own step): `_probe/` and
+   `_diff_{geom,runs,notes,groups,anim}.txt`.
+
+### Same session, later: the duplicate block cut to 9 slides
+
+Nico cut displays 101 – 127 – the duplicates of slides 64 – 90. Those are agenda
+items 3 and 4 plus the summary, **designated in-class from the start, so they
+could not possibly have been in a video**; re-listing them said nothing. Done by
+re-running the pass from the pre-adoption deck with a new
+`DUPLICATE_AT_END = [3, 29, 34, 35, 36, 59, 60, 61, 62]` in `_video_map.py`,
+rather than by hand-surgery on the finished file. `NOT_IN_VIDEO` still holds all
+36 so the 54 + 36 = 90 completeness assertion still bites.
+
+**Deck is now 101 slides:** 1 – 90 the adopted main deck, 91 the divider, 92 – 100
+the 9 slides that sit INSIDE a video block yet were dropped from the recording,
+101 the applications divider. Re-verified: slides 1 – 100 byte-identical to the
+128-slide version, only divider B changed (cached page number 128 → 101); all
+five video-deck diffs still 0 of 54; `_verify_adopt.py` all pass; PowerPoint
+opens it, 66 animated. Backups: `_t-1` = the 128-slide version, `_t-2` = the
+original 90.
+
+## 2026-08-31 – Round 4: the two podcast source docs
+
+**One-line summary:** Wrote `Podcast Module 4 -- Intro.md` and
+`Podcast Module 4 -- Wrap-up.md`, each self-contained, from the MAIN part of the
+deck (slides 1 – 90; the 91 – 101 appendix ignored per the podcast rule).
+
+### The throughline chosen
+In a competitive market the firm does not choose its price, only its quantity –
+and it finds that quantity at the margin, where one more unit stops paying for
+itself. Everything in the second half is judged by the same yardstick: the
+mutually beneficial trades an intervention prevents.
+
+### Length – the thing that keeps going wrong
+First drafts came in at **695** words (intro) and **3,097** (wrap-up), against
+targets of ~400 and ~2,400. Trimmed to **536** and **2,624** (≈ 3.6 and 17.5
+minutes at 150 wpm). The intro stops at 536 rather than 400 because the rule also
+requires an intuitive grasp of *every* core concept and Module 4 has seven
+sections; cutting further would have turned the preview into a teaser. If it
+still runs long, the panel's own Shorter setting is the stronger lever.
+
+### Module-4-specific host instructions (beyond the standing rules)
+- **The short-run / long-run verb convention is the single most important one
+  here**, because the module spends a section on it and the hosts would garble
+  it: short run = **stop production** (a temporary halt, fixed costs still
+  owed); long run = **shut down / exit** (leaves the industry, escapes the fixed
+  costs). **Never "operate".** Stated in both docs and both prompts.
+- Which regime each rule lives in: P ≥ AVC is SHORT-RUN, P ≥ LAC is LONG-RUN.
+- Two results not to overstate: the minimum-wage evidence is genuinely mixed
+  (employment barely moves, hours do), and the Argentina rent-control figures
+  are **reported in the press, not from a study** – the docs say so explicitly.
+- Tax incidence turns on elasticity, not on who remits.
+
+### Figures verified before they went in the wrap-up
+Recovered the deck's cost function from the two optima it states and checked
+every number quoted: **TC = 60,000 + 135Q + 0.2Q²**; at P = 400, Q* = 662.5 and
+profit **+27,781.25**; at P = 210, Q* = 187.5 and profit **−52,968.75**, matching
+slide 38 exactly; AVC there is **172.50**, so P > AVC and producing beats
+stopping by **7,031.25** (52,968.75 against the full 60,000 of TFC). The
+wrap-up keeps only the numbers that carry the lesson: the 400 → 210 drop, the
+53,000-against-60,000 comparison, the coffee producer's 10 against 12, and the
+$1.50-a-gallon petrol externality.
+
+### Open
+1. No Wrap-Up **Video** doc was asked for; say the word and it reuses the
+   wrap-up body verbatim with a video-specific instruction block.
+2. One episode per NotebookLM notebook – the two files must never share one.
