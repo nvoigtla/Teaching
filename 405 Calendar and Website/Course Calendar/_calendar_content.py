@@ -137,8 +137,6 @@ TEXTBOOK_NOTES = [
     "See the different purchase options in the class syllabus.",
     "The “Figure it out” boxes in each chapter should be considered "
     "as advanced (voluntary) readings.",
-    "For additional and optional practice, you can find review questions at "
-    "the end of each chapter (with answers at the end of the textbook).",
 ]
 
 MATH_REFRESHER_INTRO = ("If you feel you could use a math refresher before "
@@ -146,10 +144,6 @@ MATH_REFRESHER_INTRO = ("If you feel you could use a math refresher before "
 MATH_REFRESHER_ITEMS = [
     [("t", "Take the "), ("l", "math_quiz", "Math Quiz"), ("t", " (10 – 15 min)")],
     [("t", "Watch the "), ("l", "math_videos", "Math Review Videos")],
-    [("t", "Textbook reading: Math review Appendix Section 1 + Section 2 "
-           "(only first derivatives)")],
-    [("t", "Achieve: the first section of the Achieve course provides math "
-           "and graphing video tutorials")],
 ]
 
 SIGNIN_NOTE = [("t", "Sign-in to watch videos: Use option "),

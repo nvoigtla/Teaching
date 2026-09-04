@@ -5,6 +5,162 @@ Deliverable: `Calendar EMBA Hybrid -- Fall 2026.docx` (+ `.pdf`), built by
 source of truth for dates, links, video/podcast lists; the build script owns
 layout, palette and chrome.
 
+**Where this stands (end of 2026-09-04):** the calendar is current and was
+restyled on 2026-09-03 to match the new course website in
+`../Course Website/` -- podcast cards light grey, a clapperboard for Videos,
+the on-campus card above the prep container and carrying a classical-building
+glyph, problem-set cards in dark red, weeks 10 and 11 coloured as video
+content, and three lines deleted (end-of-chapter review questions, the
+"Achieve" math item, the math-review appendix reading). Rebuild with
+`python _build_calendar.py`, export the PDF through Word COM, then run
+`_check_pagination.ps1` -- it PASSES at 14 pages.
+
+**One divergence to remember:** the website prints "Podcast (before class):" /
+"(after class):" with the timing word underlined, but the calendar still
+prints the plain "Podcast: Intro to Module X". The calendar's
+`("p", url, text, minutes)` item format carries no per-run formatting, so the
+underline cannot travel with it.
+
+---
+
+**Follow-up the same day:** the glyph is now `U+1F3DB` **+ `U+FE0F`**, the
+emoji presentation selector. A bare `U+1F3DB` is rendered as a flat monochrome
+text glyph by some platforms -- which is what the first attempt produced -- and
+only the selector forces the color emoji Nico attached. Worth remembering for
+any future symbol: if an emoji comes out flat, it is missing FE0F.
+
+## 2026-09-03 (on-campus glyph) - classical building in the class header
+
+The on-campus card's header now carries **U+1F3DB, the classical building**,
+matching the website. `render_weekend()` sets `hdr_glyph` per branch and
+passes it to `card_header(..., glyph=hdr_glyph, inner_w_in=inner_w)`; the
+"videos to watch" branch passes `None`.
+
+**Measured before editing**, because this header is long and the calendar
+right-aligns its glyphs at a tab stop -- a wrapped header would grow the card
+and could break the one-page-per-week invariant. The text measures **5.14" in
+Calibri Bold 11.5pt against the 6.07" tab stop**, so there is 0.73" of
+clearance. `_check_pagination.ps1` **PASSES** afterwards (14 pages), and
+`document.xml` carries 3 glyphs -- weeks 1, 5 and 9.
+
+---
+
+## 2026-09-03 (last change) - weeks 10 and 11 read as video content
+
+`KIND_META["thanksgiving"]` and `KIND_META["examprep"]` now use `VIDEOYEL`
+instead of `"FFFFFF"`, so the page-1 agenda rows for **weeks 10 and 11 are
+pale gold rather than white**. Nico's reasoning: neither week has an in-person
+component, so both count as video content. The band labels are unaffected
+(both kinds have `legend=None`) and the three-item legend is hardcoded
+separately, so it needed no change.
+
+This was made alongside the same change on the website, where those weeks'
+agenda badges now carry the video-content color. Rebuilt and re-exported
+(backups rolled); `_check_pagination.ps1` **PASSES** at 14 pages.
+
+---
+
+## 2026-09-03 (later still) - problem-set cards in dark red
+
+A problem set's due card now has a **dark-red rule (`DARKRED = "C00000"`) over
+a very transparent dark-red wash (`DUEWASH = "FBEDED"`)**, matching the
+website. Week 11's Practice Final Exam is not a problem set, so it keeps the
+gold rule - the gate is `label.lower().startswith("problem set")`.
+
+**Word has no alpha channel.** The website uses `rgba(192,0,0,.07)`; `DUEWASH`
+is that colour flattened onto white by hand: `0.07 x 192 + 0.93 x 255 = 251`
+(`FB`) for red and `0.07 x 0 + 0.93 x 255 = 237` (`ED`) for green and blue. If
+the website's alpha changes, recompute rather than guessing a hex.
+
+Rebuilt and re-exported (backups rolled). `_check_pagination.ps1` **PASSES** -
+14 pages. Verified 5 `C00000` borders and 5 `FBEDED` fills in `document.xml`,
+one per problem set.
+
+---
+
+## 2026-09-03 (last edit of the day) - math review appendix line deleted
+
+Deleted `"Textbook reading: Math review Appendix Section 1 + Section 2 (only
+first derivatives)"` from `MATH_REFRESHER_ITEMS`. That list is now down to two
+items, the Math Quiz and the Math Review Videos.
+
+This was the one line still printing in the calendar but hidden on the website.
+With it gone, **the calendar and the website carry exactly the same content** -
+the website's `DROP_*` hooks are both empty now.
+
+Rebuilt the `.docx` and re-exported the `.pdf` (backups rolled first).
+`_check_pagination.ps1` **PASSES** - 14 pages, one page per week.
+
+---
+
+## 2026-09-03 (later the same day) - clapperboard glyph, two lines deleted
+
+Follow-up to the changes below, again for consistency with the course website.
+
+1. **Videos card glyph is now a clapperboard** (U+1F3AC) - the Hollywood
+   "action" symbol. It replaced the play triangle, then briefly the film reel
+   (U+1F39E), which Nico did not like. Video bullets are unaffected.
+2. **Deleted the textbook note** "For additional and optional practice, you
+   can find review questions at the end of each chapter ..." from
+   `TEXTBOOK_NOTES`.
+3. **Deleted the "Achieve" item** from `MATH_REFRESHER_ITEMS`.
+
+`TEXTBOOK_NOTES` is down to 2 entries and `MATH_REFRESHER_ITEMS` to 3.
+
+**Still in the calendar, dropped on the WEBSITE only:** "Textbook reading:
+Math review Appendix Section 1 + Section 2 (only first derivatives)". Nico
+named only the two lines above for calendar deletion.
+
+Rebuilt the `.docx` and re-exported the `.pdf` (backups rolled first).
+`_check_pagination.ps1` **PASSES** - 14 pages, one page per week.
+
+---
+
+## 2026-09-03 - podcast cards grey, film-reel glyph, class card on top
+
+Three changes requested while building the course website, so that the two
+documents keep the same visual language.
+
+### Files worked on
+
+| File | Change |
+|---|---|
+| `_build_calendar.py` | `PODGRAY` constant; podcast card fill; Videos card glyph; `render_weekend()` hoisted |
+| `Calendar EMBA Hybrid -- Fall 2026.docx` / `.pdf` | rebuilt and re-exported (`_t-1` backups rolled first) |
+
+### What changed in the document
+
+1. **Podcast cards are light grey** (`PODGRAY = "EFF1F4"`), not white, so the
+   three categories read apart at a glance: videos pale gold, podcasts grey,
+   suggested reading white.
+2. **The Videos card header glyph is a film reel** (U+1F39E) instead of the
+   play triangle. The calendar's video BULLETS never used a triangle, so
+   nothing else changed. Same glyph on the website.
+3. **On an on-campus week the class card now sits ABOVE the preparation
+   container.** The class is the anchor of the week. The weekend block moved
+   into a local `render_weekend()` that is called either before or after the
+   prep section, keyed on a new `weekend_first` flag.
+
+### Verified
+
+- `_check_pagination.ps1` **PASSES** - every week still fits on one page, 14
+  pages in total. The reorder does not change any card's height.
+- In `word/document.xml`, the class-card header ("4:00 - 5:30 pm") now precedes
+  the "Before class" prep heading in weeks 1, 5 and 9; week 2 (a video week)
+  is unchanged and still reads "During the week"; there are 8 `EFF1F4` fills,
+  one per week with a podcast group.
+- PDF re-exported through Word COM (no LibreOffice on these machines).
+
+### Context worth keeping
+
+- **The website mirrors these three choices**, and its README records them.
+  The site is generated from `_calendar_content.py` by
+  `../Course Website/_build_site.py`, so a content edit here updates both
+  documents: rebuild the calendar, then run the site build and deploy.
+- Colour emoji ignore the CSS/Word text colour, so the glyphs render in their
+  own colours rather than the pale gold the code asks for. That was already
+  true of the headphones and book glyphs.
+
 ---
 
 ## 2026-08-28 – recolor, podcasts, video names, one-page weeks

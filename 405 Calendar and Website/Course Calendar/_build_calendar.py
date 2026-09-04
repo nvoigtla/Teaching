@@ -45,6 +45,13 @@ LIGHT = "C8CDD3"
 HDRGRAY = "D9D9D9"     # weekend deadline header
 BODYGRAY = "F3F4F6"    # weekend deadline body / agenda deadline rows
 AGGRAY = "E9EBEE"
+# light-grey body of a podcast card (2026-09-03, Nico): videos are
+# yellow and reading is white, so podcasts take a light grey.
+PODGRAY = "EFF1F4"
+# A problem set is dark red, matching the website (2026-09-03, Nico).
+# Word has no alpha, so DUEWASH is C00000 at 7% composited over white.
+DARKRED = "C00000"
+DUEWASH = "FBEDED"
 
 # Category coding, matching the slide decks (2026-08-28, Nico):
 #   in class = dark blue   videos = light yellow   exams = darker yellow
@@ -79,8 +86,10 @@ KIND_META = {
     "deadline":     dict(fill=VIDEOYEL, legend="Video content"),
     "midterm":      dict(fill=EXAMYEL,  legend="Exam"),
     "final":        dict(fill=EXAMYEL,  legend=None),
-    "thanksgiving": dict(fill="FFFFFF", legend=None),
-    "examprep":     dict(fill="FFFFFF", legend=None),
+    # Weeks 10 and 11 have no in-person component, so the agenda colors them
+    # as video content rather than leaving them white (2026-09-03, Nico).
+    "thanksgiving": dict(fill=VIDEOYEL, legend=None),
+    "examprep":     dict(fill=VIDEOYEL, legend=None),
 }
 
 # ---------------- low-level helpers ----------------
@@ -1015,8 +1024,13 @@ def build_week(doc, wk):
                         bold=True, color=NAVY, size=11.5)
             else:
                 add_run(p, f"{label} – {note}", bold=True, color=NAVY, size=11.5)
-        rounded_card(doc, pop_due, fill="FFFFFF", border=GOLD, border_w=15875,
-                     width_in=WEEK_CARD_W)
+        # Only a problem set takes the dark-red treatment; the practice
+        # final is not one, so it keeps the gold rule (2026-09-03, Nico).
+        is_pset = label.lower().startswith("problem set")
+        rounded_card(doc, pop_due,
+                     fill=DUEWASH if is_pset else "FFFFFF",
+                     border=DARKRED if is_pset else GOLD,
+                     border_w=15875, width_in=WEEK_CARD_W)
 
     # topics card -- on an exam week the exam card takes its place, so the
     # week opens with one dark-yellow-headed box instead of three (2026-08-31)
@@ -1044,6 +1058,41 @@ def build_week(doc, wk):
         rounded_card(doc, pop_topics, fill="FFFFFF", border=NAVY,
                      width_in=WEEK_CARD_W)
 
+    def render_weekend():
+        """The on-campus class card (or, on a video week, the
+        "videos to watch" card)."""
+        spacer(doc, CARD_GAP_PT)
+        we = wk["weekend"]
+        da, db = we["days"]
+        if wk["kind"] == "oncampus":
+            title = (f"On-campus class   ·   Fri, {fmt(dt(n, 'Fri'))}, 4:00 – 5:30 pm"
+                     f"   ·   Sat, {fmt(dt(n, 'Sat'))}, 9:00 am – 12:30 pm")
+            hdr_fill, fill, border = INCLASS, PALEBLUE, NAVY
+            # classical building, matching the website (2026-09-03, Nico).
+            # The header text measures 5.14" against a 6.07" right tab stop,
+            # so the glyph has room and cannot push the line to wrap.
+            hdr_glyph = "\U0001F3DB\uFE0F"
+        else:
+            title = (f"Videos to watch   ·   suggested deadline: "
+                     f"{fmt(dt(n, da), wd=True)} / {fmt(dt(n, db), wd=True)}")
+            hdr_fill, fill, border = INCLASS, VIDEOYEL, NAVY
+            hdr_glyph = None
+
+        def pop_weekend(cell, inner_w):
+            card_header(cell, title, hdr_fill, text_color="FFFFFF", size=11.5,
+                        glyph=hdr_glyph, inner_w_in=inner_w)
+            for g in we["groups"]:
+                render_group(cell, g)
+        rounded_card(doc, pop_weekend, fill=fill, border=border,
+                     width_in=WEEK_CARD_W)
+
+    # An on-campus week LEADS with the class card (2026-09-03, Nico): the
+    # class is the anchor of the week, so it sits above the preparation
+    # container rather than under it.
+    weekend_first = bool(wk.get("weekend")) and wk["kind"] == "oncampus"
+    if weekend_first:
+        render_weekend()
+
     # prep section: Videos / Podcasts / Suggested Reading cards inside a
     # transparent thick-navy container box
     if wk["prep_groups"]:
@@ -1065,8 +1114,12 @@ def build_week(doc, wk):
             c = g.get("cat", "other")
             (others if c == "other" else cats.setdefault(c, [])).append(g)
         for key, title, glyph, fill in (
-                ("video", "Videos", "▶", VIDEOYEL),
-                ("podcast", "Podcasts", "\U0001F3A7", "FFFFFF"),
+                # clapperboard -- the Hollywood "action" symbol -- for the
+                # card header (2026-09-03, Nico). It replaced the play
+                # triangle and then the film reel. Video BULLETS are
+                # unaffected; they carry no glyph of their own.
+                ("video", "Videos", "\U0001F3AC", VIDEOYEL),
+                ("podcast", "Podcasts", "\U0001F3A7", PODGRAY),
                 ("read", "Suggested Reading", "\U0001F4D6", "FFFFFF"),
                 ("practice", "Suggested Additional Practice Exercises",
                  "\u270E", "FFFFFF")):
@@ -1083,25 +1136,8 @@ def build_week(doc, wk):
             spacer(doc, CONTAINER_AFTER_PT)  # clear the container's bottom edge
 
     # weekend / exam / holiday blocks
-    if wk.get("weekend"):
-        spacer(doc, CARD_GAP_PT)
-        we = wk["weekend"]
-        da, db = we["days"]
-        if wk["kind"] == "oncampus":
-            title = (f"On-campus class   ·   Fri, {fmt(dt(n, 'Fri'))}, 4:00 – 5:30 pm"
-                     f"   ·   Sat, {fmt(dt(n, 'Sat'))}, 9:00 am – 12:30 pm")
-            hdr_fill, fill, border = INCLASS, PALEBLUE, NAVY
-        else:
-            title = (f"Videos to watch   ·   suggested deadline: "
-                     f"{fmt(dt(n, da), wd=True)} / {fmt(dt(n, db), wd=True)}")
-            hdr_fill, fill, border = INCLASS, VIDEOYEL, NAVY
-
-        def pop_weekend(cell, inner_w):
-            card_header(cell, title, hdr_fill, text_color="FFFFFF", size=11.5)
-            for g in we["groups"]:
-                render_group(cell, g)
-        rounded_card(doc, pop_weekend, fill=fill, border=border,
-                     width_in=WEEK_CARD_W)
+    if wk.get("weekend") and not weekend_first:
+        render_weekend()
 
     if wk.get("holiday"):
         spacer(doc, CARD_GAP_PT)

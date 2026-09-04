@@ -33,3 +33,7 @@ _probe/
 # scripts that produce them are tracked, the output is not
 _diff_*.txt
 _deck_content.md
+
+# Course website: single-file preview bundles are generated from the design
+# files plus data/course-data.js by _bundle_preview.py
+_preview/
