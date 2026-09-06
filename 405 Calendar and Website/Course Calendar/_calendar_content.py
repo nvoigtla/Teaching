@@ -10,6 +10,8 @@ Week 1 = the calendar week (Mon-Sun) containing the first on-campus Friday.
 Every date in the document is expressed as (week_number, weekday).
 """
 
+import os
+import re
 from datetime import date, timedelta
 
 # ============================== DATE ENGINE ==============================
@@ -40,10 +42,84 @@ def span(d1, d2):
     return f"{fmt(d1)} – {fmt(d2)}"
 
 
+# ============================== SECTIONS ==============================
+# MGMT 405 runs twice in Fall 2026 with the SAME material and the same due
+# dates (2026-09-05, Nico). Only the meeting pattern, the room, the TA
+# mailbox, the Bruin Learn course and the published names differ, so both
+# sections come out of this one file.
+#
+# Pick one with the MGMT405_SECTION environment variable; every builder
+# also takes "--section femba" and sets it before importing this module.
+
+SECTIONS = {
+    "emba": {
+        "label": "EMBA",
+        "subtitle_tail": "EMBA Section 2 (Hybrid)",
+        # both sections meet in G305 from 2026-09-06 (Nico)
+        "classroom": "G305",
+        # (weekday, time) per meeting of an on-campus weekend, in order
+        "meetings": (("Fri", "4:00 – 5:30 pm"),
+                     ("Sat", "9:00 am – 12:30 pm")),
+        "class_times": "Fridays 4:00 – 5:30 pm  ·  Saturdays 9:00 am – 12:30 pm",
+        "ta_email": "ta405.emba2@gmail.com",
+        "bruinlearn_course": "https://bruinlearn.ucla.edu/courses/237825",
+        "repo": "MGMT-405-EMBA",
+        "calendar_docx": "Calendar EMBA Hybrid -- Fall 2026",
+        "syllabus_docx": "Course Syllabus - 405 EMBA Fall 2026",
+    },
+    "femba": {
+        "label": "FEMBA",
+        "subtitle_tail": "FEMBA Section 2 (Hybrid)",
+        "classroom": "G305",
+        # FEMBA meets on the SAME three Saturdays as EMBA, but only on the
+        # Saturday, and for a long afternoon (2026-09-05, Nico).
+        "meetings": (("Sat", "2:00 – 8:00 pm"),),
+        "class_times": "Saturdays 2:00 – 8:00 pm",
+        "ta_email": "ta405.femba2@gmail.com",
+        "bruinlearn_course": "https://bruinlearn.ucla.edu/courses/237860",
+        "repo": "MGMT-405-FEMBA",
+        "calendar_docx": "Calendar FEMBA Hybrid -- Fall 2026",
+        "syllabus_docx": "Course Syllabus - 405 FEMBA Fall 2026",
+    },
+}
+
+SECTION = os.environ.get("MGMT405_SECTION", "emba").lower()
+if SECTION not in SECTIONS:
+    raise SystemExit("unknown MGMT405_SECTION %r (want one of %s)"
+                     % (SECTION, ", ".join(sorted(SECTIONS))))
+SEC = SECTIONS[SECTION]
+
+SECTION_LABEL = SEC["label"]
+REPO = SEC["repo"]
+SITE_BASE = "https://nvoigtla.github.io/%s" % REPO
+CALENDAR_DOCX = SEC["calendar_docx"]
+SYLLABUS_DOCX = SEC["syllabus_docx"]
+MEETINGS = SEC["meetings"]
+TA_EMAIL = SEC["ta_email"]
+
+
+def class_when(week):
+    """The on-campus header line for a week: every meeting with its date and
+    time, e.g. "Fri, Sep 25, 4:00 – 5:30 pm   ·   Sat, Sep 26, 9:00 am –
+    12:30 pm", or just the Saturday for FEMBA."""
+    return "   ·   ".join("%s, %s" % (fmt(dt(week, wd), wd=True), t)
+                          for wd, t in MEETINGS)
+
+
+def class_days_line(week):
+    """The agenda table's sub-line: "class: Fri/Sat Sep 25/26", or
+    "class: Sat Sep 26" for a section that meets once."""
+    days = [dt(week, wd) for wd, _ in MEETINGS]
+    names = "/".join(d.strftime("%a") for d in days)
+    dates = fmt(days[0]) + "".join("/%d" % d.day for d in days[1:])
+    return "class: %s %s" % (names, dates)
+
+
 # ============================== HYPERLINKS ==============================
 
 LINKS = {
-    "ta_email":   "mailto:TA405.EMBA2@gmail.com",
+    # filled in from the section table below -- FEMBA has its own mailbox
+    "ta_email":   "mailto:%s" % (TA_EMAIL or ""),
     "math_quiz":  "https://bruinlearn.ucla.edu/courses/195707?invitation=0GYbOXWd6mBK4bwem1dgAP7Jq2ad1PZo5Wp4kTYQ",
     "math_videos": "https://bruinlearn.ucla.edu/courses/195707/pages/econ-math-review-videos",
     # asm_panopto (dropbox screenshot) retired 2026-08-15: the screenshot is now
@@ -59,14 +135,18 @@ LINKS = {
     "m1v4": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8bd7e577-22b2-4da6-888d-b4b30104a76a",
     "recap1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2f3c674d-13da-4308-ada2-b08b0134d2ff",
     # Podcasts
-    "pod_cb":  "https://podcasts.apple.com/us/podcast/core-principle-1-the-cost-benefit-principle-the-pros-cons/id1523898793?i=1000488478204",
-    "pod_oc":  "https://podcasts.apple.com/us/podcast/core-principle-2-the-opportunity-cost-principle-or-what/id1523898793?i=1000488478205",
+    "pod_cb":  "https://podcasts.apple.com/us/podcast/core-principle-1-the-cost-benefit-principle-the-pros-cons/id1523898793?i=1000786324917",
+    "pod_oc":  "https://podcasts.apple.com/us/podcast/core-principle-2-the-opportunity-cost-principle-or-what/id1523898793?i=1000786324632",
     "pod_freak": "https://freakonomics.com/podcast/should-we-really-behave-like-economists-say-we-do-a-new-freakonomics-radio-podcast/",
     "pod_tlae": "https://art19.com/shows/think-like-an-economist/episodes/d48893ba-1f44-43d6-a271-be306d55d0f9?fbclid=IwAR14eZxCKFr8FOC5jQ3ZvGia0WQZRs-zytfYxEUjfWsPlj8aKRzIF8zpmYQ",
-    # Module 2
-    "m2v1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=acc0db41-0b2e-4b30-9c2a-b08b012eeeb1",
-    "m2v2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=647e34af-e623-45af-882b-b08b012f00f2",
-    "m2v3": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=717874c9-f69f-4aa2-a66f-b08b012f0df4",
+    # Module 2 -- videos 1-3 re-recorded and re-uploaded as NEW Panopto
+    # sessions 2026-09-04 (ids b4bb...; the old b08b... ids were last
+    # year's recordings). Running times read straight off Panopto the
+    # same day: 25 / 23 / 24 min. The two PRACTICE videos were not
+    # retaped and keep last year's sessions.
+    "m2v1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8fcb86ee-57e8-48ec-906d-b4bb0136917f",
+    "m2v2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=406d26d1-60f9-4169-afd0-b4bb01369180",
+    "m2v3": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=885b4e89-7ffe-4305-8490-b4bb01369174",
     "m2p1": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d9a1abf9-e8e5-448b-bbbd-b08b012eeeb0",
     "m2p2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=cf0b4650-7a8b-41a0-9a6e-b08b012eeeb9",
     "recap2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4979325b-0d4a-45d8-9401-b08b0134db2a",
@@ -118,19 +198,34 @@ LINKS = {
     "prac_m7a": "https://rafaelrubiao.github.io/mgmt405-practice/module-7-part-1.html",
     "prac_m7b": "https://rafaelrubiao.github.io/mgmt405-practice/module-7-part-2.html",
     "prac_m8": "https://rafaelrubiao.github.io/mgmt405-practice/module-8.html",
+    # The course website and the BruinLearn class site (2026-09-04). Both
+    # live here rather than in a build script, so the calendar, the website
+    # and the syllabus all read one address.
+    "website": "https://nvoigtla.github.io/MGMT-405-EMBA/",
+    "bruinlearn_course": SEC["bruinlearn_course"],
+    # The two PDFs the website hosts, so the calendar, the site and the
+    # syllabus can all link them (2026-09-04). File names carry no spaces
+    # because they are served straight off GitHub Pages.
+    "calendar_pdf": SITE_BASE + "/MGMT-405-Calendar-Fall-2026.pdf",
+    "syllabus_pdf": SITE_BASE + "/MGMT-405-Syllabus-Fall-2026.pdf",
 }
 
 # ============================== HEADER / INTRO ==============================
 
 COURSE_TITLE = "MGMT 405 – Managerial Economics"
-SUBTITLE = f"Course Calendar – {TERM} – EMBA Section 2 (Hybrid)"
+SUBTITLE = f"Course Calendar – {TERM} – {SEC['subtitle_tail']}"
 BRUINLEARN_NOTE = ("Please check Bruin Learn under “Syllabus” "
                    "for the latest version of this calendar.")
+# The course website, carried at the top of page 1 (2026-09-04, Nico). The
+# link text is the bare address, so it stays usable in print; WEBSITE_TEXT
+# and LINKS["website"] have to be kept in step.
+WEBSITE_LEAD = "Course website:"
+WEBSITE_TEXT = "nvoigtla.github.io/%s" % REPO
 SYLLABUS_NOTE = ("Please check Bruin Learn under “Syllabus” "
                  "for the more detailed Class Syllabus.")
 TA_NAME = "Rafael Rubiao"
-CLASSROOM = "A301"
-CLASS_TIMES = "Fridays 4:00 – 5:30 pm  ·  Saturdays 9:00 am – 12:30 pm"
+CLASSROOM = SEC["classroom"]
+CLASS_TIMES = SEC["class_times"]
 
 TEXTBOOK_NOTES = [
     "“Microeconomics” by Goolsbee, Levitt, Syverson (4th edition). "
@@ -179,17 +274,73 @@ PODCASTS = {
 }
 
 
-def podcast_items(mod):
-    """The two podcast bullets for module `mod`, as
-    ("p", url, text, minutes) items. url and minutes are None until the
-    episode has been uploaded."""
-    ep = PODCASTS.get(mod, {})
+def podcast_items(*specs):
+    """Podcast bullets as ("p", url, text, minutes) items; url and minutes
+    are None until the episode has been uploaded.
+
+    Each spec is either a module number (both episodes, which is what the
+    module pages of the website want) or a (module, kind) pair with kind
+    "intro" or "wrap".
+
+    The WEEKS below schedule the two episodes separately (2026-09-05, Nico):
+    an intro has to be heard BEFORE the first section of its module is
+    taught, a wrap-up AFTER the last one. Module 2 is the clearest case --
+    its first section is taught in the week 1 class, so its intro sits in
+    week 1 alongside Module 1's, while both wrap-ups sit in week 2."""
+    TEXT = {"intro": "Podcast: Intro to Module %d",
+            "wrap": "Podcast: Wrap-Up of Module %d"}
     out = []
-    for key, text in (("intro", "Podcast: Intro to Module %d" % mod),
-                      ("wrap", "Podcast: Wrap-Up of Module %d" % mod)):
-        url, mins = ep.get(key, (None, None))
-        out.append(("p", url, text, mins))
+    for spec in specs:
+        mod, kinds = (spec, ("intro", "wrap")) if isinstance(spec, int) \
+            else (spec[0], (spec[1],))
+        ep = PODCASTS.get(mod, {})
+        for kind in kinds:
+            url, mins = ep.get(kind, (None, None))
+            out.append(("p", url, TEXT[kind] % mod, mins))
     return out
+
+
+# When each WRAP-UP episode should be listened to -- the phrase after the
+# underlined "after" (2026-09-05, Nico). A module whose core material is all
+# on video can be wrapped up in the same week as those videos; one taught in
+# class waits until after the class.
+#
+#   "class"                 the module's last material is taught in class
+#   "watching the ... "     all core material is on video; the on-campus
+#                           session only does APPLICATIONS for that module
+#   "class and watching ... " part I in class, part II on video (Module 2)
+#
+# An INTRO is always "before class".
+WRAP_AFTER = {
+    1: "class",                                     # remainder taught in wk 1 class
+    2: "class and watching the Module 2 videos",    # part I in class, part II on video
+    3: "watching the Module 3 videos",              # wk 5 class does Applications only
+    4: "class",                                     # part II (externalities) in class
+    5: "class",                                     # taught entirely in the wk 5 class
+    6: "watching the Module 6 videos",              # wk 9 class does Applications only
+    7: "class",                                     # part II (game theory) in class
+    8: "class",                                     # taught entirely in the wk 9 class
+}
+
+
+def podcast_when(text):
+    """("before"|"after", rest of the phrase) for a module podcast bullet;
+    None for anything that is not one of the two module episodes.
+
+    Both builders call this, so the wording is written once. The first
+    element is the word they underline."""
+    rest = text[len("Podcast: "):] if text.startswith("Podcast: ") else text
+    low = rest.lower()
+    m = re.search(r"module\s+(\d+)", low)
+    if "intro" in low:
+        # A module taught entirely on video is previewed before those
+        # videos, not before a class -- WRAP_AFTER already knows which
+        # modules those are (2026-09-06, Nico).
+        tail = WRAP_AFTER.get(int(m.group(1)), "class") if m else "class"
+        return ("before", tail if tail.startswith("watching") else "class")
+    if "wrap" in low and m:
+        return ("after", WRAP_AFTER.get(int(m.group(1)), "class"))
+    return None
 
 
 # ============================== WEEKS ==============================
@@ -220,12 +371,13 @@ WEEKS = [
                        ("v", "m1v2", "Module 1 – Video 2: Markets", 10),
                        ("v", "m1v3", "Module 1 – Video 3: Demand and Supply", 8),
                        ("v", "m1v4", "Module 1 – Video 4: Market Equilibrium", 7)]},
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(1)},
-            {"cat": "podcast", "label": "Other podcasts:",
-             "items": [("l", "pod_cb", "The Cost-Benefit Principle"),
-                       ("l", "pod_oc", "The Opportunity-Cost Principle"),
-                       ("l", "pod_freak", "Should We Really Behave Like Economists?")]},
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((1, "intro"), (2, "intro"))},
+            {"cat": "podcast", "label": "Optional Podcasts (before class):",
+             "items": [("l", "pod_freak",
+                        "Should We Really Behave Like Economists Say We Do?"),
+                       ("l", "pod_cb", "The Cost-Benefit Principle"),
+                       ("l", "pod_oc", "The Opportunity-Cost Principle")]},
             {"cat": "read", "label": "In preparation for the Module 1 videos:",
              "items": [("t", "Ch. 1"),
                        ("t", "Ch. 2.1 – 2.4"),
@@ -245,17 +397,16 @@ WEEKS = [
         "topics": ["Module 2: Demand Analysis (remaining videos)"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(2)},
-            {"cat": "video", "label": "Recap (optional):",
-             "items": [("v", "recap1", "Recap of Module 1", 7)]},
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((1, "wrap"), (2, "wrap"))},
             {"cat": "video", "label": "Remaining videos for Module 2 [material not "
                       "covered in the on-campus class] – watch by the weekend:",
              # names verbatim from Module 2/Videos Final/ (and the
              # _video_title_slide calls in _build_Module2Video.py)
-             "items": [("v", "m2v1", "Module 2 – Video 1: Elasticity and Revenue", None),
-                       ("v", "m2v2", "Module 2 – Video 2: Marginal Revenue", None),
-                       ("v", "m2v3", "Module 2 – Video 3: Demand Estimation", None)]},
+             # lengths read off Panopto 2026-09-04 (1527 / 1372 / 1412 s)
+             "items": [("v", "m2v1", "Module 2 – Video 1: Elasticity and Revenue", 25),
+                       ("v", "m2v2", "Module 2 – Video 2: Marginal Revenue", 23),
+                       ("v", "m2v3", "Module 2 – Video 3: Demand Estimation", 24)]},
             {"cat": "video", "label": "Practice videos for Module 2:",
              "items": [("v", "m2p1", "Module 2 – Practice Video 1: Elasticity and Revenues", 7),
                        ("v", "m2p2", "Module 2 – Practice Video 2: Revenue Maximization", 6)]},
@@ -286,10 +437,8 @@ WEEKS = [
         "topics": ["Module 3: Production & Costs"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(3)},
-            {"cat": "video", "label": "Recap (optional):",
-             "items": [("v", "recap2", "Recap of Module 2", 8)]},
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((3, "intro"), (3, "wrap"))},
             {"cat": "read", "label": "In preparation for the Module 3 videos:",
              "items": [("t", "Ch. 6.1 – 6.3, 6.5"),
                        ("t", "Ch. 7")]},
@@ -318,10 +467,8 @@ WEEKS = [
         "topics": ["Module 4 (Part I): Competitive Markets and Market Interventions"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(4)},
-            {"cat": "video", "label": "Recap (optional):",
-             "items": [("v", "recap3", "Recap of Module 3", 7)]},
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((4, "intro"))},
             {"cat": "video", "label": "Practice on Module 3 (optional):",
              "items": [("v", "m3pa", "Practice Video: Costs: Make vs Buy Decision", 10),
                        ("v", "m3pb", "Practice Video: Short-Run and Long-Run Costs", 26)]},
@@ -355,8 +502,8 @@ WEEKS = [
                    "Module 5: Monopoly and Monopolistic Competition"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(5)},
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((5, "intro"))},
             {"cat": "read", "label": "In preparation for class:",
              "items": [("t", "For Module 4 (Part II): Ch. 3.1 – 3.4; Ch. 17 (pp. 513 – 524)"),
                        ("t", "For Module 5: Ch. 9.1 – 9.3; Ch. 9.5 – 9.7; Ch. 11.7")]},
@@ -379,6 +526,12 @@ WEEKS = [
         "topics": ["Midterm Exam (covers through Module 3)"],
         "prep_days": ("Mon", "Wed"),
         "prep_groups": [
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             # Modules 4 and 5 are taught in the week-5 class, so their
+             # wrap-ups wait until after it. Module 3's went to week 3 with
+             # its videos -- that class only does Module 3 APPLICATIONS
+             # (2026-09-05, Nico).
+             "items": podcast_items((4, "wrap"), (5, "wrap"))},
             {"cat": "video", "label": "Practice on Module 4 (optional):",
              "items": [("v", "m4p1", "Practice Video: Optimization of a Price Taker", 18)]},
             {"cat": "other", "label": None,
@@ -403,8 +556,8 @@ WEEKS = [
         "topics": ["Module 6: Complex Pricing and Advanced Pricing Strategies"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(6)},
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((6, "intro"), (6, "wrap"))},
             {"cat": "video", "label": "Module 6: Complex Pricing and Advanced Pricing "
                       "Strategies – videos to watch by the weekend:",
              "items": [("v", "m6v1", "Video 1: Simple vs. Complex Pricing", 13),
@@ -431,12 +584,10 @@ WEEKS = [
         "topics": ["Module 7 (Part I): Oligopoly with Homogenous Goods"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(7)},
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((7, "intro"))},
             {"cat": "video", "label": "Practice on Module 6 (required):",
              "items": [("v", "m6p1", "Practice Video: Optimal Pricing in two Markets", 19)]},
-            {"cat": "video", "label": "Recap (optional):",
-             "items": [("v", "recap6", "Recap of Module 6", 7)]},
             {"cat": "video", "label": "Module 7 (Part I): Oligopoly with Homogenous "
                       "Goods – videos to watch by the weekend:",
              "items": [("v", "m7v1", "Video 1: Oligopoly – Introduction", 10),
@@ -458,9 +609,9 @@ WEEKS = [
                    "Module 8: Asymmetric Information; Auctions"],
         "prep_days": ("Mon", "Fri"),
         "prep_groups": [
-            {"cat": "podcast", "label": "About Class Material:",
-             "items": podcast_items(8)},
-            {"cat": "podcast", "label": "Other podcasts:",
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             "items": podcast_items((8, "intro"))},
+            {"cat": "podcast", "label": "Optional Podcasts (before class):",
              "items": [("l", "pod_tlae", "Economics For All Your Decisions In Life")]},
             {"cat": "read", "label": "In preparation for class:",
              "items": [("t", "For Module 7: Ch. 11.6"),
@@ -488,11 +639,14 @@ WEEKS = [
                    "Thanksgiving – no further videos"],
         "prep_days": ("Mon", "Wed"),
         "prep_groups": [
+            {"cat": "podcast", "label": "Podcasts About Class Material:",
+             # Modules 7 and 8 are taught in the week-9 class. Module 6's
+             # wrap-up went to week 7 with its videos -- that class only
+             # does Module 6 APPLICATIONS.
+             "items": podcast_items((7, "wrap"), (8, "wrap"))},
             {"cat": "video", "label": "Practice on Module 7 (required):",
              "items": [("v", "m7p1", "Practice Video: Cournot Competition – Math", 11),
                        ("v", "m7p2", "Practice Video: Oligopoly with different MC", 18)]},
-            {"cat": "video", "label": "Recap (optional):",
-             "items": [("v", "recap7", "Recap of Module 7", 8)]},
             {"cat": "video", "label": "Practice on Module 7 (optional, advanced) [for "
                       "those interested in the math – not required for the exam]:",
              "items": [("v", "m7adv", "Practice Video: Oligopoly with Differentiated "
@@ -547,3 +701,42 @@ WEEKS = [
         "due": [],
     },
 ]
+
+
+# ============================== DERIVED VIEWS ==============================
+
+_MOD_RE = re.compile(r"Module\s+(\d)")
+
+
+def modules_named(text):
+    """The module numbers a piece of calendar text names, in order."""
+    out = []
+    for m in _MOD_RE.finditer(text or ""):
+        n = int(m.group(1))
+        if 1 <= n <= 8 and n not in out:
+            out.append(n)
+    return out
+
+
+def inclass_modules(wk):
+    """Modules an on-campus class covers, for the "In-Class Material" list.
+
+    Read from the week's TOPICS as well as the class card's own items: week
+    9's card names Modules 7 and 8, but the class also covers Module 6 --
+    its applications sit behind the Discussion item -- and the topics list
+    catches that (2026-09-04, Nico). Both the calendar and the website
+    build their list from this one function.
+    """
+    mods = []
+    for t in wk.get("topics") or []:
+        for n in modules_named(t):
+            if n not in mods:
+                mods.append(n)
+    for g in (wk.get("weekend") or {}).get("groups") or []:
+        for it in g["items"]:
+            txt = it[1] if it[0] in ("t", "b", "note") else (
+                it[2] if it[0] in ("v", "l", "p") else "")
+            for n in modules_named(txt):
+                if n not in mods:
+                    mods.append(n)
+    return sorted(mods)

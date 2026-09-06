@@ -4,7 +4,8 @@ Build script for the MGMT 405 EMBA Hybrid course calendar (.docx).
 
 Source of truth: _calendar_content.py (content + date engine).
 Run:  python _build_calendar.py
-Output: "Calendar EMBA Hybrid -- Fall 2026.docx" in this folder.
+Output: "Calendar <SECTION> Hybrid -- Fall 2026.docx" in this folder.
+Pass --section femba for the FEMBA calendar; the default is EMBA.
 
 Design: navy/gold/cream palette matching the 405 slide decks.
 Page 1 = title + semester-at-a-glance agenda with internal links.
@@ -23,17 +24,29 @@ from docx.oxml.ns import qn
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from PIL import ImageFont
 
+# --section has to land in the environment BEFORE _calendar_content is
+# imported: that module reads MGMT405_SECTION at import time and everything
+# below is bound from it (2026-09-05, Nico).
+for _i, _a in enumerate(sys.argv):
+    if _a == "--section" and _i + 1 < len(sys.argv):
+        os.environ["MGMT405_SECTION"] = sys.argv[_i + 1].lower()
+    elif _a.startswith("--section="):
+        os.environ["MGMT405_SECTION"] = _a.split("=", 1)[1].lower()
+
 from _calendar_content import (ANCHOR_FRIDAY, TERM, LINKS, COURSE_TITLE, SUBTITLE,
                                BRUINLEARN_NOTE, SYLLABUS_NOTE, TA_NAME, CLASSROOM,
                                CLASS_TIMES, TEXTBOOK_NOTES, MATH_REFRESHER_INTRO,
                                MATH_REFRESHER_ITEMS, SIGNIN_NOTE, WEEKS,
-                               dt, fmt, span)
+                               WEBSITE_LEAD, WEBSITE_TEXT, inclass_modules,
+                               podcast_when, dt, fmt, span,
+                               CALENDAR_DOCX, TA_EMAIL, class_when,
+                               class_days_line)
 
 # OUT is derived from this script's own folder: the project lives on
 # different drive letters on different machines (C:, D:, H:).
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.environ.get("CALENDAR_OUT") or os.path.join(
-    HERE, "Calendar EMBA Hybrid -- Fall 2026.docx")
+    HERE, CALENDAR_DOCX + ".docx")
 
 # ---------------- palette ----------------
 NAVY  = "0B2B4E"
@@ -123,6 +136,41 @@ def shade_cell(cell, fill):
     tcPr.append(shd)
 
 
+# The dark-red problem-set box in the agenda's Due / Exams column
+# (2026-09-05, Nico). Narrow enough to sit inside the 1.32" column.
+PSET_BOX_W = 1.12
+# 8.5 pt + 8 pt of text needs ~0.29"; 0.275" clipped the date's
+# descenders (2026-09-05, Nico). 0.32" leaves a hair of padding.
+PSET_BOX_H = 0.32
+
+
+def pset_box(cell, lines):
+    """Draw the rounded dark-red box round a problem set AND its due date.
+
+    The first cut used paragraph borders (w:pBdr + w:shd). Those are always
+    square and can only wrap one paragraph, and Nico asked for rounded
+    corners with the date inside -- so this became a drawn roundRect, the
+    same device the week pages use for their problem-set cards.
+
+    Both lines are set in NAVY: the on-campus rows print white on navy, and
+    white on the box's pale fill would be unreadable."""
+    def pop(cell_, inner_w):
+        q = cp(cell_)
+        add_run(q, lines[0], bold=True, size=8.5, color=NAVY)
+        for extra in lines[1:]:
+            q2 = cell_.add_paragraph()
+            q2.paragraph_format.space_before = Pt(0)
+            q2.paragraph_format.space_after = Pt(0)
+            add_run(q2, extra, size=8, color=NAVY)
+
+    # 8.5 pt + 8 pt of text, no padding: page 1 of the calendar is full
+    # to the point, and the box has to cost no more than the two plain
+    # lines it replaced (2026-09-05).
+    return rounded_card(cell, pop, fill=DUEWASH, border=DARKRED,
+                        width_in=PSET_BOX_W, compact=True,
+                        height_in=PSET_BOX_H)
+
+
 def cell_borders(cell, top=None, bottom=None, left=None, right=None):
     """Each side: (sz_eighths_pt, hexcolor) or 'nil'."""
     tcPr = cell._tc.get_or_add_tcPr()
@@ -203,6 +251,59 @@ def add_hyperlink(p, url, text, bold=True, italic=False, color=LINKC, size=11,
     r.append(t)
     h.append(r)
     p._p.append(h)
+
+
+def add_hyperlink_runs(p, url, parts, bold=True, color=LINKC, size=11):
+    """One hyperlink whose text is several runs: [(text, underline), ...].
+
+    The podcast bullets need the timing word underlined INSIDE the link, the
+    way the website sets it, and add_hyperlink() writes a single run.
+    """
+    r_id = p.part.relate_to(url, RT.HYPERLINK, is_external=True)
+    h = OxmlElement('w:hyperlink')
+    h.set(qn('r:id'), r_id)
+    for text, underline in parts:
+        r = OxmlElement('w:r')
+        rPr = OxmlElement('w:rPr')
+        rf = OxmlElement('w:rFonts')
+        rf.set(qn('w:ascii'), 'Calibri'); rf.set(qn('w:hAnsi'), 'Calibri')
+        rPr.append(rf)
+        if bold:
+            rPr.append(OxmlElement('w:b'))
+        if underline:
+            u = OxmlElement('w:u'); u.set(qn('w:val'), 'single'); rPr.append(u)
+        col = OxmlElement('w:color'); col.set(qn('w:val'), color); rPr.append(col)
+        sz = OxmlElement('w:sz'); sz.set(qn('w:val'), str(int(size * 2)))
+        rPr.append(sz)
+        r.append(rPr)
+        t = OxmlElement('w:t'); t.text = text
+        t.set(qn('xml:space'), 'preserve')
+        r.append(t)
+        h.append(r)
+    p._p.append(h)
+
+
+def add_runs(p, parts, size=11, **kw):
+    """The same run list, unlinked -- an episode that is not uploaded yet."""
+    for text, underline in parts:
+        add_run(p, text, size=size, underline=underline, **kw)
+
+
+def podcast_parts(text):
+    """"Podcast: Intro to Module 1" -> the runs for "Podcast (before class):
+    Intro to Module 1", with the timing word underlined (2026-09-04, Nico --
+    the calendar matches the website). The phrase after that word comes from
+    podcast_when() in the content module, so a wrap-up can say "after
+    watching the Module 3 videos" where the class only did applications
+    (2026-09-05). Anything that is not one of the two module episodes is
+    left exactly as it is."""
+    w = podcast_when(text)
+    if w is None:
+        return [(text, False)]
+    when, tail = w
+    rest = text[len("Podcast: "):] if text.startswith("Podcast: ") else text
+    return [("Podcast (", False), (when, True), (" %s): " % tail, False),
+            (rest, False)]
 
 
 def add_internal_link(p, anchor, text, bold=True, color=LINKC, size=11):
@@ -354,7 +455,7 @@ def card_header(cell, text, fill, text_color="FFFFFF", size=11, glyph=None,
 
 
 def rounded_card(doc, populate, fill="FFFFFF", border=NAVY, border_w=9525,
-                 width_in=CONTENT_W):
+                 width_in=CONTENT_W, compact=False, height_in=None):
     """Rounded-rect text-box shape with drop shadow.
 
     populate(cell, inner_w_in) renders the card's paragraphs into a temp
@@ -366,7 +467,20 @@ def rounded_card(doc, populate, fill="FFFFFF", border=NAVY, border_w=9525,
     populate(cell, inner_w_in)
     ps = [ch for ch in cell._tc if ch.tag == qn('w:p')]
     total_pt = sum(_measure_par(p, inner_w_in * 72) for p in ps)
-    h_in = total_pt / 72 + 0.18     # insets + cushion
+    # A compact card has to live inside a table cell (the agenda's Due /
+    # Exams column), so it trades the vertical breathing room -- and the drop
+    # shadow, whose effectExtent is what reserves layout space below an
+    # inline shape -- for fitting the page (2026-09-05).
+    ins_v = 9144 if compact else 54864           # EMU: 0.01" vs 0.06"
+    eff = ('<wp:effectExtent l="0" t="0" r="0" b="0"/>' if compact else
+           '<wp:effectExtent l="0" t="0" r="76200" b="76200"/>')
+    shadow = ('' if compact else
+              '<a:effectLst><a:outerShdw blurRad="63500" dist="27940" '
+              'dir="5400000" rotWithShape="0"><a:srgbClr val="000000">'
+              '<a:alpha val="30000"/></a:srgbClr></a:outerShdw></a:effectLst>')
+    h_in = height_in if height_in else total_pt / 72 + (0.0 if compact else 0.18)
+    # _measure_par floors its font size at 9.5 pt, so a card set in
+    # smaller type measures larger than it is -- hence the override.
     cx = int(width_in * 914400)
     cy = int(h_in * 914400)
     adj = int(min(18000, max(3000, 0.12 / h_in * 100000)))
@@ -379,7 +493,7 @@ def rounded_card(doc, populate, fill="FFFFFF", border=NAVY, border_w=9525,
         'xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape">'
         '<wp:inline distT="0" distB="0" distL="0" distR="0">'
         f'<wp:extent cx="{cx}" cy="{cy}"/>'
-        '<wp:effectExtent l="0" t="0" r="76200" b="76200"/>'
+        f'{eff}'
         f'<wp:docPr id="{_docpr_id[0]}" name="Card {_docpr_id[0]}"/>'
         '<a:graphic><a:graphicData '
         'uri="http://schemas.microsoft.com/office/word/2010/wordprocessingShape">'
@@ -390,13 +504,12 @@ def rounded_card(doc, populate, fill="FFFFFF", border=NAVY, border_w=9525,
         f'<a:gd name="adj" fmla="val {adj}"/></a:avLst></a:prstGeom>'
         f'<a:solidFill><a:srgbClr val="{fill}"/></a:solidFill>'
         f'<a:ln w="{border_w}"><a:solidFill><a:srgbClr val="{border}"/></a:solidFill></a:ln>'
-        '<a:effectLst><a:outerShdw blurRad="63500" dist="27940" dir="5400000" '
-        'rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="30000"/>'
-        '</a:srgbClr></a:outerShdw></a:effectLst>'
+        f'{shadow}'
         '</wps:spPr>'
         '<wps:txbx><w:txbxContent/></wps:txbx>'
-        '<wps:bodyPr rot="0" vert="horz" wrap="square" lIns="109728" tIns="54864" '
-        'rIns="109728" bIns="54864" anchor="t" anchorCtr="0"><a:noAutofit/></wps:bodyPr>'
+        f'<wps:bodyPr rot="0" vert="horz" wrap="square" lIns="109728" '
+        f'tIns="{ins_v}" rIns="109728" bIns="{ins_v}" anchor="t" '
+        f'anchorCtr="0"><a:noAutofit/></wps:bodyPr>'
         '</wps:wsp></a:graphicData></a:graphic></wp:inline></w:drawing>'
     )
     drawing = parse_xml(xml)
@@ -406,8 +519,13 @@ def rounded_card(doc, populate, fill="FFFFFF", border=NAVY, border_w=9525,
     # insert shape paragraph (centered), drop the temp table
     par = doc.add_paragraph()
     par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    par.paragraph_format.space_before = Pt(CARD_PAR_BEFORE_PT)
-    par.paragraph_format.space_after = Pt(CARD_PAR_AFTER_PT)
+    par.paragraph_format.space_before = Pt(0 if compact else CARD_PAR_BEFORE_PT)
+    par.paragraph_format.space_after = Pt(0 if compact else CARD_PAR_AFTER_PT)
+    if compact:
+        # An inline drawing sits in a text line, and that line's normal
+        # leading is what made the boxed rows ~5 pt taller than the plain
+        # text they replaced. Pin the line to the shape's own height.
+        par.paragraph_format.line_spacing = Pt(h_in * 72)
     run = par.add_run()
     run._r.append(drawing)
     t._tbl.getparent().remove(t._tbl)
@@ -584,10 +702,11 @@ def render_item(container, item, size=11):
         # module podcast: ("p", url|None, text, minutes|None). The url is
         # a literal Dropbox share link, not a LINKS key; both it and the
         # duration stay absent until the episode has been uploaded.
+        parts = podcast_parts(item[2])
         if item[1]:
-            add_hyperlink(p, item[1], item[2], size=size)
+            add_hyperlink_runs(p, item[1], parts, size=size)
         else:
-            add_run(p, item[2], size=size)
+            add_runs(p, parts, size=size)
         if item[3]:
             add_run(p, f"  ({item[3]} min)", color=GRAY, size=size - 1)
     elif kind == "l":
@@ -673,19 +792,22 @@ def exam_window(wk):
 
 
 def agenda_due_text(wk):
+    """(text, is_pset) per entry. The name is spelled out in full -- it was
+    abbreviated to "PS X" until 2026-09-05, when Nico asked for the full
+    "Problem Set X" inside a dark-red box."""
     parts = []
     for label, w, d, note in wk["due"]:
-        short = label.replace("Problem Set", "PS")
+        pset = label.startswith("Problem Set")
         if w:
-            parts.append(f"{short}\n{fmt(dt(w, d), wd=True)}")
+            parts.append((f"{label}\n{fmt(dt(w, d), wd=True)}", pset))
         else:
-            parts.append(short)
+            parts.append((label, pset))
     if wk["kind"] == "midterm":
         a, b = exam_window(wk)
-        parts.insert(0, f"Midterm window\n{span(a, b)}")
+        parts.insert(0, (f"Midterm window\n{span(a, b)}", False))
     if wk["kind"] == "final":
         a, b = exam_window(wk)
-        parts.insert(0, f"Final Exam window\n{span(a, b)}")
+        parts.insert(0, (f"Final Exam window\n{span(a, b)}", False))
     return parts
 
 
@@ -705,10 +827,15 @@ def build_page1(doc):
         # 12pt hand-tweaked by Nico on 2026-08-15 (was 10.5)
         add_run(p, f"{label}  ", bold=True, color=NAVY, size=12)
         if label == "TA:":
-            add_run(p, f"{TA_NAME} (", size=12)
-            add_hyperlink(p, LINKS["ta_email"], "TA405.EMBA2@gmail.com",
-                          bold=False, size=12)
-            add_run(p, ")", size=12)
+            # FEMBA's mailbox is not set yet; print the name alone rather
+            # than route students to the other section's TA inbox
+            if TA_EMAIL:
+                add_run(p, f"{TA_NAME} (", size=12)
+                add_hyperlink(p, LINKS["ta_email"], TA_EMAIL,
+                              bold=False, size=12)
+                add_run(p, ")", size=12)
+            else:
+                add_run(p, f"{TA_NAME}  (email address to follow)", size=12)
         else:
             add_run(p, value, size=12)
 
@@ -716,7 +843,14 @@ def build_page1(doc):
 
     # Bruin Learn callout (cream rounded card)
     def pop_bruin(cell, inner_w):
+        # The course website leads the callout (2026-09-04, Nico): it is
+        # where the current calendar, the syllabus and every video live.
         p = cp(cell)
+        add_run(p, WEBSITE_LEAD + "  ", bold=True, color=NAVY, size=12)
+        add_hyperlink(p, LINKS["website"], WEBSITE_TEXT, size=12,
+                      underline=True)
+        p = cell.add_paragraph()
+        p.paragraph_format.space_before = Pt(3)
         add_run(p, BRUINLEARN_NOTE, bold=True, color=NAVY, size=11)
         # wording + own line hand-tweaked by Nico on 2026-08-15
         p2 = cell.add_paragraph()
@@ -750,6 +884,13 @@ def build_page1(doc):
     widths = [0.82, 1.58, 2.98, 1.32]        # 6.70 total, inset on the backing
     # +1 header row, +1 white spacer row separating it from Week 1
     t = fixed_table(doc, widths, rows=2 + len(WEEKS))
+    # The agenda's rows carry a shade less vertical padding than a
+    # default table. Page 1 is full to the point -- heading, table and
+    # legend all have to sit inside ONE drawn backing card -- and the
+    # problem-set boxes in the Due column need the room (2026-09-05).
+    _cellmar = t._tbl.tblPr.find(qn('w:tblCellMar'))
+    for _side in ('top', 'bottom'):
+        _cellmar.find(qn('w:' + _side)).set(qn('w:w'), '30')
     # explicit width + centered, with w:jc in proper schema position
     # (appending w:jc after w:tblLook makes Word's placement unreliable)
     tblW = t._tbl.tblPr.find(qn('w:tblW'))
@@ -819,7 +960,7 @@ def build_page1(doc):
         sub = None
         if kind == "oncampus":
             f, s = dt(wk["num"], "Fri"), dt(wk["num"], "Sat")
-            sub = f"class: Fri/Sat {fmt(f)}/{s.day}"
+            sub = class_days_line(wk["num"])
         if sub:
             p2 = cells[1].add_paragraph()
             add_run(p2, sub, italic=True, size=8.5, color=subtxt)
@@ -829,18 +970,29 @@ def build_page1(doc):
                 bold=(kind in ("midterm", "final")), color=maintxt)
         # Due
         parts = agenda_due_text(wk)
-        p = cp(cells[3])
-        first = True
-        for part in parts:
+        blank = cells[3].paragraphs[0]      # the cell's own empty paragraph
+        used_blank = False
+        for part, is_pset in parts:
             lines = part.split("\n")
-            if not first:
+            if is_pset:
+                # a drawn card, appended to the cell -- it brings its own
+                # paragraph, so it never touches `blank`
+                pset_box(cells[3], lines)
+                continue
+            if not used_blank:
+                p = cp(cells[3])
+                used_blank = True
+            else:
                 p = cells[3].add_paragraph()
-            first = False
             add_run(p, lines[0], bold=True, size=9.5,
                     color=("FFFFFF" if kind == "oncampus" else NAVY))
             for extra in lines[1:]:
                 p2 = cells[3].add_paragraph()
                 add_run(p2, extra, size=9, color=subtxt)
+        if parts and not used_blank:
+            # every entry was a drawn card; drop the leftover empty paragraph
+            # or it prints a blank line above the box
+            blank._p.getparent().remove(blank._p)
 
     # measure rows; force all data rows to the SAME height (the tallest one)
     hdr_h = 0.0
@@ -857,7 +1009,13 @@ def build_page1(doc):
             data_hs.append(row_h)
     # uniform height = typical (median) row; rows with longer topic lists
     # (weeks 5, 9) keep growing via the atLeast rule
-    uniform_pt = sorted(data_hs)[len(data_hs) // 2] + 4
+    # median + 2 pt of slack. It was + 4 until 2026-09-04, when page 1 grew
+    # a line for the course-website link and the legend fell onto page 2 --
+    # the backing card is one drawn rectangle, so the whole block has to
+    # stay on page 1. 2 pt per row over 12 rows buys the line back and the
+    # rows still fit their content (the rule is atLeast, not exact).
+    # 2 pt of slack until 2026-09-05; see the padding note above
+    uniform_pt = sorted(data_hs)[len(data_hs) // 2]
     for row in t.rows[2:]:
         trPr = row._tr.get_or_add_trPr()
         th = OxmlElement('w:trHeight')
@@ -869,8 +1027,8 @@ def build_page1(doc):
     # hairline paragraph so Word does NOT merge the legend table into the
     # agenda table (adjacent tables merge without one)
     sep = doc.add_paragraph()
-    sep.paragraph_format.space_before = Pt(2)
-    sep.paragraph_format.space_after = Pt(2)
+    sep.paragraph_format.space_before = Pt(0)
+    sep.paragraph_format.space_after = Pt(1)
     sep.paragraph_format.line_spacing = Pt(1)
     add_run(sep, "", size=1)
     lwidths = [0.28, 1.10, 0.28, 1.70, 0.28, 0.50]
@@ -1017,16 +1175,26 @@ def build_week(doc, wk):
 
     # due cards at the top, right under the week band
     for label, w, d, note in wk["due"]:
-        def pop_due(cell, inner_w, label=label, w=w, d=d, note=note):
+        # Only a problem set takes the dark-red treatment; the practice
+        # final is not one, so it keeps the gold rule (2026-09-03, Nico).
+        is_pset = label.lower().startswith("problem set")
+
+        def pop_due(cell, inner_w, label=label, w=w, d=d, note=note,
+                    is_pset=is_pset):
             p = cp(cell)
             if w:
                 add_run(p, f"Due:  {label} – {fmt(dt(w, d), wd=True)}",
                         bold=True, color=NAVY, size=11.5)
             else:
                 add_run(p, f"{label} – {note}", bold=True, color=NAVY, size=11.5)
-        # Only a problem set takes the dark-red treatment; the practice
-        # final is not one, so it keeps the gold rule (2026-09-03, Nico).
-        is_pset = label.lower().startswith("problem set")
+            # Every problem set says where the solution goes, as on the
+            # website (2026-09-04, Nico).
+            if is_pset:
+                p2 = cell.add_paragraph()
+                p2.paragraph_format.space_before = Pt(1)
+                add_run(p2, "Upload one solution per group on ", size=10)
+                add_hyperlink(p2, LINKS["bruinlearn_course"], "BruinLearn",
+                              size=10, bold=False, underline=True)
         rounded_card(doc, pop_due,
                      fill=DUEWASH if is_pset else "FFFFFF",
                      border=DARKRED if is_pset else GOLD,
@@ -1065,8 +1233,7 @@ def build_week(doc, wk):
         we = wk["weekend"]
         da, db = we["days"]
         if wk["kind"] == "oncampus":
-            title = (f"On-campus class   ·   Fri, {fmt(dt(n, 'Fri'))}, 4:00 – 5:30 pm"
-                     f"   ·   Sat, {fmt(dt(n, 'Sat'))}, 9:00 am – 12:30 pm")
+            title = f"On-campus class   ·   {class_when(n)}"
             hdr_fill, fill, border = INCLASS, PALEBLUE, NAVY
             # classical building, matching the website (2026-09-03, Nico).
             # The header text measures 5.14" against a 6.07" right tab stop,
@@ -1083,6 +1250,21 @@ def build_week(doc, wk):
                         glyph=hdr_glyph, inner_w_in=inner_w)
             for g in we["groups"]:
                 render_group(cell, g)
+            # In-Class Material, as on the website (2026-09-04, Nico): a
+            # handout and a slide deck per module the class covers, "(TBD)"
+            # until they are uploaded right before class. One line per
+            # module -- the two rows the website uses would cost the week
+            # pages 3 more lines each, and every week has to stay on one
+            # page.
+            if wk["kind"] == "oncampus":
+                mods = inclass_modules(wk)
+                if mods:
+                    mlist = ("Module %s" % mods[0] if len(mods) == 1 else
+                             "Modules " + ", ".join(str(n) for n in mods))
+                    render_group(cell, {
+                        "label": f"In-Class Material – {mlist}: "
+                                 f"Handout / Slides  (TBD)",
+                        "items": []}, budget=False)
         rounded_card(doc, pop_weekend, fill=fill, border=border,
                      width_in=WEEK_CARD_W)
 

@@ -23,6 +23,273 @@ underline cannot travel with it.
 
 ---
 
+## 2026-09-06 - podcast labels, and no materials box where there is nothing to post
+
+Three edits, all driven from `_calendar_content.py`, so both sections and
+both documents followed from one change each.
+
+**1. "Optional Podcasts (before class):"** replaces "Other podcasts:". Only
+weeks 1 and 9 carry that group and both are in-person, so the rename covers
+exactly the in-person weeks Nico asked for.
+
+*This broke two GROUP_MODULE_OVERRIDES keys* -- they match on the label text
+-- and `check_overrides()` is what would have caught it. Both keys now match
+on the shorter, stabler snippet "Optional Podcasts".
+
+**2. Practice videos no longer count as "videos"** for the materials box.
+Module 4's slides were showing under week 6, which has neither a class nor
+teaching videos -- only an optional practice video. `video_modules()` now
+skips groups labelled "Practice…" and items named "Practice Video: …".
+
+Result (same for both sections):
+
+| week | box |
+|---|---|
+| 1 | In-Class (M1, M2) + Slides for Videos (M1) |
+| 2, 3, 4, 7, 8 | Slides for Videos (M2 / M3 / M4 / M6 / M7) |
+| 5, 9 | In-Class only (M3-5 / M6-8) |
+| **6, 10, 11, 12** | **no box at all** |
+
+Weeks 6 and 10 were the two Nico asked me to find: both carry practice
+videos only. Weeks 4 and 8 carry both kinds and now list only the module
+they actually teach (M4, M7 -- not M3's or M6's practice videos).
+
+**3. An intro to a module taught entirely on video** says "Podcast
+(<u>before</u> watching the Module 3 videos):" rather than "before class".
+Derived from the same `WRAP_AFTER` table that drives the wrap-ups: a tail
+beginning "watching" means the module never reaches a classroom, so the
+intro is keyed to the videos too. Modules 3 and 6 today.
+
+**Verification note.** Searching the .docx for the whole phrase reports
+False -- Word splits it into runs around the underlined word ("Podcast (" /
+"before" / " watching the Module 3 videos): "). Check the runs, not the
+sentence.
+
+Nothing to change in the CALENDARS for point 2: they never had a materials
+box, only the single In-Class Material line inside the on-campus card, which
+weeks 6 and 10 do not render.
+
+**Confirmed by Nico (2026-09-06), so this is the rule, not an accident:** a
+module split between video and class earns an entry in BOTH weeks. Module 4
+appears under week 4 as "Slides for Videos" (its Part I videos) and under
+week 5 as in-class material. Module 7 is the same case (videos week 8, class
+week 9). Do not "tidy" one of them away.
+
+---
+
+## 2026-09-05 (FEMBA) - one content file, two sections
+
+MGMT 405 runs twice in Fall 2026. Nico: "The material and due dates are the
+same", only the meeting pattern and a few names differ. So FEMBA is NOT a
+copy of anything -- both sections come out of the same content file and the
+same builders, picked by **MGMT405_SECTION** (default `emba`).
+
+```
+python _build_calendar.py  --section femba
+python _build_site.py      --section femba
+python _build_syllabus.py  --section femba --md
+python _deploy.py          --section femba
+```
+
+`SECTIONS` in `_calendar_content.py` holds everything that differs:
+
+| | EMBA | FEMBA |
+|---|---|---|
+| subtitle | EMBA Section 2 (Hybrid) | FEMBA Section 2 (Hybrid) |
+| room | ~~A301~~ **G305** | ~~G-402~~ **G305** (both sections, 2026-09-06) |
+| meetings | Fri 4:00–5:30 pm + Sat 9:00 am–12:30 pm | **Sat 2:00–8:00 pm only** |
+| Bruin Learn | courses/237825 | courses/237860 |
+| TA mailbox | ta405.emba2@gmail.com | **still to come** |
+| repo | MGMT-405-EMBA | MGMT-405-FEMBA |
+
+Two helpers, `class_when(week)` and `class_days_line(week)`, build every
+sentence that names a meeting day or time, so the hard-coded "Fri … 4:00 –
+5:30 pm · Sat … 9:00 am – 12:30 pm" strings are gone from all three builders.
+
+### The ordering rule that makes it work
+
+`_calendar_content` reads `MGMT405_SECTION` **at import time**, and the
+builders use `from _calendar_content import (...)`, which binds values at
+import. So every builder parses `--section` into `os.environ` in a loop
+placed ABOVE its imports. Move that loop below an import and the flag
+silently does nothing -- there is a comment saying so at each of the four
+sites.
+
+### Output layout
+
+EMBA keeps `Course Website/` exactly as it was, so the live EMBA site was
+never at risk; FEMBA builds into `Course Website/femba/`. `site.css` and
+`site.js` stay hand-authored in ONE place and are copied into the FEMBA
+folder on every build, so the two cannot drift. The EMBA deploy only globs
+top-level `*.html`, so `femba/` is invisible to it (checked: still 23 pages).
+
+Calendars and syllabi share their folders and differ by filename
+(`Calendar FEMBA Hybrid -- Fall 2026.docx`, `Course Syllabus - 405 FEMBA
+Fall 2026.docx`).
+
+### Open
+
+1. ~~The FEMBA TA mailbox~~ -- done 2026-09-06: `ta405.femba2@gmail.com`
+   (EMBA keeps `ta405.emba2@gmail.com`). One line in `SECTIONS`; both
+   calendars, both websites rebuilt and redeployed. The websites obfuscate
+   each address, so neither appears in plaintext on its page.
+
+   **The SYLLABUS deliberately carries no address at all** and still does.
+   Its own docstring records why (2026-09-04, Nico): the syllabus PDF is
+   published on the public site, so printing an address there would undo the
+   obfuscation. Adding it was started and then reverted -- ask before
+   changing that decision.
+2. **Both FEMBA PDFs are missing** -- Word's ExportAsFixedFormat hung again.
+   The site is published with `--skip-docs`, so its syllabus and calendar PDF
+   links 404 until the two files are exported and it is redeployed. That flag
+   is never the default.
+
+FEMBA calendar: 14 pages, one week per page. Live at
+https://nvoigtla.github.io/MGMT-405-FEMBA/
+
+---
+
+## 2026-09-05 (week 1 "Other podcasts")
+
+Reordered and relinked, in `_calendar_content.py` so both documents follow:
+
+1. **Should We Really Behave Like Economists Say We Do?** — moved to the
+   first bullet, and given the show's full title. The short form
+   ("...Like Economists?") was ours; the episode's own URL slug carries the
+   longer one.
+2. The Cost-Benefit Principle — new Apple episode id `1000786324917`
+3. The Opportunity-Cost Principle — new Apple episode id `1000786324632`
+
+Both Apple links already existed and pointed at the 2020 postings
+(`...488478204` / `...205`); only the `i=` episode ids changed. Verified in
+the docx's `word/_rels/document.xml.rels` (Word stores hyperlink targets
+there, NOT in `document.xml`) and on the live page. Calendar still 14 pages.
+
+## 2026-09-05 (later) - recaps deleted, podcasts rescheduled, box taller
+
+**Recaps gone.** All five "Recap of Module X" groups removed (weeks 2, 3, 4,
+8, 10) -- old recordings, replaced by the podcasts. Their `recapN` entries
+stay in `LINKS`, unused.
+
+**Podcasts rescheduled.** An intro belongs to the week before a module's
+first section is taught, a wrap-up to the week AFTER all its core material is
+covered -- which is not necessarily after a class. The week-5 and week-9
+sessions do Module 3 / Module 6 APPLICATIONS only, so those two modules are
+fully covered by their videos and their wrap-ups sit with them, in weeks 3
+and 7. `podcast_items()` takes `(module, kind)` specs.
+
+The label says what to finish first. `WRAP_AFTER` in `_calendar_content.py`
+holds one phrase per module and `podcast_when()` serves BOTH builders, so the
+wording is written once and the calendar and the website cannot drift:
+
+| module | wrap-up week | reads |
+|---|---|---|
+| 1 | 2 | after **class** |
+| 2 | 2 | after **class and watching the Module 2 videos** |
+| 3 | 3 | after **watching the Module 3 videos** |
+| 4, 5 | 6 | after **class** |
+| 6 | 7 | after **watching the Module 6 videos** |
+| 7, 8 | 10 | after **class** |
+
+**Label**: "Podcasts About Class Material:". **TA address**: lowercase
+`ta405.emba2@gmail.com` (one string, `LINKS["ta_email"]`, plus the literal
+the page-1 info block prints).
+
+**Problem-set box taller.** 0.275" clipped the date's descenders;
+`PSET_BOX_H` is 0.32" with 0.01" of vertical padding back. Paid for by
+dropping the last point of the agenda's uniform row-height slack
+(`median + 1` -> `median`). Still 14 pages, one week per page, legend on
+page 1.
+
+**The `.pdf` is STALE again.** `ExportAsFixedFormat` hung on the one attempt
+Nico now allows per round (2026-09-05: "do one attempt to generate it. If
+that's not working let me know and i'll generate it myself"). The docx is
+correct and verified; Nico exports the PDF by hand. See the standing open
+item below -- this is the third session it has failed in.
+
+---
+
+## 2026-09-05 - "Problem Set X" boxed in the agenda's Due / Exams column
+
+Nico: the Due / Exams column on page 1 should spell the name out in full and
+carry the same dark-red marker the website draws around a problem set inside
+each week — "just narrow, so it fits inside the Due field".
+
+- `agenda_due_text()` no longer abbreviates to "PS X". It now returns
+  `(text, is_pset)` per entry, so the caller can tell a problem set from an
+  exam window without re-parsing the label.
+- Nico then asked for **rounded corners with the due date inside**. Word
+  paragraph borders are always square and wrap one paragraph, so `pset_box`
+  became a DRAWN roundRect -- `rounded_card` in a new `compact` mode -- 1.12"
+  wide, holding "Problem Set X" (8.5 pt bold) over its date (8 pt), both
+  NAVY. The two on-campus rows print white on navy, and white on the box's
+  pale fill would be unreadable.
+- Colors are the constants that were already there for the week cards:
+  `DARKRED` `C00000` and `DUEWASH`, its 7 % wash over white, matching the
+  website's `rgba(192,0,0,.07)`.
+
+### Page 1 had ZERO slack, and the box costs real height
+
+This is the part to remember. In the previous build the agenda table ended at
+717.0 pt and the legend sat at 717.0 with the usable bottom at 741.6 -- page 1
+was full to the point, and the whole block (heading, table, legend) has to
+stay inside ONE drawn backing card. A drawn box costs ~4.5 pt per row more
+than the two plain text lines it replaced, so five problem-set rows put the
+legend on page 2 and the document at 15 pages.
+
+What actually worked, after several dead ends:
+
+- `compact` mode on `rounded_card`: no drop shadow (its `effectExtent` is
+  what reserves layout space under an inline shape), `effectExtent` zeroed,
+  no vertical text insets, no cushion, no paragraph gap. Defaults unchanged,
+  so every other card in the calendar is untouched.
+- **An explicit `height_in`.** `_measure_par` floors its font size at 9.5 pt,
+  so a card set in 8.5/8 pt type measured LARGER than it renders -- which is
+  why shrinking the fonts did nothing until the height was passed in
+  (`PSET_BOX_H = 0.275`).
+- Three small reclamations on page 1: agenda cell padding 50 -> 30 twips,
+  the uniform row-height slack 2 -> 1 pt, and the legend separator 2/2 -> 0/1.
+
+Dead ends worth not repeating: pinning the shape paragraph's line spacing to
+the card height (Word does not clip an inline shape, so it changed nothing);
+cell padding 30 -> 20 twips (rows were already content-driven); shrinking the
+fonts alone (see the `_measure_par` floor above).
+
+**Result: 14 pages, legend back on page 1 at 721.5 pt, every week on one
+page.**
+
+**Checked:** "Problem Set 1" measures 0.764" in Calibri Bold 9.5 against the
+1.10" of usable width in the 1.32" column, so nothing wraps — the reason the
+label had been abbreviated in the first place. `_check_pagination.ps1` still
+PASSES at 14 pages, one week per page, and the docx carries 5 boxed
+paragraphs and 5 `FBEDED` fills, one per problem set, with no "PS 1" left.
+
+---
+
+## 2026-09-04 (later) - Module 2's three videos retaped and measured
+
+Nico supplied new Panopto links for Module 2 videos 1-3. `m2v1` / `m2v2` /
+`m2v3` in `_calendar_content.py` now point at the NEW sessions (ids
+`8fcb86ee...`, `406d26d1...`, `885b4e89...`, all `b4bb...`); the old `b08b...`
+ids were last year's recordings and are gone from the deck.
+
+**Running times read off Panopto, not typed:** 25:27, 22:51 and 23:31, so
+**25 / 23 / 24 min** by the file's `round(seconds/60)` convention. Confirmed
+twice - directly against `DeliveryInfo.aspx`, then with
+`python _video_minutes.py m2`, which re-reads Panopto and flags disagreements
+(none). The Panopto session names match the calendar's video titles exactly.
+
+**Week 2 gained a line.** With all three lengths now measured the group
+crosses `render_group`'s budget test (>= 2 videos, >= 20 min, all measured),
+so week 2 now prints **"= 72 min of video in total"**. `_check_pagination.ps1`
+re-run afterwards: **PASS**, 14 pages, week 2 still on page 4.
+
+The two PRACTICE videos (`m2p1`, `m2p2`) were not retaped. They keep last
+year's sessions and their stored 7 / 6 min; `_video_minutes.py` reports them
+LOCKED because those sessions are not shared publicly.
+
+---
+
 **Follow-up the same day:** the glyph is now `U+1F3DB` **+ `U+FE0F`**, the
 emoji presentation selector. A bare `U+1F3DB` is rendered as a flat monochrome
 text glyph by some platforms -- which is what the first attempt produced -- and

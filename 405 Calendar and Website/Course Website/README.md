@@ -179,13 +179,22 @@ jump menu together.
   open. The page's own name lives in the band, not the tab.
 - **On-campus cards carry an "In-Class Material" section**: a handout and a
   slide deck per module that class covers, both marked "(TBD)" until they are
-  uploaded. The module list comes from the class card's OWN items, so the
-  section says exactly what the card just listed.
+  uploaded. The module list comes from `inclass_modules()` in the calendar's
+  content file — the week's topics as well as the class card's own items — so
+  the website and the calendar name the same modules.
 - **Module podcasts read "Podcast (_before_ class):" and "Podcast (_after_
   class):"**, with the timing word underlined. Done in `podcast_label()` at
-  render time rather than in the calendar content, because the calendar's item
-  format carries no per-run formatting for podcasts — so the calendar still
-  prints the plain "Podcast: Intro to Module 1".
+  render time rather than in the calendar content, because the item format
+  carries no per-run formatting.
+
+**Both are in the calendar too, as of 2026-09-04**, along with the
+problem-set upload line: `podcast_parts()` and `add_hyperlink_runs()` in
+`_build_calendar.py` set the same underlined label in Word. The one
+difference is deliberate: the calendar's In-Class Material is a SINGLE line
+per class ("In-Class Material – Modules 6, 7, 8: Handout / Slides (TBD)")
+rather than the website's two rows per module. Every week of the calendar has
+to fit on one page, and the website's form cost weeks 1 and 9 a second page.
+`_check_pagination.ps1` is what settles this — it PASSES at 14 pages.
 
 ## Problem sets
 
@@ -277,7 +286,7 @@ auto-flowing grid, so nothing moves as the window changes size:
 
 | | Left | Right |
 |---|---|---|
-| Row 1 | Class Syllabus ▤ | BruinLearn Class Site 🎓 |
+| Row 1 | Class Syllabus and Calendar ▤ | BruinLearn Class Site 🎓 |
 | | **How the Quarter Runs** | **Class and Contact** |
 | | Watching the Videos 🎬 | Math Refresher ∂ |
 | | Online Practice Exercises ✎ | Textbook 📖 |
@@ -290,11 +299,32 @@ textbook under the math refresher.
 `_build_site.py` copies out of the calendar's `Images/` folder into
 `assets/panopto-login.png` on every build; `_deploy.py` ships it with the site.
 
-## One placeholder
+## The two PDFs the site hosts
 
-- `SYLLABUS_URL` at the top of `_build_site.py` is `"#"`. Paste the Bruin Learn
-  or PDF address there and rebuild; the General Logistics page then links it as
-  "Download the Class Syllabus here".
+The **Class Syllabus and Calendar** box carries two downloads — "Download the
+Class Syllabus here" and "Download the Class Calendar as PDF here". Both files
+are published NEXT TO the pages, by `DOCS` in `_deploy.py`:
+
+| Source | Published as |
+|---|---|
+| `../Syllabus/Course Syllabus - 405 EMBA Fall 2026.pdf` | `MGMT-405-Syllabus-Fall-2026.pdf` |
+| `../Course Calendar/Calendar EMBA Hybrid -- Fall 2026.pdf` | `MGMT-405-Calendar-Fall-2026.pdf` |
+
+The published names carry no spaces (they are served straight off GitHub
+Pages) and they have to match `LINKS["syllabus_pdf"]` / `LINKS["calendar_pdf"]`
+in the calendar's content file, which is what this site, the syllabus and the
+calendar all link. `_deploy.py` refuses to run if either PDF is missing, so a
+`.docx` edit that was never exported cannot silently publish a stale link.
+
+**The calendar has no card of its own.** The website IS the calendar; the PDF
+is the version for those who want it on paper, which is why the download sits
+under the syllabus rather than in a box of its own.
+
+**No e-mail address appears in either PDF** (2026-09-04, Nico). The pages
+obfuscate both addresses against harvesters, so the published syllabus points
+at the "Class and Contact" box and at Bruin Learn instead of printing them.
+The calendar's page-1 TA line is the one deliberate exception — Nico kept the
+click-to-mail there.
 
 `DROP_TEXTBOOK_NOTES` and `DROP_MATH_ITEMS` in `_build_site.py` can hide a
 calendar line on the website while it still prints in the calendar. **Both are

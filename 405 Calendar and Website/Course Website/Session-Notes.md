@@ -9,6 +9,363 @@ the page layout and the palette.
 
 ---
 
+## 2026-09-06 - podcast labels, and no materials box where there is nothing to post
+
+Three edits, all driven from `_calendar_content.py`, so both sections and
+both documents followed from one change each.
+
+**1. "Optional Podcasts (before class):"** replaces "Other podcasts:". Only
+weeks 1 and 9 carry that group and both are in-person, so the rename covers
+exactly the in-person weeks Nico asked for.
+
+*This broke two GROUP_MODULE_OVERRIDES keys* -- they match on the label text
+-- and `check_overrides()` is what would have caught it. Both keys now match
+on the shorter, stabler snippet "Optional Podcasts".
+
+**2. Practice videos no longer count as "videos"** for the materials box.
+Module 4's slides were showing under week 6, which has neither a class nor
+teaching videos -- only an optional practice video. `video_modules()` now
+skips groups labelled "Practice…" and items named "Practice Video: …".
+
+Result (same for both sections):
+
+| week | box |
+|---|---|
+| 1 | In-Class (M1, M2) + Slides for Videos (M1) |
+| 2, 3, 4, 7, 8 | Slides for Videos (M2 / M3 / M4 / M6 / M7) |
+| 5, 9 | In-Class only (M3-5 / M6-8) |
+| **6, 10, 11, 12** | **no box at all** |
+
+Weeks 6 and 10 were the two Nico asked me to find: both carry practice
+videos only. Weeks 4 and 8 carry both kinds and now list only the module
+they actually teach (M4, M7 -- not M3's or M6's practice videos).
+
+**3. An intro to a module taught entirely on video** says "Podcast
+(<u>before</u> watching the Module 3 videos):" rather than "before class".
+Derived from the same `WRAP_AFTER` table that drives the wrap-ups: a tail
+beginning "watching" means the module never reaches a classroom, so the
+intro is keyed to the videos too. Modules 3 and 6 today.
+
+**Verification note.** Searching the .docx for the whole phrase reports
+False -- Word splits it into runs around the underlined word ("Podcast (" /
+"before" / " watching the Module 3 videos): "). Check the runs, not the
+sentence.
+
+Nothing to change in the CALENDARS for point 2: they never had a materials
+box, only the single In-Class Material line inside the on-campus card, which
+weeks 6 and 10 do not render.
+
+**Confirmed by Nico (2026-09-06), so this is the rule, not an accident:** a
+module split between video and class earns an entry in BOTH weeks. Module 4
+appears under week 4 as "Slides for Videos" (its Part I videos) and under
+week 5 as in-class material. Module 7 is the same case (videos week 8, class
+week 9). Do not "tidy" one of them away.
+
+---
+
+## 2026-09-05 (FEMBA) - one content file, two sections
+
+MGMT 405 runs twice in Fall 2026. Nico: "The material and due dates are the
+same", only the meeting pattern and a few names differ. So FEMBA is NOT a
+copy of anything -- both sections come out of the same content file and the
+same builders, picked by **MGMT405_SECTION** (default `emba`).
+
+```
+python _build_calendar.py  --section femba
+python _build_site.py      --section femba
+python _build_syllabus.py  --section femba --md
+python _deploy.py          --section femba
+```
+
+`SECTIONS` in `_calendar_content.py` holds everything that differs:
+
+| | EMBA | FEMBA |
+|---|---|---|
+| subtitle | EMBA Section 2 (Hybrid) | FEMBA Section 2 (Hybrid) |
+| room | ~~A301~~ **G305** | ~~G-402~~ **G305** (both sections, 2026-09-06) |
+| meetings | Fri 4:00–5:30 pm + Sat 9:00 am–12:30 pm | **Sat 2:00–8:00 pm only** |
+| Bruin Learn | courses/237825 | courses/237860 |
+| TA mailbox | ta405.emba2@gmail.com | **still to come** |
+| repo | MGMT-405-EMBA | MGMT-405-FEMBA |
+
+Two helpers, `class_when(week)` and `class_days_line(week)`, build every
+sentence that names a meeting day or time, so the hard-coded "Fri … 4:00 –
+5:30 pm · Sat … 9:00 am – 12:30 pm" strings are gone from all three builders.
+
+### The ordering rule that makes it work
+
+`_calendar_content` reads `MGMT405_SECTION` **at import time**, and the
+builders use `from _calendar_content import (...)`, which binds values at
+import. So every builder parses `--section` into `os.environ` in a loop
+placed ABOVE its imports. Move that loop below an import and the flag
+silently does nothing -- there is a comment saying so at each of the four
+sites.
+
+### Output layout
+
+EMBA keeps `Course Website/` exactly as it was, so the live EMBA site was
+never at risk; FEMBA builds into `Course Website/femba/`. `site.css` and
+`site.js` stay hand-authored in ONE place and are copied into the FEMBA
+folder on every build, so the two cannot drift. The EMBA deploy only globs
+top-level `*.html`, so `femba/` is invisible to it (checked: still 23 pages).
+
+Calendars and syllabi share their folders and differ by filename
+(`Calendar FEMBA Hybrid -- Fall 2026.docx`, `Course Syllabus - 405 FEMBA
+Fall 2026.docx`).
+
+### Open
+
+1. ~~The FEMBA TA mailbox~~ -- done 2026-09-06: `ta405.femba2@gmail.com`
+   (EMBA keeps `ta405.emba2@gmail.com`). One line in `SECTIONS`; both
+   calendars, both websites rebuilt and redeployed. The websites obfuscate
+   each address, so neither appears in plaintext on its page.
+
+   **The SYLLABUS deliberately carries no address at all** and still does.
+   Its own docstring records why (2026-09-04, Nico): the syllabus PDF is
+   published on the public site, so printing an address there would undo the
+   obfuscation. Adding it was started and then reverted -- ask before
+   changing that decision.
+2. **Both FEMBA PDFs are missing** -- Word's ExportAsFixedFormat hung again.
+   The site is published with `--skip-docs`, so its syllabus and calendar PDF
+   links 404 until the two files are exported and it is redeployed. That flag
+   is never the default.
+
+FEMBA calendar: 14 pages, one week per page. Live at
+https://nvoigtla.github.io/MGMT-405-FEMBA/
+
+---
+
+## 2026-09-05 (week 1 "Other podcasts")
+
+Reordered and relinked, in `_calendar_content.py` so both documents follow:
+
+1. **Should We Really Behave Like Economists Say We Do?** — moved to the
+   first bullet, and given the show's full title. The short form
+   ("...Like Economists?") was ours; the episode's own URL slug carries the
+   longer one.
+2. The Cost-Benefit Principle — new Apple episode id `1000786324917`
+3. The Opportunity-Cost Principle — new Apple episode id `1000786324632`
+
+Both Apple links already existed and pointed at the 2020 postings
+(`...488478204` / `...205`); only the `i=` episode ids changed. Verified in
+the docx's `word/_rels/document.xml.rels` (Word stores hyperlink targets
+there, NOT in `document.xml`) and on the live page. Calendar still 14 pages.
+
+## 2026-09-05 (later) - podcasts rescheduled, recaps deleted, materials box
+
+**Recaps gone.** All five "Recap of Module X" groups deleted from
+`_calendar_content.py` -- the recordings are old and the podcasts replace
+them.
+
+**Podcasts rescheduled by when a module is actually taught.** Nico's rule: an
+INTRO belongs to the week before a module's first section is covered, a
+WRAP-UP to the week after its last. `podcast_items()` now takes explicit
+`(module, kind)` specs instead of always emitting both episodes, so a
+module's two episodes sit in different weeks:
+
+| week | episodes | why |
+|---|---|---|
+| 1 | Intro 1, Intro 2 | M2's first section is taught in the week-1 class |
+| 2 | Wrap 1, Wrap 2 | M1 finished in that class, M2 with week 2's videos |
+| 3 / 4 / 5 | Intro 3 / 4 / 5 | first videos, and M5 starts in the week-5 class |
+| 6 | Wrap 4, 5 | both taught in the week-5 class |
+| 7 / 8 / 9 | Intro 6 / 7 / 8 | first videos, and M8 starts in the week-9 class |
+| 10 | Wrap 7, 8 | both taught in the week-9 class |
+
+**Refined the same day.** A wrap-up does not have to wait for a class the
+module is only APPLIED in. The week-5 session does "Module 3: Applications"
+and the week-9 session "Module 6: Applications" -- all of those two modules'
+core material is on video -- so their wrap-ups moved forward to sit with
+those videos, in weeks 3 and 7.
+
+The label now says what to finish first, and `WRAP_AFTER` in
+`_calendar_content.py` holds one phrase per module (`podcast_when()` serves
+BOTH builders, so the wording is written once):
+
+| module | wrap-up week | reads |
+|---|---|---|
+| 1 | 2 | after **class** |
+| 2 | 2 | after **class and watching the Module 2 videos** (part I in class, part II on video) |
+| 3 | 3 | after **watching the Module 3 videos** (class does applications only) |
+| 4, 5 | 6 | after **class** |
+| 6 | 7 | after **watching the Module 6 videos** |
+| 7, 8 | 10 | after **class** |
+
+The underlined word stays "before" / "after"; only the phrase after it
+varies. An intro is always "before class".
+
+Weeks 6 and 10 had no podcast group before; they gained one. **The module
+pages are unchanged** -- they match items by the module named in the text, so
+each module page still shows both its episodes, under whichever week now
+carries it.
+
+**Group label** is now "Podcasts About Class Material:".
+
+### The trap this sprang: GROUP_MODULE_OVERRIDES was keyed by INDEX
+
+`(week, "prep", group_index)`. Deleting the recap groups and inserting the
+new podcast groups silently re-pointed every override that sat after one --
+week 3's advanced reading and week 6's Module 4 practice video quietly fell
+off their module pages, and week 2's "reading already covered" note lost its
+tag. Nothing failed; the pages just got quietly thinner.
+
+Now keyed by a distinctive SNIPPET of the group's label, or of its first item
+when it has no label, and `check_overrides()` runs at the top of the build
+and aborts if any key stops matching exactly one group. Recovered the correct
+targets from `git show HEAD:./_calendar_content.py` rather than guessing.
+
+**Rule for later: never key anything to a group's position in a list Nico
+edits.**
+
+### New box: "Slides & Other Video / In-class Material"
+
+The In-Class Material list moved out of the on-campus card into its own box
+at the foot of the week page, in the same container format as Before Class /
+During the Week. Two subheadings: **In-Class Material** (Handout + Slides per
+module the class covers -- now generated for weeks 5 and 9 as well as week 1)
+and **Slides for Videos** (one Slides placeholder per module whose videos the
+week carries; Nico supplies the decks in a later step). `inclass_material()`
+now returns module numbers and `materials_box()` does the rendering.
+
+The CALENDAR keeps its single compressed line ("In-Class Material - Modules
+1, 2: Handout / Slides (TBD)"). The four-bullet form would cost each week
+page three lines, and every week has to stay on one page.
+
+**TA address** is lowercase `ta405.emba2@gmail.com` everywhere; it lives once
+in `C.LINKS["ta_email"]` and the website obfuscates it, so no page carries it
+in plaintext.
+
+---
+
+## 2026-09-05 - help-button hover box, and asset URLs get a cache buster
+
+**Hover box on the ? / envelope.** "Contact the TA or Prof.", same treatment
+as the View by tip -- the two share one rule (`.viewbtn .tip,.helpbtn .tip`).
+`.helpbtn` was already `position:relative` for its two corner marks, so it
+needed nothing else. The tip hides while the popover is open
+(`.helpbtn[aria-expanded="true"] .tip`), which otherwise says the same thing
+at length.
+
+### The bug that mattered more: stale CSS against fresh HTML
+
+Nico saw the top-right corner "distorted" -- the tip text wrapped INSIDE the
+48px button, on top of the glyphs. The published CSS was correct and a
+cold-cache headless load rendered it correctly. His browser had the new HTML
+and an OLD cached `site.css`, so the span existed with none of the rules that
+position it.
+
+Fixed at the source: `stamp_assets()` puts a content hash on the asset URLs
+(`assets/site.css?v=b447270699`). The build writes `__ASSETV__` into the head
+and replaces it in a post-pass over the emitted `*.html`, because
+`search-index.js` is only written after the pages that reference it. A
+changed stylesheet now always arrives with the markup that needs it.
+
+**Worth remembering:** when a page looks wrong for Nico but right in a
+headless check, compare a COLD-CACHE load before touching the CSS. Publishing
+HTML and CSS as separate cacheable files is the failure mode, not the rule.
+
+**The heredoc backslash trap bit again** on this task -- `newline="\n"` in a
+patch script piped through a Bash heredoc arrived as a literal newline and
+broke `_build_site.py`. The rule in Teaching/CLAUDE.md is not optional: any
+patch script whose strings contain backslashes gets written to a .py file
+with the Write tool.
+
+---
+
+## 2026-09-04 (evening) - the sidebar minimizes, View by gets a hover box, footer deleted
+
+Three of Nico's edits, all built, deployed and verified live.
+
+**1. The footer line is gone.** "Prof. Nico Voigtländer · UCLA Anderson ·
+Fall 2026 · Please check Bruin Learn…" is deleted outright: the `<footer>`
+element removed from `page()` in `_build_site.py`, the now-unused `term` /
+`bl` template fields dropped, and all five dead `footer{...}` rules removed
+from `site.css` (base, print, and the two in the desktop block). The
+`C.TERM` / `C.BRUINLEARN_NOTE` constants stay in the calendar content module,
+which still uses them.
+
+**2. The right sidebar minimizes when it does not fit.** Nico narrows the
+window by opening a bookmarks sidebar, and the deadlines box was being
+relegated to the bottom and eating the screen. Cause: at 861–1240px the old
+`@media` rule made `.right` a full-width second grid ROW
+(`.right{grid-column:1 / -1}`). Measured cost: `main` is 697px tall at
+1400px but was only **253px** at 1100px, with `#deadlines` rendering 1,245px
+tall below it.
+
+Now that band parks the WHOLE right column — search box and deadlines card
+— in a fixed panel behind a bottom-right button labeled **"Deadlines /
+Search"** (`.sidebtn`, `body.sidebar-open .right{display:flex}`). Above
+1240px the sidebar keeps its own column; at ≤860px the phone layout is
+untouched (`.right{display:contents}`, search at the top, deadlines under
+the content, button `display:none`). Escape and an outside click close the
+panel, and `/` opens it before focusing the search box, since search lives
+inside it.
+
+**The detour worth recording (2026-09-05).** An intermediate version left
+the search box OUT of the panel, pinned on its own in the corner so it
+needed no click. Nico: "the search box is almost invisible in the bottom" —
+a bare input floating over the page content, with nothing framing it, does
+not read as a control. So both children went back inside the panel and the
+button was renamed to name both. Don't re-derive that: the panel is the
+frame that makes the search box legible down there.
+
+One mechanical consequence of keeping both inside: the panel itself must
+NOT scroll. `overflow-y:auto` on `.right` clips the search hits, which drop
+out of the box at the top of the panel. The deadlines CARD carries the
+scrolling instead (`.right #deadlines{max-height:min(58vh,470px);
+overflow-y:auto}`), and `.right` stays `overflow:visible`.
+
+The button's `aria-controls` now names the whole `<aside>` (which gained
+`id="sidebar"`), not the deadlines card it used to point at.
+
+Measured at 1100px and 950px: `main` 645px tall (was 253px), panel 330×517
+when open with the search box at its top and the deadlines card 306×441
+below, search hits rendering downward inside the panel and fitting the
+viewport. 1400px and 820px unchanged.
+
+**3. The View by button has a hover box.** `Switch to view by Module` /
+`Switch to view by Week`, set from `paintViewBtn()` so it always names the
+other view.
+
+### Trap worth remembering: `offsetParent` is null for a fixed element
+
+`sidebarBtn()` first tested `btn.offsetParent !== null` to decide whether we
+are in panel mode. That is always false here — by spec `offsetParent` is
+null when the computed position is `fixed`, and `.sidebtn` is fixed. The
+resize handler therefore closed the panel on EVERY resize, and `/` would
+never have opened it. Use `getComputedStyle(btn).display !== "none"` instead.
+
+Found it because headless `--screenshot` resizes the viewport, so the
+screenshot came back byte-identical to the closed state while a
+`--dump-dom` probe (no resize) measured the panel open. When a probe and a
+screenshot disagree, the screenshot's extra step — the resize — is the clue.
+
+Headless verification recipe used here, kept in the scratchpad as
+`probe.py` / `shot.py`: write the page copy **into the site folder** (a copy
+elsewhere 404s on the relative `assets/` hrefs), inject a probe that appends
+a `#PROBE` div of `getBoundingClientRect` + computed styles, and read it out
+of `--dump-dom`. For a screenshot of a JS state, stamp the class into the
+`<body>` markup rather than relying on a `load` handler.
+
+---
+
+## 2026-09-04 (later) - Module 2's video links and lengths
+
+Nothing was edited in this folder. The three new Module 2 Panopto links and
+their measured lengths (25 / 23 / 24 min) went into
+`../Course Calendar/_calendar_content.py`, and `_build_site.py` picked them up
+on the next run - which is the pipeline working as intended.
+
+Rebuilt and deployed; verified on the LIVE site that `week-02.html` and
+`all-videos.html` both carry all three new session ids with "(25 min)",
+"(23 min)", "(24 min)", and that none of last year's ids survive. `module-2.html`
+checked locally too.
+
+Note that the website does NOT show the per-week video total, so the new
+"= 72 min of video in total" line appears in the calendar only.
+
+---
+
 ## Where this stands (end of 2026-09-04)
 
 **The site is built, live and current.** 23 pages generated from the course
@@ -21,8 +378,9 @@ plus a Word-COM PDF export and `_check_pagination.ps1`.
 
 **Open items, in the order they are likely to matter:**
 
-1. `SYLLABUS_URL` in `_build_site.py` is `"#"` -- paste the Bruin Learn or PDF
-   address and rebuild.
+1. ~~`SYLLABUS_URL` is `"#"`~~ -- done. It now reads
+   `C.LINKS["syllabus_pdf"]`, and `_deploy.py` publishes the syllabus and
+   calendar PDFs alongside the pages.
 2. The In-Class Material rows are all "(TBD)". Nico uploads the handouts and
    slide decks right before each class; they need real links then.
 3. The podcast "(before class)" / "(after class)" wording is website-only. The

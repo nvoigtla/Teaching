@@ -19,6 +19,8 @@ Output (all overwritten on every run):
 """
 
 import base64
+import glob
+import hashlib
 import io
 import json
 import os
@@ -31,9 +33,23 @@ CAL = os.path.abspath(os.path.join(HERE, os.pardir, "Course Calendar"))
 if CAL not in sys.path:
     sys.path.insert(0, CAL)
 
+# --section has to land in the environment BEFORE _calendar_content is
+# imported: that module reads MGMT405_SECTION at import time (2026-09-05).
+for _i, _a in enumerate(sys.argv):
+    if _a == "--section" and _i + 1 < len(sys.argv):
+        os.environ["MGMT405_SECTION"] = sys.argv[_i + 1].lower()
+    elif _a.startswith("--section="):
+        os.environ["MGMT405_SECTION"] = _a.split("=", 1)[1].lower()
+
 import _calendar_content as C  # noqa: E402
 
-SITE_NAME = "Managerial Economics Fall 2026 – EMBA"
+# EMBA keeps this folder, so its published site is untouched; a second
+# section gets a subfolder of its own. SRC is where the hand-authored
+# stylesheet and script live -- always this folder, for both sections.
+SRC = HERE
+OUT = HERE if C.SECTION == "emba" else os.path.join(HERE, C.SECTION)
+
+SITE_NAME = "Managerial Economics Fall 2026 – %s" % C.SECTION_LABEL
 
 # What the browser tab shows, on every page (2026-09-03, Nico).
 TAB_TITLE = "Managerial Econ 405"
@@ -47,18 +63,22 @@ HELP_Q = "?"
 HELP_MAIL = "&#9993;"
 HELP_HD_GLYPH = HELP_Q + "&nbsp;" + HELP_MAIL
 
-# Paste the Bruin Learn / PDF address for the syllabus here when it exists.
-# Deliberately a placeholder for now (2026-09-03, Nico).
-SYLLABUS_URL = "#"
+# The syllabus and the calendar are published as PDFs alongside the site
+# (2026-09-04, Nico) -- _deploy.py copies both out of their folders. The
+# addresses live in the calendar's LINKS registry, so the calendar, the
+# syllabus and this page all read one string.
+SYLLABUS_URL = C.LINKS["syllabus_pdf"]
+CALENDAR_PDF_URL = C.LINKS["calendar_pdf"]
 
 # The Panopto sign-in screenshot lives with the calendar; the build copies
 # it into assets/ so the site can link it (2026-09-03, Nico).
 PANOPTO_SHOT_SRC = os.path.join(CAL, "Images", "Panopto-Login-Picture.png")
 PANOPTO_SHOT = "assets/panopto-login.png"
 
-# The course's BruinLearn site (2026-09-03, Nico). Kept here rather than in
-# the calendar's LINKS registry, because only the website links it.
-BRUINLEARN_COURSE = "https://bruinlearn.ucla.edu/courses/237825"
+# The course's BruinLearn site. It moved INTO the calendar's LINKS registry
+# on 2026-09-04, when the calendar's problem-set cards started linking it
+# too, so the address is no longer typed twice.
+BRUINLEARN_COURSE = C.LINKS["bruinlearn_course"]
 
 # The instructor's faculty page, linked from the header (2026-09-03, Nico).
 NICO_URL = "https://www.anderson.ucla.edu/faculty_pages/nico.v/"
@@ -127,23 +147,26 @@ EXTRA_LINKS = [
 
 _MOD_RE = re.compile(r"Module\s+(\d)")
 
-# Groups whose text names no module, or names one the regex would get wrong.
-# Keyed by (week number, "prep"|"weekend", group index). An empty list means
-# "not specific to one module" -- it then shows on the week page only.
+# Groups whose module tags cannot be read off their own text. KEYED BY A
+# DISTINCTIVE SNIPPET of the group's label -- or of its first item, when it
+# has no label -- NOT by position. It used to be keyed by the group's index
+# within the week, and deleting the "Recap of Module X" groups silently
+# re-pointed every override that followed one (2026-09-05). check_overrides()
+# fails the build if a key stops matching exactly one group.
 GROUP_MODULE_OVERRIDES = {
-    (1, "prep", 2): [],      # general-interest econ podcasts
+    (1, "prep", "Optional Podcasts"): [],        # general-interest econ podcasts
     # "In preparation for class: Ch. 2.5" names no module; tagged with the two
     # modules that week 1's on-campus class covers, per that week's topics.
-    (1, "prep", 4): [1, 2],
-    (2, "prep", 4): [2],     # "[reading already covered ...]" note
-    (2, "prep", 5): [2],     # advanced reading, Ch. 5 (elasticity)
-    (2, "prep", 6): [2],     # teaching notes: MR, elasticity, regressions
-    (3, "prep", 4): [3],     # advanced reading, Ch. 6.6 - 6.7
-    (5, "prep", 2): [],      # assigned articles for discussion
-    (6, "prep", 1): [],      # midterm prep / TA review sessions
-    (9, "prep", 1): [],      # general-interest econ podcast
-    (9, "prep", 3): [],      # assigned articles for discussion
-    (11, "prep", 0): [],     # exam-prep time
+    (1, "prep", "In preparation for class:"): [1, 2],
+    (2, "prep", "[Relevant textbook reading was already covered"): [2],
+    (2, "prep", "Advanced reading (optional):"): [2],   # Ch. 5 (elasticity)
+    (2, "prep", "Teaching notes (optional"): [2],       # MR, elasticity, regressions
+    (3, "prep", "Advanced reading (optional):"): [3],   # Ch. 6.6 - 6.7
+    (5, "prep", "Assigned articles for discussion"): [],
+    (6, "prep", "Midterm Prep: TA Review Sessions"): [],
+    (9, "prep", "Optional Podcasts"): [],        # general-interest econ podcast
+    (9, "prep", "Assigned articles for discussion"): [],
+    (11, "prep", "Exam prep time:"): [],
 }
 
 # Hooks for hiding a calendar line on the WEBSITE only, while it still
@@ -216,10 +239,24 @@ def week_span(w):
     return C.dt(w["num"], "Mon"), C.dt(w["num"], "Sun")
 
 
+def group_text(g):
+    """The group's label, or its first item's text when it has no label --
+    what GROUP_MODULE_OVERRIDES matches its snippets against."""
+    if g.get("label"):
+        return g["label"]
+    for it in g["items"]:
+        txt = it[1] if it[0] in ("t", "b", "note") else (
+            it[2] if it[0] in ("v", "l", "p") else "")
+        if txt:
+            return txt
+    return ""
+
+
 def group_modules(g, wnum, where, idx):
-    key = (wnum, where, idx)
-    if key in GROUP_MODULE_OVERRIDES:
-        return list(GROUP_MODULE_OVERRIDES[key])
+    hay = group_text(g)
+    for (w, wh, snippet), mods in GROUP_MODULE_OVERRIDES.items():
+        if w == wnum and wh == where and snippet in hay:
+            return list(mods)
     mods = mods_in(g.get("label"))
     if mods:
         return mods
@@ -276,18 +313,19 @@ def render_segments(segs):
 
 def podcast_label(text):
     """"Podcast: Intro to Module 1" -> "Podcast (<u>before</u> class): Intro
-    to Module 1"; the wrap-up episode gets "after". The underline marks WHEN
-    to listen (2026-09-03, Nico). Anything that is not one of the two module
-    episodes is left alone."""
-    rest = text[len("Podcast: "):] if text.startswith("Podcast: ") else text
-    low = rest.lower()
-    if "intro" in low:
-        when = "before"
-    elif "wrap" in low:
-        when = "after"
-    else:
+    to Module 1". The underline marks WHEN to listen (2026-09-03, Nico).
+
+    The phrase after the underlined word comes from podcast_when() in the
+    content module, which the calendar reads too -- a wrap-up says "after
+    watching the Module 3 videos" where the on-campus session only did that
+    module's applications (2026-09-05). Anything that is not one of the two
+    module episodes is left alone."""
+    w = C.podcast_when(text)
+    if w is None:
         return esc(text)
-    return "Podcast (<u>%s</u> class): %s" % (when, esc(rest))
+    when, tail = w
+    rest = text[len("Podcast: "):] if text.startswith("Podcast: ") else text
+    return "Podcast (<u>%s</u> %s): %s" % (when, esc(tail), esc(rest))
 
 
 def render_item(it, cat):
@@ -604,6 +642,15 @@ def mail_link(address, text, cls=""):
             % ((" " + cls) if cls else "", enc(local), enc(domain), esc(text)))
 
 
+def ta_link(text, cls=""):
+    """The TA's name as a mail link -- or as plain text when the section has
+    no mailbox yet, rather than routing students to the other section's TA
+    (2026-09-05, FEMBA's address is still to come)."""
+    if not C.TA_EMAIL:
+        return esc(text)
+    return mail_link(C.TA_EMAIL, text, cls)
+
+
 def help_body():
     """Who to ask about what. Only "TA <name>" is the link, bold and
     underlined so it reads as one (2026-09-04, Nico); Prof. Nico's line
@@ -620,8 +667,7 @@ def help_body():
             '%s</span></div>'
             '</div>'
             % (HELP_MAIL,
-               mail_link(C.LINKS["ta_email"].replace("mailto:", ""),
-                         "TA " + C.TA_NAME, "who"),
+               ta_link("TA " + C.TA_NAME, "who"),
                HELP_MAIL,
                mail_link(NICO_EMAIL, "Prof. Nico", "who")))
 
@@ -719,7 +765,7 @@ def right_column(current_week):
                (' <span style="font-size:12.5px;color:var(--ink-3)">(%s)</span>'
                 % esc(a["note"])) if a["note"] else "",
                esc(a["when"])))
-    return """<aside class="right">
+    return """<aside class="right" id="sidebar">
   <div class="searchwrap">
     <span class="mag" aria-hidden="true">⌕</span>
     <input type="search" id="q" placeholder="Search…"
@@ -766,9 +812,9 @@ def page(fname, page_title, nav_kind, current, main_html,
 <!-- the tab always reads the course, never the page (2026-09-03, Nico) -->
 <title>%(tab)s</title>
 %(head_extra)s<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&amp;family=Source+Sans+3:wght@400;600;700&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css">
-<script src="assets/search-index.js"></script>
-<script src="assets/site.js"></script>
+<link rel="stylesheet" href="assets/site.css?v=__ASSETV__">
+<script src="assets/search-index.js?v=__ASSETV__"></script>
+<script src="assets/site.js?v=__ASSETV__"></script>
 </head>
 <body data-navkind="%(navkind)s">
 <div class="topbar"><div class="topbar-in">
@@ -777,13 +823,13 @@ def page(fname, page_title, nav_kind, current, main_html,
   <div class="tb-right">
     <div class="helpwrap">
       <button class="helpbtn" id="helpbtn" type="button" aria-expanded="false"
-              aria-controls="helppop" aria-label="Help and questions"><span class="q" aria-hidden="true">%(helpq)s</span><span class="m" aria-hidden="true">%(helpmail)s</span></button>
+              aria-controls="helppop" aria-label="Help and questions"><span class="q" aria-hidden="true">%(helpq)s</span><span class="m" aria-hidden="true">%(helpmail)s</span><span class="tip" aria-hidden="true">Contact the TA or Prof.</span></button>
       <div class="helppop" id="helppop" hidden>
         <div class="box-hd"><span class="cg" aria-hidden="true">%(helphd)s</span>Help and Questions</div>
         <div class="panel-bd">%(helpbody)s</div>
       </div>
     </div>
-    <button class="viewbtn" id="viewmode" type="button"><span class="l1">View by</span><span class="l2" id="viewmode-label">Week</span></button>
+    <button class="viewbtn" id="viewmode" type="button"><span class="l1">View by</span><span class="l2" id="viewmode-label">Week</span><span class="tip" id="viewmode-tip">Switch to view by Module</span></button>
   </div>
 </div></div>
 
@@ -793,13 +839,9 @@ def page(fname, page_title, nav_kind, current, main_html,
 %(main)s
 </main>
 %(right)s
+<button class="sidebtn" id="sidebtn" type="button" aria-expanded="false"
+        aria-controls="sidebar">Deadlines / Search</button>
 </div>
-
-<footer>
-  <span>%(inst)s · %(school)s · %(term)s</span>
-  <span class="sep">·</span>
-  <span>%(bl)s</span>
-</footer>
 </body>
 </html>
 """ % {
@@ -814,16 +856,14 @@ def page(fname, page_title, nav_kind, current, main_html,
         "gl": GL_HREF,
         "inst": esc("Prof. Nico Voigtländer"),
         "school": "UCLA Anderson",
-        "term": esc(C.TERM),
         "nico": esc(NICO_URL),
         "jump": jump_select(current),
-        "bl": esc(C.BRUINLEARN_NOTE),
         "left": left_column(current),
         "right": right_column(current_week),
         "main": main_html,
         "head_extra": head_extra,
     }
-    with io.open(os.path.join(HERE, fname), "w", encoding="utf-8",
+    with io.open(os.path.join(OUT, fname), "w", encoding="utf-8",
                  newline="\n") as f:
         f.write(html)
 
@@ -851,17 +891,71 @@ def inclass_material(w):
             for n in mods_in(txt):
                 if n not in mods:
                     mods.append(n)
-    if not mods:
-        return ""
+    return sorted(mods)
+
+
+def tbd_rows(mods, kinds):
+    """Placeholder bullets -- "Module 3 – Handout (TBD)" -- one per module
+    and kind. Nico uploads the real files right before each class."""
     rows = []
-    for n in sorted(mods):
-        for what in ("Handout", "Slides"):
+    for n in mods:
+        for what in kinds:
             rows.append('<li><span class="g" aria-hidden="true">▤</span>'
                         '<span class="txt">Module %d – %s '
                         '<span class="tba">(TBD)</span></span></li>'
                         % (n, what))
-    return ('<div class="grp"><p class="grp-lab">In-Class Material</p>'
-            '<ul class="items">%s</ul></div>' % "".join(rows))
+    return "".join(rows)
+
+
+def video_modules(w):
+    """Modules whose TEACHING videos this week carries -- what "Slides for
+    Videos" needs placeholders for.
+
+    PRACTICE videos do not count (2026-09-06, Nico): they have no deck of
+    their own, and counting them put a stray "Module 4 - Slides" under week
+    6, which has neither videos nor a class. Weeks 6 and 10 carry practice
+    videos only, so they now get no materials box at all; weeks 4 and 8
+    carry both kinds and list only the module they actually teach."""
+    mods = []
+    for i, g in enumerate(w.get("prep_groups") or []):
+        if g.get("cat") != "video":
+            continue
+        if "practice" in (g.get("label") or "").lower():
+            continue
+        gm = group_modules(g, w["num"], "prep", i)
+        for it in g["items"]:
+            if "Practice Video" in (it[2] if len(it) > 2 else ""):
+                continue
+            for n in item_modules(it, gm):
+                if n not in mods:
+                    mods.append(n)
+    return sorted(mods)
+
+
+def materials_box(w):
+    """The week's downloadable material, in a box of its own at the foot of
+    the page (2026-09-05, Nico). The In-Class Material list used to sit as a
+    group inside the on-campus card.
+
+    Same container format as Before Class / During the Week."""
+    secs = []
+    if w["kind"] == "oncampus":
+        mods = inclass_material(w)
+        if mods:
+            secs.append(("In-Class Material",
+                         tbd_rows(mods, ("Handout", "Slides"))))
+    vmods = video_modules(w)
+    if vmods:
+        secs.append(("Slides for Videos", tbd_rows(vmods, ("Slides",))))
+    if not secs:
+        return ""
+    body = "".join('<div class="grp"><p class="grp-lab">%s</p>'
+                   '<ul class="items">%s</ul></div>' % (esc(lab), rows)
+                   for lab, rows in secs)
+    return ('<div class="prep materials"><div class="head">%s</div>'
+            '<section class="cat other"><div class="cat-bd">%s</div>'
+            '</section></div>'
+            % (esc("Slides & Other Video / In-class Material"), body))
 
 
 def week_main(w):
@@ -934,10 +1028,8 @@ def week_main(w):
         we = w["weekend"]
         body = "".join(render_group(g, "other") for g in we["groups"])
         if w["kind"] == "oncampus":
-            body += inclass_material(w)
-            when = ("Fri, %s, 4:00 – 5:30 pm · Sat, %s, 9:00 am – 12:30 pm "
-                    "· Room %s"
-                    % (C.fmt(C.dt(n, "Fri")), C.fmt(C.dt(n, "Sat")),
+            when = ("%s · Room %s"
+                    % (C.class_when(n).replace("   ·   ", " · "),
                        C.CLASSROOM))
             # the classical building marks the in-person part of the week
             # (2026-09-03, Nico)
@@ -975,6 +1067,8 @@ def week_main(w):
 
     if w.get("weekend") and not class_first:
         h.append(class_card())
+
+    h.append(materials_box(w))
 
     if w.get("holiday"):
         ho = w["holiday"]
@@ -1162,11 +1256,19 @@ def logistics_main():
 
     # Two half-width boxes, side by side, above the three columns.
     h.append('<div class="gl-row">%s%s</div>' % (
-        panel("Class Syllabus",
+        # Both PDFs sit in one box (2026-09-04, Nico): the syllabus first,
+        # the calendar under it. The calendar has no card of its own any
+        # more -- the website IS the calendar, and the PDF is the version
+        # for those who want it on paper.
+        panel("Class Syllabus and Calendar",
               '<div class="qlinks first">'
-              '<a href="%s"><span class="g" aria-hidden="true">&#9636;</span>'
+              '<a href="%s" target="_blank" rel="noopener">'
+              '<span class="g" aria-hidden="true">&#9636;</span>'
               '<span class="u">Download the Class Syllabus here</span></a>'
-              '</div>' % SYLLABUS_URL,
+              '<a href="%s" target="_blank" rel="noopener">'
+              '<span class="g" aria-hidden="true">&#9636;</span>'
+              '<span class="u">Download the Class Calendar as PDF here</span>'
+              '</a></div>' % (SYLLABUS_URL, CALENDAR_PDF_URL),
               "▤"),
         panel("BruinLearn Class Site",
               '<div class="qlinks first">'
@@ -1189,8 +1291,7 @@ def logistics_main():
                   "</dl>"
                   % (esc(C.CLASS_TIMES), esc(C.CLASSROOM),
                      mail_link(NICO_EMAIL, "Prof. Nico Voigtl\u00e4nder"),
-                     mail_link(C.LINKS["ta_email"].replace("mailto:", ""),
-                               C.TA_NAME),
+                     ta_link(C.TA_NAME),
                      esc(C.TERM)))
 
     # Column 2: watching the videos, then the practice exercises directly
@@ -1277,7 +1378,7 @@ def build_index(pages):
         rows.append({"href": href, "kind": kind, "title": title, "sub": sub,
                      "head": head, "hay": head + " " + hay})
     body = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
-    with io.open(os.path.join(HERE, "assets", "search-index.js"), "w",
+    with io.open(os.path.join(OUT, "assets", "search-index.js"), "w",
                  encoding="utf-8", newline="\n") as f:
         f.write("/* GENERATED by _build_site.py -- do not edit by hand. */\n")
         f.write("window.SEARCH_INDEX = %s;\n" % body)
@@ -1285,11 +1386,68 @@ def build_index(pages):
 
 # ============================== main ==============================
 
+def check_overrides():
+    """Every GROUP_MODULE_OVERRIDES key must still match exactly one group.
+
+    The table used to be keyed by a group's index within its week, so adding
+    or deleting a group re-pointed the overrides after it without a word --
+    which is how week 3's advanced reading and week 6's Module 4 practice
+    video quietly fell off their module pages (2026-09-05)."""
+    hits = {k: 0 for k in GROUP_MODULE_OVERRIDES}
+    for w in C.WEEKS:
+        for where, groups in (("prep", w.get("prep_groups") or []),
+                              ("weekend",
+                               (w.get("weekend") or {}).get("groups") or [])):
+            for g in groups:
+                hay = group_text(g)
+                for key in GROUP_MODULE_OVERRIDES:
+                    if key[0] == w["num"] and key[1] == where and key[2] in hay:
+                        hits[key] += 1
+    bad = {k: n for k, n in hits.items() if n != 1}
+    if bad:
+        for k, n in bad.items():
+            print("  OVERRIDE %r matches %d groups (want 1)" % (k, n))
+        sys.exit("group-module overrides are stale -- fix them and rebuild")
+
+
+def stamp_assets():
+    """Put a content hash on the asset URLs.
+
+    Without it a browser can pair freshly published HTML with a site.css it
+    already has cached -- which is exactly how the help tooltip shipped
+    broken on 2026-09-05: the new markup arrived, the CSS that positions it
+    did not, and the tip rendered as wrapped text inside the button. The
+    stamp goes in as a post-pass because search-index.js is only written
+    after the pages that reference it."""
+    h = hashlib.sha1()
+    for name in ("site.css", "site.js", "search-index.js"):
+        with io.open(os.path.join(OUT, "assets", name), "rb") as fh:
+            h.update(fh.read())
+    v = h.hexdigest()[:10]
+    n = 0
+    for f in glob.glob(os.path.join(OUT, "*.html")):
+        s = io.open(f, encoding="utf-8").read()
+        if "__ASSETV__" not in s:
+            continue
+        io.open(f, "w", encoding="utf-8", newline="\n").write(
+            s.replace("__ASSETV__", v))
+        n += 1
+    print("  asset version %s stamped into %d pages" % (v, n))
+
+
 def main():
-    os.makedirs(os.path.join(HERE, "assets"), exist_ok=True)
+    os.makedirs(os.path.join(OUT, "assets"), exist_ok=True)
+    check_overrides()
+    if OUT != SRC:
+        # site.css and site.js are hand-authored ONCE, in Course Website/.
+        # Copy them in on every build so a second section can never drift
+        # from the stylesheet Nico actually edits (2026-09-05).
+        for _a in ("site.css", "site.js"):
+            shutil.copy2(os.path.join(SRC, "assets", _a),
+                         os.path.join(OUT, "assets", _a))
     if not os.path.exists(PANOPTO_SHOT_SRC):
         sys.exit("missing sign-in screenshot: %s" % PANOPTO_SHOT_SRC)
-    shutil.copy2(PANOPTO_SHOT_SRC, os.path.join(HERE, PANOPTO_SHOT))
+    shutil.copy2(PANOPTO_SHOT_SRC, os.path.join(OUT, PANOPTO_SHOT))
     pages = []
 
     gl = logistics_main()
@@ -1323,6 +1481,7 @@ def main():
                       "Weeks " + ", ".join(str(k) for k in wks), html))
 
     build_index(pages)
+    stamp_assets()
 
     print("built %d pages" % len(pages))
     print("  index.html, week-01..week-%02d, module-1..module-%d"

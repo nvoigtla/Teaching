@@ -25,12 +25,30 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CAL = os.path.abspath(os.path.join(HERE, os.pardir, "Course Calendar"))
+if CAL not in sys.path:
+    sys.path.insert(0, CAL)
+
+# --section has to land in the environment BEFORE _calendar_content is
+# imported: that module reads MGMT405_SECTION at import time (2026-09-05).
+for _i, _a in enumerate(sys.argv):
+    if _a == "--section" and _i + 1 < len(sys.argv):
+        os.environ["MGMT405_SECTION"] = sys.argv[_i + 1].lower()
+    elif _a.startswith("--section="):
+        os.environ["MGMT405_SECTION"] = _a.split("=", 1)[1].lower()
+
+import _calendar_content as C  # noqa: E402
+
+# EMBA publishes this folder; a second section publishes its subfolder --
+# the same split _build_site.py writes to.
+SITE = HERE if C.SECTION == "emba" else os.path.join(HERE, C.SECTION)
 
 OWNER = "nvoigtla"
 # GitHub repository names cannot contain spaces, so "MGMT 405 EMBA" becomes
 # this; the published address is https://<owner>.github.io/<REPO>/
-REPO = "MGMT-405-EMBA"
-DESC = "Course website for MGMT 405 Managerial Economics (EMBA Hybrid)"
+REPO = C.REPO
+DESC = ("Course website for MGMT 405 Managerial Economics (%s Hybrid)"
+        % C.SECTION_LABEL)
 
 # Everything the site needs. Nothing else is copied -- the build script, the
 # session notes and the calendar stay private.
@@ -40,13 +58,26 @@ DESC = "Course website for MGMT 405 Managerial Economics (EMBA Hybrid)"
 # (2026-09-03), so both 404'd on the live site while the local build was
 # fine. Every .html in this folder is a built page.
 def page_files():
-    return sorted(f for f in os.listdir(HERE)
+    return sorted(f for f in os.listdir(SITE)
                   if f.endswith(".html") and not f.startswith("_"))
 
 
 ASSETS = ["site.css", "site.js", "search-index.js", "panopto-login.png"]
 
-PUBLIC_README = """# MGMT 405 – Managerial Economics (EMBA Hybrid)
+# Documents published NEXT TO the site, so the General Logistics page can
+# link them (2026-09-04, Nico): (source path, published file name). The
+# published names carry no spaces -- they are served straight off GitHub
+# Pages -- and they have to match LINKS["syllabus_pdf"] / ["calendar_pdf"]
+# in ../Course Calendar/_calendar_content.py, which is what the site, the
+# syllabus and the calendar all link.
+DOCS = [
+    (os.path.join(HERE, os.pardir, "Syllabus", C.SYLLABUS_DOCX + ".pdf"),
+     "MGMT-405-Syllabus-Fall-2026.pdf"),
+    (os.path.join(HERE, os.pardir, "Course Calendar", C.CALENDAR_DOCX + ".pdf"),
+     "MGMT-405-Calendar-Fall-2026.pdf"),
+]
+
+PUBLIC_README = """# MGMT 405 – Managerial Economics (%s Hybrid)""" % C.SECTION_LABEL + """
 
 Course website: **https://%s.github.io/%s/**
 
@@ -68,30 +99,44 @@ def run(cmd, cwd=None, check=True, quiet=False):
     return p
 
 
-def missing():
+def missing(skip_docs=False):
     out = []
     for f in page_files():
-        if not os.path.exists(os.path.join(HERE, f)):
+        if not os.path.exists(os.path.join(SITE, f)):
             out.append(f)
     for a in ASSETS:
-        if not os.path.exists(os.path.join(HERE, "assets", a)):
+        if not os.path.exists(os.path.join(SITE, "assets", a)):
             out.append("assets/" + a)
+    if not skip_docs:
+        for src, name in DOCS:
+            if not os.path.exists(src):
+                out.append(name + "  (export it from its .docx first: %s)" % src)
     return out
 
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--section", default=os.environ.get("MGMT405_SECTION"),
+                    help="emba (default) or femba; already consumed above")
     ap.add_argument("--dry-run", action="store_true")
+    # Word's ExportAsFixedFormat has been hanging on this machine, so a
+    # section can be published before its PDFs exist. The two links to them
+    # 404 until the files are added, which is why this is never the default
+    # (2026-09-05).
+    ap.add_argument("--skip-docs", action="store_true",
+                    help="publish without the syllabus / calendar PDFs")
     args = ap.parse_args()
 
-    gone = missing()
+    gone = missing(skip_docs=args.skip_docs)
     if gone:
         sys.exit("Run `python _build_site.py` first -- missing:\n  " +
                  "\n  ".join(gone))
     files = page_files()
     if not files:
         sys.exit("no built pages found -- run `python _build_site.py` first")
-    print("all %d pages and %d assets present" % (len(files), len(ASSETS)))
+    have_docs = sum(1 for src, _ in DOCS if os.path.exists(src))
+    print("all %d pages, %d assets and %d of %d PDFs present"
+          % (len(files), len(ASSETS), have_docs, len(DOCS)))
 
     if args.dry_run:
         print("\nwould publish to https://github.com/%s/%s" % (OWNER, REPO))
@@ -100,6 +145,8 @@ def main():
             print("   " + f)
         for a in ASSETS:
             print("   assets/" + a)
+        for _src, name in DOCS:
+            print("   " + name)
         print("   README.md, .nojekyll")
         return
 
@@ -126,10 +173,16 @@ def main():
 
         os.makedirs(os.path.join(work, "assets"), exist_ok=True)
         for f in files:
-            shutil.copy2(os.path.join(HERE, f), os.path.join(work, f))
+            shutil.copy2(os.path.join(SITE, f), os.path.join(work, f))
         for a in ASSETS:
-            shutil.copy2(os.path.join(HERE, "assets", a),
+            shutil.copy2(os.path.join(SITE, "assets", a),
                          os.path.join(work, "assets", a))
+        for src, name in DOCS:
+            if os.path.exists(src):
+                shutil.copy2(src, os.path.join(work, name))
+            else:
+                print("   WARNING: %s not published (no %s)"
+                      % (name, os.path.basename(src)))
         io.open(os.path.join(work, "README.md"), "w", encoding="utf-8",
                 newline="\n").write(PUBLIC_README)
         # keep GitHub Pages from running the site through Jekyll
