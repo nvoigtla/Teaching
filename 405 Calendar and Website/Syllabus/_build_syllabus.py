@@ -233,8 +233,9 @@ SECTIONS = [
           "exams will be scheduled."),
     ("p", "The exams are open-book. You may use the course textbook, class "
           "slides, class notes and problem sets. You may use a calculator or "
-          "Excel. You may access the course materials on Bruin Learn and the "
-          "online version of the textbook. Usage of the internet for any "
+          "Excel. You may access the course materials on the course website "
+          "and on Bruin Learn, and the online version of the textbook. "
+          "Usage of the internet for any "
           "other purpose is prohibited. In particular, the use of AI tools "
           "(e.g., ChatGPT) is not allowed during the exams, and both exams "
           "are proctored by an online proctoring company. Communicating with "
@@ -318,10 +319,14 @@ SECTIONS = [
                    "exercises and every deadline, week by week and module by "
                    "module. The class syllabus and the course calendar can be "
                    "downloaded there as PDFs.")]),
-    ("mix", [("t", "All course materials, including electronic copies of all "
-                   "our slides, problem sets and solutions, are on the "),
-             ("l", "bruinlearn_course", "Bruin Learn"),
-             ("t", " site for the course. This course is almost entirely "
+    # Slides, problem sets AND their solutions live on the class website
+    # (2026-09-06, Nico). The link is repeated here on purpose, even though
+    # the paragraph above already carries it. Exam solutions are the
+    # exception and stay on Bruin Learn -- see the exams section.
+    ("mix", [("t", "Electronic copies of all our slides, problem sets, and "
+                   "the solutions to the problem sets, are on the "),
+             ("l", "website", "class website"),
+             ("t", ". This course is almost entirely "
                    "paperless, except for the occasional class handout. "
                    "Please monitor the course pages regularly, as they carry "
                    "the most up-to-date information on the reading "
@@ -513,8 +518,17 @@ def website_card(doc):
 
         p = cell.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        add_run(p, "Prefer a PDF? The course calendar and this syllabus can "
-                   "be downloaded from the website.",
+        # "course calendar" links that section's own calendar PDF, which is
+        # where the video / slide / podcast links actually live
+        # (2026-09-06, Nico).
+        add_run(p, "Prefer a PDF with links to videos, slides, etc.? "
+                   "Download the ",
+                italic=True, color=GRAY, size=10.5)
+        # bold=False: the line is italic gray, and add_hyperlink defaults to
+        # bold, which would make the link shout inside a quiet caption
+        add_hyperlink(p, C.LINKS["calendar_pdf"], "course calendar",
+                      bold=False, italic=True, size=10.5, underline=True)
+        add_run(p, " from the class website.",
                 italic=True, color=GRAY, size=10.5)
 
     # gold border at 2 pt, twice the weight of an ordinary card, so the box
@@ -583,8 +597,9 @@ def write_md():
          "week, all videos and podcasts, the readings, the practice "
          "exercises and every deadline.",
          ">",
-         "> *Prefer a PDF? The course calendar and this syllabus can be "
-         "downloaded from the website.*", ""]
+         "> *Prefer a PDF with links to videos, slides, etc.? Download the "
+         "[course calendar](%s) from the class website.*"
+         % C.LINKS["calendar_pdf"], ""]
     for blk in SECTIONS:
         k = blk[0]
         if k == "h":

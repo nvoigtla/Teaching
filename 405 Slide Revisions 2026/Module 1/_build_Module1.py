@@ -4021,10 +4021,10 @@ def slide_27_tea_market(prs):
         _sd_chart(
             slide, fig,
             curves=[
-                ((1, 8), (8, 1), GOLD, None, "D", (8.05, 1.35)),
-                ((2, 8.5), (8.6, 1.9), GOLD, 'dash', "D1", (8.65, 2.2)),
-                ((1.5, 1.5), (8.5, 8.5), STEEL, None, "S", (8.55, 8.75)),
-                ((0.5, 4), (6, 9.5), STEEL, 'dash', "S1", (5.6, 10.0)),
+                ((1, 8), (8, 1), RED, None, "D", (8.05, 1.35)),
+                ((2, 8.5), (8.6, 1.9), RED, 'dash', "D1", (8.65, 2.2)),
+                ((1.5, 1.5), (8.5, 8.5), NAVY, None, "S", (8.55, 8.75)),
+                ((0.5, 4), (6, 9.5), NAVY, 'dash', "S1", (5.6, 10.0)),
             ],
             points=[(4.5, 4.5), (3.5, 7.0)],
             xlabels=[(4.75, "Q0"), (3.1, "Q1")],
@@ -4122,11 +4122,11 @@ def slide_31_avocado_market(prs):
         _sd_chart(
             slide, fig,
             curves=[
-                ((1, 8), (8, 1), GOLD, None, "D", (8.05, 1.35)),
-                ((4, 9), (9.6, 3.4), GOLD, 'dash', "D1", (9.3, 3.9)),
-                ((1.5, 1.5), (8.5, 8.5), STEEL, None, "S", (8.55, 8.75)),
-                ((0.5, 4), (5.8, 9.3), STEEL, 'dash', "S1", (5.35, 9.8)),
-                ((5, 1), (9.5, 5.5), STEEL, 'dash', "S2", (9.55, 5.85)),
+                ((1, 8), (8, 1), RED, None, "D", (8.05, 1.35)),
+                ((4, 9), (9.6, 3.4), RED, 'dash', "D1", (9.3, 3.9)),
+                ((1.5, 1.5), (8.5, 8.5), NAVY, None, "S", (8.55, 8.75)),
+                ((0.5, 4), (5.8, 9.3), NAVY, 'dash', "S1", (5.35, 9.8)),
+                ((5, 1), (9.5, 5.5), NAVY, 'dash', "S2", (9.55, 5.85)),
             ],
             points=[(4.5, 4.5), (4.75, 8.25), (8.5, 4.5)],
             xlabels=[(4.1, "Q0"), (5.15, "Q1"), (8.5, "Q2")],
@@ -4277,10 +4277,10 @@ def slide_35_la_market(prs):
         _sd_chart(
             slide, fig,
             curves=[
-                ((1, 8), (8, 1), GOLD, None, "D0", (8.05, 1.35)),
-                ((0.9, 6), (6.4, 0.5), GOLD, 'dash', "D1", (6.15, 1.05)),
-                ((1.5, 1.5), (8.5, 8.5), STEEL, None, "S0", (8.55, 8.75)),
-                ((0.5, 2), (7.5, 9), STEEL, 'dash', "S1", (7.1, 9.4)),
+                ((1, 8), (8, 1), RED, None, "D0", (8.05, 1.35)),
+                ((0.9, 6), (6.4, 0.5), RED, 'dash', "D1", (6.15, 1.05)),
+                ((1.5, 1.5), (8.5, 8.5), NAVY, None, "S0", (8.55, 8.75)),
+                ((0.5, 2), (7.5, 9), NAVY, 'dash', "S1", (7.1, 9.4)),
             ],
             points=[(4.5, 4.5), (2.7, 4.2)],
             xlabels=[(2.7, "Q1"), (4.5, "Q0")],
@@ -5421,9 +5421,9 @@ def slide_72_v3_demand_curve(prs):
     box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
     fig = SimpleFig(8.6, 6.55, 3.9, 3.0, 10, 10)
     _fig_axes(slide, fig, label_size=16)
-    _fig_line(slide, fig, (0.8, 8.6), (7.6, 1.4), color=GOLD,
+    _fig_line(slide, fig, (0.8, 8.6), (7.6, 1.4), color=RED,
               weight_pt=2.75)
-    _fig_curve_label(slide, fig, 7.8, 1.9, "D", color=NAVY)
+    _fig_curve_label(slide, fig, 7.8, 1.9, "D", color=RED)
     _draw_footer(slide, FOOTER_TEXT, 75)
     _set_notes(slide, DEMAND_CURVE_NOTE)
     return slide
@@ -5436,8 +5436,8 @@ def slide_73_v3_move_vs_shift_d(prs):
         # D: y = 9 - x ; movement (4.5,4.5) -> (2.5,6.5); D': y = 12 - x
         _fig_guide(slide, fig, (4.5, 4.5), color=GRAY)
         _fig_guide(slide, fig, (2.5, 6.5), color=GRAY)
-        _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD, weight_pt=2.75)
-        _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=GOLD)
+        _fig_line(slide, fig, (1, 8), (8, 1), color=RED, weight_pt=2.75)
+        _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=RED)
         # arrowhead added 2026-08-24 (Nico): the movement along D
         # points UP the curve, i.e. at the path start (2.5, 6.5)
         _set_line_ends(
@@ -5525,11 +5525,11 @@ def slide_74_v3_ai_chips(prs):
             gh.name = "sdguide:h:P1"
         if gv is not None:
             gv.name = "sdguide:v:Q1"
-        d = _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD,
+        d = _fig_line(slide, fig, (1, 8), (8, 1), color=RED,
                       weight_pt=2.75)
         d.name = "sdcurve:D"
         _fig_curve_label(slide, fig, 8.05, 1.35, "D",
-                         color=GOLD).name = "sdlabel:D"
+                         color=RED).name = "sdlabel:D"
         dp = _fig_line(slide, fig, (3.6, 8.4), (9.7, 2.3), color=GREEN_DK,
                        weight_pt=2.75, dash='dash')
         dp.name = "sdcurve:Dp"
@@ -5605,7 +5605,7 @@ def slide_75_v3_supply_curve(prs):
     box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
     fig = SimpleFig(8.6, 6.55, 3.9, 3.0, 10, 10)
     _fig_axes(slide, fig, label_size=16)
-    _fig_line(slide, fig, (0.8, 1.6), (7.6, 8.6), color=STEEL,
+    _fig_line(slide, fig, (0.8, 1.6), (7.6, 8.6), color=NAVY,
               weight_pt=2.75)
     _fig_curve_label(slide, fig, 7.8, 9.0, "S", color=NAVY)
     _draw_footer(slide, FOOTER_TEXT, 78)
@@ -5628,7 +5628,7 @@ def slide_76_v3_move_vs_shift_s(prs):
             h1.name = "sdguide:h:P1"
         if v1 is not None:
             v1.name = "sdguide:v:Q1"
-        _fig_line(slide, fig, (1, 2), (7.5, 8.5), color=STEEL,
+        _fig_line(slide, fig, (1, 2), (7.5, 8.5), color=NAVY,
                   weight_pt=2.75)
         _fig_curve_label(slide, fig, 7.7, 8.9, "S", color=NAVY)
         # arrowhead added 2026-08-24 (Nico): the movement along S
@@ -5719,9 +5719,9 @@ def slide_79_v4_mechanism(prs):
                    color=GRAY, weight_pt=1.25, head=False, dash='dash')
         _add_arrow(slide, (fig.x(0), fig.y(2.5)), (fig.x(2.5), fig.y(2.5)),
                    color=GRAY, weight_pt=1.25, head=False, dash='dash')
-        _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD, weight_pt=2.75)
-        _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=NAVY)
-        _fig_line(slide, fig, (1.5, 1.5), (8.5, 8.5), color=STEEL,
+        _fig_line(slide, fig, (1, 8), (8, 1), color=RED, weight_pt=2.75)
+        _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=RED)
+        _fig_line(slide, fig, (1.5, 1.5), (8.5, 8.5), color=NAVY,
                   weight_pt=2.75)
         _fig_curve_label(slide, fig, 8.55, 8.9, "S", color=NAVY)
         # excess-supply band at P1 = 6.5 (D at 2.5, S at 6.5)
@@ -5859,9 +5859,9 @@ def _v4_shift_chart(slide, *, d_shift=False, s_shift=False,
     g1h, g1v = _fig_guide(slide, fig, (q1, p1), color=GRAY)
     g1h.name = "sdguide:h:1"
     g1v.name = "sdguide:v:1"
-    _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD, weight_pt=2.75)
-    _fig_curve_label(slide, fig, 8.1, 1.4, "D", color=GOLD)
-    _fig_line(slide, fig, (1.5, 1.5), (9.0, 9.0), color=STEEL,
+    _fig_line(slide, fig, (1, 8), (8, 1), color=RED, weight_pt=2.75)
+    _fig_curve_label(slide, fig, 8.1, 1.4, "D", color=RED)
+    _fig_line(slide, fig, (1.5, 1.5), (9.0, 9.0), color=NAVY,
               weight_pt=2.75)
     _fig_curve_label(slide, fig, 9.1, 9.4, "S", color=NAVY)
     if d_shift:
@@ -6147,8 +6147,8 @@ def slide_ac_solution(prs):
     def extras(slide):
         fig = SimpleFig(8.3, 6.35, 4.1, 3.9, 10, 10)
         _fig_axes(slide, fig, label_size=16)
-        _fig_line(slide, fig, (1, 8), (8, 1), color=GOLD, weight_pt=2.75)
-        _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=GOLD)
+        _fig_line(slide, fig, (1, 8), (8, 1), color=RED, weight_pt=2.75)
+        _fig_curve_label(slide, fig, 8.05, 1.35, "D", color=RED)
         _fig_line(slide, fig, (3.4, 8.6), (10.0, 2.0), color=GREEN_DK,
                   weight_pt=2.75, dash='dash')
         # label + arrow hand-tweaked 2026-08-23 (from 9.65/2.6 and
@@ -6220,10 +6220,10 @@ def slide_copper_market(prs):
     _sd_chart(
         slide, fig,
         curves=[
-            ((1, 8), (8, 1), GOLD, None, "D0", (8.05, 1.35)),
-            ((4, 9), (11.4, 1.6), GOLD, 'dash', "D1", (11.05, 2.1)),
-            ((1.5, 1.5), (9, 9), STEEL, None, "S0", (9.05, 9.35)),
-            ((5, 1), (11.5, 7.5), STEEL, 'dash', "S1", (11.2, 7.95)),
+            ((1, 8), (8, 1), RED, None, "D0", (8.05, 1.35)),
+            ((4, 9), (11.4, 1.6), RED, 'dash', "D1", (11.05, 2.1)),
+            ((1.5, 1.5), (9, 9), NAVY, None, "S0", (9.05, 9.35)),
+            ((5, 1), (11.5, 7.5), NAVY, 'dash', "S1", (11.2, 7.95)),
         ],
         points=[(4.5, 4.5), (8.5, 4.5)],
         xlabels=[(4.5, "Q0"), (8.5, "Q1")],

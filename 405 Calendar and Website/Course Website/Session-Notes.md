@@ -9,6 +9,192 @@ the page layout and the palette.
 
 ---
 
+## One placeholder: "(link to follow)", and "(++)" retired
+
+2026-09-06, Nico: "some videos still have the (++). Please use '(link to
+follow)' throughout."
+
+"(++)" meant something different -- *the link is there, the running time is
+unmeasured* -- so the rule is now:
+
+| case | shows |
+|---|---|
+| no link | **(link to follow)** |
+| link + known running time | (12 min) |
+| link, running time unknown | nothing (the link works; the duration is not the student's problem) |
+
+### Why this also removed six links
+
+Every bullet still showing "(++)" was a **Module 3** video, and those six
+keys (`m3v1` - `m3v6`) point at **LAST YEAR's Panopto sessions** -- the
+`b08b...` ids. Module 2's were replaced with `b4bb...` on 2026-09-04;
+Module 3's never were, and the open-items list has said so for days.
+
+Relabelling alone would have printed "(link to follow)" next to a working,
+clickable link to last year's recording. So the keys came off the items at
+the same time: the seven Module 3 bullets now carry no video link, read
+"(link to follow)", and keep their slide decks. The URLs stay in `LINKS`
+for reference -- restore a key on its line as each new session id lands.
+
+Verified live on both sites: 0 occurrences of "(++)", 20 of "(link to
+follow)", and **0 reachable `b08b` links**. Both calendars still 14 pages;
+their PDFs went 91 -> 85 hyperlinks, which is exactly the six removed.
+
+## Video slide decks, and the PDF-export regression that came with them
+
+**19 decks published** (Modules 1-4), linked from both websites and both
+calendars. Module 3 Video 7 "Economies of Scale and Scope" has no deck yet
+and shows "(TBD)".
+
+The decks are **DISCOVERED, not listed**: `_scan_slides()` in
+`_calendar_content.py` walks `405 Slide Revisions 2026/Module */Videos
+Final/` and keys on `(module, video number)` parsed from the filename
+convention `Module <M> - Video <N> - <whatever>.pptx`. Drop a new deck in
+that folder, run `python _publish.py`, and it appears -- no code change.
+`unparsed_slides()` reports anything that does not match the convention.
+
+Keying on the video NUMBER rather than the Panopto link key matters: Module
+4's five videos have no Panopto links at all yet, and their decks still find
+their bullets.
+
+- Website: the deck link sits on the VIDEO'S OWN BULLET -- "Video 2: The
+  Production Function (++) · slides" -- the same treatment as the calendar,
+  which Nico asked for after seeing both (2026-09-06). It reaches all three
+  views: the week pages, the module pages and All Videos, 19 links each.
+  A first version gave the decks a "Slides for Videos" rubric of their own
+  in the materials box; that is gone.
+- The materials box is now **"Slides from Class"** and appears on ON-CAMPUS
+  weeks only (1, 5, 9). With the video decks moved onto their bullets it
+  holds only what is handed out in class, so the inner "In-Class Material"
+  sub-heading was dropped as well -- it just repeated the box title.
+- Calendar: the link is appended INLINE to the video's own bullet
+  ("... (9 min) · slides"). Week 3 lists seven videos and every week has to
+  stay on one page, so a line each was not affordable.
+- The decks are copied into the built site by `_build_site.py` and shipped
+  by `_deploy.py`. `.gitignore` keeps them out of the private repo -- they
+  are build OUTPUT here, 51 MB per section.
+
+**Threading the module down to the bullet.** `render_item` needs to know
+which module a video belongs to, because a title does not always say
+("Video 2: The Production Function"). `cat_cards` already computes each
+group's modules, so it now carries them alongside the items and passes them
+to `render_group` -> `render_item`. `media_card` needed the same treatment
+separately: All Videos renders its items directly, and without the module it
+silently linked only the 8 videos whose titles happened to name one.
+
+### The regression: printing to PDF FLATTENS the file
+
+Do not go back to the "Microsoft Print to PDF" workaround. It returns
+quickly, but the calendar came out with **0 hyperlinks instead of 90** --
+every video, podcast and slide-deck link gone, because the calendar's links
+sit inside drawn text boxes. The syllabus kept 14 (its links are in body
+text), which is exactly why this was easy to miss: one document looked fine.
+It was published that way before being caught.
+
+**What actually fixes `ExportAsFixedFormat`:** set `$w.ActivePrinter` to a
+local printer BEFORE exporting. Word wants printer metrics to lay a PDF out
+and stalls when the default is unavailable. With that one line it returns in
+seconds and produces 90 links.
+
+`verify_pdfs()` in `_publish.py` now counts hyperlinks and fails a PDF that
+has none, so a flattened file can never ship again. A page-count and
+section-name check alone would not have caught this -- both were correct.
+
+### Also worth knowing
+
+The six **teaching-note PDFs** are already wired into `_deploy.py`'s DOCS and
+linked from the module and week pages. They were in the working tree but not
+in commit 0cfc6b8, so they are Nico's own edits; they work and were left
+alone.
+
+
+## "Now update the website" -> `python _publish.py`
+
+One command, both sections. It exists because **committing to git does not
+update the website** (git is the private source; `_deploy.py` publishes to
+the public repos GitHub Pages serves) and because the real gap sits upstream
+of both: `_deploy.py` copies whatever `.pdf` is on disk, so a changed `.docx`
+whose PDF was not re-exported ships the OLD one silently. That is how both
+sites served A301 PDFs for two days while every HTML page said G305.
+
+```
+python _publish.py            # check, fix what it can, publish both
+python _publish.py --check    # report only, publish nothing
+python _publish.py --section femba
+```
+
+Six steps, in order: rebuild both sites -> re-export any PDF older than its
+`.docx` -> verify each PDF opens, has pages and names its own section ->
+check every local link resolves -> **report what is still a placeholder** ->
+publish. It refuses to publish a section whose checks failed.
+
+**Step 5 is the one to read after an upload.** It lists the "(TBD)" handouts
+and slide decks and the "(link to follow)" videos per week -- currently 28
+items across 8 weeks. When a teaching note or a video deck is added, that
+count should drop; if it does not, the file was not wired in.
+
+Two bugs found while building it, both worth remembering:
+
+- PowerShell flattens `@( @("a","b") )` into a 2-element array of STRINGS, so
+  a single-document export unpacked to `$out = $null` and did nothing. The
+  script now emits one explicit block per document instead of looping.
+- That silent no-op then **reported success**. A false all-clear is worse
+  than the problem the script exists to catch, so `export()` now re-checks
+  each target's mtime afterwards and fails loudly.
+
+## The PDF export: ExportAsFixedFormat, with ActivePrinter set first
+
+**Superseded advice below.** An earlier version of this note recommended
+printing the document to the "Microsoft Print to PDF" driver, because
+`ExportAsFixedFormat` was hanging. That workaround FLATTENS the file: the
+calendar came out with 0 hyperlinks instead of 90, losing every video,
+podcast and slide-deck link, because those sit inside drawn text boxes. It
+was published in that state before being caught.
+
+**What actually works:** set `$w.ActivePrinter` to a local printer BEFORE
+calling `ExportAsFixedFormat`. Word wants printer metrics to lay a PDF out
+and stalls when the default is unavailable -- that was the hang all along.
+With that one line it returns in seconds and keeps every link.
+`python _publish.py` does this, and `verify_pdfs()` fails any PDF with zero
+hyperlinks so a flattened file cannot ship again.
+
+The original note is kept below for the mechanics of driving Word over COM.
+
+### Original note (do NOT use PrintOut for the real export)
+
+`ExportAsFixedFormat` (and `SaveAs2` to wdFormatPDF) HANGS on this machine --
+Word opens, stays Responding, burns CPU and writes nothing, with no modal
+dialog visible in an `EnumWindows` dump. It failed on ~8 attempts across
+three sessions, read-only and read-write, visible and invisible, to the
+canonical path and to a scratch path, before and after killing WINWORD and
+clearing the Resiliency key.
+
+**What works: printing to the "Microsoft Print to PDF" driver** (2026-09-06).
+A different code path, and it returns in seconds:
+
+```powershell
+$w = New-Object -ComObject Word.Application
+$w.Visible = $false; $w.DisplayAlerts = 0
+$w.ActivePrinter = "Microsoft Print to PDF"
+$d = $w.Documents.Open($src, $false, $true)
+$m = [Type]::Missing
+# PrintOut(Background, Append, Range, OutputFileName, From, To, Item,
+#          Copies, Pages, PageType, PrintToFile, Collate)
+$d.GetType().InvokeMember("PrintOut", "InvokeMethod", $null, $d,
+  @($false, $false, 0, $out, $m, $m, 0, 1, $m, 0, $true, $true))
+$d.Close(0); $w.Quit()
+```
+
+Delete the target first (the driver appends to an existing file), and give
+the print spooler a few seconds after `Quit()` before checking for the file.
+
+**Verify the result with PyMuPDF, not a regex.** These PDFs use subset fonts,
+so scanning the raw bytes or the inflated streams for "G305" returns False
+even when the page plainly shows it -- the same trap that made an earlier
+syllabus check look like a failure. `fitz.open(path)` and `page.get_text()`
+read it correctly. PyMuPDF and `pdftoppm` (MiKTeX) are both installed;
+LibreOffice is not.
+
 ## 2026-09-06 - podcast labels, and no materials box where there is nothing to post
 
 Three edits, all driven from `_calendar_content.py`, so both sections and

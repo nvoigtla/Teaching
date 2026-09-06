@@ -10,6 +10,7 @@ Week 1 = the calendar week (Mon-Sun) containing the first on-campus Friday.
 Every date in the document is expressed as (week_number, weekday).
 """
 
+import glob
 import os
 import re
 from datetime import date, timedelta
@@ -40,6 +41,77 @@ def span(d1, d2):
     if d1.month == d2.month:
         return f"{d1.strftime('%b')} {d1.day} – {d2.day}"
     return f"{fmt(d1)} – {fmt(d2)}"
+
+
+# ============================== VIDEO SLIDES ==============================
+# The slide deck behind each recorded video. DISCOVERED by scanning the
+# module folders, not listed here, so a deck Nico drops into a "Videos Final"
+# folder shows up on the next build with no code change (2026-09-06).
+#
+# The scan requires this filename convention:
+#     Module <M> - Video <N> - <whatever>.pptx
+# and keys on (module, video number) -- the same numbering the calendar uses
+# for its video bullets, so a deck finds its video even where the Panopto
+# link is still missing. `python _publish.py` reports any file it could not
+# parse, and any video still without a deck.
+
+SLIDES_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir,
+    "405 Slide Revisions 2026"))
+
+
+def _scan_slides():
+    found = {}
+    if not os.path.isdir(SLIDES_ROOT):
+        return found                      # another machine, or moved
+    for folder in sorted(glob.glob(os.path.join(SLIDES_ROOT, "Module *",
+                                                "Videos Final"))):
+        for name in sorted(os.listdir(folder)):
+            m = re.match(r"Module (\d+) - Video (\d+) - (.+)\.pptx$", name)
+            if m:
+                found[(int(m.group(1)), int(m.group(2)))] = \
+                    os.path.join(folder, name)
+    return found
+
+
+VIDEO_SLIDES = _scan_slides()
+
+
+def unparsed_slides():
+    """.pptx files in a Videos Final folder that the convention above does
+    not match -- so a mis-named deck is reported rather than ignored."""
+    bad = []
+    if not os.path.isdir(SLIDES_ROOT):
+        return bad
+    for folder in sorted(glob.glob(os.path.join(SLIDES_ROOT, "Module *",
+                                                "Videos Final"))):
+        for name in sorted(os.listdir(folder)):
+            if name.lower().endswith(".pptx") and not re.match(
+                    r"Module (\d+) - Video (\d+) - (.+)\.pptx$", name):
+                bad.append(os.path.join(folder, name))
+    return bad
+
+
+def slides_pub_name(path):
+    """Published file name: no spaces, since it is served straight off
+    GitHub Pages. " - " collapses to a single hyphen, so
+    "Module 1 - Video 1 - Introduction.pptx" publishes as
+    "Module-1-Video-1-Introduction.pptx"."""
+    base = os.path.basename(path)
+    return re.sub(r"\s*-\s*", "-", base).replace(" ", "-")
+
+
+def slides_for(module, title):
+    """Absolute path of the deck behind one video bullet, or None.
+
+    PRACTICE videos have no deck of their own, and their titles contain
+    "Video 1" too, so they are excluded explicitly."""
+    if module is None or "Practice Video" in title:
+        return None
+    m = re.search(r"Video (\d+)", title)
+    if not m:
+        return None
+    return VIDEO_SLIDES.get((module, int(m.group(1))))
 
 
 # ============================== SECTIONS ==============================
@@ -186,6 +258,15 @@ LINKS = {
     "m7p2": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=1c65c0ce-2e5a-4527-9078-b08b0133e583",
     "recap7": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=71beb745-5142-4a78-84f2-b08b01355a2c",
     "m7adv": "https://ucla-anderson.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=055b647a-0998-4ab9-92cf-b08b0133e57c",
+    # Teaching notes -- PDFs published next to the site by _deploy.py, so
+    # the names here must match its DOCS list. They carry no year: the notes
+    # are written to be reusable from one year to the next.
+    "tn_mr":    "%s/MGMT-405-Teaching-Note-Marginal-Revenue.pdf" % SITE_BASE,
+    "tn_elast": "%s/MGMT-405-Teaching-Note-Demand-Elasticity-and-Total-Revenue.pdf" % SITE_BASE,
+    "tn_reg":   "%s/MGMT-405-Teaching-Note-Regressions.pdf" % SITE_BASE,
+    "tn_bfb":   "%s/MGMT-405-Teaching-Note-Bang-for-the-Buck-Rule.pdf" % SITE_BASE,
+    "tn_hire":  "%s/MGMT-405-Teaching-Note-Hiring-Decisions-Short-Run.pdf" % SITE_BASE,
+    "tn_mrmc":  "%s/MGMT-405-Teaching-Note-MR-MC.pdf" % SITE_BASE,
     # Practice exercises (TA Rafael Rubiao's site), added 2026-08-31.
     # index: https://rafaelrubiao.github.io/mgmt405-practice/index.html
     "prac_m1": "https://rafaelrubiao.github.io/mgmt405-practice/module-1.html",
@@ -201,7 +282,10 @@ LINKS = {
     # The course website and the BruinLearn class site (2026-09-04). Both
     # live here rather than in a build script, so the calendar, the website
     # and the syllabus all read one address.
-    "website": "https://nvoigtla.github.io/MGMT-405-EMBA/",
+    # Derived from SITE_BASE, not hardcoded: it used to be the literal EMBA
+    # address, so every FEMBA build printed the FEMBA address (WEBSITE_TEXT
+    # is section-derived) but linked the EMBA site (2026-09-06).
+    "website": SITE_BASE + "/",
     "bruinlearn_course": SEC["bruinlearn_course"],
     # The two PDFs the website hosts, so the calendar, the site and the
     # syllabus can all link them (2026-09-04). File names carry no spaces
@@ -214,14 +298,14 @@ LINKS = {
 
 COURSE_TITLE = "MGMT 405 – Managerial Economics"
 SUBTITLE = f"Course Calendar – {TERM} – {SEC['subtitle_tail']}"
-BRUINLEARN_NOTE = ("Please check Bruin Learn under “Syllabus” "
-                   "for the latest version of this calendar.")
+CALENDAR_NOTE = ("Please check the course website "
+                 "for the latest version of this calendar.")
 # The course website, carried at the top of page 1 (2026-09-04, Nico). The
 # link text is the bare address, so it stays usable in print; WEBSITE_TEXT
 # and LINKS["website"] have to be kept in step.
 WEBSITE_LEAD = "Course website:"
 WEBSITE_TEXT = "nvoigtla.github.io/%s" % REPO
-SYLLABUS_NOTE = ("Please check Bruin Learn under “Syllabus” "
+SYLLABUS_NOTE = ("Please check the course website "
                  "for the more detailed Class Syllabus.")
 TA_NAME = "Rafael Rubiao"
 CLASSROOM = SEC["classroom"]
@@ -415,10 +499,11 @@ WEEKS = [
                                 "in preparation for the previous class.]")]},
             {"cat": "read", "label": "Advanced reading (optional):",
              "items": [("t", "Chapters 5.1, 5.2, 5.4, 5.5")]},
-            {"cat": "read", "label": "Teaching notes (optional, posted on Bruin Learn):",
-             "items": [("t", "Teaching note: Marginal Revenue"),
-                       ("t", "Teaching note: Demand Elasticity and Total Revenue"),
-                       ("t", "Teaching note: Regressions")]},
+            {"cat": "read", "label": "Teaching notes (optional):",
+             "items": [("l", "tn_mr", "Teaching note: Marginal Revenue"),
+                       ("l", "tn_elast",
+                        "Teaching note: Demand Elasticity and Total Revenue"),
+                       ("l", "tn_reg", "Teaching note: Regressions")]},
             # Practice exercises (TA site). Placement rule, confirmed
             # 2026-08-31: the week AFTER the module's own teaching week.
             # Modules 3 and 6 follow their VIDEO week, not the later
@@ -450,15 +535,26 @@ WEEKS = [
              # "Introduction to Module 3" joins at the front and has no
              # Panopto link yet, so the six old link keys shift down one
              # topic (m3v1 = the production-function video, and so on).
+             # The keys are None until the module is re-recorded. m3v1 -
+             # m3v6 still hold LAST YEAR's sessions (b08b... ids) and are
+             # kept in LINKS for reference, but pointing students at them
+             # while the bullet reads "(link to follow)" would be worse
+             # than no link at all (2026-09-06, Nico). Restore the key on
+             # a line as soon as its new session id lands.
              "items": [("v", None, "Video 1: Introduction to Module 3", None),
-                       ("v", "m3v1", "Video 2: The Production Function", None),
-                       ("v", "m3v2", "Video 3: Short Run: Hiring Decisions", None),
-                       ("v", "m3v3", "Video 4: Wage Searchers", None),
-                       ("v", "m3v4", "Video 5: Long Run: The Optimal Input Mix", None),
-                       ("v", "m3v5", "Video 6: Cost Concepts", None),
-                       ("v", "m3v6", "Video 7: Economies of Scale and Scope", None)]},
+                       ("v", None, "Video 2: The Production Function", None),
+                       ("v", None, "Video 3: Short Run: Hiring Decisions", None),
+                       ("v", None, "Video 4: Wage Searchers", None),
+                       ("v", None, "Video 5: Long Run: The Optimal Input Mix", None),
+                       ("v", None, "Video 6: Cost Concepts", None),
+                       ("v", None, "Video 7: Economies of Scale and Scope", None)]},
             {"cat": "read", "label": "Advanced reading (optional):",
              "items": [("t", "Ch. 6.6 and 6.7")]},
+            {"cat": "read", "label": "Teaching notes (optional):",
+             "items": [("l", "tn_hire",
+                        "Teaching note: Hiring Decisions in the Short Run"),
+                       ("l", "tn_bfb",
+                        "Teaching note: The Bang-for-the-Buck Rule")]},
         ],
         "due": [("Problem Set 1", 4, "Tue", None)],
     },
@@ -507,6 +603,8 @@ WEEKS = [
             {"cat": "read", "label": "In preparation for class:",
              "items": [("t", "For Module 4 (Part II): Ch. 3.1 – 3.4; Ch. 17 (pp. 513 – 524)"),
                        ("t", "For Module 5: Ch. 9.1 – 9.3; Ch. 9.5 – 9.7; Ch. 11.7")]},
+            {"cat": "read", "label": "Teaching notes (optional):",
+             "items": [("l", "tn_mrmc", "Teaching note: MR = MC")]},
             {"cat": "read", "label": None,
              "items": [("t", "Assigned articles for discussion (posted on Bruin Learn)")]},
             {"cat": "practice", "label": None,

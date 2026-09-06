@@ -13,6 +13,7 @@ Page 2 = before-the-course notes. Then one week per page.
 """
 
 import sys, io, os
+import re
 from datetime import datetime, timedelta
 
 from docx import Document
@@ -34,13 +35,14 @@ for _i, _a in enumerate(sys.argv):
         os.environ["MGMT405_SECTION"] = _a.split("=", 1)[1].lower()
 
 from _calendar_content import (ANCHOR_FRIDAY, TERM, LINKS, COURSE_TITLE, SUBTITLE,
-                               BRUINLEARN_NOTE, SYLLABUS_NOTE, TA_NAME, CLASSROOM,
+                               CALENDAR_NOTE, SYLLABUS_NOTE, TA_NAME, CLASSROOM,
                                CLASS_TIMES, TEXTBOOK_NOTES, MATH_REFRESHER_INTRO,
                                MATH_REFRESHER_ITEMS, SIGNIN_NOTE, WEEKS,
                                WEBSITE_LEAD, WEBSITE_TEXT, inclass_modules,
                                podcast_when, dt, fmt, span,
                                CALENDAR_DOCX, TA_EMAIL, class_when,
-                               class_days_line)
+                               class_days_line, SITE_BASE, slides_for,
+                               slides_pub_name)
 
 # OUT is derived from this script's own folder: the project lives on
 # different drive letters on different machines (C:, D:, H:).
@@ -674,7 +676,7 @@ def bullet_par(container, size=11, indent=0.30):
     return p
 
 
-def render_item(container, item, size=11):
+def render_item(container, item, size=11, module=None):
     kind = item[0]
     if kind == "note":
         p = container.add_paragraph()
@@ -696,8 +698,21 @@ def render_item(container, item, size=11):
             add_hyperlink(p, LINKS[item[1]], item[2], size=size)
         else:
             add_run(p, item[2], size=size)
-        mins = f"({item[3]} min)" if item[3] is not None else "(++)"
-        add_run(p, "  " + mins, color=GRAY, size=size - 1)
+        # One placeholder, "(link to follow)", and only where the link is
+        # genuinely missing. A linked video whose running time is unknown
+        # gets no marker -- "(++)" was cryptic (2026-09-06, Nico).
+        if not item[1]:
+            add_run(p, "  (link to follow)", color=GRAY, size=size - 1,
+                    italic=True)
+        elif item[3] is not None:
+            add_run(p, f"  ({item[3]} min)", color=GRAY, size=size - 1)
+        # the slide deck behind this video, published next to the website.
+        # Inline, so a seven-video week does not gain seven lines.
+        deck = slides_for(module, item[2])
+        if deck:
+            add_run(p, "  ·  ", color=GRAY, size=size - 1)
+            add_hyperlink(p, "%s/slides/%s" % (SITE_BASE, slides_pub_name(deck)),
+                          "slides", bold=False, size=size - 1)
     elif kind == "p":
         # module podcast: ("p", url|None, text, minutes|None). The url is
         # a literal Dropbox share link, not a LINKS key; both it and the
@@ -721,8 +736,15 @@ def render_group(container, group, size=11, budget=True):
         p.paragraph_format.space_before = Pt(GLABEL_BEFORE_PT)
         p.paragraph_format.space_after = Pt(BULLET_AFTER_PT)
         add_run(p, group["label"], italic=True, color=NAVY, size=size)
+    # A video title does not always name its module ("Video 2: The
+    # Production Function"), so fall back to the group's label.
+    label_mods = re.findall(r"Module (\d+)", group.get("label") or "")
     for item in group["items"]:
-        render_item(container, item, size=size)
+        own = re.findall(r"Module (\d+)", item[2] if len(item) > 2
+                         and isinstance(item[2], str) else "")
+        mods = own or label_mods
+        render_item(container, item, size=size,
+                    module=int(mods[0]) if mods else None)
     if budget:
         vids = [i for i in group["items"] if i[0] == "v"]
         known = [i[3] for i in vids if i[3] is not None]
@@ -841,7 +863,7 @@ def build_page1(doc):
 
     spacer(doc, 2)
 
-    # Bruin Learn callout (cream rounded card)
+    # Course-website callout (cream rounded card)
     def pop_bruin(cell, inner_w):
         # The course website leads the callout (2026-09-04, Nico): it is
         # where the current calendar, the syllabus and every video live.
@@ -851,7 +873,7 @@ def build_page1(doc):
                       underline=True)
         p = cell.add_paragraph()
         p.paragraph_format.space_before = Pt(3)
-        add_run(p, BRUINLEARN_NOTE, bold=True, color=NAVY, size=11)
+        add_run(p, CALENDAR_NOTE, bold=True, color=NAVY, size=11)
         # wording + own line hand-tweaked by Nico on 2026-08-15
         p2 = cell.add_paragraph()
         add_run(p2, "Time stamp for this version: Last updated "

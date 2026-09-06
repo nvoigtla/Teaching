@@ -161,6 +161,12 @@ GROUP_MODULE_OVERRIDES = {
     (2, "prep", "[Relevant textbook reading was already covered"): [2],
     (2, "prep", "Advanced reading (optional):"): [2],   # Ch. 5 (elasticity)
     (2, "prep", "Teaching notes (optional"): [2],       # MR, elasticity, regressions
+    # The teaching-note groups name no module in their own text, so each
+    # week's group needs its tag here (2026-09-06). The snippet matches the
+    # group's LABEL -- group_text() returns the label whenever there is one,
+    # and all three groups share it; the week number is what tells them apart.
+    (3, "prep", "Teaching notes (optional"): [3],       # hiring, bang-for-buck
+    (5, "prep", "Teaching notes (optional"): [5],       # MR = MC
     (3, "prep", "Advanced reading (optional):"): [3],   # Ch. 6.6 - 6.7
     (5, "prep", "Assigned articles for discussion"): [],
     (6, "prep", "Midterm Prep: TA Review Sessions"): [],
@@ -328,7 +334,7 @@ def podcast_label(text):
     return "Podcast (<u>%s</u> %s): %s" % (when, esc(tail), esc(rest))
 
 
-def render_item(it, cat):
+def render_item(it, cat, gmods=None):
     """One calendar item tuple -> one <li>."""
     kind = it[0]
 
@@ -354,9 +360,19 @@ def render_item(it, cat):
             inner += ' <span class="tba">(link to follow)</span>'
         elif it[3]:
             inner += ' <span class="mins">(%d min)</span>' % it[3]
-        elif kind == "v":
-            inner += (' <span class="tba" title="running time not yet '
-                      'measured">(++)</span>')
+        # a video whose link works but whose running time is unmeasured
+        # gets no marker at all: "(++)" was cryptic, and "(link to follow)"
+        # would be untrue (2026-09-06, Nico)
+        if kind == "v":
+            # the slide deck behind this video, right after the running
+            # time and separated by a dot -- the calendar's treatment,
+            # which Nico prefers (2026-09-06)
+            mods = item_modules(it, gmods or [])
+            deck = C.slides_for(mods[0] if mods else None, it[2])
+            if deck:
+                inner += (' <span class="deck">\u00b7 '
+                          '<a href="slides/%s">slides</a></span>'
+                          % esc(C.slides_pub_name(deck)))
     elif kind == "l":
         url = link_for(it[1])
         inner = ('<a href="%s" target="_blank" rel="noopener">%s</a>'
@@ -369,7 +385,7 @@ def render_item(it, cat):
             '<span class="txt">%s</span></li>' % (cls, glyph, inner))
 
 
-def render_group(g, cat, items=None):
+def render_group(g, cat, items=None, gmods=None):
     """The italic navy lead-in, then the bullets. No per-week video total
     (2026-09-03, Nico)."""
     items = g["items"] if items is None else items
@@ -377,7 +393,7 @@ def render_group(g, cat, items=None):
     if g.get("label"):
         h.append('<p class="grp-lab">%s</p>' % esc(g["label"]))
     h.append('<ul class="items">')
-    h += [render_item(it, cat) for it in items]
+    h += [render_item(it, cat, gmods) for it in items]
     h.append("</ul></div>")
     return "".join(h)
 
@@ -392,13 +408,14 @@ def box_hd(title, glyph=None, small=False, when=None):
                ('<span class="when">%s</span>' % esc(when)) if when else ""))
 
 
-def render_cat_card(cat, groups, filtered=None):
+def render_cat_card(cat, groups, filtered=None, gmods=None):
     body = []
     for i, g in enumerate(groups):
         items = None if filtered is None else filtered[i]
         if items is not None and not items:
             continue
-        body.append(render_group(g, cat, items))
+        body.append(render_group(g, cat, items,
+                                 gmods[i] if gmods else None))
     if not body:
         return ""
     return ('<section class="cat %s">%s<div class="cat-bd">%s</div></section>'
@@ -420,17 +437,18 @@ def cat_cards(groups, wnum, where, only_module=None):
         else:
             keep = g["items"]
         (others if cat == "other" else buckets.setdefault(cat, [])).append(
-            (g, keep))
+            (g, keep, gm))
 
     out = []
     for cat, _, _ in CAT_ORDER:
         if cat not in buckets:
             continue
-        out.append(render_cat_card(cat, [g for g, _ in buckets[cat]],
-                                   [k for _, k in buckets[cat]]))
-    for g, keep in others:
+        out.append(render_cat_card(cat, [g for g, _, _ in buckets[cat]],
+                                   [k for _, k, _ in buckets[cat]],
+                                   [m for _, _, m in buckets[cat]]))
+    for g, keep, gm in others:
         out.append('<div class="cat other"><div class="cat-bd">%s</div></div>'
-                   % render_group(g, "other", keep))
+                   % render_group(g, "other", keep, gm))
     return "".join(out)
 
 
@@ -907,55 +925,27 @@ def tbd_rows(mods, kinds):
     return "".join(rows)
 
 
-def video_modules(w):
-    """Modules whose TEACHING videos this week carries -- what "Slides for
-    Videos" needs placeholders for.
-
-    PRACTICE videos do not count (2026-09-06, Nico): they have no deck of
-    their own, and counting them put a stray "Module 4 - Slides" under week
-    6, which has neither videos nor a class. Weeks 6 and 10 carry practice
-    videos only, so they now get no materials box at all; weeks 4 and 8
-    carry both kinds and list only the module they actually teach."""
-    mods = []
-    for i, g in enumerate(w.get("prep_groups") or []):
-        if g.get("cat") != "video":
-            continue
-        if "practice" in (g.get("label") or "").lower():
-            continue
-        gm = group_modules(g, w["num"], "prep", i)
-        for it in g["items"]:
-            if "Practice Video" in (it[2] if len(it) > 2 else ""):
-                continue
-            for n in item_modules(it, gm):
-                if n not in mods:
-                    mods.append(n)
-    return sorted(mods)
-
-
 def materials_box(w):
     """The week's downloadable material, in a box of its own at the foot of
     the page (2026-09-05, Nico). The In-Class Material list used to sit as a
     group inside the on-campus card.
 
     Same container format as Before Class / During the Week."""
-    secs = []
-    if w["kind"] == "oncampus":
-        mods = inclass_material(w)
-        if mods:
-            secs.append(("In-Class Material",
-                         tbd_rows(mods, ("Handout", "Slides"))))
-    vmods = video_modules(w)
-    if vmods:
-        secs.append(("Slides for Videos", tbd_rows(vmods, ("Slides",))))
-    if not secs:
+    # On-campus weeks only (2026-09-06, Nico). The video decks used to have
+    # a "Slides for Videos" rubric of their own here; they now sit on the
+    # video's own bullet in the Videos card, so what is left is purely what
+    # is handed out in class -- hence the name, and no inner sub-heading to
+    # repeat it.
+    if w["kind"] != "oncampus":
         return ""
-    body = "".join('<div class="grp"><p class="grp-lab">%s</p>'
-                   '<ul class="items">%s</ul></div>' % (esc(lab), rows)
-                   for lab, rows in secs)
+    mods = inclass_material(w)
+    if not mods:
+        return ""
+    body = ('<div class="grp"><ul class="items">%s</ul></div>'
+            % tbd_rows(mods, ("Handout", "Slides")))
     return ('<div class="prep materials"><div class="head">%s</div>'
             '<section class="cat other"><div class="cat-bd">%s</div>'
-            '</section></div>'
-            % (esc("Slides & Other Video / In-class Material"), body))
+            '</section></div>' % (esc("Slides from Class"), body))
 
 
 def week_main(w):
@@ -1181,7 +1171,7 @@ def coursewide_media(cat):
     return out
 
 
-def media_card(title, glyph, cat, blocks):
+def media_card(title, glyph, cat, blocks, mod=None):
     """One module's worth of videos or podcasts, in the category card style,
     with each source group's own lead-in kept and its week named."""
     body = []
@@ -1191,7 +1181,8 @@ def media_card(title, glyph, cat, blocks):
                     '<span class="wk">Week %d</span></p>'
                     '<ul class="items">%s</ul></div>'
                     % (esc(lab), w["num"],
-                       "".join(render_item(it, cat) for it in items)))
+                       "".join(render_item(it, cat, [mod] if mod else None)
+                               for it in items)))
     if not body:
         return ""
     return ('<section class="cat %s">%s<div class="cat-bd">%s</div></section>'
@@ -1209,8 +1200,10 @@ def media_index(kind_title, subtitle, cat, glyph):
     for num, title, _short, _parts in MODULES:
         blocks = module_media(num, cat)
         if blocks:
+            # pass the module, so a video whose title does not name it
+            # ("Video 2: The Production Function") still finds its deck
             h.append(media_card("Module %d: %s" % (num, title), glyph, cat,
-                                blocks))
+                                blocks, num))
         else:
             # Say so rather than silently skipping the module -- an absent
             # card reads like an omission (modules 5 and 8 have no videos).
@@ -1448,6 +1441,24 @@ def main():
     if not os.path.exists(PANOPTO_SHOT_SRC):
         sys.exit("missing sign-in screenshot: %s" % PANOPTO_SHOT_SRC)
     shutil.copy2(PANOPTO_SHOT_SRC, os.path.join(OUT, PANOPTO_SHOT))
+
+    # The video slide decks, under their published (space-free) names. These
+    # are build OUTPUT here -- the originals live in 405 Slide Revisions
+    # 2026/ -- so .gitignore keeps them out of the private repo, while
+    # _deploy.py ships the folder to the public one (2026-09-06).
+    sl = os.path.join(OUT, "slides")
+    os.makedirs(sl, exist_ok=True)
+    keep = set()
+    for src in C.VIDEO_SLIDES.values():
+        name = C.slides_pub_name(src)
+        keep.add(name)
+        dst = os.path.join(sl, name)
+        if (not os.path.exists(dst)
+                or os.path.getmtime(dst) < os.path.getmtime(src)):
+            shutil.copy2(src, dst)
+    for gone in set(os.listdir(sl)) - keep:
+        os.remove(os.path.join(sl, gone))
+    print("  slides/                 (%d decks)" % len(keep))
     pages = []
 
     gl = logistics_main()

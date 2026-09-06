@@ -75,6 +75,26 @@ DOCS = [
      "MGMT-405-Syllabus-Fall-2026.pdf"),
     (os.path.join(HERE, os.pardir, "Course Calendar", C.CALENDAR_DOCX + ".pdf"),
      "MGMT-405-Calendar-Fall-2026.pdf"),
+] + [
+    # Teaching notes (2026-09-06). Sources live with the decks, not with the
+    # site; the published names must match the "tn_*" keys in LINKS. No year
+    # in the name -- the notes are reusable across years.
+    (os.path.join(HERE, os.pardir, os.pardir, "405 Slide Revisions 2026",
+                  "Teaching Notes", src + ".pdf"), name)
+    for src, name in [
+        ("Module 2 - Teaching Note Marginal Revenue",
+         "MGMT-405-Teaching-Note-Marginal-Revenue.pdf"),
+        ("Module 2 - Teaching Note Demand Elasticity and Total Revenue",
+         "MGMT-405-Teaching-Note-Demand-Elasticity-and-Total-Revenue.pdf"),
+        ("Module 2 - Teaching Note Regressions",
+         "MGMT-405-Teaching-Note-Regressions.pdf"),
+        ("Module 3 - Teaching Note Bang for Buck Rule",
+         "MGMT-405-Teaching-Note-Bang-for-the-Buck-Rule.pdf"),
+        ("Module 3 - Teaching Note Hiring Decisions in the Short Run",
+         "MGMT-405-Teaching-Note-Hiring-Decisions-Short-Run.pdf"),
+        ("Module 5 - Teaching Note MR=MC",
+         "MGMT-405-Teaching-Note-MR-MC.pdf"),
+    ]
 ]
 
 PUBLIC_README = """# MGMT 405 – Managerial Economics (%s Hybrid)""" % C.SECTION_LABEL + """
@@ -135,8 +155,9 @@ def main():
     if not files:
         sys.exit("no built pages found -- run `python _build_site.py` first")
     have_docs = sum(1 for src, _ in DOCS if os.path.exists(src))
-    print("all %d pages, %d assets and %d of %d PDFs present"
-          % (len(files), len(ASSETS), have_docs, len(DOCS)))
+    n_slides = len(os.listdir(os.path.join(SITE, "slides")))         if os.path.isdir(os.path.join(SITE, "slides")) else 0
+    print("all %d pages, %d assets, %d slide decks and %d of %d PDFs present"
+          % (len(files), len(ASSETS), n_slides, have_docs, len(DOCS)))
 
     if args.dry_run:
         print("\nwould publish to https://github.com/%s/%s" % (OWNER, REPO))
@@ -172,6 +193,15 @@ def main():
             shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
 
         os.makedirs(os.path.join(work, "assets"), exist_ok=True)
+        # the video slide decks, if this build produced any
+        src_slides = os.path.join(SITE, "slides")
+        if os.path.isdir(src_slides):
+            dst_slides = os.path.join(work, "slides")
+            os.makedirs(dst_slides, exist_ok=True)
+            for name in sorted(os.listdir(src_slides)):
+                shutil.copy2(os.path.join(src_slides, name),
+                             os.path.join(dst_slides, name))
+            print("   %d slide deck(s)" % len(os.listdir(dst_slides)))
         for f in files:
             shutil.copy2(os.path.join(SITE, f), os.path.join(work, f))
         for a in ASSETS:

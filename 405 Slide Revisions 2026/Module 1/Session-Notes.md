@@ -844,3 +844,54 @@ the slide will still show the old wording.
   boundaries never match.
 - Converting TIFF→PNG with `.convert('RGB')` flattens alpha to BLACK;
   composite on white first.
+
+---
+
+## 2026-09-06 — Adopted the dark-red demand rule (deck-wide sweep)
+
+Nico asked for the colour rule to be adopted here. Teaching CLAUDE.md
+(2026-08-30): *"A DEMAND curve is dark red `C00000` — curve and label
+alike. Supply stays navy."* Module 1 was built on 2026-08-20 and predated
+the rule, so it still drew demand in GOLD and supply in STEEL (the source
+deck's light blue `95B3D7`). Module 4's `_sd_curves` is the reference.
+
+**What changed** — 33 lines in `_build_Module1.py`, applied by
+`_sweep_demand_color.py` (kept in the folder; it verifies every anchor
+line before writing and aborts if any has drifted):
+
+| | before | after |
+|---|---|---|
+| demand curve + label | `GOLD` (label sometimes `NAVY`) | `RED` |
+| supply curve | `STEEL` | `NAVY` |
+| supply label | `NAVY` | unchanged |
+
+**`RED` is the right constant, not `DARKRED`.** In this script `RED` is
+`C00000` (the rule's colour); `DARKRED` is `A2162A`, the source MC-bar
+red. Easy to get wrong.
+
+**Deliberately NOT changed:**
+- **Shifted curves (D′, S′) keep `GREEN_DK` / `BLUE_PED`.** Green marks
+  *"this is the shifted curve"*, which is a different job from naming the
+  curve type, and Module 4 keeps it for exactly that (a shifted supply in
+  `GREEN_DK` on a slide whose base demand is `RED`).
+- **The gold "Excess demand" band on display 29** is not a demand curve.
+- All other gold (chrome, badges, table headers, roadmap dots).
+- In the tuple-driven charts the *dashed* shifted curve follows its base
+  curve's new colour, since there the dash already marks the shift —
+  display 65 (LA real estate) now reads solid/dashed dark red for D₀/D₁
+  and solid/dashed navy for S₀/S₁, which is clearer than before.
+
+The tea, avocado and copper chart edits are **dead code**: those slides
+are mapped to `None` in `_m1_order.py`. Swept anyway so the script stays
+consistent if they ever come back.
+
+**Verified:** `95B3D7` is gone from all 95 slides; displays 22, 29, 31
+and 65 exported and eyeballed; full pipeline re-run
+(`_build_Module1.py` → `_splice_media.py` → `_group_pass.py` →
+`_animate.py all apply`); full-screen slideshow probe PASSED on 1, 22,
+29, 31, 57, 65, 72, 73, 95 — including the two PollEv slides, which
+render live. Backups rolled before the rebuild. Deck was committed and
+clean beforehand, so there were no unported hand-edits at risk.
+
+**Note for other modules:** Module 2's deck has not been checked against
+this rule. Module 3 likewise.

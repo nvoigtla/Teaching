@@ -370,3 +370,13 @@ links need no login. Panopto links require an Anderson sign-in, and the TA's
 practice site is already public. If the podcasts should not be reachable that
 way, the options are to move them behind Bruin Learn or to host the site
 privately instead.
+
+## Updating the live sites
+
+    python _publish.py
+
+That is the whole procedure. It rebuilds both sections, re-exports any PDF
+whose .docx is newer, verifies the PDFs, checks every local link, reports
+what is still a placeholder, and publishes. `--check` reports without
+publishing. Do NOT rely on a git commit to update the website -- git holds
+the source; `_publish.py` (via `_deploy.py`) is what students see.

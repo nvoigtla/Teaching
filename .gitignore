@@ -37,3 +37,9 @@ _deck_content.md
 # Course website: single-file preview bundles are generated from the design
 # files plus data/course-data.js by _bundle_preview.py
 _preview/
+
+# Video slide decks copied into the built sites. They are build OUTPUT --
+# the originals live in "405 Slide Revisions 2026/Module N/Videos Final/" --
+# and 51 MB per section has no business in this repo (2026-09-06).
+405 Calendar and Website/Course Website/slides/
+405 Calendar and Website/Course Website/*/slides/

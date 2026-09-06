@@ -12,7 +12,7 @@
 >
 > Everything for this class in one place: the schedule week by week, all videos and podcasts, the readings, the practice exercises and every deadline.
 >
-> *Prefer a PDF? The course calendar and this syllabus can be downloaded from the website.*
+> *Prefer a PDF with links to videos, slides, etc.? Download the [course calendar](https://nvoigtla.github.io/MGMT-405-EMBA/MGMT-405-Calendar-Fall-2026.pdf) from the class website.*
 
 ## Course Purpose
 
@@ -100,7 +100,7 @@ The grade distributions will correspond to the School’s guidelines for core co
 
 Both exams take place online, and you will have a 3.5-hour window to solve the exam and upload your solutions. The midterm exam covers the material through Module 3. The final exam covers all the class content, Modules 1 – 8, and has about 20 multiple choice questions and 3 – 4 problem-solving questions. To provide flexibility, you will have the option to take each exam any time within a given time window, as indicated on the course calendar; the exact window will be announced in class. No makeup exams will be scheduled.
 
-The exams are open-book. You may use the course textbook, class slides, class notes and problem sets. You may use a calculator or Excel. You may access the course materials on Bruin Learn and the online version of the textbook. Usage of the internet for any other purpose is prohibited. In particular, the use of AI tools (e.g., ChatGPT) is not allowed during the exams, and both exams are proctored by an online proctoring company. Communicating with anyone regarding the exam is prohibited.
+The exams are open-book. You may use the course textbook, class slides, class notes and problem sets. You may use a calculator or Excel. You may access the course materials on the course website and on Bruin Learn, and the online version of the textbook. Usage of the internet for any other purpose is prohibited. In particular, the use of AI tools (e.g., ChatGPT) is not allowed during the exams, and both exams are proctored by an online proctoring company. Communicating with anyone regarding the exam is prohibited.
 
 A practice final exam is scheduled in the exam-preparation week, and a sample final exam with solutions is available on Bruin Learn as an example of the type of exam given in the past.
 
@@ -142,7 +142,7 @@ No use of laptops or tablets, with the exception of note-taking. Surfing the int
 
 The course website, [nvoigtla.github.io/MGMT-405-EMBA](https://nvoigtla.github.io/MGMT-405-EMBA/), is the fastest way to find what a given week asks of you: the videos, the podcasts, the readings, the practice exercises and every deadline, week by week and module by module. The class syllabus and the course calendar can be downloaded there as PDFs.
 
-All course materials, including electronic copies of all our slides, problem sets and solutions, are on the [Bruin Learn](https://bruinlearn.ucla.edu/courses/237825) site for the course. This course is almost entirely paperless, except for the occasional class handout. Please monitor the course pages regularly, as they carry the most up-to-date information on the reading assignments. I will make extensive use of e-mail to communicate with the class, so please check your e-mail regularly.
+Electronic copies of all our slides, problem sets, and the solutions to the problem sets, are on the [class website](https://nvoigtla.github.io/MGMT-405-EMBA/). This course is almost entirely paperless, except for the occasional class handout. Please monitor the course pages regularly, as they carry the most up-to-date information on the reading assignments. I will make extensive use of e-mail to communicate with the class, so please check your e-mail regularly.
 
 In addition, an Excel workbook used in class is available on the class site.
 
