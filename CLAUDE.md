@@ -42,6 +42,76 @@ the whole deck for the old wording rather than fixing the one instance.
   - Do NOT use "operate" for either decision – it blurs exactly the
     distinction the two slides are drawing.
 
+- **"Supply expands" is NEVER written. Say whether the curve SHIFTS or
+  the move is ALONG it** (2026-09-12, Nico, on page 4 of the Problem Set 1
+  solutions, in his own words after two weaker versions of this rule).
+  Supply and demand do not "expand", "increase", "grow", "fall" or
+  "respond" – drop that whole family of verbs for the curves. There are
+  exactly two things that can happen, and each has fixed wording:
+  - **The whole curve moves.** "This is a shift **to the left / to the
+    right** of the (whole) supply / demand curve." The short form "**a
+    shift in supply / demand**" is also fine here. Causes: input prices,
+    technology, the number of sellers, tastes, income, the price of a
+    substitute, expectations.
+  - **Everything else is equal and only the price changes.** "This is a
+    **move** along the supply / demand curve, i.e. a **change** in
+    **quantity supplied / quantity demanded** due to a change in price."
+    Not a "shift" in either half of that sentence (2026-09-12, Nico):
+    **only a curve shifts.** A point MOVES along it, and a quantity
+    CHANGES.
+  - So the two readings are told apart twice over – by the verb (**shift**
+    of the curve versus **move** along it) and by what is named (the
+    **curve** versus the **quantity** supplied or demanded). Never write a
+    bare "supply shifts" where the sentence could mean either.
+  - **Say which one it is when both are in play.** His own edited wording
+    spells out the negative half too: "quantity supplied expands somewhat,
+    though supply curve does not shift since production and input (or
+    technological) constraints still bind."
+  - This is the distinction the whole supply-and-demand block is built to
+    teach, so a loose sentence in a solution undoes the figure right next
+    to it. It holds in slides, speaker notes, podcast scripts, problem
+    sets and answer keys alike – sweep all of them when a hit turns up,
+    rather than fixing the one instance.
+
+## Worked Solutions and Answer Keys
+Inferred from the edits Nico made by hand to the Problem Set 1 solutions
+(2026-09-12). They are about content, so they apply to a solution
+document, a worked-solution slide, and the answer half of a teaching note
+alike.
+
+- **Answer everything the point allocation promises.** A part worth
+  "2 points for the correct new ranking" must contain a ranking, in
+  those words. Read each part's own label back against the answer and
+  check that every deliverable it names – a ranking, a number, a
+  direction, a graph, an explanation – is actually there. His 3(c) had
+  the three cases worked out and the figures drawn, and still never
+  stated the re-ranking the label asked for.
+- **Name a simplification where it is made, and point at the part that
+  relaxes it.** Drawing three industries with the same supply slope is
+  fine, but the caption has to say so and send the reader on: "The same
+  supply curve slope for all three industries above is a simplification,
+  please see 3(c) for details." Otherwise the early figure reads as
+  contradicting the later part, and a careful student concludes the key
+  is wrong.
+- **After a general ambiguity, come back and say what the problem's own
+  assumptions DO pin down.** "Once both demand and supply can shift, the
+  price change is ambiguous" is true of the general case and useless as
+  an answer. Follow it with the specific verdict: which cases the stated
+  assumptions settle, and which one stays ambiguous even under them. A
+  student who is told only that everything is ambiguous cannot tell a
+  correct answer from a shrug.
+  - The general statement then needs hedging to match – "tends to be
+    ambiguous", not "is ambiguous" – because the exercise is about to
+    produce two determinate cases.
+- **Repair mechanical errors in his source wording; do not reproduce
+  them out of deference.** An unclosed parenthesis, a doubled "?.",
+  a misspelling: fix it and say so in one line. Leaving it verbatim
+  with a note in the build script's docstring only moves the work to
+  him. (This matches the obvious-spelling-mistake exception in "Working
+  with .pptx Files"; the test is the same – the intended text has to be
+  beyond doubt. Anything that changes a name, date, number or claim
+  still gets asked about first.)
+
 ## Language and Framing
 - **Big-picture first.** Every new topic in a slide deck should lead with
   the "why this matters" before any technical content.
@@ -128,6 +198,66 @@ the whole deck for the old wording rather than fixing the one instance.
   Animations section (table-cell number-highlights; OMML-math callouts).
   **Grouping invalidates the slide's animations, so re-run the animation
   build afterward.**
+- **An ARROW and its text box are ONE object — group them** (2026-09-10,
+  Nico). Same procedure again, applied to annotation arrows: a leader, a
+  flow arrow or a branch label is grouped with the arrow it belongs to, so
+  the label cannot be dragged off its own arrow and the two fade in
+  together. The pair is already defined by the arrow-origin rule (the label
+  sits at the tail, the arrow starts at the box's edge), so grouping just
+  fixes what that rule put together. A **callout LEADER counts even though
+  it has no arrowhead** — it runs from the label's edge to a dot on a
+  curve, and that is the same pair.
+  - **Exclude axes and dashed guides.** An axis is a long axis-parallel
+    arrow whose title is anchored to the TIP by a different rule, so the
+    two are not a pair; a dashed drop line is not an annotation.
+  - **A curve is a solid headless connector too**, and its endpoint lands
+    on the axis exactly where a tick label sits — so a purely geometric
+    test grouped demand lines with "$20". Name the leaders where they are
+    created and group only those (`_arrow_from_box` stamps `sdleader:`).
+- **A SHAPE and the label written on it are ONE object — group them**
+  (2026-09-10, Nico, on the `F*` inside the flat-fee triangle). A region
+  label belongs to its region, so the two move, resize and animate
+  together.
+  - **Pair them by an id both carry, not by geometry.** A bbox test groups
+    a CURVE label with whatever shaded region it happens to sit inside —
+    which is how `D` and `MR` got grouped with revenue rectangles. Stamp
+    the region and its label with a key derived from the polygon's own
+    coordinates (`_fig_poly` writes `sdregion:<key>`, `_region_label`
+    writes `sdreglab:<key>`) and pair on that. A label placed OUTSIDE its
+    region is not stamped, and is grouped with its leader instead.
+  - The same applies to a link BUTTON seated in a labelled box: it belongs
+    to the box it sits in.
+  - **Grouping a pair invalidates the per-slide ANIMATION plans**, and not
+    only by needing a re-run: every plan that named the two members
+    separately now addresses shapes inside a group, and each `osp:` /
+    `cxn:` ordinal after the group SHIFTS — which lands a later beat on the
+    footer rule. Fix it in the engine, not in fifteen plans: name the pair
+    groups (`sdpair:…`) and have the shape collector index their MEMBERS
+    while pointing each at the group, so existing selectors keep resolving
+    and the pair animates as one. Two members named in one beat then
+    resolve to the same target, so dedupe within the beat. Reference:
+    `_group_pass.py` rules 6 and 7 plus `collect_shapes` in
+    `Module 6/_animate.py`. A pair group must NOT consume a `grp:` ordinal
+    of its own, or the next real group on the slide shifts too.
+- **A CURVE and the label that names it are ONE object — group them**
+  (2026-09-14, Nico: "everywhere in Module 6, group a curve with its label").
+  `D` belongs to the demand line, `MR` to the marginal-revenue line, `MC` to
+  the marginal-cost line, and each pair moves, resizes and animates together
+  — which is also what the animation rule already asks for ("reveal each
+  curve or series together with its own label on the same click").
+  - **Pair them by a KEY both carry, never by proximity.** A chart holds
+    several lines and several labels, and the label nearest a line is
+    regularly the wrong one — the same mistake the region pairing made in its
+    first version. The line helper stamps `sdcurve:<key>` and the label
+    helper `sdcurvelab:<key>`, and the grouping pass joins those two names.
+    Reference: `_fig_line` / `_fig_curve_label` in `Module 6/_m6_helpers.py`
+    and rule 8 in `Module 6/_group_pass.py`.
+  - Axis titles are NOT in scope: they belong to the arrow TIP by the
+    axis-title rule, and an axis is excluded from pair grouping already.
+  - Same consequence as every other pair group: name it `sdpair:` so the
+    shape collector keeps existing animation selectors resolving, and do not
+    let it consume a `grp:` ordinal.
+
 - **Minimize text on slides.** Aim for short bullets (5 – 10 words),
   not full sentences. Longer explanation belongs in **speaker notes**,
   not on the slide itself.
@@ -295,6 +425,20 @@ accent, one neutral.
   deliberate exception (Module 4 slide 10 draws market demand in dark
   yellow because that slide is *about* telling the two curves apart), but
   it has to be a choice, not a leftover.
+- **MR is DASHED and the SAME dark red as the demand curve it comes from**
+  (2026-09-14, Nico, on Module 6 slide 8). Marginal revenue is not a second
+  curve competing with demand for the eye — it is derived from demand, so it
+  shares demand's colour and is told apart by the dash (`<a:prstDash
+  val="dash"/>`), a little thinner (2.25 pt against demand's 2.75 pt). Drawing
+  MR in navy made it read as a cost curve, which is the one thing on that
+  panel it is not. Its label takes the same red.
+  - **Supply, MC and ATC stay navy and stay solid.** The dash means "derived
+    from the solid curve in this colour", so it is not spare notation to hand
+    out elsewhere — a dashed guide line to a value is still a thin gray
+    dashed line and is unaffected.
+  - Sweep the deck when this changes, per the demand-colour rule above: one
+    navy MR among dark-red ones reads as an error.
+
 - **Consumer / producer surplus areas have fixed colours** (2026-08-30,
   Nico, adopted from MW's deck). Consumer surplus is a **red wash
   `C0201B` at ~26 %** with a `C0201B` outline; producer surplus is a
@@ -630,6 +774,110 @@ artifact.
 - **Labels live inside the plot area**, in clear zones; avoid annotation
   arrows. Label the demand curve "D" at its end; keep Q* as a dashed drop
   line. Labels must not cross the curves.
+- **A curve's label sits at that curve's RIGHT END** (2026-09-09, Nico) –
+  and where the right end is crowded, immediately **above or below** it.
+  For a downward-sloping demand curve that means the **lower right** of
+  the plot. Never park a curve label in the middle of its own line.
+  - **Comply to the extent possible.** The right end is the target, not an
+    absolute: where a callout, a shaded region or another label already
+    owns that corner, put the label as far toward the right end as it can
+    go while staying clear, rather than forcing it into a collision. Being
+    legible beats being exactly at the end.
+  - **A label must not be crossed or covered by ANY line or shape** – not
+    just by its own curve. Two distinct failures, and the second is the
+    worse one:
+    - a **line drawn through** the label strikes out the words (the axis,
+      a dashed guide, another curve, a neighbouring callout's leader);
+    - a **filled shape emitted LATER** than the label is painted over it,
+      which also makes the label **unclickable in PowerPoint** – the shape
+      takes the mouse. Module 6 slide 8 shipped with `MR` buried under the
+      revenue rectangle this way.
+  - So **order matters**: emit shaded regions FIRST, then the curves, then
+    the labels. If a label must sit inside a region, it has to come after
+    that region in the `spTree`.
+  - **A label's own leader line is fine** – a callout's leader is meant to
+    start at the label and run to the point it marks. Only a line with
+    neither endpoint at the label is a strike-through.
+  - **Check the whole box, not the anchor.** A label box two inches wide
+    can be clear at its centre and still be cut at its right edge. Test
+    the label's inner area against every line on the slide; the helper
+    `_fig_curve_label(..., clear_of=((x0, y0), (x1, y1)))` in
+    `Module 6/_m6_helpers.py` does this by pushing the box along the
+    line's normal, so the label stays clear when the curve later moves.
+  - **Region labels** (`_region_label`) are centred on the region's
+    computed centroid, then **clamped into the region's own x-range** and
+    shrunk until they fit, and biased toward a triangle's right-angle
+    corner – because a triangle's hypotenuse IS the curve.
+  - **Check it mechanically**: `_check_labels.py` in `Module 6/` reports
+    all three failure modes for a whole deck. None is reliably visible in
+    a PNG render.
+- **A demand curve is labelled `D`, never spelled out** (2026-09-10, Nico).
+  Not "Demand", not "demand" — the one-letter label everywhere, the way
+  `MR`, `MC` and `S` are already written. It is shorter, so it fits at the
+  curve's right end where the right end is crowded, and it matches the `D`
+  the algebra and the speaker notes use. The same goes for the other
+  curves: label them `S`, `MR`, `MC`, `ATC`, never a spelled-out word.
+  Module 6 slides 28 and 34 shipped with "Demand" / "demand" until this
+  was written down.
+- **Text that sits INSIDE a shape must sit fully inside it, crossed by
+  nothing — and if it will not fit at a reasonable size, it goes OUTSIDE
+  with an arrow pointing in** (2026-09-10, Nico, on slide 9's "Consumer
+  surplus" lying across the demand line). This covers every label written
+  into a shaded region, a block, a profit rectangle or a callout box.
+  - **Test real CONTAINMENT, not the centroid.** Centring a label on a
+    region's centroid is where it should START, but it is not a check.
+    Clamping the box into the region's x-range is not one either: a
+    triangle is only that wide down at its base, and the label sits
+    further up, where the sloped edge has closed in. Test all four
+    CORNERS of the box against the polygon, with a clearance margin — the
+    sloped edge of a surplus triangle IS the demand curve, drawn at
+    2.75 pt, so the box has to stop short of it rather than touch it.
+    Every region in these decks is convex, so a polygon containing the
+    four corners contains the box.
+  - **Then search, don't just shrink.** When the box does not fit at the
+    centroid, scan for the nearest position that does before touching the
+    type size. "Consumer surplus" fits inside its triangle at the full
+    17 pt — just not at the centroid, which sits a third of the way into
+    the crowded corner.
+  - **Two lines before a smaller font.** A label too wide for a narrow
+    block usually fits when split over two lines at the same size. This
+    is what puts "Version 3" inside a 0.70"-wide staircase block, where
+    one line is wider than the block at any readable size.
+  - **Only then, outside with an arrow.** Place the label in clear space
+    beyond the shape at full size and run an arrow from its EDGE back
+    into the region — per the arrow rule below, which also governs the
+    leader.
+  - Reference: `_region_label` in `Module 6/_build_Module6.py`, with
+    `_box_in_poly` / `_fit_in_poly` doing the containment and the search.
+    It prints a line whenever a label has to go outside, so the case
+    cannot ship unnoticed.
+- **An arrow's text box sits at the arrow's ORIGIN, and the arrow starts at
+  the EDGE of that box** (2026-09-09, Nico). Two halves, and the second is
+  the one that keeps getting missed:
+  - **Origin, not head.** A leader, a flow arrow or a branch label belongs
+    at the tail — where the thought starts — not down beside the thing the
+    arrow points at. On a decision tree the "Yes" / "No" sits just outside
+    the box the branch LEAVES.
+  - **Start at the box edge.** Emitting the leader from the box's CENTRE
+    draws the line straight through the words. Intersect the segment
+    (box centre → target) with the box boundary and start there, plus a
+    small gap. Module 6's three "…-MPV customer" callouts on slides 16 and
+    17 each had the line struck through "MPV" until this was fixed.
+    Reference: `_arrow_from_box` in `Module 6/_build_Module6.py`.
+  - **The arrow may be lengthened or shortened to make this work** — moving
+    the text to keep a line off it is the priority, and the arrow simply
+    reaches further. On Module 6 slide 17 the "do not sell to the low-MPV
+    customer" callout had to move above the MC line entirely, because that
+    was the only clear air in the corner; its leader is now longer.
+  - **AXIS titles are the exception**: they are anchored to the arrow TIP
+    by the axis-title rule above, not to its origin.
+  - `_check_labels.py` reports this as ARROWEND, exempting long
+    axis-parallel arrows.
+  - When the right end is already taken by a callout, move the CALLOUT and
+    keep the label at the end, or use the arrangement the original slide
+    used. Module 6 slide 17 is the worked case: Nico's own slide puts the
+    "do not sell to the low-MPV customer" callout HIGH and the
+    `Demand = MPV` label LOW near the x axis.
 - **All figure text large:** axis titles ~18–20 pt, in-chart labels ~16–20
   pt, uniform within a chart.
 - **No horizontal gridlines** unless pedagogically necessary (then
@@ -675,6 +923,16 @@ artifact.
   beats a brand mark. No stock photos, clip art, or emojis.
 - **Crop tight to the subject**; size / place so the image never overlaps
   text.
+- **Size a picture by the dimension that CONSTRAINS it, and compute the
+  other from the real aspect ratio** (2026-09-09). Setting a width and
+  letting the height fall where it may is how a portrait image ends up
+  7.15" tall on a 7.5" slide. Read the pixel dimensions off the file, work
+  out `height = width × h/w`, and check the result against the content area
+  (roughly y 1.42" – 7.02"; the footer rule is at 7.15"). For a tall image,
+  set the HEIGHT and let the width follow.
+  - **A PNG export will not show you this.** PowerPoint crops the export to
+    the canvas, so an overflowing picture looks perfectly fine in a render
+    and only a geometry check finds it — see the audit rule below.
 - **Captions:** title-style caption ABOVE the picture (small italic-bold
   navy, centered); source / license BELOW (smaller italic gray) – only when
   it adds information the image / title doesn't already carry. Remove
@@ -822,6 +1080,38 @@ artifact.
       of the older positions (y 6.25 at full 0.72" height, and a
       2.585 × 0.512" variant); they are finished and are not retrofitted
       unless asked.
+- **EVERY box in the bottom-right corner is drawn LAST, in the FOREGROUND**
+  (2026-09-14, Nico: "All slides that have a box in the bottom right (such as
+  'Discussion'): make sure this box is in the front, so it covers the line at
+  the bottom of the slide" — with the note that it should already be here. It
+  was, but only as per-mark guidance under the Poll Break badge and the
+  practice-video box, so it kept being missed on the others.) The rule is one
+  rule and it covers the whole family: the **Poll Break parallelogram**, the
+  round **POLL pill**, a **Discussion / Group Discussion badge**, the
+  **practice-video link box**, the **problem-set / teaching-note pointer**,
+  the **backup and "← Back" pills**, and any future corner mark. Each one
+  straddles the footer rule at y 7.15" by design, so anything emitted after
+  it — the rule itself, the page number, a chart element — cuts a line
+  straight across it.
+  - **Enforce it with a PASS, not at the call site.** "Draw it after the
+    footer" means after the slide is BUILT, and in these builders the body
+    callback runs before the footer — so a helper called from inside `draw()`
+    lands under the rule however carefully the rule is written down. Module 6
+    shipped eleven such call sites and the footer rule cut through the
+    "Discussion" badge on slide 22. Move every corner mark to the END of its
+    slide's `spTree` in one deck-wide pass instead, so the call site stops
+    mattering. Reference: `_raise_corner_marks` in
+    `Module 6/_build_Module6.py`, called from `main()` before the save.
+  - **The test is geometric and narrow:** a filled box or a group at least
+    0.25" tall that STRADDLES y 7.15". Nothing else does — the footer rule,
+    the gold strip, the footer text and the page number all sit entirely on
+    one side of it.
+  - **Re-run the animation build afterward and compare click counts.**
+    Moving a shape to the end of the `spTree` shifts every `osp:` / `cxn:`
+    ordinal that followed it, so a plan can silently land on the wrong
+    shape. Diff the per-slide click counts against the previous run and
+    expect them unchanged.
+
 - **Convention callout** – see "Concept-explanation textboxes" above.
 - **Quote callout** – verbatim quotes (CEO memos, court opinions,
   named executives) go in the cream convention box: italic quote
@@ -829,14 +1119,31 @@ artifact.
 - **Practice-Video link box** – the deck-standard chrome for links to
   practice videos: rounded rect (~28% corner) with a **vertical gray
   gradient fill** (schemeClr bg1 lumMod 65% → 95% → 65%, linear 90°,
-  scaled), **gold 1.75 pt border**, soft drop shadow, and a gold "▶" play
-  glyph followed by the navy bold label (single shape — text lives inside
-  the rect). **Default position: bottom-right corner, overlaying the
-  footer** (left 6.92", top 6.83", 5.85 × 0.58" — the slide-24 reference
-  position); draw it AFTER the footer so it sits on top of rules and
-  page number, and in front of any chart elements. On dedicated
-  video-index slides (e.g., "Cournot: Computation") larger centered boxes
-  mid-slide are fine; everywhere else use the default corner position.
+  scaled), **gold 1.75 pt border**, soft drop shadow, and the **FILM
+  symbol** in a reserved left inset, followed by the navy bold label.
+  **Default position: bottom-right corner, overlaying the footer** (left
+  6.92", top 6.83", 5.85 × 0.58" — the slide-24 reference position); draw
+  it AFTER the footer so it sits on top of rules and page number, and in
+  front of any chart elements. On dedicated video-index slides (e.g.,
+  "Cournot: Computation") larger centered boxes mid-slide are fine;
+  everywhere else use the default corner position.
+  - **The mark is an ACTION BUTTON, not a text glyph** (2026-08-23,
+    restated 2026-09-10 after Module 6 was found still on the old glyph).
+    External-link markers say what a link OPENS rather than which way it
+    points, and they are one family: `ACTION_BUTTON_MOVIE` for a video,
+    `ACTION_BUTTON_SOUND` for a podcast, `ACTION_BUTTON_DOCUMENT` for an
+    article. Navy face with the glyph knocked out in white, ~0.60 × 0.30",
+    1.25 pt line, soft shadow, carrying the URL as its click action.
+    Reference: `_add_ext_link_button(slide, kind, …)` and
+    `EXT_LINK_SHAPES` in `Module 4/_m4_helpers.py`. **This replaced the
+    gold "▶" text glyph** — do not reintroduce it. Seat the button the way
+    `_add_jump_pill` seats its jump button: in a left inset, vertically
+    centred, with the label's text frame indented past it.
+  - **"Draw it AFTER the footer" means after the slide is BUILT.** In these
+    builders the body callback runs before the footer, so a box added
+    inside `draw()` ends up UNDER the footer rule, which then cuts a line
+    straight through its label. Call it on the returned slide instead — the
+    same reason the Poll Break badge is called after `_draw_footer`.
 - **Post-work reference box** – the deck-standard pointer to a problem set
   or a teaching note: gold-bordered rounded rect (~25% corner), white fill,
   soft drop shadow, navy bold ~15 pt, with a **leading glyph** that says
@@ -976,6 +1283,40 @@ need that pass.)
   slides may reveal the link box (and any note box) on their own
   clicks.
 
+## Course-Roadmap Slide ("Agenda for the Class")
+
+Every module opens with the same course-roadmap slide, so it must look
+IDENTICAL in every deck — only the highlighted box changes. Reference
+implementation: `make_m4_roadmap` in `Module 4/_build_Module4.py`
+(Module 1's is the same). Written down 2026-09-09 after Module 6's first
+attempt diverged three ways at once.
+
+- **A diamond, not a stack.** Four rounded filled boxes, `box_h` 0.85":
+  - box 1 across the top, **8.6" wide**, centred, at y **2.00"** —
+    "1. Basic Principles and Economic Way of Thinking", 24 pt
+  - boxes 2 and 3 side by side, **4.6" wide** each with a **0.3" gap**,
+    at y **3.65"** — "2. Value and Demand" / "3. Supply and Cost", 26 pt
+  - box 4 across the bottom, **8.6" wide**, centred, at y **5.50"** —
+    "4. Markets, Pricing, and Strategy", 24 pt
+- **Four connector arrows** join them into the diamond: 1 → 2, 1 → 3,
+  2 → 4, 3 → 4, drawn from box-centre to box-centre in **FADED gray at
+  3.0 pt with a head**. Without them the boxes read as an unrelated stack.
+- **The current module's box is NAVY; the other three are FADED.** White
+  bold text in all four.
+- **The "we are here" marker is a gold block ARROW plus a gold italic
+  label, both to the LEFT of the current box** — never a text label on the
+  right, and never the arrow alone:
+  - the arrow is a `MSO_SHAPE.RIGHT_ARROW`, **0.60 × 0.50"**, gold, seated
+    `0.12"` left of the box and vertically centred on it;
+  - the label reads **"we are here"** in **gold italic bold 16 pt**,
+    right-aligned in a 1.45"-wide box ending 1.55" left of the arrow.
+- **Wording is fixed across the whole course** — including the comma in
+  "Markets, Pricing, and Strategy". A module's own source deck may punctuate
+  it differently; the recurring slide wins, because a student sees it eight
+  times.
+- The slide is **static** (no animation), and its tag is
+  `Module N · Course Roadmap`.
+
 ## Working with .pptx Files
 - PowerPoint files are **binary**, so VS Code visual diffs do not
   work for them.
@@ -1021,6 +1362,12 @@ need that pass.)
   fixed position for every back button in the deck (≈ x 11.72", y 6.6",
   size ≈ 1.55 × 0.46"). It links back to the source slide. Keep this
   position consistent even when it overlays a full-bleed image.
+  - **Build-script trap:** the shared `_add_jump_pill` helper defaults to a
+    WHITE pill with a navy label, and passing `back=True` does **not**
+    change that — it only reverses the jump. The navy fill and white text
+    have to be passed explicitly (`fill=NAVY, text_color=WHITE`).
+    Module 6 shipped a white "Back" pill until Nico spotted it
+    (2026-09-09); the deck-wide audit below now checks it.
 - **Footer page numbers are LIVE slide-number fields, by default.** The
   page number in the footer must be a PowerPoint slide-number field
   (`<a:fld type="slidenum">` in OOXML, or Insert → Slide Number in the UI),
@@ -1321,6 +1668,66 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
     VIDEOS – FOR In-Class APPLICATIONS", slides 95 onward. Take the
     episode's structure from the main part only; those extra examples are
     for the classroom, not the podcast.
+  - **Build the episode from the SLIDES, and check every claim against the
+    on-slide text before it goes in** (2026-09-15, Nico, on the Module 6
+    wrap-up: "the longer podcast talked about a hospital case that
+    negotiated with insurances. I don't think we have that in the slides.
+    How come?"). The speaker notes are the fastest way to read a deck's
+    substance, and that is the trap: they are MY notes to myself, so they
+    carry the answer to a discussion prompt, the aside I add out loud, and
+    the number the room is supposed to guess. **A claim that exists only
+    in the notes is not taught content and does not belong in an episode.**
+    Dump the on-slide text of every slide the episode draws on and check
+    each named example and each figure against it – the notes are for
+    understanding the deck, not for sourcing it.
+    - **Discussion, poll and "In the News" slides pose questions the class
+      answers live. Never assert an answer to one.** Module 6's hospital
+      slide is a newspaper clipping plus "what does recent research show
+      about prices after hospital mergers?"; the insurer-negotiation
+      finding was in the notes alone and came back as a stated result.
+    - **A number that is hidden on purpose stays hidden.** The three Barbie
+      prices are off the slide so the room guesses before each reveal;
+      quoting them in the episode spends the reveal.
+    - **Put the rule in the episode too**, in both the in-doc host
+      instructions and the paste-ready prompt: say what the class TAUGHT,
+      not what it asked, and name the specific discussion prompts the hosts
+      must not answer. The hosts ad-lib, so an unguarded example comes back
+      as a confident finding.
+    - This is the same failure as the appendix rule above, one level down:
+      there the question is which SLIDES are in scope, here it is which
+      TEXT of a slide is in scope.
+  - **A COUNTERFACTUAL on a slide is a thought experiment, never history.
+    Say so, and never narrate it as something the company did**
+    (2026-09-15, Nico, on the Module 6 wrap-up: "the podcast treated the
+    uniform Netflix pricing as if it was reality. But it's clearly not –
+    it was just an example to illustrate how much Netflix would lose if
+    they charged a price per movie instead of a fixed fee per month").
+    The episode had narrated it as a company history: "Netflix priced per
+    movie and then priced as a flat monthly fee." That inverts the lesson,
+    because the whole point of the exercise is that the firm does NOT price
+    that way.
+    - **The slide title usually says so outright.** Module 6's slide 9 is
+      titled "What IF Netflix used simple pricing per movie? (Assume MC =
+      0)". Read the title for its framing before writing a word about the
+      example: "What if…", "Suppose…", "Assume…", "Now MC > 0" and the like
+      mark a constructed case, not a real one.
+    - **Name the real product in the same breath.** "Netflix sells a flat
+      monthly subscription. The class asked what would happen if it charged
+      per movie instead." The listener has to be told which half describes
+      the market and which half is the class's construction.
+    - **Figures from a stylised example are not the firm's accounts.** Both
+      the $12 and the $24 come from one invented demand curve, so they are
+      introduced as the example's numbers, never as revenue Netflix earned.
+      Same for any made-up demand, cost or elasticity in a worked case.
+    - **When a module OPENS by building a counterfactual in order to knock
+      it down, that is the episode's opening too**, and it deserves the
+      first few minutes: everything the module does afterwards is an answer
+      to it, so the recap is incoherent if the listener never sees the
+      problem being solved.
+    - **Put the guard in the episode as well**, in the in-doc host
+      instructions and in the paste-ready prompt, naming the specific
+      example. The hosts ad-lib, and "Netflix used to charge per movie" is
+      exactly the sort of plausible detail they will invent.
   - **Lead with real-world stories** and let them carry the ideas.
   - Warm, curious, conversational tone – smart colleagues (or two students)
     connecting the dots, not a lecture; define terms in plain language, go
@@ -1399,6 +1806,16 @@ taped video) follows one idea at a time. Calibrated defaults:
 - **Chrome stays put.** The top bar, section tag, title, thin rule, footer,
   page number, and a chart's axes and axis labels are visible from the
   start and are never animated.
+  - **The axes and their titles are recognised by NAME, not by geometry**
+    (2026-09-15). An axis title sits a few tenths of an inch from the
+    arrow tip — and so does the outermost TICK label, which *does*
+    animate, with its curve. Nothing on the shape said which was which,
+    so Module 6's slide 34 gave "P" and "Q" a click each and built in
+    17 steps. `_fig_axes` now stamps `sdaxis:x` / `sdaxis:y` on the two
+    arrows and `sdaxistitle:x` / `sdaxistitle:y` on the two titles, and
+    `is_chrome` in `_animate.py` excludes those names — the same device
+    the curve, region and leader pairings use, because an exact key beats
+    a geometric guess. `_check_anim.py` reports AXIS if one is animated.
 - **Poll chrome is never animated.** The gold "Poll Break" parallelogram and
   the gold round POLL pill are visible from the moment the slide appears – no
   click, no fade. Students should see that a poll is coming while I talk
@@ -1425,6 +1842,80 @@ taped video) follows one idea at a time. Calibrated defaults:
   ratio, grow the later figure (keeping its own proportions) rather than
   cropping or stretching it, and re-check that it still sits inside the
   content area.
+- **A chart builds in a FIXED order: formula — primary curves — derived
+  curves — the guides they imply — shaded areas** (2026-09-15, Nico, on
+  Module 6 slide 9). "Reveal the pieces one at a time" says how MANY
+  clicks; this says WHICH piece goes on which, and it holds on every
+  chart slide in every deck:
+  1. **The formula and the line it describes arrive together**, on the
+     first click — normally demand. The algebra and the picture of it are
+     one thought, so `P = 4 − Q/3` must not land a beat apart from the `D`
+     it draws.
+  2. **A line's INTERCEPT VALUES come with that line**, not on a click of
+     their own: the `$4` and the `12` are what the demand curve *is*.
+     (Void where a chart shows no intercept values.)
+  3. **Then the other PRIMARY line** — `MC`, or `S`. Primary means drawn
+     from the slide's own data rather than computed off another curve.
+  4. **Then the DERIVED lines** — `MR`, with their own intercepts where
+     those are shown. `MR` is read off demand, so it cannot precede it,
+     and it is the one curve on the panel that is a consequence rather
+     than an assumption.
+  5. **Then the guides that only exist BECAUSE of the derived line.** The
+     dashed drop line at `Q = 6` marks `MR = 0`; revealed before `MR` it
+     marks nothing. It comes with the price guide and the `$2` tick it
+     meets — one click for the whole crossing.
+  6. **Then the shaded areas**: the revenue rectangle, the surplus
+     triangle, the profit box. An area is the payoff of everything above
+     it, so it is last (and the takeaway bar, if there is one, after
+     that).
+  - A curve and the label naming it are ONE click throughout — that is the
+    grouping rule under Slide Design Principles, and the same pairing key
+    (`sdcurve:` / `sdcurvelab:`) is what makes this order checkable.
+  - **Check it mechanically**: `_check_anim.py` in `Module 6/` reports
+    CURVE for a derived curve revealed before a primary one, or a curve
+    split from its own label. Run it after `_animate.py`; a plan that
+    names connectors by INDEX is exactly where this breaks, because
+    `cxn:2` is whichever line the builder happened to draw first (Module
+    6 slide 73 drew MC before D and put all three curves on one click).
+- **A TICK LABEL belongs to the shape it marks, not to the axis**
+  (2026-09-15, Nico, on Module 6 slide 10). An axis value is revealed on
+  the click that reveals whatever it is a coordinate OF. Two cases, and
+  the same tick can be either depending on the slide:
+  - it is an INTERCEPT of a curve — it comes with that curve (rule above,
+    step 2): the `$4` and the `12` are what demand *is*;
+  - it is a corner of a shaded area, or the foot of a guide — it comes
+    with that area or guide. On slide 9 the `6` marks `MR = 0` and rides
+    with the MR guides; on slide 10 MR is not drawn at all and the same
+    `6` is the right-hand edge of the revenue rectangle, so it rides with
+    the rectangle.
+  - **The test is whether the thing it names is on screen.** A tick
+    revealed before its shape marks nothing, and a tick that belongs to a
+    curve the slide never draws should not appear on the curve's click
+    just because the same number appeared there on a neighbouring slide.
+- **A LEGEND ROW naming one area rides with that area; a row naming a
+  COMBINATION of areas comes after the LAST of them** (2026-09-15, Nico,
+  same slide). The list beside a shaded chart — the region-mark rows
+  under "Figures, charts and tables" — is read as a running commentary,
+  so a row must never name something not yet on screen:
+  - "Revenues under simple pricing", with the revenue mark, is revealed
+    together with the revenue rectangle;
+  - "“Wasted profits”: consumer surplus + unexploited markets", which
+    carries TWO marks, is revealed only after BOTH of those areas have
+    been shown — not before them, and not with the first of them;
+  - the closing row that carries every mark ("can do better using complex
+    pricing") is therefore last of all.
+- **A newspaper clipping or press screenshot placed at the TOP of a slide
+  is chrome — never animated** (2026-09-15, Nico, on Module 6 slide 12).
+  On an "In the News" slide the class reads the clipping while the
+  question underneath is put to them, so the clipping is on screen from
+  the moment the slide appears and only the question animates. This is
+  the same principle as the poll badge: material the audience is meant to
+  be looking at during the build is not part of the build.
+  - It covers the clipping only. A figure that IS the content of the
+    slide — a product screenshot the bullets then explain, a chart, a
+    photograph being discussed — still animates normally.
+  - `_check_anim.py` reports NEWS for an animated clipping on a slide
+    titled "In the News".
 - **Build the content, one step per click:**
   - Text slides: reveal one bullet (top-level point) per click.
   - Charts / diagrams: reveal the pieces one at a time, and reveal each
@@ -1743,6 +2234,22 @@ When I ask for fresh, current examples for a module's concepts:
 - **When in doubt about wording, lean toward the original.** The new
   deck is a reformat of my own pedagogical material; rewriting prose
   is not the goal and risks introducing subtle changes I may not want.
+- **A rebuilt diagram keeps the ORIGINAL's box positions, spacing and
+  colour GROUPING** (2026-09-09, Nico, on the pricing-strategies decision
+  tree). Recolour to the deck palette, but preserve which boxes shared a
+  colour and which did not — the grouping carries an argument that the
+  wording does not repeat. Module 6's tree is the worked case: four of his
+  boxes were one accent because they are all the complex-pricing
+  strategies, one was its own colour because it is perfect competition,
+  and one because it is simple monopoly pricing. Flattening that to
+  "questions navy, answers gold" lost the point of the diagram.
+  - **Colours often live in a shape STYLE, not in the shape.** A scan for
+    `srgbClr` on such a slide finds nothing and reads as "no colours".
+    Resolve `<p:style><a:fillRef><a:schemeClr>` against the theme's
+    `clrScheme` before concluding a diagram is unstyled.
+  - Reproduce the original's box coordinates by SCALING, not by
+    redesigning: 4:3 → 16:9 is x × 1.333, with y shifted down just enough
+    to clear the new top bar and action title.
 - **Copied text keeps its run formatting — italics, bold, underline.**
   When porting text from the original slides, carry over the
   character-level emphasis on each run (bold, italic, underline —
@@ -1883,6 +2390,28 @@ matrices, best responses, Nash equilibria); ignore them for other decks.
   the safety net – write straight to the canonical filename and stop. Don't
   run a python-pptx readback, footer-page-number check, or
   duplicate-`<a:effectLst>` audit by default.
+- **A NEW deck gets a mechanical formatting audit before it is handed over**
+  (2026-09-09, Nico: "make sure you recheck all formatting"). Reading
+  renders catches layout; it does not catch rule compliance, and it cannot
+  catch anything outside the canvas. Reference: `_audit_format.py` in
+  `Module 6/`, which checks trailing periods, the 18 pt box-text floor,
+  Title Case titles, off-canvas shapes, live page-number fields and the
+  Back pill. Run it after every build; it found 22 real defects in Module 6
+  that four rounds of looking at PNGs had not.
+  - **Tune it against the DOCUMENTED geometry before trusting the count.**
+    Its first run buried those 22 findings under ~300 false positives,
+    because the 13 pt coverage pills, the ~15 pt corner pills and the
+    footer band that sits 0.02" past the bottom edge are all intended. An
+    audit that cries wolf gets ignored, which is worse than none.
+- **A source inventory built with python-pptx is BLIND to
+  `mc:AlternateContent`**, which is what PowerPoint wraps around any
+  textbox holding OMML math. Such slides read as "title only" or "empty
+  placeholder" when they are nothing of the sort. Dump the raw OOXML
+  instead (`_dump_text_raw.py` in `Module 6/`) before concluding that a
+  source slide is blank — Module 6 lost a six-paragraph summary and an
+  entire quote block to this, and both were rebuilt from invention until
+  the animation extractor showed five clicks against a placeholder the
+  inventory said did not exist.
 - **Opt-in verification when I report a problem** ("the page numbers are
   off", "PowerPoint won't open it", "shape X disappeared") – then use the
   readback to diagnose, fix the script, and rebuild.
