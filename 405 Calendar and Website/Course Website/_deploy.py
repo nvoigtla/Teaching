@@ -62,7 +62,8 @@ def page_files():
                   if f.endswith(".html") and not f.startswith("_"))
 
 
-ASSETS = ["site.css", "site.js", "search-index.js", "panopto-login.png"]
+ASSETS = ["site.css", "site.js", "search-index.js", "panopto-login.png",
+          "bruin-bear.png"]
 
 # Documents published NEXT TO the site, so the General Logistics page can
 # link them (2026-09-04, Nico): (source path, published file name). The
@@ -193,6 +194,16 @@ def main():
             shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
 
         os.makedirs(os.path.join(work, "assets"), exist_ok=True)
+        # the calendar feeds students subscribe to (2026-09-09)
+        src_feeds = os.path.join(SITE, "feeds")
+        if os.path.isdir(src_feeds):
+            dst_feeds = os.path.join(work, "feeds")
+            os.makedirs(dst_feeds, exist_ok=True)
+            for name in sorted(os.listdir(src_feeds)):
+                shutil.copy2(os.path.join(src_feeds, name),
+                             os.path.join(dst_feeds, name))
+            print("   %d calendar feed(s)" % len(os.listdir(dst_feeds)))
+
         # the video slide decks, if this build produced any
         src_slides = os.path.join(SITE, "slides")
         if os.path.isdir(src_slides):

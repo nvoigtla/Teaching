@@ -9,6 +9,171 @@ the page layout and the palette.
 
 ---
 
+## Subscribe to the deadlines (2026-09-09)
+
+A calendar **icon** in the Deadlines & Exams header, desktop only -- the CSS
+hides both the button and its panel below 861px. Hovering says "Subscribe to
+Calendar and Updates". Students tick which kinds they want -- **Assignments**,
+**Videos**, **Exams** -- and get the address of the matching feed.
+
+### Subscribe only; the download was removed on purpose
+
+It first shipped as an Export panel offering .ics and .csv downloads. Nico
+asked whether a subscription really removes and adds items, and it does, so
+he asked for subscribing to be the only option. That is the right call:
+
+| | download | subscribe |
+|---|---|---|
+| date moves | updates (stable UID) | updates |
+| new deadline | needs a re-export | appears |
+| **deadline removed** | **lingers for ever** | **disappears** |
+
+An .ics file can add and update but has no way to say "this event is gone",
+so a downloaded copy silently keeps stale dates. A subscribed feed is a
+mirror. Keeping both would have meant recommending the weaker one.
+
+Refresh timing belongs to the student's app, not to us: Apple Calendar lets
+them choose (5 minutes to weekly), Google refreshes an external feed roughly
+every 8-24 hours. Worth saying out loud if anyone expects it to be instant.
+
+### The feeds
+
+**One feed per non-empty COMBINATION** -- seven files per section, written by
+`write_feeds()` at build time and shipped by `_deploy.py`:
+
+```
+mgmt405-assign.ics        5    mgmt405-assign-video.ics   12
+mgmt405-video.ics         7    mgmt405-assign-exam.ics     7
+mgmt405-exam.ics          2    mgmt405-video-exam.ics      9
+                               mgmt405-all.ics            14
+```
+
+It first shipped as four files, so ticking two kinds handed out two addresses
+to subscribe to. Whatever a student ticks now, there is exactly ONE address.
+
+`feed_name()` in the generator and `feedUrl()` in site.js build the name the
+same way, and both iterate in FEED_KINDS order rather than tick order, so the
+name cannot depend on which box was clicked first. Verified by driving all
+eight tick states in the browser and checking each resolves to a file that
+exists -- the only way to catch a name the two sides spell differently.
+
+Event identity is stable -- `mgmt405-<section>-<kind>-w<week>-<n>`, built
+from position and never from the title or the date, since those are exactly
+what changes. `SEQUENCE` is the build time in whole minutes since
+2026-01-01, monotonic, so a revised event is accepted rather than ignored.
+Undated rows ("Practice Final Exam", t.b.a.) are skipped, which is why the
+panel counts 14 dates against 15 visible rows.
+
+Checked: exam windows span correctly (midterm DTSTART 20261030 -> DTEND
+20261101; DTEND is exclusive for all-day events), `METHOD:PUBLISH` present,
+titles folded at 75 octets per RFC 5545, all eight feeds serving
+`text/calendar`, and the address switching correctly as boxes are ticked
+(all three -> `-all.ics`, assign+exam -> two addresses, none -> nothing).
+
+### The icon
+
+Nico sent a picture of the icon he wanted -- a gold calendar with blue
+hangers, a highlighted week and a blue badge carrying an up arrow -- redrawn
+as an **inline SVG** in the deck's own gold and a blue from the navy family.
+Not a bitmap (it has to stay crisp at 18px) and above all not an emoji: an
+emoji-plane glyph ignores the button's colour and renders as a coloured box,
+which is the bug fixed one day earlier on the phone.
+
+**Trap worth remembering:** a verification probe containing a regex with
+`
+` / `
+` must be written to a FILE, not piped through a Bash heredoc. The
+heredoc eats a backslash level, the regex literal becomes a syntax error,
+and the probe produces NO output at all -- which reads like a broken feature
+rather than a broken probe. `scratchpad/exportprobe.py` is the working one.
+
+## The yellow box on phones: an emoji-plane glyph (2026-09-08)
+
+Nico: "a strange yellow box before *How to sign in (screenshot)*" on the
+phone, fine on the computer.
+
+Cause: that bullet used `&#128444;` (U+1F5BC, FRAMED PICTURE) -- an
+**emoji-plane** codepoint. `.qlinks .g` styles its marks as a 15px gold
+monochrome glyph, but an emoji ignores `color` and renders as a colour
+picture, squeezed into a 15px box. Windows made it a squashed gold frame;
+a phone renders the full colour emoji, hence the yellow box.
+
+Every other `.qlinks` mark is text-plane (`&#9636;` ▤, `&#9993;` ✉,
+`&#9998;` ✎), so this one was the odd one out. Replaced with `&#9635;`
+(U+25A3), which reads as a small framed square and takes the gold like the
+rest. Checked in both light and dark at phone width.
+
+**Rule for new marks:** anything inside `.qlinks` or `ul.items .g` must be
+below U+2FFF. The colour emoji in the CARD HEADERS (clapperboard,
+headphones, the classical building) are deliberate and stay -- they are
+sized for it and Nico asked for them.
+
+
+## Rooms: EMBA A301, FEMBA G305 (2026-09-08)
+
+**EMBA is A301, FEMBA is G305.** (Both were briefly G305, then the two were
+set the other way round for an hour before Nico corrected it -- the table
+below is the final answer.) One line each in `SECTIONS`, and both calendars,
+both syllabi and both sites follow.
+
+**This broke a check, which is the point of having it.** `verify_pdfs()` in
+`_publish.py` flagged stale PDFs by looking for the hardcoded old rooms
+`("A301", "G-402")` -- so the moment FEMBA legitimately moved INTO A301, its
+correct PDFs would have failed. The check now reads the expected room from
+the section and flags any OTHER room in `KNOWN_ROOMS`. Hardcoding "what
+wrong looks like" ages badly; compare against what is right instead.
+
+Both FEMBA PDFs re-exported and published; verified live that each section's
+documents name its own room and no other.
+
+
+## Automatic night mode on phones (2026-09-08)
+
+Phones go dark from **22:00 to 05:00 on the device's own clock**. Desktop is
+never affected.
+
+**Scoping.** Every dark rule lives inside the existing `@media
+(max-width:860px)` block, keyed on `html[data-night="1"]`. The desktop
+therefore cannot darken whatever the attribute says, and dragging a window
+across the breakpoint switches back with no JS involved. Verified by
+sampling rendered pixels: phone at 23:00 is `#0A1520`, desktop at 23:00 and
+phone at 14:00 are light.
+
+**No flash.** `site.js` is a synchronous `<script>` in `<head>`, so the
+attribute is stamped at parse time, before first paint. Setting it from
+`DOMContentLoaded` would show white and then snap to dark -- which is why
+`paintNight()` is called at the IIFE's top level rather than joining the
+other `init*()` calls. Re-checked every five minutes so an open page flips
+without a reload.
+
+**The palette.** The site had been light-only since 2026-09-03, so a dark
+palette had to be reintroduced. It is all token overrides -- the deck's navy
+and gold are untouched, only surfaces, inks and card tints move, so the
+calendar's colour coding still reads (video warm, podcast cool grey, class
+blue, exam gold). Eight non-token colours needed explicit overrides;
+`.cat.video .mins` / `.deck` at `#7A6231` were the ones that would have gone
+invisible on a dark card.
+
+### The sunrise/sunset version, and why it went
+
+The first implementation computed real sun times and switched an hour after
+sunset and an hour before sunrise. It worked -- the solar maths matched
+published Los Angeles times to 1-4 minutes across the year -- but it forced
+a choice nobody wanted: either call `navigator.geolocation`, which raises a
+permission prompt that a course website has no business showing students, or
+assume every phone is in Los Angeles.
+
+Nico's answer (2026-09-08): use the phone's clock, 22:00 to 05:00. That is
+correct wherever the student is, because the clock is already local, and it
+removed the sun equations, the geolocation handling and the default-location
+compromise in one go. Boundaries verified with a stubbed `window.Date` --
+light at 21:54, dark 22:00 through 04:54, light from 05:00.
+
+**Stubbing the clock:** the stub has to be injected AHEAD of `site.js` in the
+`<head>`, not before `</body>`. site.js runs at parse time, so a stub placed
+at the end of the body is far too late. `scratchpad/nightshot.py` does it
+correctly.
+
 ## One placeholder: "(link to follow)", and "(++)" retired
 
 2026-09-06, Nico: "some videos still have the (++). Please use '(link to
@@ -1364,3 +1529,97 @@ Preview artifacts from that pass (they show the OLD single-page prototypes,
 not the live site): A `fdcc7a40-5837-4008-a9e2-7637144b9c6a`,
 B `a5e2c02e-f20b-41ff-ba5f-c3be0517f66f`,
 C `abd1ef6c-fdb7-4260-a5b0-40f96062ed0e` under claude.ai/code/artifact/.
+
+## Problem sets move to BruinLearn (2026-09-12)
+
+Nico: "the problem sets will be downloadable only from the BL site." Every
+mention of PS 1–5 now points at that section's **Assignments** page, and the
+same link serves the download and the upload.
+
+**One derived constant, not two literals.** `_calendar_content.py` gained
+
+```python
+"bruinlearn_assignments": SEC["bruinlearn_course"] + "/assignments",
+```
+
+next to `"bruinlearn_course"`. Hardcoding the pair he sent (EMBA
+237825 / FEMBA 237860) would have re-created the 2026-09-06 bug recorded a
+few lines above it, where a literal EMBA address made every FEMBA build
+*print* the FEMBA address and *link* the EMBA site.
+
+**Three call sites:**
+
+- `Course Calendar/_build_calendar.py` – the due card's "Upload one solution
+  per group on BruinLearn", was linking the course root.
+- `Course Website/_build_site.py` – the same line on the week cards, plus a
+  new `BRUINLEARN_ASSIGNMENTS` beside `BRUINLEARN_COURSE`.
+- `Syllabus/_build_syllabus.py` – the sentence that used to say slides,
+  problem sets and solutions were all on the class website, which the new
+  policy made false. It now reads, in his words: "Electronic copies of all
+  our slides are on the class website. You find the Problem Sets and Problem
+  Set Solutions on BruinLearn under “Assignments.”" – with
+  `BruinLearn under “Assignments.”` carrying the link.
+
+The BruinLearn *class-site* panel on the website still points at the course
+root, which is right – it is a link to the site itself, not to the problem
+sets.
+
+**Verified, both sections:** 5 assignments links per site (weeks 3, 5, 7, 9,
+10 – the five problem sets), 5 per calendar `.docx`, 1 per syllabus; EMBA
+outputs carry 237825 and FEMBA 237860 with no cross-contamination. PDFs
+re-exported and the links survive into them. `_check_pagination.ps1` PASSES
+at 14 pages, every week on one page. Syllabi 5 pages each.
+
+**Not done:** `_publish.py` / `_deploy.py` were NOT run – nothing is live yet.
+
+
+## Glyphs, Course at a Glance, module boxes, podcasts (2026-09-15/16)
+
+**Course at a Glance** replaced "Class and Contact" and moved to the
+top-left; the band is two columns (glance | syllabus + BL stacked), not
+three. Rows: Class / Meets / Instructor / TA / Grading. "Term" is gone; the
+meeting dates are inline after the times, separated by a `·`, with
+non-breaking spaces inside each date so "Nov 20/21" cannot split. FEMBA
+carries weekday names because it meets once a week.
+
+**Glyphs are drawn, never emoji.** An emoji-plane codepoint ignores the
+header colour and can render as a coloured box on a phone, so each mark is
+inline SVG or a text-plane character below U+2FFF:
+
+- `MATH_GLYPH` — a stacked `dy/dx`, rule width measured with PIL
+  (Georgia Italic 12 px: `dy` 13.60, `dx` 12.90) rather than guessed, which
+  is what struck the earlier `df(x)/dx` through its own glyphs.
+- `BEAR_GLYPH` — the Bruin Bear, recoloured to our dark yellow `#B8860B` by
+  `_make_bear.py`, which recovers alpha from a white-backed PNG. Remember
+  `_deploy.py ASSETS` is an allowlist: `bruin-bear.png` had to be named
+  there or it would never have been pushed.
+- `BOOK_GLYPH` — open-book line art for the textbook.
+- `EYE_GLYPH` — a human eye (almond, iris, filled pupil) for Course at a
+  Glance, in `currentColor`.
+
+**Key Topics / Goals boxes** per module, module view only: `MODULE_BOXES`
+for all 8, two columns on desktop and stacked under 860 px, above the Videos
+box, replacing Module 1's italic `mwk-topics` line. Content was taken from
+each deck's own "Outline of Module N" slide after Nico caught "Value of the
+firm" in Module 1, which is not in the slides. **No Module 8 deck exists**
+in `405 Slide Revisions 2026`, so Module 8's boxes are his BruinLearn text —
+revisit when that deck is built.
+
+**Logistics.** "All videos on one page" is the lead point of the Watching
+the Videos box at 15.5 px, the Panopto sign-in next, and the screenshot line
+as a `.sub` sub-point. An Assignments link sits under BruinLearn, and a
+"Podcasts about Class Material" box under the Watching the Videos box.
+
+**Module pages group by WEEK**, which is why "one Podcasts box per module"
+and "optional podcasts in the class week" cannot both hold. Nico chose the
+class-week placement. A deliberate `GROUP_MODULE_OVERRIDES … : []` had been
+keeping the optional podcasts off module pages entirely — reversed.
+
+**Problem-set rows** in Deadlines and Exams link to `BRUINLEARN_ASSIGNMENTS`
+in a new tab.
+
+**BruinLearn** is one word throughout (see the Course Calendar notes).
+
+**Published:** 23 pages, 5 assets, 19 decks, 8 PDFs per section; every local
+link resolves. Module 6's two podcasts are live on week 7, module 6 and
+all-podcasts, both sections.

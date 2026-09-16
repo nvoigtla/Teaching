@@ -45,7 +45,7 @@ For those of you that would like a suggestion of a more basic text to serve as a
 
 ### Newspaper articles
 
-Articles from the Wall Street Journal or other news sources will be assigned. These selected articles will be posted on Bruin Learn a couple of days in advance. These readings will be discussed in class and everyone will be expected to have read these assigned articles.
+Articles from the Wall Street Journal or other news sources will be assigned. These selected articles will be posted on BruinLearn a couple of days in advance. These readings will be discussed in class and everyone will be expected to have read these assigned articles.
 
 You can subscribe to the WSJ at a reduced educational rate (optional – not required for the class): [wsj.com/studentoffer](http://www.wsj.com/studentoffer)
 
@@ -66,7 +66,7 @@ For those of you who feel they would need a math refresher before the class, I s
 
 My office is located in Anderson C-511, Entrepreneur’s Hall.
 
-The e-mail addresses are on the course website, in the “Class and Contact” box, and on Bruin Learn.
+The e-mail addresses are on the course website, in the “Class and Contact” box, and on BruinLearn.
 
 Important – how to schedule a meeting: my office hours are by appointment and the time is flexible. To schedule a (Zoom) meeting, send me an e-mail with your question and we then schedule a time.
 
@@ -77,7 +77,7 @@ I will hold regular “Coffee & Econ Sessions” via Zoom. Times will be announc
 
 ## Teaching Assistant
 
-The teaching assistant for this section is Rafael Rubiao. There is a section-specific TA e-mail address for Section 2; it is on the course website and on Bruin Learn.
+The teaching assistant for this section is Rafael Rubiao. There is a section-specific TA e-mail address for Section 2; it is on the course website and on BruinLearn.
 
 The TA will hold a weekly office hour and review session via Zoom, at a time to be announced. During each session, the TA will provide supplemental instruction on more technical content, solve additional exercises, and answer any questions related to course content or the problem sets. In addition to the weekly sessions, the TA will conduct review sessions prior to the final exam.
 
@@ -98,27 +98,29 @@ The grade distributions will correspond to the School’s guidelines for core co
 
 ## Midterm and Final Exams
 
-Both exams take place online, and you will have a 3.5-hour window to solve the exam and upload your solutions. The midterm exam covers the material through Module 3. The final exam covers all the class content, Modules 1 – 8, and has about 20 multiple choice questions and 3 – 4 problem-solving questions. To provide flexibility, you will have the option to take each exam any time within a given time window, as indicated on the course calendar; the exact window will be announced in class. No makeup exams will be scheduled.
+Both exams take place online, and you will have 3 hours to solve the exam and upload your solutions. The midterm exam covers the material through Module 3. To provide flexibility, you will have the option to take the midterm any time within a given time window, as indicated on the course calendar; the exact window will be announced in class. The final exam covers all the class content, Modules 1 – 8, and has about 20 multiple choice questions and 3 – 4 problem-solving questions. It takes place on Saturday, December 12, 9:00 AM – 12:00 PM. No makeup exams will be scheduled.
 
-The exams are open-book. You may use the course textbook, class slides, class notes and problem sets. You may use a calculator or Excel. You may access the course materials on the course website and on Bruin Learn, and the online version of the textbook. Usage of the internet for any other purpose is prohibited. In particular, the use of AI tools (e.g., ChatGPT) is not allowed during the exams, and both exams are proctored by an online proctoring company. Communicating with anyone regarding the exam is prohibited.
+The exams are open-book. You may use the course textbook, class slides, class notes and problem sets. You may use a calculator or Excel. You may access the course materials on the course website and on BruinLearn, and the online version of the textbook. Usage of the internet for any other purpose is prohibited. In particular, the use of AI tools (e.g., ChatGPT) is not allowed during the exams, and both exams are proctored by an online proctoring company. Communicating with anyone regarding the exam is prohibited.
 
-A practice final exam is scheduled in the exam-preparation week, and a sample final exam with solutions is available on Bruin Learn as an example of the type of exam given in the past.
+A practice final exam is scheduled in the exam-preparation week, and a sample final exam with solutions is available on BruinLearn as an example of the type of exam given in the past.
 
 ## Group Problem Sets
 
 There will be 5 problem sets. These problems are designed to check your progress and to extend and reinforce concepts covered in class. One or two questions similar to the ones on the problem sets will appear on the exams. Since the exams test individual performance, it is critical that you acquire skills at solving the problems independently. Therefore, while these assignments are to be turned in by groups, you should independently attempt beforehand to answer each question. Group assignments will be graded on a continuous 0 – 100 scale. Solutions will be distributed for each assignment. These step-by-step solutions are a good substitute for seeing me solve problems in person in class: there is usually not enough class time to do this.
 
-Each study group submits one set of answers. The problem sets are due according to the schedule in the course calendar. Upload one solution per group on [Bruin Learn](https://bruinlearn.ucla.edu/courses/237860). No late assignments can be accepted.
+Each study group submits one set of answers. The problem sets are due according to the schedule in the course calendar. Upload one solution per group on [BruinLearn](https://bruinlearn.ucla.edu/courses/237860/assignments). No late assignments can be accepted.
 
 ## Attendance Policy
 
 Whether to attend class is your personal decision. There is no penalty in terms of participation. However, I highly recommend that you attend each class.
 
-### If you have to miss a class
+### If you have to miss an on-campus class:
 
 - You do not need to contact the instructor or the TA
-- Do the readings assigned for the week and watch the class recording
-- Make sure you coordinate work on the problem set with your study group
+- Go over the readings assigned for the material covered in the on-campus class
+- Listen to the podcasts, especially the “Wrap-Up” for the Modules that were covered in class
+- A class recording will be made available on [BruinLearn](https://bruinlearn.ucla.edu/courses/237860/external_tools/10995) after the class. Watch this recording
+- Make sure you coordinate work on the Problem Set with your study group
 
 ## Use of Unauthorized Materials
 
@@ -138,11 +140,11 @@ For regrade requests, submit the original copy of the graded exam or assignment 
 
 No use of laptops or tablets, with the exception of note-taking. Surfing the internet and catching up on your e-mail is distracting, both for yourself and for those around you. Exception: if you prefer to take notes on your tablet – but for note-taking only.
 
-## Course Materials: Website and Bruin Learn
+## Course Materials: Website and BruinLearn
 
 The course website, [nvoigtla.github.io/MGMT-405-FEMBA](https://nvoigtla.github.io/MGMT-405-FEMBA/), is the fastest way to find what a given week asks of you: the videos, the podcasts, the readings, the practice exercises and every deadline, week by week and module by module. The class syllabus and the course calendar can be downloaded there as PDFs.
 
-Electronic copies of all our slides, problem sets, and the solutions to the problem sets, are on the [class website](https://nvoigtla.github.io/MGMT-405-FEMBA/). This course is almost entirely paperless, except for the occasional class handout. Please monitor the course pages regularly, as they carry the most up-to-date information on the reading assignments. I will make extensive use of e-mail to communicate with the class, so please check your e-mail regularly.
+Electronic copies of all our slides are on the [class website](https://nvoigtla.github.io/MGMT-405-FEMBA/). You find the Problem Sets and Problem Set Solutions on [BruinLearn under “Assignments.”](https://bruinlearn.ucla.edu/courses/237860/assignments) This course is almost entirely paperless, except for the occasional class handout. Please monitor the course pages regularly, as they carry the most up-to-date information on the reading assignments. I will make extensive use of e-mail to communicate with the class, so please check your e-mail regularly.
 
 In addition, an Excel workbook used in class is available on the class site.
 
@@ -152,4 +154,4 @@ The UCLA Center for Accessible Education (CAE) facilitates academic accommodatio
 
 ## Instructor Evaluation
 
-At the midpoint of the class, your views about the course will be formally solicited using an online survey. There will also be a final course evaluation. You are free to contact me and discuss the course with me and offer suggestions for improvements at any time. I am always glad to receive feedback. In addition, an opportunity for providing me with anonymous feedback exists on Bruin Learn.
+At the midpoint of the class, your views about the course will be formally solicited using an online survey. There will also be a final course evaluation. You are free to contact me and discuss the course with me and offer suggestions for improvements at any time. I am always glad to receive feedback. In addition, an opportunity for providing me with anonymous feedback exists on BruinLearn.

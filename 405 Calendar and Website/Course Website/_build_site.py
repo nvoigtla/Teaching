@@ -19,6 +19,7 @@ Output (all overwritten on every run):
 """
 
 import base64
+import datetime as _dt
 import glob
 import hashlib
 import io
@@ -52,7 +53,10 @@ OUT = HERE if C.SECTION == "emba" else os.path.join(HERE, C.SECTION)
 SITE_NAME = "Managerial Economics Fall 2026 – %s" % C.SECTION_LABEL
 
 # What the browser tab shows, on every page (2026-09-03, Nico).
-TAB_TITLE = "Managerial Econ 405"
+# The browser tab names the SECTION, so the two sites are told apart
+# when both are open (2026-09-08, Nico): "EMBA Econ 405" / "FEMBA
+# Econ 405".
+TAB_TITLE = "%s Econ 405" % C.SECTION_LABEL
 
 # Help and Questions carries two marks doing two jobs (2026-09-04, Nico):
 # a question mark for "where do I get help", an envelope for "by email".
@@ -79,6 +83,9 @@ PANOPTO_SHOT = "assets/panopto-login.png"
 # on 2026-09-04, when the calendar's problem-set cards started linking it
 # too, so the address is no longer typed twice.
 BRUINLEARN_COURSE = C.LINKS["bruinlearn_course"]
+# The Assignments page -- where the problem sets are downloaded and
+# uploaded from 2026-09-12.  Section-derived, like the course URL.
+BRUINLEARN_ASSIGNMENTS = C.LINKS["bruinlearn_assignments"]
 
 # The instructor's faculty page, linked from the header (2026-09-03, Nico).
 NICO_URL = "https://www.anderson.ucla.edu/faculty_pages/nico.v/"
@@ -136,6 +143,9 @@ EXTRA_PAGES = [
     ("all-podcasts.html", "all-podcasts", "All Podcasts",
      "Intro and wrap-up, by module", "\U0001F3A7"),
 ]
+# Addressed by KEY, so a page rename cannot silently orphan a link to it.
+EXTRA_HREF = {k: h for h, k, _t, _s, _g in EXTRA_PAGES}
+EXTRA_GLYPH = {k: g for h, k, _t, _s, g in EXTRA_PAGES}
 
 # The TA's exercise site -- an outgoing link, not a page of ours, so it sits
 # at the very bottom of the menu and opens in a new tab (2026-09-03, Nico).
@@ -154,7 +164,17 @@ _MOD_RE = re.compile(r"Module\s+(\d)")
 # re-pointed every override that followed one (2026-09-05). check_overrides()
 # fails the build if a key stops matching exactly one group.
 GROUP_MODULE_OVERRIDES = {
-    (1, "prep", "Optional Podcasts"): [],        # general-interest econ podcasts
+    # Were [] -- "general-interest", so they showed in the week view only.
+    # Nico asked for them on the module pages too (2026-09-14). Both
+    # groups are single-module, so the override carries it and the titles
+    # stay clean; a group that SPANS modules names the module per item
+    # instead (weeks 4 and 8).
+    # Week 1's three optional podcasts are all Module 1, so the module is
+    # carried here and their titles stay clean. Weeks 5 and 9 hold the
+    # optional listening for EVERY module taught in that week's class
+    # (2026-09-14, Nico), so they span modules and name them per item
+    # instead -- item_modules() reads the title ahead of the group.
+    (1, "prep", "Optional Podcasts"): [1],
     # "In preparation for class: Ch. 2.5" names no module; tagged with the two
     # modules that week 1's on-campus class covers, per that week's topics.
     (1, "prep", "In preparation for class:"): [1, 2],
@@ -170,7 +190,6 @@ GROUP_MODULE_OVERRIDES = {
     (3, "prep", "Advanced reading (optional):"): [3],   # Ch. 6.6 - 6.7
     (5, "prep", "Assigned articles for discussion"): [],
     (6, "prep", "Midterm Prep: TA Review Sessions"): [],
-    (9, "prep", "Optional Podcasts"): [],        # general-interest econ podcast
     (9, "prep", "Assigned articles for discussion"): [],
     (11, "prep", "Exam prep time:"): [],
 }
@@ -396,6 +415,80 @@ def render_group(g, cat, items=None, gmods=None):
     h += [render_item(it, cat, gmods) for it in items]
     h.append("</ul></div>")
     return "".join(h)
+
+
+BEAR_GLYPH = (
+    # Nico's Bruin Bear, 2026-09-12. The file he dropped is the UCLA
+    # blue bear on an OPAQUE WHITE rectangle; _make_bear.py recovers the
+    # alpha and recolours it to the deck's dark yellow, because a white
+    # box on the navy header bar -- or a blue bear on dark blue -- is not
+    # a mark. 31x16 css px, stored at 4x so it stays sharp on retina.
+    '<img class="bear" src="assets/bruin-bear.png?v=__ASSETV__"'
+    ' width="31" height="16" alt="" aria-hidden="true">'
+)
+
+
+EYE_GLYPH = (
+    # A human eye for "at a glance" (2026-09-15, Nico). Drawn rather
+    # than set as U+1F441: the emoji ignores the header colour and can
+    # fall back to a coloured box on a phone.
+    '<svg class="eye" viewBox="0 0 24 16" width="23" height="15"'
+    ' aria-hidden="true" focusable="false" fill="none"'
+    ' stroke="currentColor" stroke-width="1.6"'
+    ' stroke-linecap="round" stroke-linejoin="round">'
+    '<path d="M1.6 8C5.2 2.9 18.8 2.9 22.4 8C18.8 13.1 5.2 13.1 1.6 8Z"/>'
+    '<circle cx="12" cy="8" r="3.4"/>'
+    '<circle cx="12" cy="8" r="1.25" fill="currentColor"'
+    ' stroke="none"/>'
+    '</svg>'
+)
+
+
+BOOK_GLYPH = (
+    # An open book, drawn rather than set as an emoji (2026-09-12, Nico sent
+    # a line-art reference). The emoji rendered in its own blue-and-white and
+    # was the one mark here that ignored the header palette; currentColor
+    # puts it back in the family, and an SVG cannot degrade to the coloured
+    # box an emoji-plane glyph can show on a phone.
+    '<svg class="bk" viewBox="0 0 32 26" width="28" height="23"'
+    ' aria-hidden="true" focusable="false">'
+    '<g fill="none" stroke="currentColor" stroke-width="1.9"'
+    ' stroke-linecap="round" stroke-linejoin="round">'
+    '<path d="M16 7.2C12.4 4.6 7.6 3.9 3 4.6V20.4C7.6 19.7 12.4 20.4 16 23'
+    'C19.6 20.4 24.4 19.7 29 20.4V4.6C24.4 3.9 19.6 4.6 16 7.2Z"/>'
+    '<path d="M16 7.2V23"/></g>'
+    '<g fill="none" stroke="currentColor" stroke-width="1.25"'
+    ' stroke-linecap="round">'
+    '<path d="M5.6 8.3C8.4 8.2 11.2 8.9 13.4 10.3"/>'
+    '<path d="M5.6 11.6C8.4 11.5 11.2 12.2 13.4 13.6"/>'
+    '<path d="M5.6 14.9C8.4 14.8 11.2 15.5 13.4 16.9"/>'
+    '<path d="M26.4 8.3C23.6 8.2 20.8 8.9 18.6 10.3"/>'
+    '<path d="M26.4 11.6C23.6 11.5 20.8 12.2 18.6 13.6"/>'
+    '<path d="M26.4 14.9C23.6 14.8 20.8 15.5 18.6 16.9"/>'
+    '</g></svg>'
+)
+
+
+MATH_GLYPH = (
+    # dy/dx as a STACKED fraction (2026-09-12, Nico). It replaced a solidus
+    # arrangement, which replaced df(x)/dx: each step simpler than the last.
+    #
+    # Widths are MEASURED, not guessed -- PIL against Georgia Italic at 12px
+    # gives "dy" = 13.60 and "dx" = 12.90, so the rule spans 0.8 to 16.2 and
+    # both halves centre on x=8.5. The fallback, Times New Roman, is
+    # narrower still (11.35 for both) and stays inside the rule.
+    '<svg class="mg" viewBox="0 0 17 29" width="15" height="26"'
+    ' aria-hidden="true" focusable="false">'
+    '<text x="8.5" y="11.5" text-anchor="middle" font-size="12"'
+    ' font-style="italic" fill="currentColor"'
+    ' font-family="Georgia,&#39;Times New Roman&#39;,serif">dy</text>'
+    '<line x1="0.8" y1="15" x2="16.2" y2="15" stroke="currentColor"'
+    ' stroke-width="1.3" stroke-linecap="round"/>'
+    '<text x="8.5" y="27" text-anchor="middle" font-size="12"'
+    ' font-style="italic" fill="currentColor"'
+    ' font-family="Georgia,&#39;Times New Roman&#39;,serif">dx</text>'
+    '</svg>'
+)
 
 
 def box_hd(title, glyph=None, small=False, when=None):
@@ -741,13 +834,159 @@ def assessments():
             (wd0, off0), (wd1, off1) = ex["window"]
             d0 = C.dt(w["num"] + off0, wd0)
             d1 = C.dt(w["num"] + off1, wd1)
+            slot = C.slot_label(ex)
             out.append({"week": w["num"], "label": ex["title"], "note": None,
-                        "date": d0.isoformat(),
-                        "when": "%s – %s" % (C.fmt(d0, wd=True),
-                                             C.fmt(d1, wd=True)),
+                        "date": d0.isoformat(), "end": d1.isoformat(),
+                        # a fixed slot reads as one day plus the hours; a
+                        # window still reads as a range (2026-09-10)
+                        "when": ("%s · %s" % (C.fmt(d0, wd=True), slot)
+                                 if slot else
+                                 "%s – %s" % (C.fmt(d0, wd=True),
+                                              C.fmt(d1, wd=True))),
+                        "utc": C.exam_utc(w),
                         "exam": True, "watch": False})
     out.sort(key=lambda a: a["date"])
     return out
+
+
+# ===================== calendar feeds (.ics) =====================
+# The three categories the Export panel offers, and the file each is
+# published as. "all" is the convenience feed for someone who wants the lot.
+FEED_KINDS = (("assign", "Assignments"), ("video", "Videos"),
+              ("exam", "Exams"))
+FEED_DIR = "feeds"
+
+# Every event title is prefixed, so a deadline is recognisable among
+# everything else in a student's calendar. Short on purpose: a calendar
+# entry is a narrow strip, and "MGMT 405 (EMBA): " ate most of it before
+# the actual deadline started (2026-09-09, Nico). The section is not
+# repeated -- a student only ever subscribes to their own feed.
+EVENT_PREFIX = "Econ: "
+
+# SEQUENCE has to INCREASE for a calendar to accept a revised event, so it
+# is the build time in whole minutes since 2026-01-01 -- monotonic by
+# construction, and shared by every event in a build.
+BUILD_SEQ = int((_dt.datetime.now(_dt.timezone.utc)
+                 - _dt.datetime(2026, 1, 1, tzinfo=_dt.timezone.utc)
+                 ).total_seconds() // 60)
+
+
+def kind_of(a):
+    return "exam" if a["exam"] else ("video" if a.get("watch") else "assign")
+
+
+def ics_uid(a, i):
+    """Stable across edits. Deliberately NOT built from the title or the
+    date: those are exactly the things Nico changes, and a UID that moved
+    with them would leave a duplicate behind instead of updating the event
+    the student already has."""
+    return "mgmt405-%s-%s-w%d-%d@nvoigtla.github.io" % (
+        C.SECTION, kind_of(a), a["week"], i)
+
+
+def _ics_esc(t):
+    return (t.replace("\\", "\\\\").replace(";", "\\;")
+             .replace(",", "\\,").replace("\n", "\\n"))
+
+
+def _fold(line):
+    """RFC 5545 caps a content line at 75 octets; continuations start with
+    a space. Long video titles do exceed it."""
+    out, b = [], line.encode("utf-8")
+    while len(b) > 73:
+        cut = 73
+        while cut > 0 and (b[cut] & 0xC0) == 0x80:   # never split a rune
+            cut -= 1
+        out.append(b[:cut].decode("utf-8"))
+        b = b[cut:]
+    out.append(b.decode("utf-8"))
+    return "\r\n ".join(out)
+
+
+def ics_text(kinds, stamp=None):
+    """One VCALENDAR holding every dated assessment of the given kinds."""
+    stamp = stamp or _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    per_week = {}
+    L = ["BEGIN:VCALENDAR", "VERSION:2.0", "CALSCALE:GREGORIAN",
+         "METHOD:PUBLISH",
+         "PRODID:-//UCLA Anderson//MGMT 405 %s//EN" % C.SECTION_LABEL,
+         # no commas here: escaping them for iCalendar leaves visible
+         # backslashes in the calendar's name in some clients
+         "X-WR-CALNAME:%s" % _ics_esc(
+             "MGMT 405 (%s) - %s"
+             % (C.SECTION_LABEL,
+                "All dates" if len(kinds) == len(FEED_KINDS)
+                else " + ".join(n for k, n in FEED_KINDS if k in kinds))),
+         "X-WR-TIMEZONE:America/Los_Angeles"]
+    for a in assessments():
+        k = kind_of(a)
+        if k not in kinds or a["date"] == "9999":
+            continue
+        key = (k, a["week"])
+        per_week[key] = per_week.get(key, 0) + 1
+        start = a["date"].replace("-", "")
+        # DTEND is EXCLUSIVE for an all-day event, so a one-day deadline
+        # ends the next morning and an exam window ends the day after d1.
+        last = a.get("end") or a["date"]
+        end = (_dt.date(*[int(x) for x in last.split("-")])
+               + _dt.timedelta(days=1)).strftime("%Y%m%d")
+        # A fixed-slot exam is a real block on the student's calendar,
+        # not an all-day banner, and it marks them busy. Everything else
+        # stays all-day: a deadline has no hour (2026-09-10).
+        if a.get("utc"):
+            when = ["DTSTART:" + a["utc"][0], "DTEND:" + a["utc"][1]]
+            busy = "TRANSP:OPAQUE"
+        else:
+            when = ["DTSTART;VALUE=DATE:" + start,
+                    "DTEND;VALUE=DATE:" + end]
+            busy = "TRANSP:TRANSPARENT"
+        L += ["BEGIN:VEVENT",
+              "UID:" + ics_uid(a, per_week[key]),
+              "DTSTAMP:" + stamp,
+              "LAST-MODIFIED:" + stamp,
+              "SEQUENCE:%d" % BUILD_SEQ] + when + [
+              busy,
+              _fold("SUMMARY:" + _ics_esc(EVENT_PREFIX + a["label"])),
+              _fold("DESCRIPTION:" + _ics_esc(
+                  "Week %d - %s. %s/week-%02d.html"
+                  % (a["week"], a["when"], C.SITE_BASE, a["week"]))),
+              _fold("URL:%s/week-%02d.html" % (C.SITE_BASE, a["week"])),
+              "END:VEVENT"]
+    L.append("END:VCALENDAR")
+    return "\r\n".join(L) + "\r\n"
+
+
+def feed_name(kinds):
+    """The file for one combination of kinds. The order is always FEED_KINDS
+    order, never the order the boxes were ticked, so a given combination has
+    exactly ONE address (2026-09-09, Nico -- picking two used to hand out two
+    addresses to subscribe to)."""
+    ordered = [k for k, _n in FEED_KINDS if k in kinds]
+    if len(ordered) == len(FEED_KINDS):
+        return "mgmt405-all.ics"
+    return "mgmt405-%s.ics" % "-".join(ordered)
+
+
+def write_feeds():
+    """One feed per non-empty combination -- 7 for three kinds, so whatever
+    a student ticks there is a single address to subscribe to."""
+    d = os.path.join(OUT, FEED_DIR)
+    os.makedirs(d, exist_ok=True)
+    stamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    keys = [k for k, _n in FEED_KINDS]
+    combos = []
+    for mask in range(1, 1 << len(keys)):
+        combos.append(tuple(k for i, k in enumerate(keys) if mask & (1 << i)))
+    keep = set()
+    for kinds in combos:
+        name = feed_name(kinds)
+        keep.add(name)
+        io.open(os.path.join(d, name), "w", encoding="utf-8",
+                newline="").write(ics_text(kinds, stamp))
+    for gone in set(os.listdir(d)) - keep:
+        os.remove(os.path.join(d, gone))
+    print("  %s/                (%d feeds, one per combination)"
+          % (FEED_DIR, len(keep)))
 
 
 def week_has_deadlines(n):
@@ -773,13 +1012,30 @@ def right_column(current_week):
         if current_week == a["week"] and not marked:
             anchor_id = ' id="dl-here"'
             marked = True
+        # data-kind / data-end / data-title are what the Export button
+        # reads. The three kinds are exactly the three tick-boxes it offers
+        # (2026-09-09, Nico).
+        kind = "exam" if a["exam"] else ("video" if a.get("watch")
+                                         else "assign")
+        # A problem set goes STRAIGHT to BruinLearn Assignments, which
+        # serves the download and takes the upload -- not to the week page
+        # it is listed under, which is usually the page the student is
+        # already on (2026-09-12, Nico). Everything else keeps the week
+        # link: the practice final is not a problem set.
+        if a["label"].lower().startswith("problem set"):
+            href, tgt = BRUINLEARN_ASSIGNMENTS, ' target="_blank" rel="noopener"'
+        else:
+            href, tgt = "week-%02d.html" % a["week"], ""
         rows.append(
-            '<li%s%s data-week="%d" data-date="%s"><span class="w">Week %d</span>'
-            '<span class="lb"><a href="week-%02d.html">%s</a>%s</span>'
+            '<li%s%s data-week="%d" data-date="%s" data-kind="%s"%s'
+            ' data-title="%s"><span class="w">Week %d</span>'
+            '<span class="lb"><a href="%s"%s>%s</a>%s</span>'
             '<time>%s</time></li>'
             % ((' class="%s"' % " ".join(cls)) if cls else "", anchor_id,
-               a["week"], "" if a["date"] == "9999" else a["date"],
-               a["week"], a["week"], esc(a["label"]),
+               a["week"], "" if a["date"] == "9999" else a["date"], kind,
+               (' data-end="%s"' % a["end"]) if a.get("end") else "",
+               esc(a["label"]),
+               a["week"], href, tgt, esc(a["label"]),
                (' <span style="font-size:12.5px;color:var(--ink-3)">(%s)</span>'
                 % esc(a["note"])) if a["note"] else "",
                esc(a["when"])))
@@ -790,13 +1046,41 @@ def right_column(current_week):
            aria-label="Search the course" autocomplete="off">
     <div class="results" id="results" hidden></div>
   </div>
-  <div class="card" id="deadlines">%s
+  <div class="card" id="deadlines" data-course="MGMT 405 %s"
+       data-seq="%s" data-feeds="%s">
+    <div class="box-hd small">Deadlines &amp; Exams
+      <button class="dl-exp" id="dl-exp" type="button" aria-expanded="false"
+              aria-controls="dl-exp-pop"
+              aria-label="Subscribe to calendar and updates"><svg class="ic" viewBox="0 0 20 20" width="30" height="30" aria-hidden="true" focusable="false"><rect x="4.8" y="0.9" width="2.5" height="3.6" rx="1.2" fill="#4C86DA"/><rect x="12.7" y="0.9" width="2.5" height="3.6" rx="1.2" fill="#4C86DA"/><rect x="1.5" y="2.7" width="17" height="15.2" rx="2.6" fill="#E6A93F"/><rect x="2.7" y="9.1" width="14.6" height="3.6" rx="1.3" fill="#3B76D1"/><g fill="#FFFFFF"><rect x="3.7" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="7.2" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="10.7" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="14.2" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="3.7" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="7.2" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="10.7" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="14.2" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="3.7" y="13.5" width="2.7" height="2.3" rx="0.5"/><rect x="7.2" y="13.5" width="2.7" height="2.3" rx="0.5"/></g><circle cx="15.1" cy="15.1" r="4.7" fill="#2F74D8" stroke="#0B2B4E" stroke-width="1.1"/><g stroke="#FFFFFF" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M15.1 17.3V12.9"/><path d="M13.3 14.6l1.8-1.8 1.8 1.8"/></g></svg><span
+              class="tip">Subscribe to Calendar and Updates</span></button></div>
+    <div class="dl-exp-pop" id="dl-exp-pop" hidden>
+      <p class="lab">Subscribe to Calendar and Updates</p>
+      <p class="note">Your calendar keeps itself updated: dates that moved
+        will change in your calendar, new ones appear, and anything removed
+        from the course calendar disappears.</p>
+      <p class="lab">Include</p>
+      <label><input type="checkbox" id="exp-assign" checked> Assignments
+        <span class="sub">problem sets and practice sets</span></label>
+      <label><input type="checkbox" id="exp-video" checked> Videos
+        <span class="sub">suggested watch-by dates</span></label>
+      <label><input type="checkbox" id="exp-exam" checked> Exams</label>
+      <p class="lab">Address to subscribe to</p>
+      <p class="hint" id="exp-hint"></p>
+      <div class="row">
+        <button type="button" id="exp-copy">Copy address</button>
+      </div>
+      <p class="how">In Google Calendar: <em>Other calendars &rarr; From
+        URL</em>. In Apple Calendar: <em>File &rarr; New Calendar
+        Subscription</em>. In Outlook: <em>Add calendar &rarr; Subscribe
+        from web</em>.</p>
+    </div>
     <div class="dl-legend"><span class="sw-due" aria-hidden="true"></span>
       <span>Upcoming within 3 days</span></div>
     <ul class="dl">%s</ul>
     <button class="dl-all" id="dl-all" type="button">Show all deadlines</button>
   </div>
-</aside>""" % (box_hd("Deadlines & exams", small=True), "".join(rows))
+</aside>""" % ("(%s)" % C.SECTION_LABEL, BUILD_SEQ,
+                 "%s/%s" % (C.SITE_BASE, FEED_DIR), "".join(rows))
 
 
 # ============================== page shell ==============================
@@ -982,9 +1266,11 @@ def week_main(w):
         is_pset = label.lower().startswith("problem set")
         upload = ""
         if is_pset:
+            # The Assignments page, not the course root: the same page
+            # serves the download and the upload from 2026-09-12.
             upload = ('<p class="upload">Upload one solution per group on '
                       '<a href="%s" target="_blank" rel="noopener">BruinLearn'
-                      '</a></p>' % BRUINLEARN_COURSE)
+                      '</a></p>' % BRUINLEARN_ASSIGNMENTS)
         # Only a problem set takes the dark-red treatment; the practice final
         # is not one, so it keeps the gold rule (2026-09-03, Nico).
         h.append('<div class="pcard due%s"><div class="pcard-bd">'
@@ -999,15 +1285,17 @@ def week_main(w):
         (wd0, off0), (wd1, off1) = ex["window"]
         w0 = C.fmt(C.dt(n + off0, wd0), wd=True)
         w1 = C.fmt(C.dt(n + off1, wd1), wd=True)
+        slot = C.slot_label(ex)
         lines = "".join(
             '<li><span class="g" aria-hidden="true">•</span>'
             '<span class="txt">%s</span></li>'
-            % esc(ln.format(w0=w0, w1=w1)) for ln in ex["lines"])
+            % esc(ln.format(w0=w0, w1=w1, slot=slot)) for ln in ex["lines"])
+        when = ("%s · %s" % (w0, slot)) if slot else ("%s – %s" % (w0, w1))
         h.append('<section class="pcard exam"><div class="pcard-hd">'
-                 '<span>%s</span><span class="when">%s – %s</span></div>'
+                 '<span>%s</span><span class="when">%s</span></div>'
                  '<div class="pcard-bd"><ul class="items">%s</ul></div>'
                  '</section>'
-                 % (esc(ex["title"]), esc(w0), esc(w1), lines))
+                 % (esc(ex["title"]), esc(when), lines))
     else:
         h.append('<section class="pcard topics">%s<div class="pcard-bd">'
                  '<ul>%s</ul></div></section>'
@@ -1077,6 +1365,126 @@ def week_main(w):
 
 # ============================== module pages ==============================
 
+# ============================ module boxes ============================
+# "Key Topics" and "Goals for This Module", shown on the MODULE pages only
+# (2026-09-14, Nico). Taken from each deck's own "Outline of Module N"
+# slide, so the website cannot drift from the slides -- except Module 8,
+# which has no deck in 405 Slide Revisions 2026; its text is Nico's, from
+# the old BruinLearn page.
+#
+# An item is a string, or (heading, [sub-items]) where it nests.
+MODULE_BOXES = {
+    1: (["Markets, demand and supply",
+         "Market equilibrium",
+         "Principles for sound economic decisions"],
+        ["Understand what a market is and how far it extends",
+         "See how buyers and sellers each respond to price, and where demand "
+         "meets supply",
+         ("Apply the three decision principles",
+          ["Economic costs include opportunity costs",
+           "Ignore sunk costs",
+           "Compare the benefit of the next unit with its cost"])]),
+    2: (["The law of demand",
+         "Elasticities",
+         "Demand and revenue"],
+        ["Know how strongly demand responds to price, income and the prices "
+         "of other goods",
+         ("Translate the demand curve into revenue",
+          ["When a price increase raises revenue \u2013 and when it backfires",
+           "Marginal revenue: the extra revenue from one more unit"]),
+         "Measure demand from data, through market experiments and "
+         "regression"]),
+    3: (["The production function",
+         "Hiring and input decisions",
+         "Cost concepts"],
+        ["Decide how many workers to hire when capital is fixed, including "
+         "when hiring bids up the wage for everyone",
+         "Choose between capital and labor in the long run, when both can be "
+         "adjusted",
+         ("Use the right cost concept",
+          ["Fixed, variable, marginal and sunk costs, and which ones matter",
+           "When bigger or broader production lowers cost per unit"])]),
+    4: (["Market structures and perfect competition",
+         "Profit maximization by a price taker",
+         "Market distortions and externalities"],
+        ["Place a firm between price taker and price setter",
+         ("Find a price taker\u2019s output",
+          ["How much to produce, and when to stop production",
+           "Marginal cost as the firm\u2019s supply curve, summed into "
+           "market supply",
+           "Entry and exit drive economic profits to zero"]),
+         ("Judge a market intervention",
+          ["Who wins, who loses, and what is lost outright",
+           "Costs and benefits that land on people outside the deal"])]),
+    5: (["Profit maximization for price searchers",
+         "Markup and market power",
+         "Monopoly and welfare"],
+        ["Maximize profit as a price searcher rather than a price taker",
+         "Measure market power through the markup and the Lerner index, and "
+         "its link to elasticity",
+         ("Assess monopoly against the alternatives",
+          ["Welfare impact, rising market power and regulation",
+           "Monopolistic competition"])]),
+    6: (["Simple vs. complex pricing",
+         "Direct and indirect price discrimination",
+         "Advanced pricing strategies"],
+        ["See the pricing dilemma and why complex pricing pays",
+         ("Price customers directly",
+          ["Every customer at her own willingness to pay",
+           "Different prices for groups with different price sensitivity"]),
+         "Let customers sort themselves, through versioning and coupons",
+         ("Use a fixed and a variable part",
+          ["Flat fee pricing, two-part tariffs and block pricing",
+           "Which strategy fits which market conditions"])]),
+    7: (["Collusion and cartels",
+         "Cournot and Bertrand competition",
+         "Strategic thinking"],
+        ["Understand why firms are tempted to collude, and why cartels break "
+         "down",
+         ("Compete as one of a few firms",
+          ["Choosing quantities (Cournot) and setting prices (Bertrand)",
+           "Why price competition can compete profits away",
+           "How differentiation softens price competition"]),
+         "Use best responses, dominant strategies and Nash equilibrium, and "
+         "read the classic games"]),
+    8: ([("Auctions", []),
+         ("Asymmetric Information",
+          ["Adverse Selection", "Moral Hazard", "Signaling"])],
+        ["Understand under which circumstances auctions are the best choice "
+         "for finding a product\u2019s price",
+         "Introduction to asymmetric information and its implication for "
+         "economic decision making",
+         "Ways to address these problems, most importantly: signaling"]),
+}
+
+
+def module_box_list(items):
+    """A <ul>, nesting a second level where an item carries sub-items."""
+    out = []
+    for it in items:
+        if isinstance(it, tuple):
+            head, subs = it
+            out.append("<li>%s%s</li>"
+                       % (esc(head),
+                          ("<ul>%s</ul>"
+                           % "".join("<li>%s</li>" % esc(s) for s in subs))
+                          if subs else ""))
+        else:
+            out.append("<li>%s</li>" % esc(it))
+    return "<ul>%s</ul>" % "".join(out)
+
+
+def module_boxes(num):
+    """The two panels, or "" for a module with no entry yet."""
+    if num not in MODULE_BOXES:
+        return ""
+    topics, goals = MODULE_BOXES[num]
+    return ('<div class="mbox-row">%s%s</div>'
+            % (panel("Key Topics", module_box_list(topics), "\u25c6"),
+               panel("Goals for This Module", module_box_list(goals),
+                     "\u25c7")))
+
+
 def module_main(num, title, parts):
     wks = [w for w in C.WEEKS if num in week_modules(w)]
     h = []
@@ -1112,6 +1520,11 @@ def module_main(num, title, parts):
     if pills:
         h.append('<div class="pills">%s</div>' % "".join(pills))
 
+    # The two module boxes go at the TOP of the first week section, in
+    # place of its topics line -- which only repeated the module title the
+    # band already carries (2026-09-14, Nico). Later week sections keep
+    # their topics line, since those say something new.
+    boxes = module_boxes(num)
     for w in wks:
         d1, d2 = week_span(w)
         cards = cat_cards(w.get("prep_groups") or [], w["num"], "prep",
@@ -1132,9 +1545,10 @@ def module_main(num, title, parts):
                  '<span class="d">%s · %s</span></div>%s%s</section>'
                  % (w["num"], w["num"], esc(C.span(d1, d2)),
                     band_center(w).replace("&amp;", "&"),
-                    ('<p class="mwk-topics">%s</p>'
-                     % esc(" · ".join(topics))) if topics else "",
+                    boxes or (('<p class="mwk-topics">%s</p>'
+                               % esc(" · ".join(topics))) if topics else ""),
                     cards))
+        boxes = ""          # only the first week section carries them
     h.append("</div>")
 
     if num < MODULES[-1][0]:
@@ -1247,8 +1661,51 @@ def logistics_main():
              % esc(C.TERM))
     h.append('<div class="body">')
 
-    # Two half-width boxes, side by side, above the three columns.
-    h.append('<div class="gl-row">%s%s</div>' % (
+    # Built here because the band below prints it -- the definition used to
+    # sit further down, with the columns it belonged to.
+    # A fisheye for the box of course vitals -- it was the only one in
+    # the top band without a mark (2026-09-15, Nico asked me to pick).
+    # U+25C9, text-plane like every other glyph here, and unused so far.
+    glance = panel("Course at a Glance",
+                  "<dl>"
+                   # Class leads and Term is gone (2026-09-13, Nico): the
+                   # year Term carried now sits in this line, so the box
+                   # says which section it belongs to at a glance.
+                   "<dt>Class</dt><dd>%s</dd>"
+                   # The weekend DATES sit inside Meets, running straight on
+                   # from the times after a horizontal gap -- no line break
+                   # (2026-09-13, Nico; they were briefly a row of their
+                   # own, then a forced second line). One row answers when,
+                   # which weekends, and where. The weekday names are
+                   # dropped because the times have just given them.
+                   '<dt>Meets</dt><dd>%s<span class="oc">·</span>%s'
+                   "<br>Room <b>%s</b></dd>"
+                   "<dt>Instructor</dt><dd>%s</dd>"
+                   "<dt>TA</dt><dd>%s</dd>"
+                   # The grade split was on no page of the site until now.
+                   "<dt>Grading</dt><dd>%s</dd>"
+                  "</dl>"
+                  % (esc(C.SECTION_TITLE),
+                     esc(C.CLASS_TIMES),
+                     # A non-breaking space inside each date, so a wrap can
+                     # only fall on a separator: without it "Nov 20/21" broke
+                     # across two lines and read as a mistake.
+                     esc("  \u00b7  ".join(
+                         d.replace(" ", "\u00a0") for d in C.oncampus_dates())),
+                     esc(C.CLASSROOM),
+                     mail_link(NICO_EMAIL, "Prof. Nico Voigtl\u00e4nder"),
+                     ta_link(C.TA_NAME),
+                     esc("  \u00b7  ".join(
+                         "%s %s" % (n.replace(" Exam", ""), p)
+                         for n, p in C.GRADE_WEIGHTS))),
+                  EYE_GLYPH)
+
+    # Two columns (2026-09-13, Nico): the facts card on the left, the two
+    # download boxes stacked in the right one. `.panel-stack` is the same
+    # device the grid below uses to keep a pair together.
+    h.append('<div class="gl-row">%s'
+             '<div class="panel-stack">%s%s</div></div>' % (
+        glance,
         # Both PDFs sit in one box (2026-09-04, Nico): the syllabus first,
         # the calendar under it. The calendar has no card of its own any
         # more -- the website IS the calendar, and the PDF is the version
@@ -1268,37 +1725,73 @@ def logistics_main():
               '<a href="%s" target="_blank" rel="noopener">'
               '<span class="g" aria-hidden="true">&#9636;</span>'
               '<span class="u">Open the BruinLearn class site</span></a>'
-              '</div>' % BRUINLEARN_COURSE,
-              "&#127891;")))
+              # The Assignments page is where the problem sets are both
+              # downloaded and handed in, so it earns its own line rather
+              # than being two clicks inside the course (2026-09-13, Nico).
+              # Pencil = "problem set", the deck's fixed vocabulary.
+              '<a href="%s" target="_blank" rel="noopener">'
+              '<span class="g" aria-hidden="true">&#9998;</span>'
+              '<span class="u">Open the Assignments page on BruinLearn'
+              '</span></a>'
+              '</div>' % (BRUINLEARN_COURSE, BRUINLEARN_ASSIGNMENTS),
+              BEAR_GLYPH)))
 
     h.append('<div class="gl-grid">')
 
     # "How the Quarter Runs" was dropped and Class and Contact promoted to
-    # the top left (2026-09-04, Nico).
-    col1 = panel("Class and Contact",
-                  "<dl>"
-                   "<dt>Meets</dt><dd>%s<br>Room <b>%s</b></dd>"
-                   "<dt>Instructor</dt><dd>%s</dd>"
-                   "<dt>TA</dt><dd>%s</dd>"
-                   "<dt>Term</dt><dd>%s</dd>"
-                  "</dl>"
-                  % (esc(C.CLASS_TIMES), esc(C.CLASSROOM),
-                     mail_link(NICO_EMAIL, "Prof. Nico Voigtl\u00e4nder"),
-                     ta_link(C.TA_NAME),
-                     esc(C.TERM)))
+    # the top left (2026-09-04, Nico), then renamed and moved into the top
+    # band itself (2026-09-13, Nico -- "Class" said nothing on a page where
+    # every box is about the class, and "Contact" overlapped Help and
+    # Questions, which is the box that says who to ask about what).
 
     # Column 2: watching the videos, then the practice exercises directly
     # beneath it. Column 3: the math refresher above the textbook. Each
     # column is one grid cell, so neither pair can come apart.
     col2 = panel(
         "Watching the Videos",
-        "<p>%s</p>"
-        '<div class="qlinks">'
+        # Three points at ONE weight (2026-09-14, Nico). The sign-in line
+        # was a paragraph above these, set larger, so a caveat outranked the
+        # thing students open the box for. "first" drops the top margin the
+        # paragraph used to provide.
+        '<div class="qlinks first">'
+        # Every video in one list, for a student who would rather scan the
+        # whole course than open twelve week pages (2026-09-13, Nico).
+        # Internal, so no target -- only the off-site links open a new tab.
+        '<a class="lead" href="%s">'
+        '<span class="g" aria-hidden="true">&#9654;</span>'
+        '<span class="u">All videos on one page</span></a>'
         '<a href="%s" target="_blank" rel="noopener">'
-        '<span class="g" aria-hidden="true">&#128444;</span>'
-        '<span class="u">How to sign in (screenshot)</span></a></div>'
-        % (render_segments(C.SIGNIN_NOTE), PANOPTO_SHOT),
+        '<span class="g" aria-hidden="true">&#9670;</span>'
+        '<span class="u">%s</span></a>'
+        # U+25A3, not the framed-picture EMOJI U+1F5BC: an emoji-plane
+        # codepoint ignores the gold `color` on .g and renders as a colour
+        # picture, which on a phone read as a stray yellow box (2026-09-08,
+        # Nico). Every other .qlinks glyph is text-plane for the same
+        # reason -- keep new ones below U+2FFF.
+        # A SUB-point of the sign-in line above (2026-09-14, Nico): same
+        # diamond, drawn smaller, indented by the parent's glyph column so
+        # it sits under the parent's text rather than beside its marker.
+        '<a class="sub" href="%s" target="_blank" rel="noopener">'
+        '<span class="g" aria-hidden="true">&#9670;</span>'
+        '<span class="u">Use option “ASM Panopto” (screenshot)'
+        '</span></a></div>'
+        % (EXTRA_HREF["all-videos"],
+           esc(link_for("panopto_site")), esc(C.SIGNIN_WEB_TEXT),
+           PANOPTO_SHOT),
         "\U0001F3AC")
+    # Directly under the videos box (2026-09-13, Nico), so the stack reads
+    # videos -> podcasts -> practice: what a student does before class, in
+    # the order they do it. The headphone is the glyph the week-page
+    # Podcasts card already uses, matching the clapperboard above it.
+    col2 += panel(
+        "Podcasts about Class Material",
+        "<p>For each Module there is an Intro and a Wrap-Up podcast.</p>"
+        '<div class="qlinks">'
+        '<a href="%s">'
+        '<span class="g" aria-hidden="true">&#9834;</span>'
+        '<span class="u">You find all podcasts on one page here</span></a>'
+        '</div>' % EXTRA_HREF["all-podcasts"],
+        EXTRA_GLYPH["all-podcasts"])
     col2 += panel(
         "Online Practice Exercises",
         "<p>Interactive practice exercises for each Module, with hints and "
@@ -1315,19 +1808,24 @@ def logistics_main():
     # The top right is now "who to ask about what" (2026-09-04, Nico). The
     # TA's line carries his address; Prof. Nico's deliberately does not.
     col3 = panel("Help and Questions", help_body(), HELP_HD_GLYPH)
+    # The boxed "pi = ?" Nico sent, 2026-09-12, in place of the partial
+    # differential -- which said "calculus" rather than "brush up your
+    # math". Inline SVG in currentColor: it stays crisp at 16px, takes the
+    # header's colour in both palettes, and keeps the panel to ONE compact
+    # mark the way its siblings have.
     col3 += panel("Math Refresher",
                   "<p>%s</p><ul>%s</ul>"
                   % (esc(C.MATH_REFRESHER_INTRO), m_items),
-                  "∂")
-    col3 += panel("Textbook", "<ul>%s</ul>" % books, "\U0001F4D6")
+                  MATH_GLYPH)
+    col3 += panel("Textbook", "<ul>%s</ul>" % books, BOOK_GLYPH)
 
     # Two balanced columns of three. The right-hand column opens with Class
     # and Contact, so it sits in the top right corner (2026-09-03, Nico);
     # within each column the pairs Nico asked for stay together -- practice
     # under videos, textbook under the math refresher.
-    h.append('<div class="panel-stack">%s%s</div>'
+    h.append('<div class="panel-stack">%s</div>'
              '<div class="panel-stack">%s</div>'
-             % (col1, col2, col3))
+             % (col2, col3))
 
     h.append("</div></div>")
     h.append(next_link("week-01.html", "Week 1"))
@@ -1413,7 +1911,8 @@ def stamp_assets():
     stamp goes in as a post-pass because search-index.js is only written
     after the pages that reference it."""
     h = hashlib.sha1()
-    for name in ("site.css", "site.js", "search-index.js"):
+    for name in ("site.css", "site.js", "search-index.js",
+                 "bruin-bear.png"):
         with io.open(os.path.join(OUT, "assets", name), "rb") as fh:
             h.update(fh.read())
     v = h.hexdigest()[:10]
@@ -1435,7 +1934,7 @@ def main():
         # site.css and site.js are hand-authored ONCE, in Course Website/.
         # Copy them in on every build so a second section can never drift
         # from the stylesheet Nico actually edits (2026-09-05).
-        for _a in ("site.css", "site.js"):
+        for _a in ("site.css", "site.js", "bruin-bear.png"):
             shutil.copy2(os.path.join(SRC, "assets", _a),
                          os.path.join(OUT, "assets", _a))
     if not os.path.exists(PANOPTO_SHOT_SRC):
@@ -1492,6 +1991,7 @@ def main():
                       "Weeks " + ", ".join(str(k) for k in wks), html))
 
     build_index(pages)
+    write_feeds()
     stamp_assets()
 
     print("built %d pages" % len(pages))

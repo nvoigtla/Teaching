@@ -39,7 +39,7 @@ from _calendar_content import (ANCHOR_FRIDAY, TERM, LINKS, COURSE_TITLE, SUBTITL
                                CLASS_TIMES, TEXTBOOK_NOTES, MATH_REFRESHER_INTRO,
                                MATH_REFRESHER_ITEMS, SIGNIN_NOTE, WEEKS,
                                WEBSITE_LEAD, WEBSITE_TEXT, inclass_modules,
-                               podcast_when, dt, fmt, span,
+                               podcast_when, dt, fmt, span, slot_label,
                                CALENDAR_DOCX, TA_EMAIL, class_when,
                                class_days_line, SITE_BASE, slides_for,
                                slides_pub_name)
@@ -158,7 +158,12 @@ def pset_box(cell, lines):
     white on the box's pale fill would be unreadable."""
     def pop(cell_, inner_w):
         q = cp(cell_)
-        add_run(q, lines[0], bold=True, size=8.5, color=NAVY)
+        # The name is the LINK, straight to BruinLearn Assignments where the
+        # problem set is downloaded and handed in (2026-09-12, Nico). Kept
+        # navy rather than the usual link blue, because the box's own palette
+        # is navy-on-pale-red; the underline is what says "clickable".
+        add_hyperlink(q, LINKS["bruinlearn_assignments"], lines[0],
+                      bold=True, size=8.5, color=NAVY, underline=True)
         for extra in lines[1:]:
             q2 = cell_.add_paragraph()
             q2.paragraph_format.space_before = Pt(0)
@@ -829,7 +834,14 @@ def agenda_due_text(wk):
         parts.insert(0, (f"Midterm window\n{span(a, b)}", False))
     if wk["kind"] == "final":
         a, b = exam_window(wk)
-        parts.insert(0, (f"Final Exam window\n{span(a, b)}", False))
+        # A fixed slot is not a window, so the Due column names the day
+        # rather than a two-date range (2026-09-10). It does NOT also carry
+        # the hours: a third line here pushed the whole document from 14
+        # pages to 15, and page 1 has no slack. The hours are on the week
+        # page's exam card, which is where a student reads the detail.
+        slot = slot_label(wk["exam"])
+        parts.insert(0, ("Final Exam\n%s"
+                         % (fmt(a, wd=True) if slot else span(a, b)), False))
     return parts
 
 
@@ -1078,7 +1090,8 @@ def build_page1(doc):
     table_h = (hdr_h + 8 + AGHDR_GAP_PT) / 72 + sum(
         max(uniform_pt, h + 4) for h in data_hs) * 1.07 / 72
     container_box(anchor_par, CONTENT_W,
-                  head_h + table_h + legend_h + 0.05 + 0.10,
+                  head_h + table_h + legend_h + 0.05 + 0.10
+                  - AGENDA_CARD_TRIM_PT / 72,
                   ln_w=0, fill="FFFFFF")
 
 # ---------------- page 2: before the course ----------------
@@ -1135,6 +1148,15 @@ def build_page2(doc):
 
 # ---------------- week pages ----------------
 
+# The page-1 agenda card's height model runs LONG: the per-row "+4" slack
+# and the 7% Word-rendering factor compound, once per row. Measured on
+# 2026-09-14 against the rendered PDF -- card top 253.0 pt, requested height
+# 554.1 pt, legend text ending at 734.8 pt on a 792 pt page -- the card came
+# out 62 pt taller than its content and ran 15 pt PAST the bottom edge, so
+# its rounded bottom corners were cut off. Trimming by this much leaves
+# ~10 pt of air under the legend and brings the corners back on the page.
+AGENDA_CARD_TRIM_PT = 62.0
+
 BAND_W = (4.3, 2.6)        # week band: left cell, right label cell
 BAND_LBL_PT = 9.5          # right label size
 
@@ -1166,6 +1188,9 @@ def band_right_label(wk):
     if k == "examprep":
         return "Exam preparation"
     if k == "final":
+        a, _b = exam_window(wk)
+        if slot_label(wk["exam"]):
+            return f"Final Exam: {fmt(a, wd=True)}"
         return f"Final Exam window: {span(*exam_window(wk))}"
     return ""
 
@@ -1204,7 +1229,17 @@ def build_week(doc, wk):
         def pop_due(cell, inner_w, label=label, w=w, d=d, note=note,
                     is_pset=is_pset):
             p = cp(cell)
-            if w:
+            # On a problem set the NAME is a link to BruinLearn Assignments
+            # (2026-09-12, Nico); the "Due:" prefix and the date stay plain,
+            # so only the thing you would click is underlined.
+            if w and is_pset:
+                add_run(p, "Due:  ", bold=True, color=NAVY, size=11.5)
+                add_hyperlink(p, LINKS["bruinlearn_assignments"], label,
+                              bold=True, size=11.5, color=NAVY,
+                              underline=True)
+                add_run(p, f" – {fmt(dt(w, d), wd=True)}",
+                        bold=True, color=NAVY, size=11.5)
+            elif w:
                 add_run(p, f"Due:  {label} – {fmt(dt(w, d), wd=True)}",
                         bold=True, color=NAVY, size=11.5)
             else:
@@ -1215,7 +1250,11 @@ def build_week(doc, wk):
                 p2 = cell.add_paragraph()
                 p2.paragraph_format.space_before = Pt(1)
                 add_run(p2, "Upload one solution per group on ", size=10)
-                add_hyperlink(p2, LINKS["bruinlearn_course"], "BruinLearn",
+                # The Assignments page, not the course root: the same
+                # page serves the download and the upload from
+                # 2026-09-12.
+                add_hyperlink(p2, LINKS["bruinlearn_assignments"],
+                              "BruinLearn",
                               size=10, bold=False, underline=True)
         rounded_card(doc, pop_due,
                      fill=DUEWASH if is_pset else "FFFFFF",
@@ -1233,7 +1272,8 @@ def build_week(doc, wk):
         def pop_exam(cell, inner_w):
             card_header(cell, ex["title"], EXAMYEL, text_color=NAVY, size=12)
             for line in ex["lines"]:
-                render_item(cell, ("t", line.format(w0=w0, w1=w1)))
+                render_item(cell, ("t", line.format(w0=w0, w1=w1,
+                                                    slot=slot_label(ex))))
         rounded_card(doc, pop_exam, fill=CREAM, border=GOLD,
                      width_in=WEEK_CARD_W)
 

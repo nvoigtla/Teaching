@@ -125,3 +125,78 @@ does not exist yet, which is why the FEMBA website is published with
 
 One known cause of a hang, worth ruling out first: the target PDF being open
 in a viewer. Word then blocks on an invisible overwrite prompt.
+
+## Problem sets move to BruinLearn (2026-09-12)
+
+Nico: "the problem sets will be downloadable only from the BL site." Every
+mention of PS 1–5 now points at that section's **Assignments** page, and the
+same link serves the download and the upload.
+
+**One derived constant, not two literals.** `_calendar_content.py` gained
+
+```python
+"bruinlearn_assignments": SEC["bruinlearn_course"] + "/assignments",
+```
+
+next to `"bruinlearn_course"`. Hardcoding the pair he sent (EMBA
+237825 / FEMBA 237860) would have re-created the 2026-09-06 bug recorded a
+few lines above it, where a literal EMBA address made every FEMBA build
+*print* the FEMBA address and *link* the EMBA site.
+
+**Three call sites:**
+
+- `Course Calendar/_build_calendar.py` – the due card's "Upload one solution
+  per group on BruinLearn", was linking the course root.
+- `Course Website/_build_site.py` – the same line on the week cards, plus a
+  new `BRUINLEARN_ASSIGNMENTS` beside `BRUINLEARN_COURSE`.
+- `Syllabus/_build_syllabus.py` – the sentence that used to say slides,
+  problem sets and solutions were all on the class website, which the new
+  policy made false. It now reads, in his words: "Electronic copies of all
+  our slides are on the class website. You find the Problem Sets and Problem
+  Set Solutions on BruinLearn under “Assignments.”" – with
+  `BruinLearn under “Assignments.”` carrying the link.
+
+The BruinLearn *class-site* panel on the website still points at the course
+root, which is right – it is a link to the site itself, not to the problem
+sets.
+
+**Verified, both sections:** 5 assignments links per site (weeks 3, 5, 7, 9,
+10 – the five problem sets), 5 per calendar `.docx`, 1 per syllabus; EMBA
+outputs carry 237825 and FEMBA 237860 with no cross-contamination. PDFs
+re-exported and the links survive into them. `_check_pagination.ps1` PASSES
+at 14 pages, every week on one page. Syllabi 5 pages each.
+
+**Not done:** `_publish.py` / `_deploy.py` were NOT run – nothing is live yet.
+
+
+## Attendance card, recordings, the page-1 BruinLearn block (2026-09-15/16)
+
+**"Do the readings…" split into three bullets**, and a **dark-red card**
+(`missed_class_card()`, a new `("redcard", …)` block kind) now wraps "If you
+have to miss an on-campus class:" and its five bullets. One of those bullets
+links that section's class recordings — `LINKS["bruinlearn_recordings"]`,
+built from the course URL plus `/external_tools/` and the section's tool id
+(EMBA 10996, FEMBA 10995).
+
+**Problem-set submission** points at the Assignments page; the general
+BruinLearn references still point at the course root.
+
+**The page-1 yellow card** gained a BruinLearn entry, over three rounds of
+his edits. It now reads: Course Website, the address, the one-line
+description, then the *Prefer a PDF…* caption — which belongs to the website
+half — then a 12 pt gap, then **BruinLearn Course Site**, the full address
+`bruinlearn.ucla.edu/courses/<id>`, and "On the BruinLearn site, you can
+download and submit the problem sets and find the recordings of the
+on-campus classes." The address comes from `C.BRUINLEARN_TEXT`, derived from
+the link, so the two cannot drift. This is also the syllabus's only link to
+the course ROOT — both other BruinLearn links are problem-set ones.
+
+**A bug worth remembering.** `("grades", [list(r) for r …])` broke
+`write_md`, because `"| %s | %s |" % r` unpacks a tuple but not a list. The
+Markdown build had been failing **silently** since the `GRADE_WEIGHTS`
+refactor, and an earlier "syllabus text unchanged" check was invalid: stderr
+was suppressed and the grep ran against a stale `.md`. `GRADE_WEIGHTS` rows
+stay **tuples**.
+
+**Verified:** both syllabi 5 pages, 16 links, correct section — the extra
+link over the previous 15 is the new course-root one.

@@ -121,6 +121,12 @@ a:hover{text-decoration-color:var(--gold)}
   font-family:"Source Sans 3",sans-serif; font-weight:700; font-size:14.5px;
 }
 .box-hd .cg{font-size:16px; line-height:1; color:var(--card-glyph)}
+/* an image mark (the Bruin Bear) carries its own colour; display:block
+   keeps it off the text baseline inside the flex header */
+.box-hd .cg img{display:block}
+/* the drawn marks (dy/dx, the open book, the Bruin Bear) size
+   themselves; the span just must not add a text baseline under them */
+.box-hd .cg svg{display:block}
 .box-hd.small{font-size:12px; letter-spacing:.07em; text-transform:uppercase}
 
 /* ---------------------------- left column ---------------------------- */
@@ -385,13 +391,40 @@ ul.items a:hover{text-decoration-color:var(--gold)}
 .panel-bd dt{font-family:"Source Sans 3",sans-serif; font-size:10.5px; font-weight:700;
   letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); padding-top:3px}
 .panel-bd dd{margin:0; color:var(--ink-2)}
+/* The on-campus dates run on from the meeting times, separated by a middle
+   dot rather than a line break (2026-09-13, Nico). The span holds just the
+   dot; the margins give it the same air as the dots inside each string. */
+.panel-bd dd .oc{margin:0 9px}
 .panel-bd dd b{color:var(--ink)}
 .qlinks{display:flex; flex-direction:column; gap:8px; font-size:15px; margin-top:10px}
 .qlinks.first{margin-top:0}
 .qlinks a{display:flex; gap:9px; align-items:baseline; text-decoration:none}
 .qlinks a:hover .u{text-decoration:underline; text-decoration-color:var(--gold)}
 .qlinks .g{color:var(--gold); width:15px; flex:none; text-align:center; font-size:13px}
+/* a SUB-point: indented by the parent's glyph column (15px + the 9px
+   gap) so it starts under the parent's TEXT, with the same mark drawn
+   smaller (2026-09-14, Nico) */
+/* pulled up against its parent (2026-09-14, Nico): .qlinks is a flex
+   column with an 8px gap, which applies between EVERY pair, so the
+   sub-point cancels half of it rather than the list changing its gap
+   -- the spacing above the parent point stays exactly as it was.
+   -8px cancels the gap entirely, which is what makes this box 141.3px:
+   the same height as Help and Questions beside it (2026-09-14, Nico). */
+.qlinks a.sub{margin-left:24px; margin-top:-8px}
+/* The lead point is set at the panel-paragraph size, 15.5px, so it
+   reads as the thing the box is FOR (2026-09-14, Nico).
+   line-height is PINNED to 22.5px -- the line box a 15px row had at
+   the inherited 1.5 -- because the bigger type otherwise adds 0.75px
+   and the box has to stay level with Help and Questions beside it.
+   The pin alone leaves 1px: the row is a FLEX line aligned on the
+   baseline, so a 15.5px label and a 13px glyph span a slightly taller
+   union than either line box. The -1px margin takes that back, and the
+   box measures 141.25px either way -- same as Help. */
+.qlinks a.lead{font-size:15.5px; line-height:22.5px; margin-bottom:-1px}
+.qlinks a.sub .g{font-size:9.5px}
 /* two half-width boxes side by side, above the three columns */
+/* Two columns: Course at a Glance on the left, the syllabus and
+   BruinLearn boxes stacked in the right one (2026-09-13, Nico). */
 .gl-row{display:grid; grid-template-columns:1fr 1fr; gap:11px}
 @media (max-width:700px){.gl-row{grid-template-columns:1fr}}
 
@@ -418,6 +451,16 @@ ul.items a:hover{text-decoration-color:var(--gold)}
   text-decoration-color:var(--gold)}
 .mwk-hd .d{font-size:13px; color:var(--ink-3)}
 .mwk-topics{margin:0; font-size:15.5px; font-style:italic; color:var(--ink-2)}
+/* Key Topics + Goals, side by side above the Videos box and stacked on
+   a phone (2026-09-14, Nico). 860px is the shell's own phone
+   breakpoint, so the two collapse exactly when the page does. */
+.mbox-row{display:grid; grid-template-columns:1fr 1fr; gap:11px;
+  margin-bottom:11px; align-items:start}
+@media (max-width:860px){.mbox-row{grid-template-columns:1fr}}
+/* the second level of a module box's list */
+.mbox-row .panel-bd ul ul{margin:4px 0 0; padding-left:18px;
+  list-style:circle}
+.mbox-row .panel-bd ul ul li{margin-bottom:3px}
 
 
 /* ============================== print ============================== */
@@ -760,7 +803,7 @@ a.mail.who{white-space:nowrap}
    says what it is for, since "?" and an envelope alone do not (2026-09-05).
    .helpbtn is already position:relative for its two corner marks. */
 .viewbtn{position:relative}
-.viewbtn .tip,.helpbtn .tip{
+.viewbtn .tip,.helpbtn .tip,.dl-exp .tip{
   position:absolute; top:calc(100% + 9px); right:0; z-index:78;
   background:var(--surface); color:var(--ink);
   border:1px solid var(--rule); border-radius:7px;
@@ -770,7 +813,8 @@ a.mail.who{white-space:nowrap}
   transition:opacity .12s ease; pointer-events:none;
 }
 .viewbtn:hover .tip,.viewbtn:focus-visible .tip,
-.helpbtn:hover .tip,.helpbtn:focus-visible .tip{opacity:1; visibility:visible}
+.helpbtn:hover .tip,.helpbtn:focus-visible .tip,
+.dl-exp:hover .tip,.dl-exp:focus-visible .tip{opacity:1; visibility:visible}
 /* once the popover is open it says the same thing, at length */
 .helpbtn[aria-expanded="true"] .tip{opacity:0; visibility:hidden}
 
@@ -819,3 +863,150 @@ a.mail.who{white-space:nowrap}
   body.sidebar-open .right{display:flex}
   .right #deadlines{max-height:min(58vh,470px); overflow-y:auto}
 }
+
+/* ============== automatic night mode -- PHONES ONLY (2026-09-08) ==============
+   Nico: the phone should go dark between an hour after sunset and an hour
+   before sunrise, at the device's location. site.js works the sun times out
+   and stamps data-night="1" on <html>.
+
+   EVERY dark rule lives inside this <=860px block, so the desktop is never
+   affected however the attribute is set -- and dragging a window across the
+   breakpoint switches back on its own. The deck's navy and gold stay put:
+   only the surfaces, inks and card tints move, so the calendar's colour
+   coding (video = warm, podcast = cool grey, exam = gold) still reads. */
+@media (max-width:860px){
+  html[data-night="1"]{
+    color-scheme:dark;                 /* dark form controls and scrollbars */
+
+    --bg:#0A1520;
+    --surface:#11202E;
+    --surface-2:#16283A;
+    --rule:#263A4E;
+    --rule-soft:#1C2E40;
+    --ink:#E9EFF6;
+    --ink-2:#B6C4D2;
+    --ink-3:#8A99A9;
+    --light:#3A4B5C;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.5);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.45);
+
+    /* category cards keep their CODING, at dark value */
+    --card-video:#2B2412;
+    --card-podcast:#1B2632;
+    --card-read:#11202E;
+    --card-practice:#11202E;
+    --card-hd:#163A5E;
+    --card-ink:#E9EFF6;
+
+    --class-body:#14293E;
+    --exam-body:#2B2412;
+    --cream-bg:#241F14; --cream-ink:#F2E7D0; --cream-edge:#4C3F27;
+
+    --chip-quiet-bg:#1E2C3A; --chip-quiet-ink:#A9B7C5;
+    --chip-video-bg:#4A3A15; --chip-video-ink:#F0DDAE;
+    --chip-class-bg:#1B4C82; --chip-class-ink:#FFFFFF;
+    --chip-exam-bg:#7A5714; --chip-exam-ink:#FFEFC9;
+    --accent-ink:#D9B36A;
+    --nav-active:#1B4C82; --nav-active-ink:#FFFFFF;
+    --topics-edge:#2A5A8A;
+    --sw-edge:rgba(233,239,246,.25);
+    --due-edge:#E06A6A; --due-bg:rgba(224,106,106,.14);
+    --gl-badge-bg:#3D4753; --gl-badge-ink:#E9EFF6;
+    --focus:#6FB3FF;
+  }
+
+  /* the handful of colours that are not tokens */
+  html[data-night="1"] .cat.video .mins,
+  html[data-night="1"] .cat.video .deck{color:#C7A867}
+  html[data-night="1"] .cat.video ul.items a{text-decoration-color:#8A7440}
+  html[data-night="1"] .jumpsel option,
+  html[data-night="1"] .jumpsel optgroup{background:#11202E; color:#E9EFF6}
+  html[data-night="1"] nav.list a[aria-current="page"] .d,
+  html[data-night="1"] .band .sub{color:#BCD0E4}
+}
+
+/* ============ Export, in the Deadlines & Exams header (2026-09-09) ============
+   Desktop only, per Nico: the phone hides the button and the panel below. */
+/* an inline SVG, not a glyph: an emoji-plane character would ignore the
+   button's colour and render as a coloured box (2026-09-09) */
+.box-hd.small .dl-exp{
+  position:relative; display:inline-flex;
+  align-items:center; justify-content:center; cursor:pointer; color:#fff;
+  /* no chrome: the icon IS the button, sized to fill the header's 24px
+     content box exactly, so it just fits without making the bar taller
+     (2026-09-09, Nico) */
+  background:none; border:0; padding:0; border-radius:5px; line-height:0;
+  /* The icon overruns the bar's 8px padding and pulls its layout box back
+     in, so it nearly touches the bar's edges without making the header any
+     taller. margin-LEFT stays auto: the shorthand `margin:-3px 0` reset it
+     and dropped the icon back beside the text instead of at the right-hand
+     end of the bar (2026-09-09). */
+  margin:-3px 0 -3px auto;
+}
+.box-hd.small .dl-exp:hover .ic,
+.box-hd.small .dl-exp[aria-expanded="true"] .ic{filter:brightness(1.12)}
+.box-hd.small .dl-exp:focus-visible{outline-offset:3px}
+.box-hd.small .dl-exp .ic{display:block}
+
+.dl-exp-pop{
+  border-bottom:1px solid var(--rule); background:var(--surface-2);
+  padding:10px 12px 11px; font-size:13.5px;
+}
+.dl-exp-pop .lab{
+  margin:0 0 5px; font-family:"Source Sans 3",sans-serif; font-weight:700;
+  font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+.dl-exp-pop .lab + .lab,.dl-exp-pop label + .lab{margin-top:9px}
+.dl-exp-pop label{
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:7px;
+  align-items:baseline; padding:2px 0; cursor:pointer;
+}
+.dl-exp-pop label .sub{
+  grid-column:2; font-size:11.5px; color:var(--ink-3); line-height:1.3;
+}
+.dl-exp-pop input[type="checkbox"]{accent-color:var(--navy); margin:0}
+.dl-exp-pop .row{display:flex; flex-direction:column; gap:5px}
+.dl-exp-pop .row button{
+  font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  text-align:left; color:var(--ink); background:var(--surface);
+  border:1px solid var(--rule); border-radius:7px; padding:6px 9px;
+}
+.dl-exp-pop .row button:hover{border-color:var(--gold);
+  background:var(--surface-2)}
+.dl-exp-pop .hint{
+  margin:8px 0 0; font-size:11.5px; line-height:1.4; color:var(--ink-2);
+}
+.dl-exp-pop .hint a{color:var(--ink); word-break:break-all}
+.dl-exp-pop .hint code{
+  display:block; margin-top:3px; padding:4px 6px; font-size:11px;
+  background:var(--surface); border:1px solid var(--rule);
+  border-radius:5px; word-break:break-all;
+}
+
+/* the phone gets neither (2026-09-09, Nico) */
+@media (max-width:860px){
+  .box-hd.small .dl-exp,.dl-exp-pop{display:none !important}
+}
+
+/* ---- the subscribe panel (2026-09-09) ---- */
+/* This tip lives inside #deadlines, which is a .card with overflow:hidden.
+   Right-aligned to a button 14px from the card edge, the nowrap version was
+   222px wide in a 234px card -- 4px hung outside and got clipped. So it
+   wraps and is capped to a width that always fits (2026-09-09, Nico). */
+.dl-exp .tip{
+  top:calc(100% + 7px); line-height:1.35;
+  white-space:normal; width:190px; text-align:left;
+}
+.dl-exp[aria-expanded="true"] .tip{opacity:0; visibility:hidden}
+.dl-exp-pop .note{
+  margin:0 0 4px; font-size:11.5px; line-height:1.42; color:var(--ink-2);
+}
+.dl-exp-pop .how{
+  margin:8px 0 0; font-size:11px; line-height:1.45; color:var(--ink-3);
+}
+.dl-exp-pop .how em{font-style:normal; color:var(--ink-2); font-weight:600}
+.dl-exp-pop .hint .n{
+  display:block; margin-top:4px; font-size:11px; color:var(--ink-3);
+}
+.dl-exp-pop .row button[disabled]{opacity:.5; cursor:default}

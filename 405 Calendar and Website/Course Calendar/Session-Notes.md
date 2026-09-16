@@ -23,6 +23,38 @@ underline cannot travel with it.
 
 ---
 
+## Module 4's five videos linked (2026-09-09)
+
+All five re-recorded sessions are in, replacing the four `b08b...` keys that
+were last year's -- from before the module was re-split into five videos.
+The old ones are gone from both calendars and both sites.
+
+| key | video | min |
+|---|---|---|
+| m4v1 | Introduction to Market Structures | 6 |
+| m4v2 | Perfect Competition | 8 |
+| m4v3 | Profit Maximization of a Price Taker - Short Run | **45** |
+| m4v4 | Firm-Level and Market Supply | 6 |
+| m4v5 | Long-Run Competitive Equilibrium | 8 |
+
+Running times read off Panopto with `python _video_minutes.py m4`, then
+re-run to confirm it reports no remaining discrepancy.
+
+**Video 3 is 45 minutes against 6-8 for the other four.** Flagged to Nico
+and **CONFIRMED by him the same day**: that video really is much longer, it
+is not a mis-linked or unedited upload. Do not "fix" it, and do not re-raise
+it the next time `_video_minutes.py` makes the outlier obvious.
+
+That same run also caught **m4p1 stored as 18 minutes when Panopto says
+19:04**; corrected to 19. Worth running `_video_minutes.py` over the other
+modules at some point -- it only reports on the ones asked for.
+
+Both calendars still 14 pages; their PDFs went 85 -> 90 hyperlinks, which is
+the five new video links.
+
+---
+
+
 ## One placeholder: "(link to follow)", and "(++)" retired
 
 2026-09-06, Nico: "some videos still have the (++). Please use '(link to
@@ -914,3 +946,100 @@ and swapped Module 1's Video 1 for the re-uploaded Panopto session.
 - Confirm a link actually landed in the built file:
   read `word/_rels/document.xml.rels` out of the `.docx` with `zipfile` and
   grep the session id / file name.
+
+## Problem sets move to BruinLearn (2026-09-12)
+
+Nico: "the problem sets will be downloadable only from the BL site." Every
+mention of PS 1–5 now points at that section's **Assignments** page, and the
+same link serves the download and the upload.
+
+**One derived constant, not two literals.** `_calendar_content.py` gained
+
+```python
+"bruinlearn_assignments": SEC["bruinlearn_course"] + "/assignments",
+```
+
+next to `"bruinlearn_course"`. Hardcoding the pair he sent (EMBA
+237825 / FEMBA 237860) would have re-created the 2026-09-06 bug recorded a
+few lines above it, where a literal EMBA address made every FEMBA build
+*print* the FEMBA address and *link* the EMBA site.
+
+**Three call sites:**
+
+- `Course Calendar/_build_calendar.py` – the due card's "Upload one solution
+  per group on BruinLearn", was linking the course root.
+- `Course Website/_build_site.py` – the same line on the week cards, plus a
+  new `BRUINLEARN_ASSIGNMENTS` beside `BRUINLEARN_COURSE`.
+- `Syllabus/_build_syllabus.py` – the sentence that used to say slides,
+  problem sets and solutions were all on the class website, which the new
+  policy made false. It now reads, in his words: "Electronic copies of all
+  our slides are on the class website. You find the Problem Sets and Problem
+  Set Solutions on BruinLearn under “Assignments.”" – with
+  `BruinLearn under “Assignments.”` carrying the link.
+
+The BruinLearn *class-site* panel on the website still points at the course
+root, which is right – it is a link to the site itself, not to the problem
+sets.
+
+**Verified, both sections:** 5 assignments links per site (weeks 3, 5, 7, 9,
+10 – the five problem sets), 5 per calendar `.docx`, 1 per syllabus; EMBA
+outputs carry 237825 and FEMBA 237860 with no cross-contamination. PDFs
+re-exported and the links survive into them. `_check_pagination.ps1` PASSES
+at 14 pages, every week on one page. Syllabi 5 pages each.
+
+**Not done:** `_publish.py` / `_deploy.py` were NOT run – nothing is live yet.
+
+
+## Exams, Module 3 videos, podcasts, BruinLearn (2026-09-15/16)
+
+A long session across calendar, syllabus and both websites. Everything below
+is in `_calendar_content.py` unless another file is named — it stays the one
+source all four outputs are built from.
+
+**Exams.** Final is 9:00 AM – 12:00 PM on Saturday, Dec 12; both exams went
+from 3.5 to 3 hours. A fixed slot needed new machinery: `clock()`,
+`slot_label()`, `_pacific_offset()` (the US DST rule) and `exam_utc()`, so
+the ICS feed can emit real `DTSTART:`/`DTEND:` stamps in UTC with
+`TRANSP:OPAQUE` instead of an all-day event. `span()` now collapses a
+one-day window to a single date.
+
+**Module 3 videos.** Seven Panopto links (`m3v1`–`m3v7`), 3/8/31/6/19/33/13
+minutes.
+
+**Problem-set links.** Clicking any PS in the calendar or in "Deadlines and
+Exams" now opens the **Assignments** page, not the problem set inside the
+week — `pset_box` and `pop_due` in `_build_calendar.py`.
+
+**Podcasts rescheduled.** A module podcast now sits in the week the module
+is **covered in class**, so the optional episodes moved out of weeks 3/7 and
+into 5/9. Where a week holds all of a module's videos, both episodes sit
+there and the labels read "before / after watching the Module N videos"
+(`WRAP_AFTER[4]`, `[7]`). The optional podcasts are a sub-heading inside the
+existing Podcasts box, never a second box.
+
+**Module 6 episodes uploaded (2026-09-16).** Intro 4 min, wrap-up 20 min,
+read off the files by `_podcast_minutes.py`. Its intro measures 3:35, the
+same as Module 4's — the byte sizes differ (6,924,635 vs 6,939,575), so it
+is a coincidence, not a re-upload. The wrap-up file is named
+`Module-6-Video-Wrap-Up.m4a` upstream, like Module 4's; harmless, since the
+Dropbox URL carries its own id.
+
+**Page-1 card.** It ran to the very bottom of the page. `AGENDA_CARD_TRIM_PT
+= 62.0` now comes off the requested height: the drawn shape renders at
+exactly the height asked for (proved with a monkeypatched `container_box`),
+but the content model over-estimated by 62 pt, because a per-row `+4` of
+slack compounds through the `1.07` factor.
+
+**Wording.** The sign-in note is now two strings, `SIGNIN_NOTE` (calendar)
+and `SIGNIN_WEB_TEXT` (website), because they diverged. Week 9's class card
+reads "Module 6: Applications".
+
+**BruinLearn is one word** (2026-09-16, Nico: "Use BruinLearn throughout") —
+swept across `_calendar_content.py`, `_build_site.py` and
+`_build_syllabus.py`, 20 occurrences, prose and comments alike. New derived
+constant `BRUINLEARN_TEXT` next to `WEBSITE_TEXT`: the course URL with the
+scheme stripped, so the printed address can never drift from the link.
+
+**Verified:** calendars 14 pages, one week per page, 116 links; both sites
+published by `_publish.py`. 16 "(TBD)" handouts and decks remain, on weeks
+1, 5 and 9.

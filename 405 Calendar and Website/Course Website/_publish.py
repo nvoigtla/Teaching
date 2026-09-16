@@ -43,6 +43,11 @@ PY = sys.executable
 
 SECTIONS = ("emba", "femba")
 
+# Every room the course has used. A PDF naming one that is not its own
+# section's is stale -- that is how both sites served A301 PDFs for two days
+# after the move to G305.
+KNOWN_ROOMS = ("A301", "G305", "G-402")
+
 # Exporting to PDF. ExportAsFixedFormat hung for days on this machine; what
 # unblocked it was setting ActivePrinter to a local printer FIRST -- Word
 # wants printer metrics to lay the PDF out, and it stalls when the default
@@ -100,16 +105,17 @@ def section_facts(section):
     # the content module lives with the calendar, not here
     code = ("import sys; sys.path.insert(0, r'%s');"
             "import _calendar_content as C;"
-            "print(C.CALENDAR_DOCX);print(C.SYLLABUS_DOCX);print(C.REPO)"
+            "print(C.CALENDAR_DOCX);print(C.SYLLABUS_DOCX);print(C.REPO);"
+            "print(C.CLASSROOM)"
             % os.path.join(ROOT, "Course Calendar"))
     p = sh([PY, "-c", code], env=section_env(section))
-    cal, syl, repo = p.stdout.strip().splitlines()[:3]
+    cal, syl, repo, room = p.stdout.strip().splitlines()[:4]
     out = HERE if section == "emba" else os.path.join(HERE, section)
-    return cal, syl, repo, out
+    return cal, syl, repo, out, room
 
 
 def doc_pairs(section):
-    cal, syl, _repo, _out = section_facts(section)
+    cal, syl, _repo, _out, _room = section_facts(section)
     return [
         (os.path.join(ROOT, "Syllabus", syl + ".docx"),
          os.path.join(ROOT, "Syllabus", syl + ".pdf"), "syllabus"),
@@ -172,7 +178,7 @@ def export(jobs):
     return ok
 
 
-def verify_pdfs(section):
+def verify_pdfs(section, room):
     """Each PDF must open, carry pages, and name its own section. Subset
     fonts make a raw byte scan useless here -- read the text with PyMuPDF."""
     try:
@@ -194,7 +200,10 @@ def verify_pdfs(section):
             print("    %-9s PDF UNREADABLE: %s" % (what, e))
             ok = False
             continue
-        wrong = [r for r in ("A301", "G-402") if r in txt]
+        # Flag any room that is not THIS section's. Hardcoding the old
+        # rooms broke the moment FEMBA legitimately moved into A301
+        # (2026-09-08) -- the expected room comes from the section now.
+        wrong = [r for r in KNOWN_ROOMS if r != room and r in txt]
         mine = ("%s Section" % label) in txt
         # A PDF with no hyperlinks means it was FLATTENED -- printing to a
         # PDF driver does that, and it silently strips every video, podcast
@@ -274,7 +283,7 @@ def main():
 
     problems = []
     for section in todo:
-        _cal, _syl, repo, out_dir = section_facts(section)
+        _cal, _syl, repo, out_dir, room = section_facts(section)
         print("\n=== %s  (%s) ===" % (section.upper(), repo))
 
         print("  1. rebuild")
@@ -295,7 +304,7 @@ def main():
                 problems.append("%s: PDF export failed" % section)
 
         print("  3. verify PDFs")
-        if not verify_pdfs(section):
+        if not verify_pdfs(section, room):
             problems.append("%s: PDF verification failed" % section)
 
         print("  4. links")

@@ -20,7 +20,7 @@ Two standing content decisions (2026-09-04, Nico):
     the public course website, and the site deliberately obfuscates both
     addresses against harvesters; printing them in a public PDF would undo
     that. The document points at the website's "Class and Contact" box and
-    at Bruin Learn instead.
+    at BruinLearn instead.
   * Achieve is gone. Practice exercises are the TA's own site, which is
     what the calendar and the website link.
 """
@@ -50,6 +50,7 @@ for _i, _a in enumerate(sys.argv):
 
 from _build_calendar import (                      # noqa: E402
     NAVY, GOLD, CREAM, GRAY, LIGHT, PALEGOLD, BLACK, CONTENT_W,
+    DARKRED, DUEWASH,
     add_run, add_hyperlink, cp, fixed_table, shade_cell, cell_borders,
     gold_rule, spacer, rounded_card, setup_document, render_segments)
 import _calendar_content as C                      # noqa: E402
@@ -60,7 +61,7 @@ OUT_MD = os.path.join(HERE, C.SYLLABUS_DOCX + ".md")
 
 TITLE = C.COURSE_TITLE
 SUBTITLE = (f"Course Syllabus – {C.TERM} – "
-            f"{C.SECTIONS[C.SECTION]['subtitle_tail']}")
+            f"{C.SUBTITLE_TAIL}")
 
 # The meeting pattern, spelled out for the prose. EMBA meets twice over a
 # weekend, FEMBA once on the Saturday, so the heading changes with it.
@@ -69,6 +70,14 @@ FIRST_MEETING_DAY = _MEETING_DAYS[0]
 MEETING_SENTENCE = " and ".join(
     "%ss %s" % (day, time)
     for day, (_, time) in zip(_MEETING_DAYS, C.MEETINGS))
+# The final exam's fixed slot, read from the calendar content so the
+# syllabus and the calendar cannot disagree (2026-09-10).
+_FINAL = [w for w in C.WEEKS if w["kind"] == "final"][0]
+_FINAL_D = C.dt(_FINAL["num"], _FINAL["exam"]["window"][0][0])
+FINAL_EXAM_DAY = "%s, %s %d" % (_FINAL_D.strftime("%A"),
+                                _FINAL_D.strftime("%B"), _FINAL_D.day)
+FINAL_EXAM_SLOT = C.slot_label(_FINAL["exam"])
+
 MEETING_HEADING = ("On-campus weekends" if len(C.MEETINGS) > 1
                    else "On-campus sessions")
 
@@ -89,7 +98,7 @@ OFFICE = "Anderson C-511, Entrepreneur’s Hall"
 
 # Where the two e-mail addresses now live, said once and reused.
 WHERE_MAIL = ("The e-mail addresses are on the course website, in the "
-              "“Class and Contact” box, and on Bruin Learn.")
+              "“Class and Contact” box, and on BruinLearn.")
 
 SECTIONS = [
     ("h", "Course Purpose"),
@@ -150,7 +159,7 @@ SECTIONS = [
           "Oxford University Press, 2014."),
     ("sub", "Newspaper articles"),
     ("p", "Articles from the Wall Street Journal or other news sources will "
-          "be assigned. These selected articles will be posted on Bruin Learn "
+          "be assigned. These selected articles will be posted on BruinLearn "
           "a couple of days in advance. These readings will be discussed in "
           "class and everyone will be expected to have read these assigned "
           "articles."),
@@ -200,7 +209,7 @@ SECTIONS = [
     ("h", "Teaching Assistant"),
     ("p", f"The teaching assistant for this section is {C.TA_NAME}. There is "
           "a section-specific TA e-mail address for Section 2; it is on the "
-          "course website and on Bruin Learn."),
+          "course website and on BruinLearn."),
     ("p", "The TA will hold a weekly office hour and review session via "
           "Zoom, at a time to be announced. During each session, the TA will "
           "provide supplemental instruction on more technical content, solve "
@@ -210,9 +219,13 @@ SECTIONS = [
 
     ("h", "Grades"),
     ("p", "Final grades are determined on the following basis:"),
-    ("grades", [("Midterm Exam", "35%"),
-                ("Final Exam", "40%"),
-                ("Problem Sets", "25%")]),
+    # Read from the calendar content, not repeated here (2026-09-13): the
+    # website shows the same split, and two copies would drift.
+    # TUPLES, not lists: write_md does `"| %s | %s |" % r`, which unpacks a
+    # tuple and chokes on a list ("not enough arguments for format string").
+    # Converting them on 2026-09-13 broke the Markdown build silently -- the
+    # .docx is written first, so only the .md was missing.
+    ("grades", list(C.GRADE_WEIGHTS)),
     ("p", "It is imperative that you come to class prepared – having read "
           "the assignments beforehand."),
     ("p", "The grade distributions will correspond to the School’s "
@@ -222,26 +235,31 @@ SECTIONS = [
           "performance, nor will extra-credit projects be assigned."),
 
     ("h", "Midterm and Final Exams"),
-    ("p", "Both exams take place online, and you will have a 3.5-hour window "
+    # 2026-09-10: 3.5 hours -> 3, and the flexible-window sentence now
+    # applies to the MIDTERM only -- the final has a fixed slot, so saying
+    # "each exam" would contradict the calendar. The final's date and hours
+    # are read from the calendar content, never retyped.
+    ("p", "Both exams take place online, and you will have 3 hours "
           "to solve the exam and upload your solutions. The midterm exam "
-          "covers the material through Module 3. The final exam covers all "
-          "the class content, Modules 1 – 8, and has about 20 multiple "
-          "choice questions and 3 – 4 problem-solving questions. To "
-          "provide flexibility, you will have the option to take each exam "
-          "any time within a given time window, as indicated on the course "
-          "calendar; the exact window will be announced in class. No makeup "
-          "exams will be scheduled."),
+          "covers the material through Module 3. To provide flexibility, "
+          "you will have the option to take the midterm any time within a "
+          "given time window, as indicated on the course calendar; the "
+          "exact window will be announced in class. The final exam covers "
+          "all the class content, Modules 1 – 8, and has about 20 multiple "
+          "choice questions and 3 – 4 problem-solving questions. It takes "
+          "place on %s, %s. No makeup exams will be scheduled."
+          % (FINAL_EXAM_DAY, FINAL_EXAM_SLOT)),
     ("p", "The exams are open-book. You may use the course textbook, class "
           "slides, class notes and problem sets. You may use a calculator or "
           "Excel. You may access the course materials on the course website "
-          "and on Bruin Learn, and the online version of the textbook. "
+          "and on BruinLearn, and the online version of the textbook. "
           "Usage of the internet for any "
           "other purpose is prohibited. In particular, the use of AI tools "
           "(e.g., ChatGPT) is not allowed during the exams, and both exams "
           "are proctored by an online proctoring company. Communicating with "
           "anyone regarding the exam is prohibited."),
     ("p", "A practice final exam is scheduled in the exam-preparation week, "
-          "and a sample final exam with solutions is available on Bruin Learn "
+          "and a sample final exam with solutions is available on BruinLearn "
           "as an example of the type of exam given in the past."),
 
     ("h", "Group Problem Sets"),
@@ -257,22 +275,36 @@ SECTIONS = [
           "distributed for each assignment. These step-by-step solutions are "
           "a good substitute for seeing me solve problems in person in class: "
           "there is usually not enough class time to do this."),
+    # The SUBMISSION points at the Assignments page, where the upload
+    # actually happens (2026-09-15, Nico); general BruinLearn references
+    # elsewhere keep the course root.
     ("mix", [("t", "Each study group submits one set of answers. The problem "
                    "sets are due according to the schedule in the course "
                    "calendar. Upload one solution per group on "),
-             ("l", "bruinlearn_course", "Bruin Learn"),
+             ("l", "bruinlearn_assignments", "BruinLearn"),
              ("t", ". No late assignments can be accepted.")]),
 
     ("h", "Attendance Policy"),
     ("p", "Whether to attend class is your personal decision. There is no "
           "penalty in terms of participation. However, I highly recommend "
           "that you attend each class."),
-    ("sub", "If you have to miss a class"),
-    ("b", "You do not need to contact the instructor or the TA"),
-    ("b", "Do the readings assigned for the week and watch the class "
-          "recording"),
-    ("b", "Make sure you coordinate work on the problem set with your study "
-          "group"),
+    # Boxed in dark red (2026-09-14, Nico) -- the same mark the problem
+    # sets carry on the website and in the calendar.
+    ("redcard", ("If you have to miss an on-campus class:", [
+        ("b", "You do not need to contact the instructor or the TA"),
+        # Split into three on 2026-09-14 (Nico): the single bullet ran the
+        # reading and the recording together and never mentioned the
+        # podcasts, the fastest way back into a module that was missed.
+        ("b", "Go over the readings assigned for the material covered in "
+              "the on-campus class"),
+        ("b", "Listen to the podcasts, especially the “Wrap-Up” "
+              "for the Modules that were covered in class"),
+        ("bmix", [("t", "A class recording will be made available on "),
+                  ("l", "bruinlearn_recordings", "BruinLearn"),
+                  ("t", " after the class. Watch this recording")]),
+        ("b", "Make sure you coordinate work on the Problem Set with your "
+              "study group"),
+    ])),
 
     ("h", "Use of Unauthorized Materials"),
     ("p", "Do not use any old answer keys to exams and homework sets "
@@ -311,7 +343,7 @@ SECTIONS = [
           "Exception: if you prefer to take notes on your tablet – but "
           "for note-taking only."),
 
-    ("h", "Course Materials: Website and Bruin Learn"),
+    ("h", "Course Materials: Website and BruinLearn"),
     ("mix", [("t", "The course website, "),
              ("l", "website", C.WEBSITE_TEXT),
              ("t", ", is the fastest way to find what a given week asks of "
@@ -319,14 +351,20 @@ SECTIONS = [
                    "exercises and every deadline, week by week and module by "
                    "module. The class syllabus and the course calendar can be "
                    "downloaded there as PDFs.")]),
-    # Slides, problem sets AND their solutions live on the class website
-    # (2026-09-06, Nico). The link is repeated here on purpose, even though
-    # the paragraph above already carries it. Exam solutions are the
-    # exception and stay on Bruin Learn -- see the exams section.
-    ("mix", [("t", "Electronic copies of all our slides, problem sets, and "
-                   "the solutions to the problem sets, are on the "),
+    # Slides live on the class website; the problem sets and their
+    # solutions moved to BruinLearn's Assignments page on 2026-09-12
+    # (Nico: "the problem sets will be downloadable only from the BL
+    # site"), which is also where groups upload.  The website link is
+    # repeated here on purpose, even though the paragraph above already
+    # carries it.  Exam solutions stay on BruinLearn too -- see the exams
+    # section.
+    ("mix", [("t", "Electronic copies of all our slides are on the "),
              ("l", "website", "class website"),
-             ("t", ". This course is almost entirely "
+             ("t", ". You find the Problem Sets and Problem Set Solutions "
+                   "on "),
+             ("l", "bruinlearn_assignments",
+              u"BruinLearn under “Assignments.”"),
+             ("t", " This course is almost entirely "
                    "paperless, except for the occasional class handout. "
                    "Please monitor the course pages regularly, as they carry "
                    "the most up-to-date information on the reading "
@@ -359,7 +397,7 @@ SECTIONS = [
           "the course with me and offer suggestions for improvements at any "
           "time. I am always glad to receive feedback. In addition, an "
           "opportunity for providing me with anonymous feedback exists on "
-          "Bruin Learn."),
+          "BruinLearn."),
 ]
 
 # Addresses the syllabus needs that the calendar's registry did not carry.
@@ -442,6 +480,30 @@ def bullet(doc, text=None, segs=None, lead=False):
         add_run(p, text, size=BODY_SZ)
 
 
+def missed_class_card(doc, sub_text, blocks):
+    """The "If you have to miss a class" box: dark-red rule, dark-red wash.
+
+    The same treatment the problem-set boxes get on the website and in the
+    calendar, so everything a student must ACT on is marked alike.
+
+    The first paragraph comes from cp(), which reuses the cell's own empty
+    paragraph -- add_paragraph() here would print a blank line above the
+    heading.
+    """
+    def pop(cell, inner_w):
+        p = cp(cell)
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(4)
+        add_run(p, sub_text, bold=True, color=NAVY, size=11.5)
+        for blk in blocks:
+            if blk[0] == "bmix":
+                bullet(cell, segs=blk[1])
+            else:
+                bullet(cell, text=blk[1])
+
+    rounded_card(doc, pop, fill=DUEWASH, border=DARKRED, border_w=15875)
+
+
 def grades_table(doc, rows):
     widths = [2.60, 1.10]
     t = fixed_table(doc, widths, rows=len(rows) + 1)
@@ -491,7 +553,7 @@ def title_block(doc):
 def website_card(doc):
     """The page-1 callout, and the most prominent thing on the page after the
     title (2026-09-04, Nico): the website replaces last year's "see the
-    separate section-specific calendar on Bruin Learn" line, and the PDF of
+    separate section-specific calendar on BruinLearn" line, and the PDF of
     the calendar is offered as a download FROM the website rather than as a
     reference of its own."""
     spacer(doc, 5)
@@ -516,8 +578,13 @@ def website_card(doc):
                    "practice exercises and every deadline.",
                 color=NAVY, size=11.5)
 
+        # The PDF caption closes the WEBSITE entry (2026-09-15, Nico:
+        # "it's part of the Class website part"), so it sits above the
+        # BruinLearn block rather than under it, and the gap after it is
+        # what separates the card's two halves.
         p = cell.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(12)
         # "course calendar" links that section's own calendar PDF, which is
         # where the video / slide / podcast links actually live
         # (2026-09-06, Nico).
@@ -530,6 +597,30 @@ def website_card(doc):
                       bold=False, italic=True, size=10.5, underline=True)
         add_run(p, " from the class website.",
                 italic=True, color=GRAY, size=10.5)
+
+        # BruinLearn, under the website (2026-09-15, Nico). A step smaller
+        # than the website entry above, so the website stays the headline of
+        # the card and this reads as the second address rather than a rival.
+        # This is also the syllabus's only link to the COURSE ROOT -- both
+        # other BruinLearn links are problem-set ones and point at the
+        # Assignments page.
+        p = cell.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(1)
+        add_run(p, "BruinLearn Course Site", bold=True, color=NAVY, size=12.5)
+
+        p = cell.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(2)
+        add_hyperlink(p, C.LINKS["bruinlearn_course"], C.BRUINLEARN_TEXT,
+                      size=13, underline=True)
+
+        p = cell.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        add_run(p, "On the BruinLearn site, you can download and submit the "
+                   "problem sets and find the recordings of the on-campus "
+                   "classes.",
+                color=NAVY, size=11.5)
 
     # gold border at 2 pt, twice the weight of an ordinary card, so the box
     # carries the page
@@ -557,6 +648,8 @@ def build(doc):
             bullet(doc, text=blk[1], lead=True)
         elif kind == "blmix":
             bullet(doc, segs=blk[1], lead=True)
+        elif kind == "redcard":
+            missed_class_card(doc, blk[1][0], blk[1][1])
         elif kind == "grades":
             grades_table(doc, blk[1])
         elif kind == "gap":
@@ -614,6 +707,14 @@ def write_md():
             L += ["- %s" % _md_lead(blk[1], k == "bl")]
         elif k in ("bmix", "blmix"):
             L += ["- %s" % _md_lead(md_segments(blk[1]), k == "blmix")]
+        elif k == "redcard":
+            # Markdown has no box: the heading and bullets render as they
+            # did before the card was drawn, so the .md is unchanged.
+            L += ["### %s" % blk[1][0], ""]
+            for _b in blk[1][1]:
+                L += ["- %s" % (_md_lead(md_segments(_b[1]), False)
+                                if _b[0] == "bmix"
+                                else _md_lead(_b[1], False))]
         elif k == "grades":
             L += ["", "| Component | Weight |", "|---|---|"]
             L += ["| %s | %s |" % r for r in blk[1]]

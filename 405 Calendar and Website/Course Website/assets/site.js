@@ -1,8 +1,10 @@
 /* MGMT 405 course website -- search, the week/module view mode, and the
    "due within three days" flag.
 
-   The site is light-mode only (2026-09-03), so there is no theme code here;
-   the palette is stamped on <html> by the generator. */
+   The palette is stamped on <html> by the generator and the site is light
+   by default. The ONE exception is phones, which go dark between 22:00 and
+   05:00 on the device's own clock -- see AUTOMATIC NIGHT MODE below
+   (2026-09-08). There is no manual theme switch. */
 
 (function () {
   "use strict";
@@ -370,6 +372,173 @@
     });
   }
 
+  /* ==================================================================
+     AUTOMATIC NIGHT MODE -- PHONES ONLY (2026-09-08, Nico)
+
+     Dark from 22:00 to 05:00 on the phone's OWN clock. No sunrise/sunset
+     maths and no location: an earlier version computed the sun times, which
+     meant either raising a geolocation prompt -- not something a course
+     website should do unasked -- or assuming everyone is in Los Angeles.
+     A fixed evening window is what Nico actually wanted, and it is right
+     wherever the student is, because their phone's clock is already local.
+
+     Only the phone gets it: every dark rule lives inside the <=860px
+     breakpoint in site.css, so a desktop browser is unaffected however this
+     attribute is set, and resizing across the breakpoint just works.
+
+     This runs at the TOP LEVEL, not inside DOMContentLoaded. site.js is a
+     synchronous <script> in <head>, so the attribute is stamped BEFORE
+     first paint -- otherwise a phone opened at night would flash white and
+     then go dark.
+     ================================================================== */
+
+  var NIGHT_FROM = 22;          /* inclusive, local hour */
+  var NIGHT_TO = 5;             /* exclusive, local hour */
+
+  function isNight(now) {
+    var h = now.getHours();
+    return h >= NIGHT_FROM || h < NIGHT_TO;
+  }
+
+  function paintNight() {
+    var root = document.documentElement;
+    if (isNight(new Date())) { root.setAttribute("data-night", "1"); }
+    else { root.removeAttribute("data-night"); }
+  }
+
+  paintNight();
+  /* re-check while the page is open, so it flips without a reload */
+  setInterval(paintNight, 5 * 60 * 1000);
+
+  /* exposed for the build's own checks, not used by the page */
+  window.__m405night = { isNight: isNight };
+
+  /* ==================================================================
+     SUBSCRIBE TO THE DEADLINES  (desktop only -- the CSS hides the button
+     and the panel below 861px)                    (2026-09-09, Nico)
+
+     Students tick which kinds they want -- Assignments, Videos, Exams --
+     and get the address of the matching feed to subscribe to.
+
+     SUBSCRIBING, NOT DOWNLOADING. A downloaded .ics can add an event and
+     update one, but it can never DELETE: a deadline dropped from the
+     course would sit in the student's calendar for ever. A subscribed feed
+     is a MIRROR -- the calendar re-fetches the file, so a removed date
+     disappears, a new one appears and a moved one moves, with nothing for
+     the student to do. That is why the download option was taken out
+     rather than kept alongside.
+
+     How often is up to their calendar app, not to us: Apple Calendar lets
+     them choose (5 minutes to weekly), Google refreshes an external feed
+     roughly every 8-24 hours.
+
+     The feeds themselves are static files written by _build_site.py at
+     feeds/mgmt405-{assign,video,exam,all}.ics.
+     ================================================================== */
+
+  function initExport() {
+    var btn = document.getElementById("dl-exp");
+    var pop = document.getElementById("dl-exp-pop");
+    var card = document.getElementById("deadlines");
+    if (!btn || !pop || !card) { return; }
+
+    var feeds = card.getAttribute("data-feeds") || "";
+    var hint = document.getElementById("exp-hint");
+    var copy = document.getElementById("exp-copy");
+
+    function kinds() {
+      var k = [];
+      if (document.getElementById("exp-assign").checked) { k.push("assign"); }
+      if (document.getElementById("exp-video").checked) { k.push("video"); }
+      if (document.getElementById("exp-exam").checked) { k.push("exam"); }
+      return k;
+    }
+
+    /* ONE address per combination. The generator writes a feed for every
+       non-empty combination of the three kinds -- 7 files -- so ticking two
+       gives a single address rather than two. kinds() keeps FEED_KINDS
+       order, so the name built here always matches the file on disk
+       whatever order the boxes were ticked (2026-09-09, Nico). */
+    function feedUrl() {
+      var k = kinds();
+      if (!k.length) { return null; }
+      var name = k.length === 3 ? "mgmt405-all.ics"
+                                : "mgmt405-" + k.join("-") + ".ics";
+      return feeds + "/" + name;
+    }
+
+    function countFor(kindList) {
+      var n = 0;
+      var lis = document.querySelectorAll("#deadlines ul.dl li[data-kind]");
+      Array.prototype.forEach.call(lis, function (li) {
+        if (kindList.indexOf(li.getAttribute("data-kind")) !== -1
+            && li.getAttribute("data-date")) { n += 1; }
+      });
+      return n;
+    }
+
+    function paint() {
+      var u = feedUrl();
+      if (!u) {
+        hint.innerHTML = "<em>Nothing selected.</em>";
+        copy.disabled = true;
+        return;
+      }
+      copy.disabled = false;
+      var n = countFor(kinds());
+      hint.innerHTML = "<code>" + u + "</code>"
+        + '<span class="n">' + n + " date" + (n === 1 ? "" : "s")
+        + " in one calendar</span>";
+    }
+
+    function open(on) {
+      pop.hidden = !on;
+      btn.setAttribute("aria-expanded", String(on));
+      if (on) { paint(); }
+    }
+
+    btn.addEventListener("click", function () { open(pop.hidden); });
+    ["exp-assign", "exp-video", "exp-exam"].forEach(function (id) {
+      document.getElementById(id).addEventListener("change", paint);
+    });
+
+    copy.addEventListener("click", function () {
+      var text = feedUrl();
+      if (!text) { return; }
+      function done() {
+        var was = copy.textContent;
+        copy.textContent = "Copied";
+        setTimeout(function () { copy.textContent = was; }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+        return;
+      }
+      /* older browsers, and any page served without a secure context */
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { /* ignore */ }
+      document.body.removeChild(ta);
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !pop.hidden) { open(false); }
+    });
+    document.addEventListener("click", function (e) {
+      if (pop.hidden || pop.contains(e.target) || e.target === btn
+          || btn.contains(e.target)) { return; }
+      open(false);
+    });
+
+    /* exposed for the build's own checks */
+    window.__m405export = { url: feedUrl, count: countFor, feeds: feeds };
+  }
+
   /* ------------------------------ wire up ------------------------------ */
   document.addEventListener("DOMContentLoaded", function () {
     initMail();
@@ -379,6 +548,7 @@
     initHelp();
     initSearch();
     initSidebar();
+    initExport();
 
     var btn = document.getElementById("viewmode");
     if (btn) {
