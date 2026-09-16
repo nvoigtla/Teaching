@@ -1,56 +1,49 @@
 """Build: Problem Set 1.docx  (MGMT 405, Fall 2026 format).
 
 Source: `_originals/Problem Set 1 (2025 original).docx` -- a BUILD INPUT,
-never deleted.  The folder is untracked in git, so that copy plus the
-rolling `_t-1` / `_t-2` files are the only way back.
+never deleted.
 
-The job is FORMATTING: the original's problem titles, wording, point
-allocations and examples are preserved.  Everything that goes beyond the
-restyle is emitted as a real Word revision (`w:ins` / `w:del`, author
-"Claude (proposed)") so each edit can be accepted or rejected on its own.
+STATUS: Nico reviewed the tracked round and ACCEPTED IT IN FULL on
+2026-09-08, then edited on top of it.  This script now emits the agreed
+text with NO revision marks; a future proposal goes back in as
+`ins` / `dele`.  Accepted in that round: the 2026 salary and revenue
+figures ($46,000 / $78,000), the truck in the bracketed note aligned with
+the solution's own truck, "shifts of" rather than "movements of" the
+demand curve, Problem 4 split into (a) / (b) / (c) on the solution's own
+grading boundaries, and "its capacity" for "their capacity".
 
-FORMATTING (untracked)
-  - Course masthead, navy problem headings with a gold points chip, a
-    bare centred page number (no year or term, so the file is reusable).
-  - The AI-tools policy moves into the house cream callout.
-  - Problem headings normalised to "Problem N.  Title" (the original
-    mixed "Problem 3." with an inline list-paragraph style).
-  - Q(d) / Q(s) and the demand and supply functions set as native OMML
-    with true subscripts, instead of plain-text "Qd".
-  - Parts set as (a) / (b) / (c) run-in heads carrying their own points.
-  - A gray "Draws on:" line under each problem heading, naming the
-    module and the outline item the problem exercises.  Verified against
-    `Module 1 - Revised.pptx` and `Module 2 - Revised.pptx`.
+WHAT HE CHANGED ON TOP, adopted here (2026-09-08)
+  1. "Due date: see the Course Calendar on BruinLearn"
+     -> "... on the Class Website".
+  2. The AI-tools policy is rewritten and gains a heading line,
+     "Important information, please read carefully", set BOLD ITALIC DARK
+     RED as its own centred first paragraph inside the card.  The policy
+     drops "We encourage you to ask specific questions ... the answers are
+     not always correct" and gains two things: a screening sentence ("We
+     will screen for undisclosed AI-generated content using advanced
+     AI-detection programs") and a study-partner framing that ends by
+     pointing at the exams, where AI is prohibited.  See `S.policy_card`.
+  3. Problem 1's bracketed note now says the grading is on the reasoning
+     "not on the precision of your numerical assumptions", and caps the
+     answer at one page.
+  4. Problem 3(b): "(holding supply constant)" -> "(assuming the supply
+     curve does not shift)", plus a note pointing the student at the
+     SLOPE of the supply curve.
 
-PROPOSED (tracked -- these go beyond formatting)
-  1. Problem 1's figures brought to 2026 (Nico, 2026-09-06).  The
-     gardener's forgone salary goes from $40,000 to $46,000: the BLS
-     OEWS May 2025 median for Landscaping and Groundskeeping Workers
-     (SOC 37-3011) in CALIFORNIA is $45,560, against $39,150 nationally,
-     and Los Angeles sits above the state median.  Expected revenues go
-     from $70,000 to $78,000, which holds the original's margin -- the
-     business clears its full economic cost, but not by a wide margin,
-     which is the point of the exercise.  The matching cost components
-     are updated in the solutions; see that script's docstring.
-  2. Problem 1's bracketed note illustrated averaging with "a new truck
-     costs $30,000 ... $3,000 per year", while the SOLUTION depreciates a
-     $40,000 truck at $4,000 per year.  Students read the two side by
-     side and take the note's truck for the intended one.  The note now
-     uses the solution's own truck, so nothing collides and the
-     arithmetic is unchanged.  ($40,000 is still right for 2026: a
-     2026 Ford F-150 XL work truck starts at about $40,085.)
-  3. Problem 3(a) "Tie your argument to movements of the demand curve"
-     -> "shifts of the demand curve".  Module 1 (deck slide 23) draws
-     exactly this distinction: a MOVEMENT along D is the response to a
-     price change, a SHIFT is what a non-price factor such as income
-     does.  The problem means the latter, and the solution says "shifts"
-     throughout.
-  4. Problem 4 was one undivided paragraph with no visible point split,
-     although the solution grades it in three parts (8 / 12 / 5).  Split
-     into (a) / (b) / (c) on the solution's own boundaries, so the points
-     add to the stated 25 and match the other three problems' format.
-  5. Problem 4 "affect their capacity to hire" -> "its capacity": the
-     subject is "the company".
+FORMATTING
+  - Course masthead, now carrying "Prof. Nico Voigtlaender" at the right
+    of the subtitle line, above the gold rule.
+  - Navy problem headings with a gold points chip; bare centred page
+    number, so the file is reusable next year.
+  - Q(d) / Q(s) and the demand and supply functions as native OMML with
+    true subscripts; parts as (a) / (b) / (c) run-in heads with their own
+    points; a gray "Draws on:" line under each problem heading, verified
+    against `Module 1 - Revised.pptx` and `Module 2 - Revised.pptx`.
+
+The note added to Problem 3(b) used to end "...significantly higher?.]"
+with the parenthesis opened at "(e.g. can this industry" never closed.  It
+was reproduced verbatim rather than silently repaired; he closed it himself
+on 2026-09-12 -- "...significantly higher?).]".
 
 Run:  python _build_PS1.py
 """
@@ -60,8 +53,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _ps_theme as S
-from _ps_theme import (GRAY, NAVY, WD_ALIGN_PARAGRAPH, body, dele, ins,
-                       para, para_inserted, part, problem, run)
+from _ps_theme import GRAY, NAVY, body, para, part, problem, run
 import _tn_theme as T
 from _tn_theme import mrun, msub
 
@@ -77,7 +69,9 @@ I = mrun("I")
 
 def draws_on(doc, text):
     """The gray provenance line under a problem heading (format layer)."""
-    p = para(doc, before=0, after=8, keep_next=True)
+    # after 8 -> 5 on 2026-09-12, part of returning ~30 pt of pure
+    # spacing so a page break is never decided by a few points.
+    p = para(doc, before=0, after=5, keep_next=True)
     run(p, "Draws on:  " + text, italic=True, color=GRAY, size=9.5)
     return p
 
@@ -91,22 +85,14 @@ def main():
         doc, "Problem Set 1",
         covers="Covers Modules 1 and 2",
         due="100 points     ·     Due date: see the Course Calendar on "
-            "BruinLearn")
+            "the Class Website")
 
-    # -- AI policy, in the house cream card --------------------------------
-    S.note(
-        doc,
-        "For problem sets, you may use AI tools (e.g. ChatGPT) to help "
-        "brainstorm or to revise existing work you have written. When you "
-        "submit your problem set, we expect you to clearly attribute what "
-        "text was generated by the AI tool (e.g., AI-generated text appears "
-        "in a different colored font, quoted directly in the text, or use an "
-        "in-text parenthetical citation). While AI tools can provide helpful "
-        "insights, we want you to think critically about the information you "
-        "receive. We encourage you to ask specific questions, provide "
-        "context, and evaluate the quality of the answers provided by AI "
-        "tools. Remember, the answers are not always correct.",
-        prefix="AI tools policy for problem sets:")
+    # -- Submission instruction, above the policy card (2026-09-12) -------
+    # No hyperlink on "BruinLearn": the same PS goes to both sections.
+    S.submit_card(doc)
+
+    # -- AI policy, in Nico's wording (2026-09-08) -------------------------
+    S.policy_card(doc)
 
     # ======================================================================
     # Problem 1
@@ -114,36 +100,28 @@ def main():
     problem(doc, 1, "Business Choice", 25, before=14)
     draws_on(doc, "Module 1 – Economic Costs Include Opportunity Costs")
 
-    # PROPOSED 1: the 2025 salary and revenue figures, brought to 2026.
-    p = body(doc)
-    run(p, "Your gardener, who has thus far been employed by a large "
-           "landscaping company (with an annual salary of ")
-    dele(p, "$40,000")
-    ins(p, "$46,000")
-    run(p, "), approaches you with a question: Should he open his own "
-           "gardening business? He is located in West L.A. and heard from "
-           "other gardeners that he can expect annual revenues of ")
-    dele(p, "$70,000")
-    ins(p, "$78,000")
-    run(p, ". Try your best to provide a recommendation, by making "
-           "reasonable, well-informed assumptions about all the relevant "
-           "cost components. For each cost component, state briefly what "
-           "brought you to this assumption. You may use references to "
-           "(online) sources. Distinguish between explicit and implicit "
-           "costs of the gardening business.")
+    body(doc,
+         "Your gardener, who has thus far been employed by a large "
+         "landscaping company (with an annual salary of $46,000), approaches "
+         "you with a question: Should he open his own gardening business? He "
+         "is located in West L.A. and heard from other gardeners that he can "
+         "expect annual revenues of $78,000. Try your best to provide a "
+         "recommendation, by making reasonable, well-informed assumptions "
+         "about all the relevant cost components. For each cost component, "
+         "state briefly what brought you to this assumption. You may use "
+         "references to (online) sources. Distinguish between explicit and "
+         "implicit costs of the gardening business.")
 
-    # PROPOSED 2: the note's truck collides with the solution's truck.
-    p = body(doc)
-    run(p, "[Note: There is no “right” or “wrong” answer. "
-           "We want to evaluate your reasoning based on the economic concepts "
-           "learned in class. For simplicity, use average annual costs for "
-           "all components – for example, if a new truck costs ")
-    dele(p, "$30,000")
-    ins(p, "$40,000")
-    run(p, " and can be used for 10 years, the average annual cost would be ")
-    dele(p, "$3,000")
-    ins(p, "$4,000")
-    run(p, ".]")
+    # Nico's note, 2026-09-08: the reasoning is what is graded, and the
+    # answer is capped at a page.
+    body(doc,
+         "[Note: There is no “right” or “wrong” answer. We want to evaluate "
+         "your reasoning based on the economic concepts learned in class, "
+         "not on the precision of your numerical assumptions. For "
+         "simplicity, use average annual costs for all components – for "
+         "example, if a new truck costs $40,000 and can be used for 10 "
+         "years, the average annual cost would be $4,000. Your answer does "
+         "not need to exceed 1 page.]")
 
     # ======================================================================
     # Problem 2
@@ -189,11 +167,12 @@ def main():
     body(doc,
          "During major economic crises (such as the “Great Recession” "
          "in 2008), many households started experiencing a sharp increase in "
-         "economic uncertainty and/or see their assets losing value due to "
+         "economic uncertainty and/or saw their assets losing value due to "
          "stock market devaluation. This can lead to a decrease in household "
          "expected and realized income.")
 
-    # PROPOSED 2: "movements of" -> "shifts of" (Module 1 slide 23).
+    # "shifts of", accepted 2026-09-08 (Module 1 slide 23 draws the
+    # movement-along vs. shift distinction the question depends on)
     p = part(doc, "a", 12)
     run(p, "Choose three products or services and rank them according to how "
            "much you expect quantity demanded to fall after the onset of a "
@@ -202,16 +181,20 @@ def main():
            "encouraged to give examples from your own experience during times "
            "of economic crises or uncertainty, or from the sector you’re "
            "working in. For simplicity, you can assume that the supply curve "
-           "remains unchanged. Tie your argument to ")
-    dele(p, "movements of")
-    ins(p, "shifts of")
-    run(p, " the demand curve.")
+           "remains unchanged. Tie your argument to shifts of the demand "
+           "curve.")
 
+    # Nico, 2026-09-08: "holding supply constant" -> "assuming the supply
+    # curve does not shift", and a note pointing at the SLOPE of supply.
     p = part(doc, "b", 12)
     run(p, "Provide a visual representation of the changes in the three "
            "industries that you wrote about in point (a). What happens to "
-           "quantities and prices in equilibrium (holding supply constant)? "
-           "You may use AI tools to produce graphs.")
+           "quantities and prices in equilibrium (assuming the supply curve "
+           "does not shift)? You may use AI tools to produce graphs. [Note: "
+           "Although not required for full credit, here it will be useful "
+           "for you to think about the slope of the supply curve (e.g. can "
+           "this industry produce more units easily? Will the cost of the "
+           "extra units be significantly higher?).]")
 
     p = part(doc, "c", 11)
     run(p, "Do you think the assumption of unchanged supply is reasonable for "
@@ -237,21 +220,16 @@ def main():
     draws_on(doc, "Module 1 – Equilibrium;  Economic Costs Include "
                   "Opportunity Costs")
 
-    # PROPOSED 4: "their capacity" -> "its capacity" (subject = the company)
-    p = body(doc)
-    run(p, "You are hired as a consultant by a large fast food chain. The "
-           "company would like to understand whether an expansion of "
-           "unemployment benefits in California could affect ")
-    dele(p, "their")
-    ins(p, "its")
-    run(p, " capacity to hire low-skilled workers in the state. Use a "
-           "supply-demand framework for labor to analyze this question.")
+    body(doc,
+         "You are hired as a consultant by a large fast food chain. The "
+         "company would like to understand whether an expansion of "
+         "unemployment benefits in California could affect its capacity to "
+         "hire low-skilled workers in the state. Use a supply-demand "
+         "framework for labor to analyze this question.")
 
-    # PROPOSED 3: split into the three parts the solution already grades.
+    # split into the three parts the solution grades, accepted 2026-09-08
     p = part(doc, "a", 8)
-    para_inserted(p)
-    _mark_runs_inserted(p)
-    ins(p, "Draw and label a graph that depicts a demand curve and a supply "
+    run(p, "Draw and label a graph that depicts a demand curve and a supply "
            "curve in the market for low-skilled labor, and identify the "
            "equilibrium (low-skill) wage rate in the graph. Hint: Put "
            "low-skill labor on the x-axis and wages on the y-axis. Low-skill "
@@ -260,52 +238,18 @@ def main():
            "low-skill labor supplied by all workers in the state.")
 
     p = part(doc, "b", 12)
-    para_inserted(p)
-    _mark_runs_inserted(p)
-    ins(p, "Does an expansion of unemployment benefits shift the labor ")
-    ins(p, "supply", bold=True)
-    ins(p, " curve? Explain why or why not, and show the shift in your graph.")
+    run(p, "Does an expansion of unemployment benefits shift the labor ")
+    run(p, "supply", bold=True)
+    run(p, " curve? Explain why or why not, and show the shift in your "
+           "graph.")
 
     p = part(doc, "c", 5)
-    para_inserted(p)
-    _mark_runs_inserted(p)
-    ins(p, "Does it shift the labor ")
-    ins(p, "demand", bold=True)
-    ins(p, " curve? Explain why or why not.")
+    run(p, "Does it shift the labor ")
+    run(p, "demand", bold=True)
+    run(p, " curve? Explain why or why not.")
 
-    # the original's closing sentence, now covered by (b) and (c)
-    p = body(doc)
-    dele(p, "As a starting point, draw and label a graph that depicts a "
-            "demand curve and a supply curve in the market for low-skilled "
-            "labor. Identify the equilibrium (low-skill) wage rate in the "
-            "graph. Hint: Put low-skill labor on the x-axis and wages on the "
-            "y-axis. Low-skill labor demand represents the amount of "
-            "low-skill labor demanded by all firms in California; labor "
-            "supply is the total quantity of low-skill labor supplied by all "
-            "workers in the state. Distinguish between shifts in the labor "
-            "supply and labor demand curves and discuss why each of the two "
-            "shifts (or does not).")
-
-    doc.save(OUT)
+    S.save(doc, OUT)
     print("wrote", OUT)
-
-
-def _mark_runs_inserted(p):
-    """Wrap the run-in head that `part()` already emitted in a w:ins.
-
-    `part()` writes the "(a)  (8 points)" runs untracked; for a wholly new
-    part they belong inside the revision too.
-    """
-    from docx.oxml.ns import qn
-    from docx.oxml import OxmlElement
-    runs = [r for r in p._p.findall(qn("w:r"))]
-    if not runs:
-        return
-    w = T._stamp(OxmlElement("w:ins"))
-    p._p.insert(list(p._p).index(runs[0]), w)
-    for r in runs:
-        p._p.remove(r)
-        w.append(r)
 
 
 if __name__ == "__main__":

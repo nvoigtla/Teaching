@@ -73,8 +73,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _ps_theme as S
 from _ps_theme import (DARKRED, GOLD, GRAY, NAVY, Panel, WD_ALIGN_PARAGRAPH,
-                       body, caption, cross, dele, ins, line_at, para, part,
-                       problem, run)
+                       body, caption, cross, para, part, problem, run)
 import _tn_theme as T
 from _tn_theme import mrun, msub
 
@@ -89,7 +88,9 @@ E_I = msub(mrun("E", italic=False), mrun("I"))
 
 
 def draws_on(doc, text):
-    p = para(doc, before=0, after=8, keep_next=True)
+    # after 8 -> 5 on 2026-09-12, part of returning ~30 pt of pure
+    # spacing so a page break is never decided by a few points.
+    p = para(doc, before=0, after=5, keep_next=True)
     run(p, "Draws on:  " + text, italic=True, color=GRAY, size=9.5)
     return p
 
@@ -100,16 +101,12 @@ def answer(doc, content, before=4, after=8):
                       before=before, after=after)
 
 
-def _ins_elasticity(p, tail):
-    """E(I) plus a tail, as tracked insertions.
-
-    Inside a `w:ins` the OMML helpers are awkward, so the symbol is built
-    from ordinary runs: upright E, italic subscript I -- the same shape
-    the Module 2 deck uses.
-    """
-    ins(p, "E", size=11)
-    ins(p, "I", italic=True, subscript=True, size=11)
-    ins(p, tail, size=11)
+def _elasticity(p, tail):
+    """E(I) plus a tail, built from ordinary runs: upright E, italic
+    subscript I -- the same shape the Module 2 deck uses."""
+    run(p, "E", size=11)
+    run(p, "I", italic=True, subscript=True, size=11)
+    run(p, tail, size=11)
 
 
 def _sub(p, base, idx, emit=run, **kw):
@@ -165,21 +162,23 @@ def fig_p2c():
     db0, db1 = (u(30), v(250)), (u(250), v(30))
 
     pn.supply(s0, s1, label="S", lbl_dx=0.06, lbl_dy=-0.20)
-    pn.demand(da0, da1, label=None)
+    # Both demand labels ride their OWN curve's lower end, the way every
+    # other curve label in these documents does.  Da's end sits on the
+    # x-axis, so its label backs up the curve (0.17" left, 0.31" up) to
+    # clear the axis and the Qa / Qb ticks -- the position Nico set by
+    # hand on 2026-09-08, reached here by the rule rather than by a fixed
+    # anchor, so it follows the curve if the numbers change.
+    pn.demand(da0, da1, label=("D", "a"), lbl_dx=-0.17, lbl_dy=-0.31)
     pn.demand(db0, db1, label=("D", "b"), lbl_dx=0.08, lbl_dy=-0.14)
-    # Da is labelled ON its own line, in the clear band below Db, so the two
-    # labels do not pile up at the bottom-right corner.
-    pn.text(70, line_at(da0, da1, 70) + 6,
-            S._label_runs(("D", "a"), dict(bold=True, color=DARKRED, size=11)),
-            align="c")
 
     ea = cross(s0, s1, da0, da1)
     eb = cross(s0, s1, db0, db1)
     pn.equilibrium(ea[0], ea[1], ptick=("P", "a"), qtick=("Q", "a"))
     pn.equilibrium(eb[0], eb[1], ptick=("P", "b"), qtick=("Q", "b"))
 
-    # the shift itself
-    pn.arrow((u(150), v(120)), (u(180), v(120)), color=GOLD, w_pt=1.25,
+    # the shift itself, moved down-left 2026-09-08 so it sits INSIDE the
+    # band between the two demand curves rather than above Da
+    pn.arrow((56.75, 34.34), (68.75, 34.34), color=GOLD, w_pt=1.25,
              name="demand shifts out")
     return f
 
@@ -198,22 +197,30 @@ def fig_p3b():
 
     s0, s1 = (0, 0), (72, 72)
     curves = [
-        ((0, 56), (56, 0), ("D", "L"), "L"),        # luxury: large left shift
-        ((0, 70), (70, 0), ("D", "N"), "N"),        # normal: moderate left
-        ((0, 82), (82, 0), ("D", "0"), ("E", "0")),  # initial
-        ((0, 96), (96, 0), ("D", "I"), "I"),        # inferior: right shift
+        ((0, 56), (56, 0), ("D", "L"), "L"),
+        ((0, 70), (70, 0), ("D", "N"), "N"),
+        ((0, 82), (82, 0), ("D", "0"), ("E", "0")),
+        ((0, 96), (96, 0), ("D", "I"), "I"),
     ]
 
     pn.supply(s0, s1, label="S", lbl_dx=0.06, lbl_dy=-0.20)
     for p0, p1, lbl, eq in curves:
         initial = lbl[1] == "0"
-        pn.demand(p0, p1, label=None, w_pt=2.25 if initial else 1.5)
-        pr = dict(bold=True, color=DARKRED, size=11)
-        pn.text(p1[0] + 3.0, 14.0, S._label_runs(lbl, pr), align="c")
+        # Each label rides its OWN curve's lower end, which is what keeps
+        # the four apart -- they had been set on one horizontal line at
+        # v = 14, ignoring each curve's height, and a line clipped its
+        # neighbour's label.  Nico's four hand positions (2026-09-08) are
+        # all within 0.06" of this one offset.  The labels back up further
+        # than the 3(c) pair below (-0.13) because four of them sit in a
+        # row here and have to clear the neighbouring curve as well.
+        pn.demand(p0, p1, label=lbl, lbl_dx=-0.19, lbl_dy=-0.30,
+                  w_pt=2.25 if initial else 1.5)
         e = cross(s0, s1, p0, p1)
-        pn.equilibrium(e[0], e[1], guides=False)
-        pr2 = dict(bold=True, italic=True, color=NAVY, size=11)
-        pn.text(e[0] + 3.0, e[1] - 6.0, S._label_runs(eq, pr2), align="l")
+        # The equilibrium label goes through `equilibrium` so it gets the
+        # centred-just-above-the-dot rule.  It used to be a free note
+        # offset down-RIGHT of the dot, which is how these four escaped
+        # that rule until Nico moved all four by hand on 2026-09-08.
+        pn.equilibrium(e[0], e[1], label=eq, guides=False)
     return f
 
 
@@ -257,26 +264,22 @@ def fig_p3c(case):
                   lbl_dy=-0.20, name="S prime")
         e1_supply = s_shift
 
-    pn.demand(D0_3C[0], D0_3C[1], label=None, w_pt=2.25)
-    pn.demand(d1[0], d1[1], label=None, name="D prime")
-    pr = dict(bold=True, color=DARKRED, size=11)
-    # each demand curve is named just past its own lower-right end
-    pn.text(D0_3C[1][0] + 3.5, 14.0, S._label_runs("D", pr), align="c")
-    if d1[1][1] > 0:                      # case 3: the end is off the axis
-        pn.text(d1[1][0] + 1.0, d1[1][1] + 8.0, S._label_runs("D′", pr),
-                align="c")
-    else:
-        pn.text(d1[1][0] + 3.5, 14.0, S._label_runs("D′", pr), align="c")
+    # Each label rides its OWN curve's lower end, so neither curve clips
+    # the other's label -- they used to share one horizontal line.  Nico's
+    # six hand positions (2026-09-08) are all within 0.05" of this offset.
+    pn.demand(D0_3C[0], D0_3C[1], label="D", lbl_dx=-0.13, lbl_dy=-0.30,
+              w_pt=2.25)
+    pn.demand(d1[0], d1[1], label="D′", lbl_dx=-0.13, lbl_dy=-0.30,
+              name="D prime")
 
     e0 = cross(s0, s1, D0_3C[0], D0_3C[1])
     e1 = cross(e1_supply[0], e1_supply[1], d1[0], d1[1])
-    # The two labels take opposite sides, chosen from the direction the
-    # equilibrium actually moved, so they never crowd each other.
-    right = e1[0] > e0[0]
-    pn.equilibrium(e0[0], e0[1], label=("E", "0"),
-                   dx=-0.36 if right else 0.07, dy=-0.30, guides=False)
-    pn.equilibrium(e1[0], e1[1], label=("E", "1"),
-                   dx=0.07 if right else -0.36, dy=-0.30, guides=False)
+    # Both labels sit CENTRED above their own dot.  Nico re-placed all six
+    # of these by hand on 2026-09-08 and every one landed within 0.07" of
+    # centred-above; the alternating left / right offsets this used before
+    # pushed each label away from the point it names.
+    pn.equilibrium(e0[0], e0[1], label=("E", "0"), dy=-0.30, guides=False)
+    pn.equilibrium(e1[0], e1[1], label=("E", "1"), dy=-0.30, guides=False)
     return f
 
 
@@ -351,18 +354,12 @@ def main():
         ["Licenses and permits", "West L.A. may have specific regulations "
                                  "for landscaping businesses", "$1,000"],
         ["Rent (possible)", "Storage space for the equipment. Ignored here, "
-                            "assuming he can store it at home", "–"],
+                            "assuming he can store it at home without "
+                            "crowding out any other space (zero opportunity "
+                            "cost of storage)", "–"],
         ["Total explicit costs", "", "$16,800"],
     ], widths_in=[1.35, 3.75, 0.85], size=9.5,
-        highlight=[(6, 0), (6, 1), (6, 2)], align_right=(2,),
-        replaced={
-            (3, 1): ("20,000 miles a year at 20 MPG = 1,000 gallons at "
-                     "about $5",
-                     "20,000 miles a year at 20 MPG = 1,000 gallons at "
-                     "about $5.80 (California, 2026)"),
-            (3, 2): ("$5,000", "$5,800"),
-            (6, 2): ("$16,000", "$16,800"),
-        })
+        highlight=[(6, 0), (6, 1), (6, 2)], align_right=(2,))
 
     p = para(doc, before=12, after=5, keep_next=True)
     run(p, "Implicit costs (opportunity costs)", bold=True, color=NAVY,
@@ -378,30 +375,14 @@ def main():
                              "but not required for full credit", "–"],
         ["Total implicit costs", "", "$46,000"],
     ], widths_in=[1.35, 3.75, 0.85], size=9.5,
-        highlight=[(3, 0), (3, 1), (3, 2)], align_right=(2,),
-        replaced={
-            (1, 1): ("By not working for the landscaping company, the "
-                     "gardener forgoes a sure salary of $40,000",
-                     "By not working for the landscaping company, the "
-                     "gardener forgoes a sure salary of $46,000"),
-            (1, 2): ("$40,000", "$46,000"),
-            (3, 2): ("$40,000", "$46,000"),
-        })
+        highlight=[(3, 0), (3, 1), (3, 2)], align_right=(2,))
 
     p = body(doc, before=12)
-    run(p, "Total costs = explicit + implicit costs = ")
-    dele(p, "$16,000 + $40,000 = $56,000")
-    ins(p, "$16,800 + $46,000 = $62,800")
-    run(p, ". Expected revenues are ")
-    dele(p, "$70,000")
-    ins(p, "$78,000")
-    run(p, ", which is above the total costs of ")
-    dele(p, "$56,000")
-    ins(p, "$62,800")
-    run(p, ". ")
-    # PROPOSED 3: name the comparison the way Module 1 does.
-    ins(p, "In the language of Module 1, the economic profit of the business "
-           "is $78,000 − $62,800 = $15,200, and it is positive. ")
+    run(p, "Total costs = explicit + implicit costs = $16,800 + $46,000 = "
+           "$62,800. Expected revenues are $78,000, which is above the total "
+           "costs of $62,800. In the language of Module 1, the economic "
+           "profit of the business is $78,000 − $62,800 = $15,200, and it "
+           "is positive. ")
     run(p, "Thus, under the above assumptions, you would suggest that your "
            "gardener opens his own business. Of course, this recommendation "
            "may vary depending on the assumptions that you have made. You "
@@ -459,7 +440,7 @@ def main():
            "curve outward, so both the equilibrium price and the "
            "equilibrium quantity rise.")
 
-    fig_p2c().place(doc, before=8, after=2)
+    S.place(fig_p2c(), doc, before=8, after=2)
     caption(doc, "Higher income shifts the demand curve out, and the market "
                  "clears at both a higher price and a larger quantity.")
 
@@ -500,19 +481,18 @@ def main():
 
     # PROPOSED 2: luxuries are a SUBSET of normal goods (Module 2, slide 55)
     p = bullet(doc)
-    dele(p, "Normal goods", bold=True)
-    ins(p, "Normal, non-luxury goods", bold=True)
+    run(p, "Normal, non-luxury goods", bold=True)
     run(p, " – income elasticity ")
     T.equation_inline(p, mrun("0") + mrun("<") + E_I + mrun("<") + mrun("1"))
     run(p, ". Non-essential goods that are part of routine consumption. "
            "People trim frequency and quality (cook at home, DIY grooming). "
            "Demand shifts left, but less than for luxury goods.")
-    ins(p, " Note that a luxury good is itself a normal good: Module 2 "
+    run(p, " Note that a luxury good is itself a normal good: Module 2 "
            "defines any good with ")
-    _ins_elasticity(p, " > 0")
-    ins(p, " as normal, and a luxury as a normal good with ")
-    _ins_elasticity(p, " > 1")
-    ins(p, ".")
+    _elasticity(p, " > 0")
+    run(p, " as normal, and a luxury as a normal good with ")
+    _elasticity(p, " > 1")
+    run(p, ".")
 
     p = bullet(doc)
     run(p, "Inferior goods", bold=True)
@@ -531,19 +511,19 @@ def main():
 
     # -- (b) -- PROPOSED 1: 8 points -> the 12 the problem awards -----------
     p = part(doc, "b", 12)
-    dele(p, "(2 points for each correct price/quantity change; 2 points for "
-            "a graph with the correct display of supply and demand curves.)")
-    ins(p, "(2 points for each correct price/quantity change; 6 points for a "
+    run(p, "(2 points for each correct price/quantity change; 6 points for a "
            "graph with the correct display of supply and demand curves.)")
     run(p, "  With supply held constant, every new equilibrium lies on the "
            "unchanged supply curve. Luxury goods see the largest fall in "
            "both price and quantity, normal goods a moderate fall, and "
            "inferior goods a rise in both.")
 
-    fig_p3b().place(doc, before=8, after=2)
+    S.place(fig_p3b(), doc, before=8, after=2)
     caption(doc, "E₀ is the pre-shock equilibrium; L, N and I are the "
                  "post-shock equilibria for luxury, normal and inferior "
-                 "goods. Supply is unchanged, so all four lie on S.")
+                 "goods. Supply is unchanged, so all four lie on S. "
+                 "The same supply curve slope for all three industries "
+                 "above is a simplification, please see 3(c) for details.")
 
     # -- (c) ---------------------------------------------------------------
     p = part(doc, "c", 11)
@@ -559,7 +539,7 @@ def main():
     run(p, "the largest price drop", bold=True)
     run(p, ", with quantity falling too.")
 
-    fig_p3c(1).place(doc, before=6, after=2)
+    S.place(fig_p3c(1), doc, before=6, after=2)
     caption(doc, "Demand shifts far to the left along an unchanged supply "
                  "curve, so the price falls a long way.")
 
@@ -571,10 +551,13 @@ def main():
            "and buy less food, so capacity can be reduced quickly. Net "
            "short-run price effect: ")
     run(p, "a small price drop", bold=True)
-    run(p, " (demand falls but supply falls too), with a larger quantity "
+    # "demand falls but supply falls too" -> both curves SHIFT: supply and
+    # demand never "fall" (2026-09-12, Nico).  Teaching CLAUDE.md, "Supply
+    # expands is NEVER written".
+    run(p, " (both curves shift to the left), with a larger quantity "
            "drop than in the first case.")
 
-    fig_p3c(2).place(doc, before=6, after=2)
+    S.place(fig_p3c(2), doc, before=6, after=2)
     caption(doc, "Both curves shift in. The two price effects work against "
                  "each other, so the price barely moves, while the two "
                  "quantity effects reinforce each other.")
@@ -584,15 +567,22 @@ def main():
     run(p, " (essential good). Demand shock: rightward shift, as households "
            "trade down toward cheaper staples. Supply (about 1 month): "
            "moderately elastic – inventories can be drawn down and extra "
-           "shifts worked, so supply expands somewhat, though production and "
-           "input constraints still bind. Net short-run price effect: ")
+           "shifts worked, so quantity supplied expands somewhat, though "
+           "supply curve does not shift since production and input (or "
+           "technological) constraints still bind. Net short-run price "
+           "effect: ")
     run(p, "a small price increase", bold=True)
     run(p, ", with quantity rising.")
 
-    fig_p3c(3).place(doc, before=6, after=2)
+    S.place(fig_p3c(3), doc, before=6, after=2)
     caption(doc, "Supply does not shift, but it is flat enough (elastic) "
                  "that the extra demand is met mostly by more quantity and "
                  "only a little by a higher price.")
+
+    # The part label promises "2 points for the correct new ranking" and no
+    # ranking was ever given -- Nico added this line on 2026-09-12.
+    body(doc, "Re-ranking by price change (from largest fall to largest "
+              "rise): smartphones, restaurants, groceries.")
 
     # -- (d) ---------------------------------------------------------------
     p = part(doc, "d", 5, bonus=True)
@@ -600,8 +590,12 @@ def main():
            "1 point for each answer that is correct given the previous "
            "assumptions.)  In general we cannot make a clear prediction for "
            "prices. Once both demand and supply can shift, the price change "
-           "is ambiguous: it depends on the direction and the size of each "
-           "shift, and on the elasticities of the curves.")
+           "tends to be ambiguous: it depends on the direction and the size "
+           "of each shift, and on the elasticities of the curves. However, "
+           "under the assumptions we made, we can state the directional "
+           "change for both store-brand groceries and high-end smartphones. "
+           "But for mid-price-range restaurants, the direction of the price "
+           "change remains ambiguous even under our assumptions.")
 
     # ======================================================================
     # Problem 4
@@ -614,17 +608,13 @@ def main():
     run(p, "Starting point. For simplicity we use “Labor” to refer to "
            "low-skilled labor. The equilibrium wage is where the supply of "
            "and the demand for labor intersect, at ")
-    # PROPOSED 4: notation aligned with Module 1 (initial = 0, shifted = ')
-    run(p, "the point ")
-    dele(p, "(L1, w1)")
-    ins(p, "(")
-    _sub(p, "L", "0", emit=ins)
-    ins(p, ", ")
-    _sub(p, "w", "0", emit=ins)
-    ins(p, ")")
-    run(p, ".")
+    run(p, "the point (")
+    _sub(p, "L", "0")
+    run(p, ", ")
+    _sub(p, "w", "0")
+    run(p, ").")
 
-    fig_p4(False).place(doc, before=8, after=2)
+    S.place(fig_p4(False), doc, before=8, after=2)
     caption(doc, "The market for low-skilled labor. Wages on the vertical "
                  "axis, low-skill labor on the horizontal axis.")
 
@@ -647,7 +637,7 @@ def main():
            "leaned towards working, will change their decision and stay at "
            "home.")
 
-    fig_p4(True).place(doc, before=8, after=2)
+    S.place(fig_p4(True), doc, before=8, after=2)
     cap = dict(italic=True, color=GRAY, size=9)
     p = para(doc, before=2, after=10)
     p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -664,7 +654,7 @@ def main():
            "curve down and reduce the equilibrium wage. Answers like this "
            "also received full credit.")
 
-    doc.save(OUT)
+    S.save(doc, OUT)
     print("wrote", OUT)
 
 
