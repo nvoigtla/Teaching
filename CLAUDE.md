@@ -1728,6 +1728,56 @@ lives in the doc, so it works even if NotebookLM's "Customize" box is hidden.
       instructions and in the paste-ready prompt, naming the specific
       example. The hosts ad-lib, and "Netflix used to charge per movie" is
       exactly the sort of plausible detail they will invent.
+  - **An EXAMPLE belongs to exactly one case of whatever taxonomy the
+    module teaches. Say which, or say nothing** (2026-09-16, Nico, on the
+    Module 6 intro: "the hosts ended up using the dog medicine example and
+    the different prices from different computers as an example for
+    'customers sorting into different segments' – that's wrong", and then,
+    a round later, "it says 'if they do know things about you, that would
+    explain cheaper airline fares for a longer trip' – that's just totally
+    wrong"). Three examples came out of one five-minute episode in two
+    rounds, all to the same failure.
+    - **The cause is a flat LIST of examples sitting next to a set of
+      abstract cases.** The hosts pair the nearest example with the case
+      they have just described, and then invent the reasoning that would
+      justify the pairing. That reasoning is always plausible, which is why
+      it survives a read-through: only someone who already knows the
+      taxonomy hears that the example is on the wrong side of it.
+    - **In a PREVIEW, forbid the pairing outright.** The episode names
+      examples without working them through, so it has no business
+      assigning them either: "name each one in passing only, do not say
+      which of the cases an example belongs to, and do not explain why the
+      thing is priced the way it is". **Close the list too** ("use no
+      example other than those"), or the hosts reach for one of their own
+      and place that one wrongly instead.
+    - **In a RECAP, do the opposite: GROUP the prompt's example list BY
+      CASE**, one clause per case, so the pairing is given rather than
+      inferred. A recall episode has to place each example, so silence is
+      not available – but a run of twenty examples in one sentence, right
+      after the abstract cases, is the same invitation in a longer episode.
+      Take the grouping from the body's own sections, which have already
+      been checked against the slides, rather than re-deriving it by
+      reading the examples again.
+    - **Then name the two or three wrong pairings that are most tempting**,
+      in the prompt AND in the in-doc host instructions: "Orbitz and the
+      arthritis drug are cases where the seller works out which group a
+      buyer is in, never cases of customers sorting themselves." A rule
+      stated only in the abstract does not survive the hosts' ad-libbing.
+    - **An example that straddles two cases gets NO case.** Wendy's pricing
+      by time of day is a timing segment that the deck files under
+      versioning, and what the class draws from it is the backlash rather
+      than the category. It is safer as a standing aside than as a member
+      of a category it only half fits.
+    - **Never leave two instructions in one prompt that pull against each
+      other.** Once the intro carried both a blanket "do not attach an
+      example to a case" and an older clause letting coupons illustrate
+      self-selection, the hosts had licence to use whichever half suited
+      the sentence they were building. Write any permitted pairing as the
+      single stated EXCEPTION to the rule, in the same breath as the rule.
+    - The test that catches this while writing: for every example in the
+      prompt, name the case it belongs to and say in one clause why. If the
+      clause has to be invented rather than read off the deck, the example
+      does not belong in the episode.
   - **Lead with real-world stories** and let them carry the ideas.
   - Warm, curious, conversational tone – smart colleagues (or two students)
     connecting the dots, not a lecture; define terms in plain language, go

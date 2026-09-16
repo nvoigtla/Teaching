@@ -1397,3 +1397,119 @@ to `*_test.pptx`, run `_diff_slides.py <handedit> <fresh build>`, port into
 the build script, rebuild. Slides 2–8 of the practice deck always show
 phantom MOVED chains in that diff — `mc:AlternateContent` hides OMML shapes
 from python-pptx, and those are save artifacts, not edits.
+
+---
+
+## 2026-09-16 — podcasts: three examples dropped from the intro, both prompts hardened against two recurring host failures
+
+**One-line summary.** Four more correction rounds on the podcast source
+docs, all of them the same two failures — the hosts attaching an example to
+the wrong case of the module's taxonomy, and treating a worked example's
+invented figures as real company numbers. Both are now guarded in the
+prompts, in the in-doc host instructions, and (for the figures) in the
+wrap-up body. One new rule in `Teaching/CLAUDE.md`.
+
+### Failure 1 — an example paired with the wrong case
+
+Nico, on the intro episode: the hosts used **the arthritis drug** and **the
+browser-based hotel prices** as illustrations of "customers sorting into
+different segments", and then, a round later, explained the **Lufthansa
+fare** as something the airline knew about the passenger. All three are
+wrong in the same direction: the first two are cases where the seller works
+out which GROUP a buyer is in, and the Lufthansa fare is about which market
+the passenger is flying to.
+
+**Cause.** The preview names examples without working them through — that is
+what makes it a preview — so its prompt held a flat list of examples sitting
+right beside the three abstract cases. The hosts pair the nearest example
+with the case just described and invent the reasoning that justifies it. The
+invented reasoning is always plausible, which is why it survives a
+read-through.
+
+**Fixes, and they are opposite in the two episodes:**
+
+- **Intro:** all three examples deleted. The list is now **closed** ("use no
+  example other than those") and the hosts are told to name each in passing
+  only, never to say which case an example belongs to, and never to explain
+  why the thing is priced as it is. Body down to 386 words.
+- **Wrap-up:** silence is not available, because a recall episode has to
+  place each example. Its prompt's flat run of twenty-odd examples is now
+  **grouped by case** — one clause per case — so the pairing is given rather
+  than inferred, followed by the three wrong pairings named explicitly. The
+  grouping was taken from the body's own sections 2 and 5–9, which had
+  already been checked against the slides on 09-15, not re-derived by reading
+  the examples again. No example added or dropped.
+- **Wendy's is deliberately given NO case.** The body files it under
+  versioning, but varying prices by time of day is a timing segment and what
+  the class draws from it is the backlash. A standing aside beats a category
+  it half fits.
+- **Two instructions that pull against each other are themselves a bug.**
+  Once the intro carried both a blanket "do not attach an example to a case"
+  and the older clause letting coupons illustrate self-selection, the hosts
+  had licence to use whichever half suited the sentence. The coupon
+  permission is now written as the single stated EXCEPTION, in the same
+  breath as the rule.
+
+### Failure 2 — a worked example's figures narrated as real
+
+Nico: "They will often treat the examples from class such as the BMW example
+as if those numbers were real." The guard for this already existed — it was
+written on 09-15 as part of the Netflix counterfactual rule ("figures from a
+stylised example are not the firm's accounts") — and I had applied it to
+Netflix alone, because Netflix was the example he had raised. BMW, Zipcar,
+the zoo and the ice cream kept stating their numbers flat, as though BMW had
+reported 1.7 billion.
+
+The fix is general this time. His own phrasing is now the model in the
+prompt and the host instructions: **"as we saw in the BMW example, based on
+the hypothetical demand curve for that case…"**, with the fallback that a
+figure which cannot carry the hedge is left out and the comparison given in
+words. What a worked example establishes is the DIRECTION of the gap between
+two strategies and roughly how big it is, which survives whatever the real
+numbers are.
+
+The wrap-up body hedged the four cases that stated figures flat — BMW,
+Zipcar, the zoo exercise, the ice-cream scoops. Body now 2,847 words.
+
+**One exception, named in both places:** the **American Airlines lifetime
+first-class pass** was a real product at a real price and the body tells it
+as history, so hedging that one would introduce the opposite error.
+
+### Also fixed
+
+- The Lufthansa guard was first written as "which market the passenger is
+  flying to **and how easily that passenger can substitute**", which
+  contradicts the existing instruction not to attribute travel alternatives
+  to any group. Narrowed; the body still carries the full reasoning.
+
+### `Teaching/CLAUDE.md`
+
+One rule added to the Podcasts section (50 lines, before "Lead with
+real-world stories"): **an example belongs to exactly one case of whatever
+taxonomy the module teaches — say which, or say nothing.** It carries the
+cause, the opposite fixes for a preview and a recap, the instruction to name
+the specific tempting mis-pairings, the no-case-for-a-straddler rule, the
+ban on self-contradicting prompts, and the writing-time test (name each
+example's case and say in one clause why; if the clause has to be invented,
+the example does not belong in the episode).
+
+**Still worth doing:** the existing "figures from a stylised example are not
+the firm's accounts" sub-rule is written against Netflix specifically.
+Generalizing it to every worked example, with Nico's phrasing as the model,
+was offered and not yet approved.
+
+### Open / pending (carried forward)
+
+1. The two deletions still await his decision: `Module 6 - NV Slides/` +
+   `Module 6 - PG Slides/` (107 MB) and the 116 unreferenced files in
+   `_source_images/` (70 MB, including 30 MB of .mp4 extracted from the PG
+   decks). Measured this session: only 81 files / 36 MB of `_source_images`
+   are named by any script, and `_splice_media.py` reads the 3 MB sidecar
+   alone.
+2. He decided on 09-16 to **push Module 6 whole**, source decks included,
+   rather than rewriting the unpushed commit to exclude them ("slow is
+   fine"). Note for next time: the ~10 MB push ceiling on this network means
+   this repo needs the Git Data API route regardless of what is excluded —
+   the 27 MB deck alone is over it.
+3. `405 Slide Revisions 2026/Module 5/` has **no Session-Notes.md and is
+   entirely untracked** — the position Module 6 was in before 09-15.
