@@ -1043,3 +1043,30 @@ scheme stripped, so the printed address can never drift from the link.
 **Verified:** calendars 14 pages, one week per page, 116 links; both sites
 published by `_publish.py`. 16 "(TBD)" handouts and decks remain, on weeks
 1, 5 and 9.
+
+
+## The final exam is a per-SECTION time (2026-09-20)
+
+Nico: FEMBA sits the final on Sat Dec 12 from **2:00 PM – 5:00 PM**; EMBA
+stays at 9:00 AM – 12:00 PM. Same day, different hours.
+
+The slot moved out of `WEEKS` and into `SECTIONS` as `final_slot`, next to
+the room and the meeting pattern, because that is now what it is — a fact
+that varies by section. Week 12 reads `SEC["final_slot"]`.
+
+```python
+"final_slot": ((9, 0), (12, 0)),    # EMBA
+"final_slot": ((14, 0), (17, 0)),   # FEMBA
+```
+
+**One edit reached all four outputs**, because every renderer already went
+through `slot_label()` / the `slot` tuple rather than a literal: the
+calendar's Due column and week band, the website's week page and Deadlines
+and Exams rows, the ICS feeds via `exam_utc()`, and the syllabus through
+its own `FINAL_EXAM_SLOT`. Worth remembering the next time a time or date
+looks like it needs a sweep — check whether it is already funnelled.
+
+**Verified:** FEMBA prints 2:00 PM – 5:00 PM in calendar PDF, syllabus PDF,
+week 12 and the index; EMBA still prints 9:00 AM – 12:00 PM in all four.
+ICS stamps are right for PST: EMBA 17:00–20:00Z, FEMBA 22:00 Dec 12 –
+01:00 Dec 13 Z. FEMBA calendar holds at 14 pages / 116 links.

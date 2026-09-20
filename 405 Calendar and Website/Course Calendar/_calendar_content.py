@@ -185,6 +185,11 @@ SECTIONS = {
         "meetings": (("Fri", "4:00 – 5:30 pm"),
                      ("Sat", "9:00 am – 12:30 pm")),
         "class_times": "Fridays 4:00 – 5:30 pm  ·  Saturdays 9:00 am – 12:30 pm",
+        # The final exam's fixed hours. The two sections sit it on the SAME
+        # Saturday but at different times (2026-09-20, Nico), so the slot is
+        # a section fact like the room and the meeting pattern; week 12 reads
+        # it from here. ((start h, m), (end h, m)), 24-hour.
+        "final_slot": ((9, 0), (12, 0)),
         "ta_email": "ta405.emba2@gmail.com",
         "bruinlearn_course": "https://bruinlearn.ucla.edu/courses/237825",
         # the class-recording tool, whose id differs per section
@@ -201,6 +206,8 @@ SECTIONS = {
         # Saturday, and for a long afternoon (2026-09-05, Nico).
         "meetings": (("Sat", "2:00 – 8:00 pm"),),
         "class_times": "Saturdays 2:00 – 8:00 pm",
+        # FEMBA sits the final in the afternoon (2026-09-20, Nico)
+        "final_slot": ((14, 0), (17, 0)),
         "ta_email": "ta405.femba2@gmail.com",
         "bruinlearn_course": "https://bruinlearn.ucla.edu/courses/237860",
         # the class-recording tool, whose id differs per section
@@ -965,7 +972,7 @@ WEEKS = [
             # renderer -- the band, the Due column, the week page and the
             # .ics feed -- reads the time from here.
             "window": (("Sat", 0), ("Sat", 0)),
-            "slot": ((9, 0), (12, 0)),
+            "slot": SEC["final_slot"],
             "lines": [
                 "The final exam covers all material, Modules 1 – 8.",
                 "The final exam will take place online, and you will have 3 hours "

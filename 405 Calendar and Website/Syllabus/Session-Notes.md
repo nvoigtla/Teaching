@@ -200,3 +200,13 @@ stay **tuples**.
 
 **Verified:** both syllabi 5 pages, 16 links, correct section — the extra
 link over the previous 15 is the new course-root one.
+
+
+## FEMBA's final-exam time (2026-09-20)
+
+Picked up automatically. `FINAL_EXAM_SLOT` reads the week-12 slot out of
+`_calendar_content.py`, which is now a per-section value, so the FEMBA
+syllabus prints 2:00 PM – 5:00 PM and the EMBA one still prints
+9:00 AM – 12:00 PM. Nico scoped the request to the calendar and the website;
+the syllabus was rebuilt anyway, because leaving it would have had it
+contradict both. FEMBA syllabus re-exported: 5 pages, 16 links.

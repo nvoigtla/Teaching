@@ -1623,3 +1623,15 @@ in a new tab.
 **Published:** 23 pages, 5 assets, 19 decks, 8 PDFs per section; every local
 link resolves. Module 6's two podcasts are live on week 7, module 6 and
 all-podcasts, both sections.
+
+
+## FEMBA's final exam moves to the afternoon (2026-09-20)
+
+FEMBA's final is Sat Dec 12, **2:00 PM – 5:00 PM**; EMBA is unchanged at
+9:00 AM – 12:00 PM. Nothing in `_build_site.py` needed touching — the week
+page, the Deadlines and Exams row and the four ICS feeds all read the slot
+through `C.slot_label()` and `C.exam_utc()`. The change itself is one entry
+in `SECTIONS`; see the Course Calendar notes for the detail.
+
+EMBA was republished but is byte-identical — the build hash `e41df37d8f` did
+not move and its PDFs were not re-exported. FEMBA: 33 paths pushed.
