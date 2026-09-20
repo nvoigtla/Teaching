@@ -1,6 +1,63 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
-## 2026-08-26 — Poll splice moved onto a sidecar; the 24 MB original deleted
+## 2026-09-20 — Lottery example moves to the MA article numbers
+
+**One-line summary.** Nico found a WROR/WBZ article confirming the MA
+Mega Millions numbers, so the In-Class lottery example (displays 39/41)
+switched from the NY academic figures (1.9M → 560K, Eᴅ ≈ −0.47) to the
+MA figures (142,170 → 100,297 weekly, Eᴅ ≈ −0.20); both decks rebuilt.
+The practice deck gained the poll placeholder + solution for his
+"Lottery Sales, Revisited" slide.
+
+### The article (fact-checked)
+WROR/BostonNewsroom, Apr 10 2025, citing the Massachusetts Lottery via
+WBZ-TV: sales fell 142,170 → 100,297 ("30%"), revenue "climbed 71%".
+**Two traps for future use:** (1) the article's DOLLAR figures
+($491,323 → $841,185) do not equal tickets × price (they imply $3.46
+and $8.39 per ticket) — only the ticket counts are usable; tickets ×
+price gives +76%, vs the reported +71%. (2) The article's claim that MA
+"joined the game in 2022" is false (MA has sold Mega Millions since
+2010) — never cite that part. The comparison is the first $5 drawing
+(Apr 8 2025) against the prior week, so it is a short-window response.
+
+### In-Class + merged deck
+`slide_45_megamillions` (39): bullet 2 now "As a result, in
+Massachusetts, weekly ticket sales fell from 142,170 to 100,297" (his
+wording); source line now "Massachusetts Lottery, via WBZ-TV / WROR,
+April 2025". `slide_41_megamillions_solution` (41): Q₀/Q₁, −29.5%,
+Eᴅ ≈ −0.20 (red), caution box updated to −0.20; NY figures kept in the
+notes as a comparison. Animation plans untouched (selectors don't name
+the numbers; 39 = 2 clicks, 41 = 4, unchanged). Full pipeline rerun
+(build → splice → group → animate) + `_merge_Module2.py` (116 slides).
+Slideshow probe on merged 1/39/41/45 PASS — the live poll renders.
+Both decks' `_t-1` backups rolled first.
+
+### Round 2 (same day): rounded counts; caution off the slide
+Nico: ticket sales read "fell from about 142,000 to about 100,000"
+everywhere, all calculations adjusted (%ΔQ = −29.6%, Eᴅ ≈ −0.20
+unchanged; revenue check $284,000 → $500,000, still +76%); the exact
+reported counts (142,170 → 100,297) stay in the speaker notes only.
+The practice slide 6 caution box about the article's dollar figures
+moved into that slide's notes. Both decks rebuilt again;
+`_add_practice_lottery.py` gained a REPLACE mode (regenerates the
+existing solution slide in place) and now writes the current wording.
+His hand-made practice slide 4 got the same rounded sentence
+(single-run text surgery). NOTE: he had the practice deck open in
+PowerPoint mid-round — the pass waited for the lock to clear rather
+than killing POWERPNT, and the final state was verified read-only
+(zip) because he reopened it immediately after.
+
+### Practice deck (now 8 slides)
+**`_add_practice_lottery.py`** (new, keep): zip-surgery insert after his
+hand-made "Lottery Sales, Revisited" — NEW slide 5 "Poll: Lottery
+Revenue" (stub for his own PollEv activity) and NEW slide 6 "Solution:
+Lottery Revenue" (inelastic → revenue up; R₀ = $284,340 → R₁ =
+$501,485, red answer "+about 76%", caution box on the article's dollar
+figures). Slides are STATIC (parking-lot deck; builds when they
+graduate). His slide 4's static "19" page number converted to a live
+slidenum field (one-off scratchpad surgery). His slide 4 content
+untouched and verified against the article (quote verbatim, link live,
+Eᴅ = −0.2 consistent).
 
 **One-line summary.** `Module 2 - In Class with Solutions.pptx` is gone
 from the folder; the 12 slides the In-Class splice needed now live in a

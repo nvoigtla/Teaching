@@ -4827,9 +4827,16 @@ def slide_45_megamillions(prs):
     Both are off: the $2 -> $5 price was a NATIONAL Mega Millions
     redesign that took effect on 8 April 2025 (announced in October
     2024); the state lotteries sell the tickets but did not set the
-    price.  The numbers here are New York's, from the Hansen / Misra /
-    Singh working paper, and give a very different elasticity from CT's
-    -0.2 - see the note on the solution slide.
+    price.
+
+    2026-09-20 (Nico): the New York per-drawing figures (Hansen / Misra
+    / Singh; 1.9M -> 560K, E ~ -0.47) were swapped for the MASSACHUSETTS
+    figures from the WROR / WBZ article he found (142,170 -> 100,297,
+    E ~ -0.2), so the class matches his "Lottery Sales, Revisited"
+    follow-up, which quotes that article on revenue. The NY figures
+    stay in the solution slide's notes as a comparison. CAREFUL with
+    the article's own dollar figures - they do not equal tickets x
+    price; only the ticket counts are used.
     """
     slide = _blank_slide(prs)
     # 2026-08-25 (Nico): CT's full-bleed lottery photo as a washed-out
@@ -4846,27 +4853,30 @@ def slide_45_megamillions(prs):
         [
             ([("April 2025: Mega Millions raises its ticket price from "
                "$2 to $5", {})], 0, {}),
-            ([("In New York, tickets sold per drawing fall from about "
-               "1.9 million to about 560,000", {})], 0, {}),
+            # 2026-09-20 (Nico): MA numbers from the WROR/WBZ article,
+            # rounded per his instruction (reported: 142,170 -> 100,297)
+            ([("As a result, in Massachusetts, weekly ticket sales fell "
+               "from about 142,000 to about 100,000", {})], 0, {}),
             ([("What is the implied price elasticity of demand ",
                {'bold': True}),
               ("(using $2 as the initial price)?", {})], 0, {}),
         ],
         size=26, line_spacing_pts=20)
     _add_text(slide, MARGIN, Inches(6.78), Inches(9.0), Inches(0.3),
-              "Source: Hansen, Misra & Singh, \u201cPricing a "
-              "Participation-Dependent Product: Evidence from the Mega "
-              "Millions Redesign\u201d", size=12, italic=True,
+              "Source: Massachusetts Lottery, via WBZ-TV / WROR, "
+              "April 2025", size=12, italic=True,
               color=GRAY, font="Calibri")
     _set_notes(slide, (
         "A second real-world check, and this one is recent. On 8 April "
         "2025 Mega Millions raised its ticket price from $2 to $5 - a "
         "150% increase, and only the second price change in the game's "
-        "history. Hansen, Misra and Singh collected the sales data: in "
-        "New York, tickets sold per drawing fell from about 1.9 million "
-        "to about 560,000. Ask them to work out the implied elasticity "
-        "before showing the solution, and remind them to measure both "
-        "changes from the initial point."))
+        "history. The Massachusetts Lottery reported weekly ticket "
+        "sales falling from about 142,000 to about 100,000 (reported "
+        "counts: 142,170 to 100,297) - the comparison is the first "
+        "drawing at the new price against the week before, so it is a "
+        "short-window response. Ask them to work out the implied "
+        "elasticity before showing the solution, and remind them to "
+        "measure both changes from the initial point."))
     _draw_footer(slide, FOOTER_TEXT, 39)
     _add_pollbreak_badge(slide)
     return slide
@@ -4884,8 +4894,11 @@ def slide_41_megamillions_solution(prs):
             ([("Price:  ", {'bold': True}),
               ("P\u2080 = $2   \u2192   P\u2081 = $5", {})], 0,
              {'bullet_style': 'none'}),
+            # 2026-09-20 (Nico): MA article numbers, rounded per his
+            # instruction (were NY 1,900,000 -> 560,000)
             ([("Quantity:  ", {'bold': True}),
-              ("Q\u2080 = 1,900,000   \u2192   Q\u2081 = 560,000", {})], 0,
+              ("Q\u2080 \u2248 142,000   \u2192   Q\u2081 \u2248 100,000",
+               {})], 0,
              {'bullet_style': 'none'}),
         ],
         size=22, line_spacing_pts=8)
@@ -4898,9 +4911,9 @@ def slide_41_megamillions_solution(prs):
                      + _omml_sub(_omml_run('Q'), _omml_text('0')),
                      _omml_sub(_omml_run('Q'), _omml_text('0')))
         + _omml_text(' = ')
-        + _omml_frac(_omml_text('560,000 \u2212 1,900,000'),
-                     _omml_text('1,900,000'))
-        + _omml_text(' = \u221270.5%'),
+        + _omml_frac(_omml_text('100,000 \u2212 142,000'),
+                     _omml_text('142,000'))
+        + _omml_text(' = \u221229.6%'),
         size_pt=21, color=NAVY)
     _add_math_equation(
         slide, Inches(1.15), Inches(4.06), Inches(11.0), Inches(1.05),
@@ -4917,8 +4930,8 @@ def slide_41_megamillions_solution(prs):
         slide, Inches(1.15), Inches(5.26), Inches(11.0), Inches(1.05),
         _oED() + _omml_text(' = ')
         + _omml_frac(_o_pct('Q'), _o_pct('P')) + _omml_text(' = ')
-        + _omml_frac(_omml_text('\u221270.5%'), _omml_text('150%'))
-        + _omml_text('  \u2248  \u22120.47'),
+        + _omml_frac(_omml_text('\u221229.6%'), _omml_text('150%'))
+        + _omml_text('  \u2248  \u22120.20'),
         # 2026-08-26 (Nico): final solution in dark red
         size_pt=21, color=RED)
 
@@ -4926,21 +4939,24 @@ def slide_41_megamillions_solution(prs):
         slide, Inches(1.85), Inches(6.42), Inches(9.6), Inches(0.62),
         prefix="Caution: ",
         body="Method 1 approximates % changes \u2013 best for small price "
-             "changes. Here the changes are large, so \u22120.47 is a rough "
+             "changes. Here the changes are large, so \u22120.20 is a rough "
              "approximation", size=15)
     _set_notes(slide, (
         "Both percentage changes are measured from the initial point, "
-        "as always with Method 1. Quantity falls by about 70%, price "
-        "rises by 150%, so the implied elasticity is about \u22120.47 - "
+        "as always with Method 1. Quantity falls by about 29.6%, price "
+        "rises by 150%, so the implied elasticity is about \u22120.20 - "
         "well inside the inelastic range, which is why revenue still "
-        "rose even though the number of tickets collapsed.\n\n"
-        "If you compare this with CT's version of the example: she "
-        "dates the increase to 2024 and attributes it to the "
-        "Massachusetts State Lottery, and her sales figures give an "
-        "elasticity of about \u22120.2. The price change was in fact a "
-        "national Mega Millions redesign effective 8 April 2025, and "
-        "the New York figures above come from the Hansen / Misra / "
-        "Singh study."))
+        "rose even though ticket sales fell. The WBZ/WROR article "
+        "reports revenue up about 71%; from the rounded ticket counts, "
+        "142,000 \u00d7 $2 = $284,000 against 100,000 \u00d7 $5 = "
+        "$500,000 is +76% (the article's own dollar figures include "
+        "more than the base ticket price; its reported counts are "
+        "142,170 and 100,297). That revenue question is the follow-up "
+        "exercise.\n\n"
+        "Comparison: Hansen, Misra and Singh's New York per-drawing "
+        "figures (about 1.9 million to 560,000) give an elasticity of "
+        "about \u22120.47 - a longer window and a different state, but "
+        "the same verdict: lottery demand is price-inelastic."))
     _draw_footer(slide, FOOTER_TEXT, 43)
     return slide
 
