@@ -94,9 +94,12 @@ NICO_URL = "https://www.anderson.ucla.edu/faculty_pages/nico.v/"
 # see mail_link() below.
 NICO_EMAIL = "nico.v@ucla.edu"
 
-# General Logistics link that survives the "land on the current week"
-# redirect below, so the page is always reachable from the sidebar.
-GL_HREF = "index.html?stay=1"
+# The site root IS the General Logistics page (2026-09-21, Nico: "change
+# the landing page ... so it's the main page, not the respective week").
+# It used to redirect to the current week, and every link back here had to
+# carry ?stay=1 to defeat that; with the redirect gone the plain URL is
+# right, and a bookmarked ?stay=1 still lands in the same place.
+GL_HREF = "index.html"
 
 # ===================== category cards (calendar format) =====================
 # Title, header glyph and body tint per category, matching _build_calendar.py:
@@ -1832,28 +1835,6 @@ def logistics_main():
     return "".join(h)
 
 
-def redirect_script():
-    """On the site root, land on the CURRENT week once the quarter is
-    running; before it starts and after it ends, stay here. The sidebar's
-    General Logistics link carries ?stay so the page stays reachable."""
-    rows = []
-    for w in C.WEEKS:
-        d1, d2 = week_span(w)
-        rows.append('["%s","%s","week-%02d.html"]'
-                    % (d1.isoformat(), d2.isoformat(), w["num"]))
-    return ("<script>\n"
-            "(function(){\n"
-            "  if (location.search.indexOf('stay') !== -1) { return; }\n"
-            "  var W=[%s];\n"
-            "  var d=new Date(), p=function(n){return (n<10?'0':'')+n;};\n"
-            "  var t=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());\n"
-            "  for (var i=0;i<W.length;i++){\n"
-            "    if (t>=W[i][0] && t<=W[i][1]) "
-            "{ location.replace(W[i][2]); return; }\n"
-            "  }\n"
-            "}());\n"
-            "</script>\n" % ",".join(rows))
-
 
 # ============================== search index ==============================
 
@@ -1961,8 +1942,7 @@ def main():
     pages = []
 
     gl = logistics_main()
-    page("index.html", "General Logistics", "", "index", gl,
-         head_extra=redirect_script())
+    page("index.html", "General Logistics", "", "index", gl)
     pages.append((GL_HREF, "General", "General Logistics",
                   "Before You Start", gl))
 

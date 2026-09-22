@@ -1635,3 +1635,30 @@ in `SECTIONS`; see the Course Calendar notes for the detail.
 
 EMBA was republished but is byte-identical — the build hash `e41df37d8f` did
 not move and its PDFs were not re-exported. FEMBA: 33 paths pushed.
+
+
+## The root lands on General Logistics, not the current week (2026-09-21)
+
+Nico: "change the landing page for both class websites so it's the main
+page, not the respective week."
+
+`redirect_script()` is **deleted**, not merely unhooked. It wrote a script
+into the root's `<head>` holding every week's date span, matched today
+against them and called `location.replace()` on a hit, so opening the site
+during the quarter never showed the main page at all.
+
+With it gone the `?stay=1` escape hatch had nothing to escape, so `GL_HREF`
+is plain `index.html` again. That one constant feeds the sidebar, the jump
+menu, the toolbar tag and the search index, so every General Logistics link
+changed from the single edit. `site.js`'s View-by button lost its `?stay=1`
+for the same reason. A bookmark someone already made with `?stay=1` still
+lands in the same place -- the query is ignored.
+
+**Verified by loading the root in headless Chrome**, not by reading the
+source: it ends on `<h1>General Logistics</h1>` with the sidebar entry
+marked `aria-current="page"`. Across all 46 built pages in both sections,
+no `location.replace` and no `stay=1` survive.
+
+**Consequence Nico knows about:** students are no longer dropped into the
+current week. If that wants replacing, a "this week" marker on the sidebar
+row would do it without the jump -- offered, not built.
