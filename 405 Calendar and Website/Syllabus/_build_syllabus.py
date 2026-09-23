@@ -337,11 +337,13 @@ SECTIONS = [
           "regrade request could result in a higher or lower final score."),
 
     ("h", "For On-Campus Classes: Use of Computers and Tablets"),
-    ("p", "No use of laptops or tablets, with the exception of note-taking. "
+    # Reworded 2026-09-23, Nico: laptops out altogether, and the tablet
+    # exception spelled out as a permission rather than a sentence fragment.
+    ("p", "No use of laptops. "
           "Surfing the internet and catching up on your e-mail is "
           "distracting, both for yourself and for those around you. "
-          "Exception: if you prefer to take notes on your tablet – but "
-          "for note-taking only."),
+          "Exception: if you prefer to take notes on your tablet, you may "
+          "do so – but use the tablet for note-taking only."),
 
     ("h", "Course Materials: Website and BruinLearn"),
     ("mix", [("t", "The course website, "),

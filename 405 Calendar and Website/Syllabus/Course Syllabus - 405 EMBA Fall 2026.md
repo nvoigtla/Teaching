@@ -138,7 +138,7 @@ For regrade requests, submit the original copy of the graded exam or assignment 
 
 ## For On-Campus Classes: Use of Computers and Tablets
 
-No use of laptops or tablets, with the exception of note-taking. Surfing the internet and catching up on your e-mail is distracting, both for yourself and for those around you. Exception: if you prefer to take notes on your tablet – but for note-taking only.
+No use of laptops. Surfing the internet and catching up on your e-mail is distracting, both for yourself and for those around you. Exception: if you prefer to take notes on your tablet, you may do so – but use the tablet for note-taking only.
 
 ## Course Materials: Website and BruinLearn
 

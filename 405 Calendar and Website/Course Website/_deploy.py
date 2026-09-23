@@ -63,6 +63,8 @@ def page_files():
 
 
 ASSETS = ["site.css", "site.js", "search-index.js", "panopto-login.png",
+          # the teaching-team portraits on the Home page (2026-09-23)
+          "photo-nico.png", "photo-rafael.png",
           "bruin-bear.png"]
 
 # Documents published NEXT TO the site, so the General Logistics page can

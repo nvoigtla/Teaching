@@ -9,6 +9,73 @@ the page layout and the palette.
 
 ---
 
+## A Home landing page, and search that reaches the documents (2026-09-23)
+
+Live on both sections. `python _publish.py` ran four times this day; the
+private repo was committed at the end.
+
+### Home
+
+`index.html` is now a light landing page and **General Logistics moved to
+`logistics.html`**. The band reads "Home" with "Managerial Economics Fall
+2026 - EMBA - Fall 2026" in the centre slot, the same shape General Logistics
+uses. Two cards: **The Teaching Team** (round portraits from
+`assets/photo-nico.png` / `photo-rafael.png`, name / role / address / View
+Bio) and **How to Use This Site**.
+
+It shipped EMBA-only behind `HOME_ON` while the format was settled, then went
+to both. `MGMT405_HOME=0` still builds without it -- that is how the syllabus
+edit was published mid-way.
+
+**The addresses are not in the HTML.** `mail_link()` only ever hid the href;
+printing the address as the link TEXT handed it straight back to a harvester.
+`mail_link_shown()` ships a placeholder and `site.js` writes both the href and
+the visible text from the base64 halves.
+
+### Search
+
+Three separate gaps, all closed:
+
+1. **Results were clipped.** Above 861px the right column is its own scroll
+   container and the panel is wider than it, so an absolutely positioned child
+   could not escape. `place()` in site.js positions it FIXED from the input's
+   rectangle, and repositions on resize and on that column's scroll.
+2. **Documents are indexed** -- the syllabus one row per PAGE (linking
+   `#page=N`) and the decks one row per SLIDE ("see Module 3, Video 2, Slide
+   14", linking the .pptx, because a .pptx cannot be addressed by URL).
+   `_search_docs.py`, rescanned every build, so a new deck needs no
+   bookkeeping. Slide NOTES are deliberately excluded. New dependency:
+   `pypdf`, degrading to a warning.
+3. **Deadlines had no row of their own.** "Problem Set 1" returned the weeks
+   that mention problem sets and nothing that WAS Problem Set 1, because the
+   Deadlines column is chrome. One row per dated assessment now, from the same
+   `assessments()`.
+
+Index: 237 entries (24 pages, 8 deadlines, 205 documents), 180 KB. Documents
+rank below every page and take at most 6 of 12 rows.
+
+### Problem-set cards and the calendar column
+
+The red card's **name is the link** to BruinLearn Assignments, and under it:
+"Download the Problem Set from BruinLearn and upload <u>one solution per
+group</u> on BruinLearn". The Deadlines column no longer jumps to BruinLearn
+-- every row opens its week, like every other deadline.
+
+### One height for every band
+
+Home, General Logistics and a week page measured 50 / 54 / 56px, so stepping
+between them shifted the content. `.band` is now `min-height:56px` **plus
+`flex:none`** -- and the second half is not optional: the band is a flex child
+of a height-capped `<main>`, and giving a flex item a min-height REPLACES its
+automatic content minimum, so min-height alone squashed every band to 36px
+with the titles overflowing. Measured before and after, at four widths.
+
+### Smaller things
+
+General Logistics lost the "Home" back link and its centre now reads "EMBA
+Section 2 - Fall 2026". Between roughly 861 and 1000px that longer line can
+push the title to two rows -- known, not fixed.
+
 ## Subscribe to the deadlines (2026-09-09)
 
 A calendar **icon** in the Deadlines & Exams header, desktop only -- the CSS

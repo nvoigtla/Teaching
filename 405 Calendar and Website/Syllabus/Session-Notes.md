@@ -210,3 +210,23 @@ syllabus prints 2:00 PM – 5:00 PM and the EMBA one still prints
 9:00 AM – 12:00 PM. Nico scoped the request to the calendar and the website;
 the syllabus was rebuilt anyway, because leaving it would have had it
 contradict both. FEMBA syllabus re-exported: 5 pages, 16 links.
+
+## Computers and tablets, reworded (2026-09-23)
+
+Nico's wording, verbatim, for both sections:
+
+> No use of laptops. Surfing the internet and catching up on your e-mail is
+> distracting, both for yourself and for those around you. Exception: if you
+> prefer to take notes on your tablet, you may do so - but use the tablet for
+> note-taking only.
+
+It replaces "No use of laptops or tablets, with the exception of note-taking
+... Exception: if you prefer to take notes on your tablet - but for
+note-taking only." Laptops are out altogether now, and the tablet exception
+reads as a permission rather than a sentence fragment.
+
+One edit in `_build_syllabus.py` -- both sections read the same block. Rebuilt
+.docx and .md, re-exported both PDFs through Word, and **verified by
+extracting the PDF text** that the new sentence is present and the old one
+gone in both. Published the same day.
+

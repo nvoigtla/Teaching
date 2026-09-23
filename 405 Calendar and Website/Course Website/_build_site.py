@@ -47,6 +47,11 @@ import _calendar_content as C  # noqa: E402
 # EMBA keeps this folder, so its published site is untouched; a second
 # section gets a subfolder of its own. SRC is where the hand-authored
 # stylesheet and script live -- always this folder, for both sections.
+import _search_docs                                      # noqa: E402
+
+# the folder holding Syllabus/ and Course Calendar/ beside this one
+ROOT_DOCS = os.path.abspath(os.path.join(HERE, os.pardir))
+
 SRC = HERE
 OUT = HERE if C.SECTION == "emba" else os.path.join(HERE, C.SECTION)
 
@@ -99,7 +104,18 @@ NICO_EMAIL = "nico.v@ucla.edu"
 # It used to redirect to the current week, and every link back here had to
 # carry ?stay=1 to defeat that; with the redirect gone the plain URL is
 # right, and a bookmarked ?stay=1 still lands in the same place.
-GL_HREF = "index.html"
+# A lighter HOME page takes the root, and General Logistics keeps its own
+# page one click away (2026-09-23, Nico). It was EMBA-only while the format
+# was being settled; BOTH sections have it as of the same day, so the two
+# sites stay identical in everything but their section facts.
+#
+# MGMT405_HOME=0 still builds the site WITHOUT it, which is what shipped the
+# syllabus edit while Home was being worked on. Nothing depends on that path
+# now; it is kept because it costs one line and it is the only way to publish
+# the documents without the landing page.
+HOME_ON = os.environ.get("MGMT405_HOME", "1") != "0"
+HOME_HREF = "index.html" if HOME_ON else None
+GL_HREF = "logistics.html" if HOME_ON else "index.html"
 
 # ===================== category cards (calendar format) =====================
 # Title, header glyph and body tint per category, matching _build_calendar.py:
@@ -617,6 +633,8 @@ def left_column(current):
     # (2026-09-03, Nico).
     # no sub-line: "Before You Start" was dropped (2026-09-04, Nico)
     head = [util(GL_HREF, "index", "General Logistics", "", "◆")]
+    if HOME_ON:
+        head.insert(0, util(HOME_HREF, "home", "Home", "", "⌂"))
     tail = [util(href, key, title, sub, glyph)
             for href, key, title, sub, glyph in EXTRA_PAGES]
     tail += [util(href, key, title, sub, glyph, external=True)
@@ -756,6 +774,18 @@ def mail_link(address, text, cls=""):
             % ((" " + cls) if cls else "", enc(local), enc(domain), esc(text)))
 
 
+def mail_link_shown(address, cls=""):
+    """A mail link that DISPLAYS the address -- without the address being in
+    the HTML (2026-09-23, Nico: "make sure the emails cannot be used for spam
+    crawlers"). mail_link() hides only the href, so printing the address as
+    the label handed it straight back to a harvester. Here the label is a
+    placeholder and site.js writes the real text from the same base64 halves
+    it already uses for the href."""
+    link = mail_link(address, "e-mail address", cls)
+    return link.replace('<a class="mail', '<a data-show="1" class="mail mail-ph',
+                        1)
+
+
 def ta_link(text, cls=""):
     """The TA's name as a mail link -- or as plain text when the section has
     no mailbox yet, rather than routing students to the other section's TA
@@ -812,7 +842,8 @@ def jump_select(current):
             '<select class="jumpsel" id="jump" '
             'aria-label="Jump to a week or module">%s%s%s'
             '</select></span>'
-            % (opt(GL_HREF, "General Logistics", "index", "general"),
+            % ((opt(HOME_HREF, "Home", "home", "general") if HOME_ON else "")
+               + opt(GL_HREF, "General Logistics", "index", "general"),
                weeks, mods
                + "".join(opt(href, title, key, "extra")
                          for href, key, title, _s, _g
@@ -1025,10 +1056,11 @@ def right_column(current_week):
         # it is listed under, which is usually the page the student is
         # already on (2026-09-12, Nico). Everything else keeps the week
         # link: the practice final is not a problem set.
-        if a["label"].lower().startswith("problem set"):
-            href, tgt = BRUINLEARN_ASSIGNMENTS, ' target="_blank" rel="noopener"'
-        else:
-            href, tgt = "week-%02d.html" % a["week"], ""
+        # A deadline in this column always opens its WEEK (2026-09-23,
+        # Nico). Problem sets used to jump straight to BruinLearn, which
+        # skipped the red card that says what is due and when -- and it is
+        # the card, not this narrow row, that carries the BruinLearn links.
+        href, tgt = "week-%02d.html" % a["week"], ""
         rows.append(
             '<li%s%s data-week="%d" data-date="%s" data-kind="%s"%s'
             ' data-title="%s"><span class="w">Week %d</span>'
@@ -1158,7 +1190,7 @@ def page(fname, page_title, nav_kind, current, main_html,
         "helpbody": help_body(),
         "site": esc(SITE_NAME),
         "navkind": nav_kind,
-        "gl": GL_HREF,
+        "gl": HOME_HREF or GL_HREF,
         "inst": esc("Prof. Nico Voigtländer"),
         "school": "UCLA Anderson",
         "nico": esc(NICO_URL),
@@ -1271,16 +1303,30 @@ def week_main(w):
         if is_pset:
             # The Assignments page, not the course root: the same page
             # serves the download and the upload from 2026-09-12.
-            upload = ('<p class="upload">Upload one solution per group on '
-                      '<a href="%s" target="_blank" rel="noopener">BruinLearn'
-                      '</a></p>' % BRUINLEARN_ASSIGNMENTS)
+            # One sentence covering both halves (2026-09-23, Nico): both
+            # "BruinLearn"s link the Assignments page, and the underline
+            # marks what has to be handed in -- the same <u> device the
+            # podcast labels use for the timing word.
+            bl = ('<a href="%s" target="_blank" rel="noopener">BruinLearn</a>'
+                  % BRUINLEARN_ASSIGNMENTS)
+            upload = ('<p class="upload">Download the Problem Set from %s '
+                      'and upload <u>one solution per group</u> on %s</p>'
+                      % (bl, bl))
         # Only a problem set takes the dark-red treatment; the practice final
         # is not one, so it keeps the gold rule (2026-09-03, Nico).
+        # "Problem Set 1" is ITSELF the link to BruinLearn, where the set is
+        # downloaded (2026-09-23, Nico -- a separate "Download ..." line was
+        # one line too many). The practice final is not a problem set, so its
+        # name stays plain text.
+        name = esc(label)
+        if is_pset:
+            name = ('<a href="%s" target="_blank" rel="noopener">%s</a>'
+                    % (BRUINLEARN_ASSIGNMENTS, name))
         h.append('<div class="pcard due%s"><div class="pcard-bd">'
                  '<span class="g" aria-hidden="true">✎</span>'
                  '<div class="lead"><b>%s</b>%s%s</div>%s</div></div>'
                  % (" pset" if is_pset else "",
-                    esc(label), (" — %s" % esc(note)) if note else "",
+                    name, (" — %s" % esc(note)) if note else "",
                     upload, ("<time>%s</time>" % esc(when)) if when else ""))
 
     if w.get("exam"):
@@ -1645,6 +1691,114 @@ def panel(title, body, glyph=None):
             % (box_hd(title, glyph), body))
 
 
+HOME_GLYPH = "⌂"
+
+# The teaching-team rows, one small mark each, in the same inline-SVG style
+# as the other glyphs here: currentColor, so they take the row's ink, and
+# crisp at 13px where an emoji-plane character would render as a coloured
+# box (the bug fixed on the subscribe icon).
+def _mark(paths, extra=""):
+    return ('<svg viewBox="0 0 16 16" width="13" height="13" fill="none"'
+            ' stroke="currentColor" stroke-width="1.35"'
+            ' stroke-linecap="round" stroke-linejoin="round"'
+            ' aria-hidden="true" focusable="false">%s%s</svg>'
+            % (paths, extra))
+
+PERSON_GLYPH = _mark('<circle cx="8" cy="5.1" r="2.9"/>'
+                     '<path d="M2.6 14.4c0-3 2.4-5.1 5.4-5.1s5.4 2.1 5.4 5.1"/>')
+TAG_GLYPH = _mark('<path d="M8.8 1.6h5.6v5.6l-7 7-5.6-5.6z"/>',
+                  '<circle cx="11.7" cy="4.5" r="1"/>')
+BIO_GLYPH = _mark('<path d="M1.4 6.3 8 2.3l6.6 4"/>'
+                  '<path d="M3 6.9v6M6.3 6.9v6M9.7 6.9v6M13 6.9v6"/>'
+                  '<path d="M1.2 13.4h13.6"/>')
+
+
+def team_member(photo, name, role, role2, email, bio=None):
+    """One row of The Teaching Team: a round portrait, then the name, the
+    role, the address and (for the instructor) the faculty page. The address
+    goes through mail_link(), so the published HTML carries no "@" and no
+    readable address for a harvester to scrape -- site.js reassembles it."""
+    rows = [(PERSON_GLYPH, '<span class="nm">%s</span>' % esc(name)),
+            (TAG_GLYPH, '%s<span class="r2">%s</span>'
+                        % (esc(role), esc(role2))),
+            (HELP_MAIL, mail_link_shown(email))]
+    if bio:
+        rows.append((BIO_GLYPH,
+                     '<a href="%s" target="_blank" rel="noopener">View Bio</a>'
+                     % esc(bio)))
+    return ('<div class="member">'
+            '<img class="avatar" src="%s" alt="" width="84" height="84">'
+            '<div class="who">%s</div></div>'
+            % (photo,
+               "".join('<div class="row">'
+                       '<span class="g" aria-hidden="true">%s</span>'
+                       '<span class="v">%s</span></div>' % (g, v)
+                       for g, v in rows)))
+
+
+
+def home_main():
+    """The landing page (2026-09-23, Nico): lighter than General Logistics,
+    which keeps its own page one click away. Same layout -- band, body,
+    the menu on the left and the deadlines on the right -- but the content
+    is only a welcome and a short note on how to use the site."""
+    h = []
+    # The band names the course rather than the page, as ONE line ending in
+    # the term (2026-09-23, Nico): "Managerial Economics Fall 2026 - EMBA -
+    # Fall 2026". The separate centre element is dropped, or the term would
+    # be printed twice. The dash is the deck's en dash with spaces, the same
+    # one SITE_NAME already puts before the section label.
+    # Same shape as every other band (2026-09-23, Nico): the page's name on
+    # the left, its descriptor in the centre slot -- "Home" then
+    # "Managerial Economics Fall 2026 - EMBA - Fall 2026", the way General
+    # Logistics carries "EMBA Section 2 - Fall 2026".
+    h.append('<div class="band">'
+             '<div class="who"><h1>Home</h1></div>'
+             '<div class="center big">%s</div><div class="back"></div></div>'
+             % esc("%s – %s" % (SITE_NAME, C.TERM)))
+    h.append('<div class="body">')
+
+    team = panel(
+        "The Teaching Team",
+        '<div class="team">%s%s</div>'
+        % (team_member("assets/photo-nico.png", "Nico Voigtländer",
+                       "Instructor", "Professor of Economics", NICO_EMAIL,
+                       bio=NICO_URL),
+           team_member("assets/photo-rafael.png", C.TA_NAME,
+                       "Teaching Assistant (TA)",
+                       "PhD Student in Economics", C.TA_EMAIL)),
+        PERSON_GLYPH)
+
+    howto = panel(
+        "How to Use This Site",
+        "<ul>"
+        "<li>Before getting started, go over the "
+        '<a href="%s">General Logistics</a> in the menu on the left.</li>'
+        "<li>You can switch between view by week or by Module."
+        "<ul>"
+        "<li>The week pages show the suggested study material throughout "
+        "the quarter.</li>"
+        "<li>The Module view is organized by topics and will help you "
+        "study for exams.</li>"
+        "</ul></li>"
+        '<li><a href="#deadlines"><b>Deadlines &amp; Exams</b></a> on the '
+        "right lists every due date. The calendar icon "
+        # both links act on the deadlines card: the first scrolls to it,
+        # this one also opens the subscribe panel (2026-09-23, Nico)
+        '<a href="#deadlines" data-opens="dl-exp">subscribes</a> them to '
+        "your own calendar, with automatic updates.</li>"
+        "</ul>" % GL_HREF,
+        "▤")
+
+    # the team card takes the wider half: the portraits are large and the
+    # rows carry long strings ("PhD Student in Economics", the TA's
+    # address), which wrapped at an even split (2026-09-23)
+    h.append('<div class="gl-row team-row">%s%s</div>' % (team, howto))
+    h.append("</div>")
+    h.append(next_link(GL_HREF, "General Logistics"))
+    return "".join(h)
+
+
 def logistics_main():
     keep_books = [t for t in C.TEXTBOOK_NOTES
                   if not any(d in t for d in DROP_TEXTBOOK_NOTES)]
@@ -1660,8 +1814,14 @@ def logistics_main():
     # (2026-09-04, Nico). The menu row still carries the sub-line.
     h.append('<div class="band">'
              '<div class="who"><h1>General Logistics</h1></div>'
+             # no back link to Home (2026-09-23, Nico): both menus carry
+             # Home, and the empty slot keeps this band the same height as
+             # the landing page's, so stepping between them does not jump
              '<div class="center big">%s</div><div class="back"></div></div>'
-             % esc(C.TERM))
+             # "EMBA Section 2 - Fall 2026" (2026-09-23, Nico). Built from
+             # SECTION_NAME rather than SECTION_TITLE, which joins the two
+             # with a comma; the band uses the deck's spaced en dash.
+             % esc("%s – %s" % (C.SECTION_NAME, C.TERM)))
     h.append('<div class="body">')
 
     # Built here because the band below prints it -- the definition used to
@@ -1842,13 +2002,26 @@ def plain(html):
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).strip()
 
 
-def build_index(pages):
+def _norm(s):
+    return (s or "").lower().replace("–", "-").replace("—", "-")
+
+
+def build_index(pages, docs=()):
     rows = []
     for href, kind, title, sub, html in pages:
-        hay = plain(html).lower().replace("–", "-").replace("—", "-")
+        hay = _norm(plain(html))
         head = " ".join([kind.lower(), title.lower(), (sub or "").lower()])
         rows.append({"href": href, "kind": kind, "title": title, "sub": sub,
                      "head": head, "hay": head + " " + hay})
+    # Documents -- syllabus pages and slides. `d` marks them so site.js can
+    # rank them below the site's own pages and cap how many of the twelve
+    # results they may take: 200 slides would otherwise crowd out the week
+    # page a student was actually looking for.
+    for d in docs:
+        head = " ".join([d["kind"].lower(), d["title"].lower()])
+        rows.append({"href": d["href"], "kind": d["kind"], "title": d["title"],
+                     "sub": d["sub"], "head": head,
+                     "hay": head + " " + _norm(d["text"]), "d": 1})
     body = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
     with io.open(os.path.join(OUT, "assets", "search-index.js"), "w",
                  encoding="utf-8", newline="\n") as f:
@@ -1915,7 +2088,8 @@ def main():
         # site.css and site.js are hand-authored ONCE, in Course Website/.
         # Copy them in on every build so a second section can never drift
         # from the stylesheet Nico actually edits (2026-09-05).
-        for _a in ("site.css", "site.js", "bruin-bear.png"):
+        for _a in ("site.css", "site.js", "bruin-bear.png",
+                   "photo-nico.png", "photo-rafael.png"):
             shutil.copy2(os.path.join(SRC, "assets", _a),
                          os.path.join(OUT, "assets", _a))
     if not os.path.exists(PANOPTO_SHOT_SRC):
@@ -1941,8 +2115,13 @@ def main():
     print("  slides/                 (%d decks)" % len(keep))
     pages = []
 
+    if HOME_ON:
+        hm = home_main()
+        page(HOME_HREF, "Home", "", "home", hm)
+        pages.append((HOME_HREF, "Home", "Home", "Start here", hm))
+
     gl = logistics_main()
-    page("index.html", "General Logistics", "", "index", gl)
+    page(GL_HREF, "General Logistics", "", "index", gl)
     pages.append((GL_HREF, "General", "General Logistics",
                   "Before You Start", gl))
 
@@ -1970,14 +2149,46 @@ def main():
         pages.append((fname, "Module %d" % num, title,
                       "Weeks " + ", ".join(str(k) for k in wks), html))
 
-    build_index(pages)
+    # Every deadline is searchable in its own right (2026-09-23, Nico:
+    # typing "Problem Set 1" brought back the weeks that MENTION problem
+    # sets, with nothing that WAS Problem Set 1). The Deadlines & Exams
+    # column is chrome repeated on every page, so its text reached the index
+    # only as part of whichever week page happened to carry the card -- and
+    # that row is titled after the week's topic, so a student could not see
+    # which week was the answer. A row per deadline, pointing at its week,
+    # fixes both: an exact title match already sorts first.
+    due_rows = []
+    for a in assessments():
+        if a["watch"]:
+            continue                       # "Watch Videos 1 - 7" is the week
+        due_rows.append(("week-%02d.html" % a["week"],
+                      "Exam" if a["exam"] else "Deadline",
+                      a["label"],
+                      "Week %d  ·  %s" % (a["week"], a["when"]),
+                      a.get("note") or ""))
+
+    docs = _search_docs.syllabus_rows(
+        os.path.join(ROOT_DOCS, "Syllabus", C.SYLLABUS_DOCX + ".pdf"),
+        SYLLABUS_URL)
+    docs += _search_docs.slide_rows(C.VIDEO_SLIDES, C.slides_pub_name)
+    print("  search: %d document rows (%d syllabus, %d slides)"
+          % (len(docs),
+             sum(1 for d in docs if d["kind"] == "Syllabus"),
+             sum(1 for d in docs if d["kind"] == "Slides")))
+
+    build_index(pages + due_rows, docs)
     write_feeds()
     stamp_assets()
 
     print("built %d pages" % len(pages))
-    print("  index.html, week-01..week-%02d, module-1..module-%d"
-          % (C.WEEKS[-1]["num"], MODULES[-1][0]))
-    print("  assets/search-index.js  (%d entries)" % len(pages))
+    print("  %sweek-01..week-%02d, module-1..module-%d"
+          % (("index.html (Home), logistics.html, " if HOME_ON
+              else "index.html, "),
+             C.WEEKS[-1]["num"], MODULES[-1][0]))
+    print("  assets/search-index.js  (%d entries: %d pages, %d deadlines, "
+          "%d documents)"
+          % (len(pages) + len(due_rows) + len(docs), len(pages),
+             len(due_rows), len(docs)))
     watch = [a for a in assessments() if a.get("watch")]
     print("  pre-class video rows in the deadlines list: %d" % len(watch))
     for a in watch:

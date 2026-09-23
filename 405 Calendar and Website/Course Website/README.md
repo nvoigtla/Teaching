@@ -47,7 +47,8 @@ python _deploy.py          # push the built pages to the public repo
   a phone is a full-screen list.
 - **Left column** — the color-coding key (the agenda legend from calendar
   page 1), a *By Week* / *By Module* toggle, and the page list. The list always
-  starts with **General Logistics**, then reads "Week 1", "Week 2", … or
+  starts with **Home** and **General Logistics**, then reads "Week 1",
+  "Week 2", … or
   "Module 1", "Module 2", … with each row's dates and coverage underneath, and
   closes with **All Videos**, **All Podcasts** and **All Practice Exercises**
   (the last an outgoing link to the TA's site, marked with a ↗ and opening in
@@ -122,11 +123,84 @@ site itself authors, never to calendar content.
 
 ## Where a visitor lands
 
-The site root lands on **the current week** once the quarter is running, and
-on **General Logistics** before it starts and after it ends. The redirect is a
-short inline script in `index.html` (generated, so the week dates come from the
-calendar). The sidebar's General Logistics link carries `?stay=1`, which
-suppresses the redirect, so the page is always reachable.
+The root is a light **Home** page (2026-09-23, Nico) — a welcome and a short
+note on how to use the site, in the same layout as every other page: the band,
+the menu on the left, the deadlines on the right. It carries no course
+material of its own; the page turn at its foot goes to General Logistics,
+which in turn goes to Week 1.
+
+There is no redirect. The root used to jump to the current week, and then (from
+2026-09-21) simply *was* General Logistics; `index.html` is now Home and
+**General Logistics has moved to `logistics.html`**. Any old `?stay=1` on a
+bookmarked URL is ignored and lands in the same place.
+
+**Both sections have it**, live since 2026-09-23. `HOME_ON` in
+`_build_site.py` drives `HOME_HREF` / `GL_HREF` and the two menus together,
+and both menus open with Home above General Logistics.
+
+`MGMT405_HOME=0` builds the site WITHOUT Home — the escape hatch that shipped
+the syllabus edit while the landing page was still being settled. Nothing
+depends on it now. If it is ever used again, **delete `logistics.html` first**:
+`_deploy.py` discovers every `.html` in the folder, so a stale one would ship
+on its own.
+
+## Every deadline is its own search result
+
+Typing "Problem Set 1" used to return the weeks that *mention* problem sets
+and nothing that WAS Problem Set 1 (2026-09-23, Nico). The Deadlines & Exams
+column is chrome repeated on every page, so its text only ever reached the
+index as part of whichever week page carried the card — and that row is
+titled after the week's topic, so the answer was invisible.
+
+`main()` now adds one row per dated assessment, from the same
+`assessments()` the column and the .ics feeds are built from: title "Problem
+Set 1", sub-line "Week 3 · Tue, Oct 13", linking to that week's page. An
+exact title match already sorts first, so it leads the results. The
+video-watching rows are left out — "Watch Videos 1 – 7 for Module 3" is the
+week page, which is already indexed.
+
+## Search covers the documents too
+
+Besides every week and module page, the index carries the **syllabus, one row
+per page**, and the **video slide decks, one row per slide** (2026-09-23,
+Nico). `_search_docs.py` extracts the text at build time and
+`build_index()` appends the rows.
+
+| | Row reads | The link |
+|---|---|---|
+| Syllabus | "Class Syllabus – page 5", with a snippet | the PDF at `#page=5`, which browser PDF viewers honour |
+| Slides | "see Module 3, Video 2, Slide 14" | "Download the full slide deck here" — the `.pptx` |
+
+A `.pptx` has no way to address one slide from a URL, so a slide row NAMES
+the place instead of pretending to jump there. **The decks are rescanned on
+every build** from `C.VIDEO_SLIDES`, so a deck added or replaced under
+`405 Slide Revisions 2026/Module N/Videos Final` is indexed by the next
+`python _build_site.py` with nothing to remember.
+
+Document rows are marked `d:1` and `site.js` ranks them **below every page**
+and lets them take at most **6 of the 12** results — 200 slides would
+otherwise bury the week page the student was looking for. The index grew from
+44 KB to about 180 KB, which is small enough to keep loading with the page
+rather than fetching it lazily.
+
+**Slide NOTES are deliberately not indexed** (`NOTES = False`). The notes are
+Nico's own script — asides, the answer to a discussion prompt, numbers kept
+off the slide on purpose — so indexing them would surface as course content
+things the class was never shown.
+
+**New build dependency: `pypdf`**, for the syllabus. Missing pypdf, a missing
+PDF or a deck that will not open is reported and skipped, never fatal.
+
+## The search results panel is positioned by script
+
+Above 861px the right column is its own scroll container and the results
+panel is WIDER than that column, so the column clipped its left edge and
+every result read as cut off (2026-09-23, Nico). An absolutely positioned
+child cannot escape a scrolling ancestor, so on desktop `place()` in
+`site.js` positions the panel FIXED against the viewport, from the input's
+own rectangle, and repositions it on resize and on scroll of that column.
+Below 861px the column does not scroll and the stylesheet's absolute rule
+applies unchanged.
 
 ## Light mode only
 
@@ -353,7 +427,7 @@ back to Calibri where Carlito is unavailable.
 | `assets/search-index.js` | GENERATED — do not edit |
 | `assets/panopto-login.png` | GENERATED — copied from the calendar's `Images/` |
 | `all-videos.html`, `all-podcasts.html` | GENERATED — do not edit |
-| `index.html`, `week-*.html`, `module-*.html` | GENERATED — do not edit |
+| `index.html` (Home), `logistics.html`, `week-*.html`, `module-*.html` | GENERATED — do not edit |
 
 `_deploy.py` **discovers** the pages to publish (every `.html` in the folder)
 rather than carrying a list — a hardcoded list silently dropped the two new
