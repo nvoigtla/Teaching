@@ -1,8 +1,18 @@
 # Session Notes — Module 1 (combined In-Class + Videos deck)
 
-## PENDING (updated 2026-08-27 — deck is 95 slides)
+## PENDING (updated 2026-09-22)
 
-Open items on **Module 1 - Revised.pptx**:
+Open item on **Module 1 - In Class.pptx** (60 → 63 slides):
+A. **Do the three new empty poll slots stay?** Each of the three
+   poll set-ups is now followed by an empty POLL placeholder AND by
+   the LIVE PollEverywhere activity that was already there – see the
+   table in the 2026-09-22 entry. Slots 21 and 25 look right (the
+   question-view slides for those two polls were deleted on
+   2026-08-27, leaving only the results view); slot 39 is doubtful,
+   because flip-a-house already carries both views. Nothing was
+   deleted; awaiting Nico's call.
+
+Open items on **Module 1 - Revised.pptx** (95 slides):
 0. **Podcast URL for display 12** — the Sound button is a marker until
    Nico supplies the link (one line in `_build_Module1.py`).
 0c. **Display 24** — the AI-accelerator image has no attribution line.
@@ -17,6 +27,85 @@ Open items on **Module 1 - Revised.pptx**:
    "Photos: Wikimedia Commons" caption across two photos, and the four
    video title cards (1, 10, 17, 27) carry one-line notes the
    video-conversion rule says they should not have.
+
+## 2026-09-22 – new "Module 1 - In Class.pptx": picture style + poll slots
+
+**One-line summary.** Nico dropped a NEW deck into the folder –
+`Module 1 - In Class.pptx`, the in-class-only cut – and asked for two
+edits: the picture he had inserted on slide 4 styled like the rest of the
+deck, and an empty poll slide after each poll set-up. Both applied and
+verified; the deck went 60 → 63 slides.
+
+### What this deck IS – read this before touching it
+- 63 slides, 16:9, hand-assembled from the Revised deck (its chrome, tags
+  and Poll Break badges are the 2026-08-27 ones). It is **NOT built by the
+  pipeline**: `_build_Module1.py` still produces the 95-slide
+  `Module 1 - Revised.pptx`, which knows nothing about this file. So this
+  deck is edited IN PLACE, and `_verify_anim.ps1` (keyed to the 95-slide
+  deck) does not apply to it.
+- It carries **four LIVE PollEverywhere activities** – slides 22, 26, 40
+  and 41, each with its `tags` part and the "Poll Title: Do not modify the
+  notes…" payload, plus the four `ppt/tags/tag*.xml` parts. Never round-trip
+  this deck through python-pptx and never touch those notes.
+
+### Edit 1 – slide 4's picture
+The textbook cover Nico inserted got the deck's house picture style:
+`roundRect` adj 8000 + `outerShdw` blurRad 50800 / dist 38100 / dir
+2700000 / black at alpha 50000. The style was READ OFF this deck (11 of
+its pictures already carry it; display 17 is the reference), not assumed
+from the build script.
+
+**Flagged, not changed:** Teaching CLAUDE.md lists book covers among the
+flat exceptions that take neither rounding nor shadow. Nico asked for both
+explicitly, so both were applied.
+
+### Edit 2 – an empty poll slot after each poll set-up
+Three slides carry the Poll Break badge (displays 20, 23, 36 in the
+60-slide deck). Each now has an empty poll slide after it, copying display
+34 of `Module 4 - Revised.pptx`: navy top bar + section tag, footer
+chrome, and the round gold POLL pill at (11.567", 6.460") 1.490 × 0.510",
+`roundRect` adj 50000, fill `E09F3E`, `outerShdw` alpha 45000, label
+"POLL" 20 pt bold navy Calibri. No title, no body, no animation, no notes.
+
+- **Each placeholder is built from the set-up slide it follows**, then
+  stripped of everything in the 0.50"–7.10" band – title, its rule and gold
+  strip, the body, and the Poll Break badge. So it inherits that slide's
+  own tag and footer, which is exactly how Module 4's slide 34 relates to
+  its slide 33. Slots 21 and 25 read `Module 1 · In Class · Examples ·
+  Supply and Demand`, slot 39 `Module 1 · Economic Costs Include
+  Opportunity Costs`.
+- The pill's box and label are GROUPED, which Module 4 leaves ungrouped –
+  the deck-wide "a filled box and the text on it are one object" rule, and
+  this deck's own Poll Break badge is grouped too.
+
+### The resulting sequences – and the open question
+| Poll | set-up | NEW empty | existing LIVE poll | solution |
+|---|---|---|---|---|
+| Heatwaves / AC | 20 | **21** | 22 | 23 |
+| Swiftonomics | 24 | **25** | 26 | 27 |
+| Flip a house | 38 | **39** | 40 + 41 | 42 |
+
+Nico said he would "later include the PollEV sheet" on the new slides,
+which suggests he had not registered that live activities are already
+there. See item A of PENDING.
+
+### Mechanics
+`_inclass_edits.py` (kept) does both edits as pure zip + lxml surgery – no
+python-pptx round-trip. It builds each new slide part by hand
+(`slide61/62/63.xml` + a rels file carrying only the slideLayout), registers
+it in `[Content_Types].xml`, `presentation.xml.rels` and `sldIdLst`, and
+inserts the three in DESCENDING source order so the earlier positions stay
+valid. It refuses to run twice (it looks for the `PollPill` group), and
+`--renumber` refreshes the cached `<a:fld type="slidenum">` text, which the
+insertion left one to three behind on 36 slides.
+
+### Verified
+Opens in PowerPoint at 63 slides; full-screen slideshow probe
+(`_slideshow_probe.ps1 -Deck "Module 1 - In Class.pptx"`) on slides 1, 4,
+20, 21, 22, 25, 26, 39, 40, 63 – no failure banner and all three live polls
+render live, which is the check that matters after OOXML surgery on a deck
+with polls. Backup rolled to `Module 1 - In Class_t-1.pptx` first; that copy
+mattered more than usual, since the deck was still untracked in git.
 
 ## 2026-08-27 — adopting Nico's hand pass; format audit; podcasts
 
