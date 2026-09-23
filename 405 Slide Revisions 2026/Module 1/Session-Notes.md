@@ -1,9 +1,62 @@
 # Session Notes — Module 1 (combined In-Class + Videos deck)
 
-## PENDING (updated 2026-09-22)
+## PENDING (updated 2026-09-23)
 
-Open item on **Module 1 - In Class.pptx** (60 → 63 slides):
-A. **Do the three new empty poll slots stay?** Each of the three
+**STANDING RULES for Module 1 (2026-09-23, Nico)**
+- **`Module 1 - Revised.pptx` is the SOURCE OF TRUTH.** The build pipeline
+  is retired and refuses to write it (`_m1_frozen.py`). Edit the .pptx.
+- **Never delete a slide from it without asking.** Only update the slides
+  that changed in the in-class deck.
+- `Module 1 - In Class.pptx` is FROZEN — adopted exactly as Nico left it.
+
+C1. *(resolved 2026-09-23)* `Module 1 - Revised.pptx` IS the source of
+    truth. The pipeline is retired and guarded — see round 5 below. Edit
+    the .pptx directly from here on.
+C2. The backup slide's Back button returns to RV 45 (the in-class
+    roadmap), while RV 7 (the Video-1 roadmap) also links to it. Fine, or
+    re-point?
+C3. *(resolved 2026-09-23)* Nico removed the stranded effect himself, in
+    REVISED: slide 42 is now 0 clicks / 0 effects, honestly static, with
+    all four illustrations showing as the slide opens. **In-Class slide 8
+    still carries the orphan** — the two decks now differ there on purpose,
+    because Revised is the source of truth and In-Class is a frozen
+    archive. `_xml_diff.py` reports that one pair, as expected; it is the
+    only content divergence between the decks (slide 92's page number
+    aside).
+
+**Checking this deck:** `_xml_diff.py` is the conclusive In-Class ↔ Revised
+check (normalized raw XML). `_style_diff.py` covers geometry/fills/effects.
+`_ic_vs_rev.py` covers text and layout. Use the first one before claiming
+the two decks agree — the other two each have blind spots.
+
+*(All six merge questions below were answered on 2026-09-23 and are done —
+kept for the record.)*
+B1. The three live poll slides – port In-Class's full-bleed / POLL-pill
+    captures over Revised's inset ones? They also open the activity live
+    rather than on the closed chart.
+B2. Revised keeps RV 72, the flip-house poll's question view; In-Class
+    collapsed that poll to one slide. Drop it from Revised?
+B3. Revised keeps RV 42/43, the Econ & Coffee poll pair, dropped from
+    In-Class. Drop from Revised too?
+B4. Revised keeps RV 94 "People Respond to Incentives", deleted from
+    In-Class – but **RV 3 jump-links to it**. Keep, or delete and rewire?
+B5. Add In-Class slide 7, "Recall from Video 1: Economists as Hedgehogs",
+    to Revised's in-class part?
+B6. The roadmap / "Can These Prices Be Optimal?" pair (IC 11 → RV 47,
+    IC 58 → RV 95): where should the jump pill live in Revised, and where
+    should the Back button point?
+
+## PENDING (older, updated 2026-09-22)
+
+Open items on **Module 1 - In Class.pptx** (now 59 slides):
+A2. **Slide 50's five olive "Total Benefit of Hour N" boxes** sit BEHIND
+   the bars and show only as a hairline; clicks 1–5 reveal them invisibly.
+   Two are mislabelled "Hour 1", and "Net Loss of Hour 3" sits on the
+   Hour-5 bar. See the 2026-09-23 (round 2) entry.
+A. *(resolved 2026-09-23)* The empty poll slots: Nico deleted the
+   flip-house placeholder and collapsed that poll to one live view. Three
+   live activities remain (21, 24, 37). Original question kept below.
+A-orig. **Do the three new empty poll slots stay?** Each of the three
    poll set-ups is now followed by an empty POLL placeholder AND by
    the LIVE PollEverywhere activity that was already there – see the
    table in the 2026-09-22 entry. Slots 21 and 25 look right (the
@@ -27,6 +80,442 @@ Open items on **Module 1 - Revised.pptx** (95 slides):
    "Photos: Wikimedia Commons" caption across two photos, and the four
    video title cards (1, 10, 17, 27) carry one-line notes the
    video-conversion rule says they should not have.
+
+## 2026-09-23 (round 3) – In-Class merged INTO "Module 1 - Revised"
+
+**One-line summary.** Nico froze `Module 1 - In Class.pptx` ("no more
+changes") and asked for Revised to be brought up to it wherever anything
+differs, the in-class version being dominant. 57 slide pairs were compared;
+35 were already identical, **17 were ported**, and **5 are held back pending
+his answers** (below).
+
+### The mapping – it cannot be found by similarity alone
+`_ic_vs_rev.py` (new, read-only) uses an EXPLICIT In-Class -> Revised map,
+because a text-similarity matcher pairs in-class slides with their
+near-identical twins in Revised's VIDEO block: Netflix, the hedgehogs slide
+and all the outline slides appear twice in Revised. Every pairing is
+re-scored and anything under 0.50 is flagged, so a wrong pairing cannot pass
+silently. The In-Class deck (58 slides) maps onto Revised's in-class part
+(35-95); the two decks order their front matter differently (IC puts the
+"In-Class Part" divider at 14, Revised at 35) but the content pairs 1:1.
+
+### Ported – the slide part is copied WHOLESALE
+`_port_ic_to_rev.py` (kept) copies the slide XML, its notes, its images and
+its layout rel, rather than re-deriving the differences. That is the only
+way to carry the hand-built choreography across: slide 50's 23-click
+exercise chart and slide 33's 15-shape table would not survive being rebuilt
+from the generic rules. Teaching CLAUDE.md is explicit – "never regenerate
+animations from the generic guidelines when the source deck carries my
+hand-tuned choreography".
+
+| IC | RV | what came across |
+|---|---|---|
+| 9 | 45 | Making the Most 2 – body rebalanced, 2 clicks → 1 |
+| 10 | 46 | Teaching Philosophy – body tightened |
+| 13 | 49 | outline – pills nudged down, "✎ Problem Set 1" box removed |
+| 14 | 35 | In-Class Part divider – taller title box, strip moved |
+| 17 | 52 | Netflix – 4 clicks → 3 |
+| 26, 29, 35 | 61, 64, 70 | Class-Discussion badge dropped from the build (it is chrome) |
+| 33 | 68 | **the fruit table** – native table → 15 cell shapes, the two fruit photos, 3 clicks → 10 |
+| 34 | 69 | **$30 → $50** per present |
+| 39, 45, 46 | 75, 81, 82 | bodies moved / resized; Concorde 2 clicks → 3 |
+| 49 | 85 | Cost-Benefit – 4 clicks → 6 |
+| 50 | 86 | **the exercise chart** – rebuilt, 7 clicks → 23, with the shades and 0.05" rounding |
+| 51 | 87 | "MC (Marginal Cost)" raised 0.20" |
+| 53 | 89 | Next Steps – real dates ("Due on Tuesday, Oct 13") |
+
+**Gotcha, cost one round:** the first version renumbered each copied slide's
+relationship Ids sequentially and remapped the slide XML in place. In-Class
+slide 33's rels are stored out of order (rId3, rId2, rId1, rId4), so the
+remap renamed the same `r:embed` twice and the apple and the STOP sign came
+through as "The picture can't be displayed". **Keep the source's own rel Ids
+verbatim** – the slide XML is copied unchanged, so its references already
+point at them, and a brand-new rels file cannot collide with anything.
+Revised was restored from `_t-1` and the port re-run.
+
+### Verified
+Revised opens at 95 slides. Click counts on every ported slide match the
+in-class original (RV 68 = 10 clicks / 12 effects, RV 86 = 23 / 33).
+`_ic_vs_rev.py` now reports **52 of 57 pairs identical**, the five
+exceptions being exactly the ones held back. Full-screen slideshow probe on
+1, 35, 42, 49, 56, 59, 68, 72, 73, 86, 89, 95: no failure banner, and all
+five live PollEverywhere activities render. Slides 68 and 86 rendered and
+eyeballed after the image fix.
+
+### HELD BACK – awaiting Nico (see PENDING)
+1. **Three live poll slides** IC 21/24/37 -> RV 56/59/73. Same activity ids,
+   but the in-class captures are full-bleed with the round POLL pill and
+   open the activity in the LIVE state (`state=opened`), while Revised's are
+   inset captures opening the CLOSED chart (`display_state=chart`).
+2. **RV 72** – the flip-house poll's question view. In-Class collapsed that
+   poll to a single slide; Revised still carries both views.
+3. **RV 42 / 43** – the Econ & Coffee poll pair, dropped from the in-class
+   deck but still in Revised.
+4. **RV 94** – "People Respond to Incentives". Deleted from In-Class, but
+   **RV 3 jump-links to it**, so removing it from Revised breaks a link in
+   the video part.
+5. **IC 7** – "Recall from Video 1: Economists as Hedgehogs", a new in-class
+   slide with no twin in Revised (Revised has the un-retitled original at 6,
+   inside the Video-1 block).
+6. **IC 11 -> RV 47** and **IC 58 -> RV 95** – the roadmap / "Can These
+   Prices Be Optimal?" pair. In-Class puts the jump pill on its only roadmap
+   (IC 11) and links it to IC 58; Revised wires the pill to slide 7, the
+   Video-1 roadmap, and RV 47 has none. Porting either one needs the link
+   target decided first. IC 58 is also a substantial rebuild (13 clicks).
+
+### Round 4 the same day — the merge finished on Nico's answers
+
+His answers to the six questions: (1) import the poll slides; (2) keep just
+one flip-house view; (3) drop the Econ & Coffee pair; (4) do NOT delete
+"People Respond to Incentives"; (5) the hedgehogs slide stays only in the
+intro, not duplicated; (6) adopt the roadmap / "Can These Prices" pair from
+the in-class deck.
+
+**Standing rule he gave with them: NEVER delete a slide from
+`Module 1 - Revised.pptx` without asking. Only update the slides that
+changed in the in-class deck.** The three deletions below are the ones he
+authorised in that message and nothing else was removed.
+
+### Ported (`_merge_ic_round2.py`, kept)
+| IC | RV (old #) | carried |
+|---|---|---|
+| 11 | 47 | the roadmap, now with the "Can these prices be optimal?" jump pill |
+| 21, 24, 37 | 56, 59, 73 | the three LIVE PollEverywhere slides – full-bleed captures with the round POLL pill, opening the activity live rather than on the closed chart |
+| 58 | 95 | "Can These Prices Be Optimal?", his 13-click rebuild |
+
+Both jump links were re-pointed at their Revised targets, the in-class way:
+the in-class roadmap now links to the backup slide and that slide's Back
+button returns to it.
+
+### Deleted (authorised)
+`RV 42` + `RV 43` (Econ & Coffee poll pair) and `RV 72` (the flip-house
+poll's second view) – slide part, rels, notes and tags parts, their
+`[Content_Types].xml` overrides, the `sldIdLst` entry and the presentation
+rel, in descending order so earlier positions stay valid. Deck **95 → 92
+slides**; 43 cached `slidenum` fields refreshed afterwards.
+
+### Verified
+- `_ic_vs_rev.py` (re-mapped for the new numbering): **all 57 pairs
+  identical**. The only residue it prints is slide 92's page number reading
+  92 instead of the in-class 58 – a live field, so that is correct.
+- Every slide→slide jump link resolves: 2↔88, 3↔91, 7→92, 36→88, 45↔92,
+  46→89, 90→46. **RV 3 → RV 91 still works**, which is why "People Respond
+  to Incentives" was kept.
+- Click counts survive the copy: RV 66 = 10 (fruit table), RV 83 = 23
+  (exercise chart), RV 92 = 13 (backup rebuild), RV 45 = 1.
+- Deck opens at 92 slides; slideshow probe on 1, 45, 54, 57, 66, 70, 83, 91,
+  92 – no failure banner, and the three remaining live polls render.
+
+### Two consequences worth knowing
+1. **`Module 1 - Revised.pptx` is now OFF-PIPELINE.** `_build_Module1.py`
+   still produces a 95-slide deck from the old content and knows nothing
+   about any of this. Rebuilding would throw the whole merge away. Treat the
+   .pptx as the source of truth for Module 1 from here, or budget a session
+   to port the in-class work back into the build script.
+2. **One asymmetry in the backup link.** Revised has two copies of the
+   course roadmap: RV 7 (inside the Video-1 block) and RV 45 (in-class).
+   Both carry a pill to the backup slide, but that slide's single Back
+   button returns to RV 45, because the in-class wiring won. Jumping from
+   RV 7 therefore lands back at RV 45. Say the word to point it at RV 7
+   instead, or to drop one of the two pills.
+
+### Round 5 the same day — the .pptx is the source of truth; pipeline retired
+
+Nico's answer to C1: **use `Module 1 - Revised.pptx` as the source of
+truth.** So the build pipeline is retired for this module, and — because
+this is exactly the failure that destroyed a morning's work in Module 3 on
+2026-08-27 — it is retired with a GUARD, not just a banner.
+
+### `_m1_frozen.py` (new)
+One guard module, two entry points:
+- `refuse_if_canonical(target)` — exits unless the target is something
+  other than `Module 1 - Revised.pptx`. **The guard is on the TARGET, not
+  on the script**, so building to a side path still works and experimenting
+  is unaffected; it refuses only when a pass is about to clobber the
+  canonical deck. `--force` overrides.
+- `refuse_already_applied(name)` — for the two one-off merge scripts, whose
+  slide numbers refer to the deck as it was BEFORE the merge. Re-running
+  `_merge_ic_round2.py` would delete slides 42, 43 and 72 of a deck in
+  which those numbers now mean something else entirely.
+
+### Wired into six scripts, each with a RETIRED banner at the top
+| script | where the guard sits |
+|---|---|
+| `_build_Module1.py` | inside `build()`, **not** at module level — `_build_M1_candidates.py` imports this module for its helper layer and must keep working |
+| `_animate.py` | top of `main()` |
+| `_group_pass.py` | top of `main()` |
+| `_splice_media.py` | before `splice()` |
+| `_port_ic_to_rev.py`, `_merge_ic_round2.py` | top of `main()`, "already applied" |
+
+### Verified
+All six refuse when aimed at the canonical deck. A side path still runs:
+`python _animate.py _sidetest.pptx` got past the guard and started
+animating — and then died with `KeyError: 'pic:0'`, which is itself the
+proof that the pipeline no longer describes this deck (its PLANS are keyed
+to the old 95-slide content). `import _build_Module1` still works, so the
+candidates deck can still be built. The deck was not touched: 92 slides,
+unchanged since the merge.
+
+### What this means going forward
+- **Edit Module 1 by editing the .pptx**, with targeted zip + lxml surgery —
+  `_slide33_edit.py` and `_slide50_shade.py` are the worked patterns, and
+  `_m1_frozen.py`'s docstring points at them. Never round-trip this deck
+  through python-pptx: it carries three live PollEverywhere activities.
+- `_build_Module1.py` and its passes stay in the folder as the record of
+  how the deck was built and as a source of helper functions; they are no
+  longer the source of truth.
+- The project `CLAUDE.md` for `405 Slide Revisions 2026` still documents the
+  per-module pipeline as the way Module 1 is produced. That is now wrong for
+  this module. **Not changed — a CLAUDE.md edit needs Nico's say-so.**
+
+### Round 6 the same day — the merge check had a blind spot; closed
+
+Nico: "on slide 39 you did not import the picture with rounded edges and
+shade. Then check all slides again to make sure you didn't forget anything
+else." He was right, and the miss was systematic rather than a slip.
+
+### Why it was missed
+`_diff2.py` compares **position, size, text and run formats only**. It does
+not look at geometry presets, fills, outlines or effects. So Revised 39's
+textbook cover — which gained `roundRect` adj 8000 + the deck shadow in the
+in-class deck on 2026-09-22 — compared as *identical* and was never ported.
+Its click comparison was weak too: it counts click GROUPS without checking
+`TriggerType`, so a `withEffect` reading as a `clickEffect` passed.
+
+**Lesson worth keeping: "the diff prints clean" is only as strong as what
+the diff samples.** Before trusting one, state what it does NOT compare.
+
+### Two new checks, and the tool chain now used for this deck
+| tool | sees |
+|---|---|
+| `_diff2.py` / `_ic_vs_rev.py` | position, size, text, run formats, notes, click counts |
+| `_style_diff.py` (new) | prstGeom + adjusts, fills, outlines, effects, table-cell fills |
+| `_xml_diff.py` (new) | **everything** — normalized raw slide XML |
+
+`_xml_diff.py` is the conclusive one. It normalizes away what differs
+between the two decks by design — shape ids and names, relationship ids, the
+cached text of the live `slidenum` field, and PowerPoint's per-save `extLst`
+blobs — then c14n-compares the whole part. Nothing can hide from it.
+
+### What the re-check found
+- **RV 39** — the textbook cover, flat instead of rounded + shaded. Fixed by
+  `_slide39_picstyle.py`, applied to the picture rather than by re-copying
+  the slide part, since the pair was otherwise identical.
+- **RV 42** ("Making the Most of the Course", the first one) — found only by
+  the XML diff. In-Class has **0 clicks / 1 effect**: a single stranded
+  `withEffect` on one of the four illustrations, so all four show as the
+  slide opens. Revised still had the original **1 click / 4 effects** build
+  (all four fading in together, `_animate.py` PLANS key 12). Ported with the
+  new `_ic_port.py`.
+- Nothing else. All three checks now agree.
+
+### `_ic_port.py` (new, reusable)
+`python _ic_port.py IC:RV [IC:RV ...]` — the wholesale slide-part copy,
+generalised out of the two one-off merge scripts, carrying both hard-won
+rules: keep the SOURCE's relationship Ids (renumbering them corrupted two
+pictures on 2026-09-23) and reset the cached `slidenum` text to the Revised
+number. It refuses a slide that carries a slide-to-slide jump, because the
+target has to be chosen.
+
+### Verified
+`_xml_diff.py`: **"IDENTICAL at the XML level - nothing is missing"**, all
+57 pairs. `_style_diff.py`: 0 differences. `_ic_vs_rev.py`: 56 identical,
+the 57th differing only in the live page number (58 vs 92), which is
+correct. Deck opens at 92 slides; RV 39 rendered and the cover now carries
+the rounded corners and the shade; RV 42 = 0 clicks / 1 effect, matching
+In-Class; RV 66 = 10, RV 83 = 23, RV 92 = 13 unchanged. Slideshow probe on
+1, 39, 42, 54, 57, 70, 92 clean, live polls rendering.
+
+### Flagged, not changed — RV 42 / In-Class 8
+The stranded `withEffect` has nothing before it to run with, so all four
+illustrations simply appear with the slide. That reads like an editing
+artifact — three of the four effects deleted in PowerPoint and the fourth
+left behind — rather than a choice. It is now faithfully in both decks.
+Say the word and it can be cleaned either way: drop the orphan so the slide
+is honestly static, or restore the one-click four-picture build.
+
+## 2026-09-23 (round 2) – Nico's hand pass adopted; slide 50 shaded
+
+**One-line summary.** Nico hand-edited the in-class deck further (61 → **59
+slides**) and asked for shades and very slightly rounded edges on slide 50,
+keeping his animation exactly. Nothing of his needed porting – this deck has
+no build script and is edited in place – so the work was to inventory his
+changes, verify none was lost, and make slide 50 a properties-only edit.
+
+### Why "adopt" is a no-op here – read this before the next round
+`Module 1 - In Class.pptx` is **not produced by any script**.
+`_build_Module1.py` builds the 95-slide `Module 1 - Revised.pptx` and knows
+nothing about this file. So a hand-edit to the in-class deck has nowhere to
+be ported TO: editing in place preserves it by construction. The duty is to
+*inventory* his changes and prove nothing was clobbered, not to port them.
+`_whatchanged.py` (new, read-only) does the inventory: it wraps `_diff2`'s
+`Deck` + `match` so it survives deletions and reorders, and reports
+member-level geometry / text / run-format / notes / click differences
+between any two versions of the deck.
+
+### His changes since the morning version (61 → 59)
+| slide | what he did |
+|---|---|
+| 9 Making the Most 2 | body rebalanced (y 2.29→2.77, h 3.97→3.01); 2 clicks → 1 |
+| 10 Teaching Philosophy | body tightened (y 1.60→2.65, h 5.35→3.26) |
+| 13 outline | the three "In class" pills nudged down ~0.14"; **the "✎ Problem Set 1" box deleted** |
+| 26, 29, 35 | the Class-Discussion badge dropped from the build – it is chrome now, per the "poll / discussion chrome is never animated" rule |
+| 34 Buying a Present | **$30 → $50** per present; body resized; notes updated |
+| 37–39 flip-house poll | the EMPTY poll placeholder `_inclass_edits.py` added on 2026-09-22 is gone, and the live pair collapsed to ONE view – the question view, which keeps its `tags` part and the round POLL pill. This closes PENDING item A. |
+| 39 Another Opp. Cost, 45 Sunk-cost examples, 46 Concorde | bodies moved / resized; Concorde 2 clicks → 3 |
+| 49 Cost-Benefit | rebuilt as a 6-click build (was 4) |
+| **50 exercise chart** | **rebuilt** – see below |
+| 51 | "MC (Marginal Cost)" label raised 0.20" |
+| 53 Next Steps | real dates ("Due on Tuesday, Oct 13", "Submit one copy per group"); 2 clicks → 1 |
+
+**Live PollEverywhere activities: 4 → 3** (slides 21, 24, 37), each with its
+`tags` part intact. Verified by a full-screen slideshow probe – all three
+render live, no failure banner.
+
+### Slide 50 – what he built
+He rebuilt the exercise chart into named groups and a **23-click** build:
+each bar segment is now a group of rectangle + label (`Group 42-48`, `81`,
+`84`), the "Hour N" headers animate with five new overlay groups, and he
+added "Net Benefit of Hour 3", "Net Loss of Hour 3", a `Left Arrow 36`, and
+three extra rectangles on the left "Total Net Benefit" stack.
+
+### Slide 50 – my edit: properties only
+`_slide50_shade.py` (kept) changes **shape properties and nothing else** – no
+shape added, removed, renamed, regrouped or reordered, and `<p:timing>` is
+never touched. The animation targets shapes by id, so the build survives
+verbatim.
+
+- **13 bar rectangles** (the left stack's four, plus the nine hour-column
+  segments): the deck's standard `outerShdw` (blurRad 50800 / dist 38100 /
+  dir 2700000 / black at alpha 50000) **plus** `roundRect` at a **rendered
+  0.05" radius** – "very slightly", per his wording.
+- **adj is computed per shape**, not shared: `adj = 0.05 / min(w, h) x
+  100000`, so it runs 5263 on a 1.90"-tall block and 8772 on a 0.57" one and
+  the corner is the same length everywhere. This is the Teaching CLAUDE.md
+  "radius as a rendered length" rule; one shared adj would have given the
+  short blocks visibly rounder corners.
+- **4 verdict arrows** take the shade only – an arrow preset's adjust
+  handles size the head, not the corners.
+- The shapes already carried an EMPTY `<a:effectLst/>`; the schema allows
+  only one, so the pass fills that element rather than appending a second.
+- **Left alone:** the STOP sign (a picture, and a sign – the flat-exception
+  case), the two connectors beside the left stack (a shadow on a thin line
+  reads as blur), all text, all chrome.
+
+**Verified:** deck opens at 59 slides; slide 50 reports **23 on-click steps /
+33 effects** via COM and the target sequence matches his build beat for beat
+(TextBox 11 + Group 64 … Picture 37 + TextBox 10). `_whatchanged.py` between
+his version and mine prints **(none)** – no geometry, text, notes or click
+difference anywhere in the deck, which is the point: shadows and rounding are
+not in that tool's signature, so a clean report means the edit touched
+nothing else.
+
+### Flagged, NOT changed – slide 50
+1. **Five olive boxes hide behind the hour columns.** `Group 64 / 67 / 70 /
+   73 / 76`, labelled "Total Benefit of Hour N", are filled **accent3
+   `9BBB59`** with `<a:grpFill/>` children, and each spans its column's FULL
+   height. They sit at the very back, so the bars cover them – except for a
+   0.01" misalignment that leaks an olive hairline down the left edge of
+   Hour 3 and along the top of Hour 5. They are animated on clicks 1-5,
+   paired with the "Hour N" headers, so right now those clicks reveal
+   something invisible. This looks like work in progress: as drawn, a
+   "total benefit" box behind each column is exactly the right idea, it just
+   needs to be in FRONT (or the bars made translucent). Untouched, because
+   removing the hairline would hide the only visible sign that they exist.
+2. **Two of those overlays are mislabelled** – the Hour-1 and Hour-2 columns
+   both read "Total Benefit of Hour 1".
+3. **"Net Loss of Hour 3" sits on the Hour-5 bar.** Reads as a copy-paste
+   slip from the Hour-3 group; not corrected, per the never-change-content
+   rule.
+4. The 0.05" corner cut makes the olive hairline very slightly more visible
+   at Hour 3's corners. It goes away when item 1 is resolved.
+
+## 2026-09-23 – slide 33: fruit pictures styled, table rebuilt for per-cell animation
+
+**One-line summary.** Nico dropped in a newer `Module 1 - In Class.pptx`
+(now **61 slides**) and asked for one change on slide 33, "Opportunity
+Cost: A Simple Example": adopt the two fruit pictures he had inserted, and
+make each table entry animatable on its own.
+
+### Edit 1 – the two new figures
+Slide 33 carries two pictures that the Revised deck's version of this
+slide does not have: a banana at (0.630, 2.470) 2.077 x 1.731" and an
+apple at (10.455, 2.867) 2.352 x 2.083". Both arrived flat – `prstGeom`
+`rect`, no `effectLst`. Both now carry the deck's house picture style,
+`roundRect` adj 8000 + `outerShdw` blurRad 50800 / dist 38100 / dir
+2700000 / black at alpha 50000, the same treatment `_inclass_edits.py`
+gave slide 4's textbook cover. Both PNGs are fully opaque with white
+corners, so the rounded card reads the way it does on the deck's other
+pictures rather than cropping a transparent cut-out.
+
+### Edit 2 – the table is no longer a native table
+**A native PowerPoint table is ONE `graphicFrame`, so PowerPoint animates
+it as a single object; there is no way to reveal a cell at a time.** To
+get per-entry animation the table had to be rebuilt as 15 individual cell
+shapes, one `sp` per cell carrying its own text. The group that held the
+white backing card plus the table was dissolved as well, for the same
+reason a group animates as one.
+
+- Geometry, fills, borders, fonts and alignment were READ OFF the native
+  table, so the final state is unchanged: columns 2.450 / 1.600 / 1.800"
+  and five 0.510" rows from (3.750, 2.400); header navy `0B2B4E` with
+  white bold 20 pt; column 0 alternating `FFFFFF` / `FDF6E6`, navy bold,
+  left-aligned; "My Value" green `92D050`; "My Opp. Cost" red `FF5050`;
+  cell borders `C8CDD3` at 9525 EMU; insets 0.1" / 0.04", anchored middle.
+- The cells stay **flat and square** – the rounding rule is for cards, not
+  for cells in a grid.
+- Each cell is NAMED so the animation targets it by name and survives a
+  re-run: `oc:hdr:0-2`, `oc:alt:1-4`, `oc:val:1-4`, `oc:opp:1-4`.
+- The backing card keeps its place in the z-order and its shade.
+
+### The build – 10 clicks
+| | |
+|---|---|
+| static | the card, the header row, the four fruit names, both pictures |
+| 1 – 4 | **My Value** 9, 5, 3, 1 – one per click |
+| 5 – 8 | **My Opp. Cost** 5, 9, 9, 9 – one per click |
+| 9 – 10 | the two bullets below |
+
+The header row is static so the table reads as a table from the start and
+the columns fill in under their own headings. The alternative – letting
+each column heading arrive with its first value – was not taken; say the
+word if that is the beat wanted.
+
+Because each cell draws its own border, the grid is only as complete as
+the cells revealed so far: the initial state shows the header row full
+width and the fruit column, then the table fills to the right. Checked on
+screen and it reads as intended.
+
+### Mechanics
+`_slide33_edit.py` (kept) does both edits as pure zip + lxml surgery – no
+python-pptx round-trip, because this deck carries four live
+PollEverywhere activities. The timing generators (`effect_par`,
+`click_group`, `timing_xml`) are copied verbatim from `_animate.py` rather
+than imported, per the "never verify a pass by importing it" rule.
+`_animate.py` itself is keyed to the 95-slide Revised deck and does not
+apply here. The script refuses to run twice (it looks for `oc:val:1`).
+
+### Verified
+Backup rolled to `Module 1 - In Class_t-1.pptx` before writing. Deck opens
+in PowerPoint at 61 slides; slide 33 reports **10 on-click steps / 10
+effects** via COM, and the animated shapes in order are `oc:val:1-4`,
+`oc:opp:1-4`, then TextBox 9 twice – no picture and no chrome animates.
+Both pictures confirmed present and static (COM: Picture 15 at L=753 pt,
+Picture 17 at L=45 pt). Export render of the final state is
+pixel-identical to the original table; the full-screen slideshow probe on
+1, 22, 26, 33, 40, 61 shows no failure banner and the live polls still
+render, which is the check that matters after OOXML surgery on this deck.
+(The probe's PrintWindow capture is scaled and crops the right edge and
+the footer – the apple and the footer are missing from it for that reason,
+not from the slide.)
+
+### Flagged, not changed
+The Teaching CLAUDE.md standing rule is "reproduce every table as a
+native, editable PowerPoint table". Slide 33 is now a deliberate exception
+– per-cell animation is impossible any other way. Two consequences for
+editing: a number is changed by clicking its own box rather than tabbing
+through a table, and adding a row means adding three boxes. Worth writing
+the exception into the Teaching CLAUDE.md if more tables need this.
 
 ## 2026-09-22 – new "Module 1 - In Class.pptx": picture style + poll slots
 

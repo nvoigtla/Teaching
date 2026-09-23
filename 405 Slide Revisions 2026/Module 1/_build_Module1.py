@@ -70,7 +70,13 @@ OUT_DIR = Path(__file__).parent
 # --------------------------------------------------------------------------
 
 def _draw_top_bar_tc(slide, section_tag):
-    """Navy top bar with title-cased section tag (no uppercase forcing)."""
+    """RETIRED 2026-09-23 - "Module 1 - Revised.pptx" is the SOURCE OF TRUTH.
+This pass no longer describes the shipped deck: the in-class merge put
+22 hand-edited slides into it and deleted three (95 -> 92 slides), and
+none of that is here. It refuses to write the canonical deck; it still
+works against a side path. See _m1_frozen.py.
+
+Navy top bar with title-cased section tag (no uppercase forcing)."""
     bar_h = Inches(0.42)
     _add_rect(slide, 0, 0, SLIDE_W, bar_h, NAVY)
     _add_text(slide, MARGIN, 0, Inches(12), bar_h,
@@ -7555,6 +7561,11 @@ def build(out_path=None):
     n_pg = renumber_cached_pagenums(prs)
 
     out = Path(out_path) if out_path else OUT_DIR / "Module 1 - Revised.pptx"
+    # 2026-09-23: the .pptx is the source of truth; never scaffold over it
+    import sys as _fsys
+    _fsys.path.insert(0, str(OUT_DIR))
+    from _m1_frozen import refuse_if_canonical
+    refuse_if_canonical(out)
     prs.save(str(out))
     print(f"saved {out} — {len(prs.slides._sldIdLst)} slides "
           f"({n_sym} paragraph(s) with subscripted symbols, "

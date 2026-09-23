@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Grouping pass for "Module 1 - Revised.pptx" — merges shape
+"""RETIRED 2026-09-23 - "Module 1 - Revised.pptx" is the SOURCE OF TRUTH.
+This pass no longer describes the shipped deck: the in-class merge put
+22 hand-edited slides into it and deleted three (95 -> 92 slides), and
+none of that is here. It refuses to write the canonical deck; it still
+works against a side path. See _m1_frozen.py.
+
+Grouping pass for "Module 1 - Revised.pptx" — merges shape
 pairs that belong together into <p:grpSp> groups (Teaching CLAUDE.md):
 
   1. box+text callouts   — a filled roundRect with NO text of its own +
@@ -452,6 +458,8 @@ def process_slide(tree, disp):
 
 
 def main():
+    from _m1_frozen import refuse_if_canonical
+    refuse_if_canonical(DECK)
     z = zipfile.ZipFile(DECK)
     data = {n: z.read(n) for n in z.namelist()}
     z.close()

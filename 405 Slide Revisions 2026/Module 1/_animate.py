@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Inject Fade / on-click build animations via OOXML <p:timing> —
+"""RETIRED 2026-09-23 - "Module 1 - Revised.pptx" is the SOURCE OF TRUTH.
+This pass no longer describes the shipped deck: the in-class merge put
+22 hand-edited slides into it and deleted three (95 -> 92 slides), and
+none of that is here. It refuses to write the canonical deck; it still
+works against a side path. See _m1_frozen.py.
+
+Inject Fade / on-click build animations via OOXML <p:timing> —
 Module 2 In-Class (2026-08-15). Engine from Module 7 / Italy IBR.
 
 Teaching CLAUDE.md rules implemented:
@@ -772,6 +778,8 @@ def custom_plan(shapes, disp):
 
 
 def main():
+    from _m1_frozen import refuse_if_canonical
+    refuse_if_canonical(DECK)
     args = sys.argv[1:]
     apply = "apply" in args
     sel = [a for a in args

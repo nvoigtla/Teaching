@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Splice the 6 live PollEverywhere slides into the built deck —
+"""RETIRED 2026-09-23 - "Module 1 - Revised.pptx" is the SOURCE OF TRUTH.
+This pass no longer describes the shipped deck: the in-class merge put
+22 hand-edited slides into it and deleted three (95 -> 92 slides), and
+none of that is here. It refuses to write the canonical deck; it still
+works against a side path. See _m1_frozen.py.
+
+Splice the 6 live PollEverywhere slides into the built deck —
 phase-3 media step, RERUNNABLE so _build_Module1.py never freezes.
 
 2026-08-27: the sources are now two SIDECAR decks, `_handoff_polls_WS.pptx`
@@ -312,4 +318,6 @@ def splice(deck_path):
 if __name__ == '__main__':
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     deck = Path(args[0]) if args else HERE / 'Module 1 - Revised.pptx'
+    from _m1_frozen import refuse_if_canonical
+    refuse_if_canonical(deck)
     splice(deck)
