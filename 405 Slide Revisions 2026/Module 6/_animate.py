@@ -94,9 +94,9 @@ def _derive_skips(deck):
 
 SKIP_TITLE, SKIP_AGENDA, SKIP_MEDIA = _derive_skips(DECK)
 # single-thought slides that are one object and build nothing.
-# Slide 3 (the course roadmap) is static in Nico's own deck too -- it is
+# Slide 4 (the course roadmap) is static in Nico's own deck too -- it is
 # not among the 48 slides that carry a timing tree.
-SKIP_STATIC = {3}
+SKIP_STATIC = {4}   # was {3} before the intro card went in, 2026-09-23
 SKIP = SKIP_TITLE | SKIP_AGENDA | SKIP_MEDIA | SKIP_STATIC
 
 # figures ride on this animated-bullet index by default (0 = first
@@ -149,7 +149,7 @@ PLANS = {
     # before MC, the MC LINE was buried in the dashed-guide beat, and its
     # label "MC = 0" was stranded on a click of its own at the very end,
     # a beat after the curve it names.
-    9: [["grp:0", "cxn:2", "t:D", "t:$4", "t:12"],
+    10: [["grp:0", "cxn:2", "t:D", "t:$4", "t:12"],
         ["cxn:4", "t:MC = 0"],
         ["cxn:3", "t:MR"],
         # the two dashed guides mark MR = 0, so they cannot precede MR
@@ -169,7 +169,7 @@ PLANS = {
     # Now: panel by panel, each in the deck's curve order (demand, then the
     # other primary line, then the derived one, then the guides its optimum
     # implies), with the comparison as the closing bar.
-    34: [["t:Flight LAX", "cxn:2", "t:D"],
+    35: [["t:Flight LAX", "cxn:2", "t:D"],
          ["cxn:4", "t:MC"],
          ["cxn:3", "t:MR"],
          ["cxn:5", "cxn:6", "t:P*", "t:Q*"],
@@ -190,7 +190,7 @@ PLANS = {
     #    markets" used to be revealed two clicks before either area, so
     #    it named two things that were not on screen yet.  A row naming
     #    ONE area still rides with it, as "Revenues" does.
-    10: [["grp:0", "cxn:2", "t:D", "t:$4", "t:12"],
+    11: [["grp:0", "cxn:2", "t:D", "t:$4", "t:12"],
         ["t:Simplifying assumption", "n:sdbullmark:0:dot"],
         # the revenue rectangle with the bullet that names it, and the
         # two ticks at its corner -- the new row pushed every mark index
@@ -212,15 +212,15 @@ PLANS = {
     # reading while the question is put to them, so it is chrome; only the
     # question animates.  The auto-rollout had been fading the clipping in
     # on click 1 and the question on click 2.
-    11: [["t:What does recent research"]],
-    12: [["t:Describe this pricing strategy"]],
+    12: [["t:What does recent research"]],
+    13: [["t:Describe this pricing strategy"]],
 
     # ----------------------------------------------------------------
     #  Video 2 — first degree
     # ----------------------------------------------------------------
     # 16 <- NV 14, all nine of his clicks: he alternates bullet and
     #   figure, and the three MPV callouts run high -> median -> low.
-    19: [["pr:Assume MC:0:0"],
+    20: [["pr:Assume MC:0:0"],
          ["cxn:2", "t:Demand = MPV"],
          ["pr:Assume MC:1:1"],
          ["osp:4", "cxn:3", "t:Price charged to high"],
@@ -233,7 +233,7 @@ PLANS = {
     # 17 <- NV 15, his seven clicks.  Note the PROFIT region lands LAST,
     #   after "can it work in the real world?" — his order, not the
     #   obvious one.
-    20: [["pr:Now: MC:0:0", "cxn:2", "t:Demand = MPV"],
+    21: [["pr:Now: MC:0:0", "cxn:2", "t:Demand = MPV"],
          ["cxn:3", "t:MC"],
          ["osp:4", "cxn:6", "t:Price charged to high"],
          ["osp:5", "cxn:7", "t:Price charged to median"],
@@ -246,7 +246,7 @@ PLANS = {
     # ----------------------------------------------------------------
     # 22 <- NV 19: two clicks, one per price band.  Demand and the
     #   right-hand bullets are static, as in his.
-    26: [["osp:3", "t:Regular movie-goers", "t:P\u2081"],
+    27: [["osp:3", "t:Regular movie-goers", "t:P\u2081"],
          ["osp:4", "t:Seniors", "t:P\u2082"]],
 
     # 29 — the adopted three-panel BMW figure has no original to follow,
@@ -261,7 +261,7 @@ PLANS = {
     # market by market, with each total as its own beat.  The headline,
     # which states the answer, is the LAST click rather than the first
     # thing on screen.
-    40: [["t:US market", "cxn:2", "t:D"],
+    41: [["t:US market", "cxn:2", "t:D"],
          ["cxn:4", "t:MC"],
          ["cxn:3", "t:MR"],
          ["cxn:5", "cxn:6"],
@@ -287,7 +287,7 @@ PLANS = {
     # ----------------------------------------------------------------
     # 34 <- NV 33: one click per version, then the second bullet.  His
     #   first bullet is visible from the start.
-    45: [["osp:3", "t:Version 1", "t:P\u2081"],
+    46: [["osp:3", "t:Version 1", "t:P\u2081"],
          ["osp:4", "t:Version 2", "t:P\u2082"],
          ["osp:5", "t:Version 3", "t:P\u2083"],
          ["osp:6", "t:Version 4", "t:P\u2084"],
@@ -300,7 +300,7 @@ PLANS = {
     # 43 <- NV 46, his six clicks: the whole figure first, then the
     #   bullets, with the shaded triangle landing on the same click as
     #   the "area = 16" line (his click 3).
-    48: [["out:n:MASK-1"], ["out:n:MASK-2"], ["out:n:MASK-3"]],
+    49: [["out:n:MASK-1"], ["out:n:MASK-2"], ["out:n:MASK-3"]],
 
     # ----------------------------------------------------------------
     #  55 <- NV 62, his richest build: 15 clicks that lay one block down
@@ -308,7 +308,7 @@ PLANS = {
     #  Order kept exactly; the axes stay static and each block's price
     #  tick, quantity tick and letter ride with the block.
     # ----------------------------------------------------------------
-    60: [["t:P = 4", "cxn:2", "t:D", "t:$4", "t:12"],
+    61: [["t:P = 4", "cxn:2", "t:D", "t:$4", "t:12"],
          # the legend triangle IS the label of the line beside it
          ["osp:4", "pr:Triangle =:0:0"],
          ["osp:3", "t:Revenues = $24", "pr:Triangle =:1:1"],
@@ -321,14 +321,14 @@ PLANS = {
     # up"): formula and demand, then the other primary line, then the
     # guides its optimum implies, then each area WITH the legend row that
     # names it.  The usage-fee row names the MC LINE, so it rides with MC.
-    67: [["cxn:2", "t:D"],
+    68: [["cxn:2", "t:D"],
          ["cxn:3", "t:MC", "osp:6", "t:Usage fee P*"],
          ["cxn:4", "cxn:5", "t:P*"],
          ["osp:3", "t:F*", "osp:5", "t:Flat fee F*"],
          ["osp:4", "t:Revenues from usage fee", "osp:7",
           "t:Revenue from usage fee"]],
 
-    69: [["t:P = 1.5", "cxn:2", "t:D", "t:$1.50"],
+    70: [["t:P = 1.5", "cxn:2", "t:D", "t:$1.50"],
          ["cxn:3", "t:MC", "t:$0.50"],
          ["cxn:4", "cxn:5", "t:100"],
          ["osp:3", "t:Flat fee = $50", "t:Two-part tariff:",
@@ -339,7 +339,7 @@ PLANS = {
          ["t:Would a flat fee", "n:sdbullmark:3:dot"],
          ["t:No \u2014 it would lead", "n:sdbullmark:4:rarr"]],
 
-    72: [["t:P = " + ("%g" % _M6.ZOO_A), "cxn:2", "t:D",
+    73: [["t:P = " + ("%g" % _M6.ZOO_A), "cxn:2", "t:D",
           "t:" + _Z["a"], "t:" + _Z["qmax"]],
          ["cxn:3", "t:MC", "t:" + _Z["mc"]],
          ["cxn:4", "cxn:5", "t:" + _Z["qmc"]],
@@ -351,7 +351,7 @@ PLANS = {
          ["t:Revenues from usage fee recover", "n:sdbullmark:3:dot"],
          ["t:Profit:", "n:sdbullmark:4:dot"]],
 
-    73: [["t:P = " + ("%g" % _M6.ZOO_A), "cxn:3", "t:D",
+    74: [["t:P = " + ("%g" % _M6.ZOO_A), "cxn:3", "t:D",
           "t:" + _Z["a"], "t:" + _Z["qmax"]],
          ["cxn:2", "t:MC", "t:" + _Z["mc"]],
          ["cxn:4", "t:MR"],
@@ -367,7 +367,7 @@ PLANS = {
 
     # 100 <- NV 63, the ice-cream blocks: one scoop at a time, each with
     #  its price and quantity, then the marginal-price note.
-    79: [["pr:Marginal cost of printing:0:0"],
+    80: [["pr:Marginal cost of printing:0:0"],
          ["pr:Marginal cost of printing:1:1"],
          ["cxn:2", "t:D"],
          ["grp:0", "cxn:3", "t:MC", "t:$0.05"],
@@ -383,7 +383,7 @@ PLANS = {
 
     # 58 <- NV 64: the tree walks down the questions, each with the
     #  outcome it rules out, then the direct-PD branch as the payoff.
-    80: [["t:Purchase options"],
+    81: [["t:Purchase options"],
           ["cxn:2", "cxn:3", "cxn:4", "cxn:5", "t:D"],
           ["cxn:6", "t:MC", "t:$1.00"],
           ["osp:3", "t:$4.00", "t:1", "t:A"],
@@ -399,7 +399,7 @@ PLANS = {
     # here is the deck's: the point of the slide stays on screen, his two
     # clippings come first, then the card with its source, then the facts
     # in pairs, and the gold line lands last.
-    38: [["pic:0", "pic:1"],
+    39: [["pic:0", "pic:1"],
          ["grp:0", "pr:The Odyssey:0:0"],
          ["pr:The Odyssey:1:2"],
          ["pr:The Odyssey:3:4"],
@@ -411,7 +411,7 @@ PLANS = {
     # the auto-rollout had been revealing it LAST, after all three
     # pictures -- the slide announced its own point only once the
     # examples were already up.
-    46: [["pic:0"], ["pic:1"], ["pic:2"]],
+    47: [["pic:0"], ["pic:1"], ["pic:2"]],
 
     # 59 <- NV 45.  Nothing to fix -- listed so the next reader can see
     # it was checked: his slide 45 carries no timing at all.
@@ -419,9 +419,9 @@ PLANS = {
     # 61 <- NV 47, adopted exactly: his ONE click is the closing note,
     # with the plan table and the Netflix shot on screen from the start.
     # The auto-rollout had the note first and the table second.
-    61: [["t:This pricing strategy is a mix"]],
+    62: [["t:This pricing strategy is a mix"]],
 
-    74: [["t:P = " + ("%g" % _M6.ZOO_A), "cxn:2", "t:D",
+    75: [["t:P = " + ("%g" % _M6.ZOO_A), "cxn:2", "t:D",
           "t:" + _Z["a"], "t:" + _Z["qmax"]],
          ["cxn:3", "t:MC", "t:" + _Z["mc"]],
          ["osp:3", "t:Flat fee =", "t:Flat-Fee Pricing:", "t:Flat fee F",
@@ -439,7 +439,7 @@ PLANS = {
     # auto-rollout cannot drift it: the clipping and the first three
     # lines together, then the versions button, then the closing two
     # lines.
-    53: [["pic:0", "pr:Response by major:0:2"],
+    54: [["pic:0", "pr:Response by major:0:2"],
          ["t:More seating versions"],
          ["pr:Response by major:3:4"]],
 
@@ -448,7 +448,7 @@ PLANS = {
     # what the class actually chose, then the punchline.  Without a plan
     # the auto-rollout gave the two shares a click each, which reads as
     # two findings rather than one split.
-    89: [["t:What do you think about this"],
+    90: [["t:What do you think about this"],
          ["t:16%", "t:84%"],
          ["t:Customer attention focused"]],
 
@@ -458,10 +458,10 @@ PLANS = {
     # The auto-rollout had opened with the sale tags alone and only
     # brought their caption up two clicks later, alongside a different
     # picture.
-    91: [["pic:0", "pic:1", "t:Prices ending in 9"],
+    92: [["pic:0", "pic:1", "t:Prices ending in 9"],
          ["pic:2", "t:Adding a highly priced option"]],
     # 101 — the in-class copy of the tree
-    83: [["t:Does the firm have market power", "t:Perfect competition produces"],
+    84: [["t:Does the firm have market power", "t:Perfect competition produces"],
          # his 2026-09-15 rewording of the second outcome
          ["t:Can the firm prevent resale", "t:Simple pricing under"],
          ["t:Do the firm", "t:Advanced pricing strategies"],

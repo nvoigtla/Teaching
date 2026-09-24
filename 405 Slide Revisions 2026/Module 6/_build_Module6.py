@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 # ==========================================================================
+#  *** STALE since 2026-09-24 ***  Module 6 is taped and finalized.  The
+#  source of truth is now "Module 6 - Final.pptx" (assembled from the taped
+#  decks in "Recorded Video Slides" by _finalize.ps1 + _final_retag.py),
+#  and it is edited in place.  Re-running this script regenerates only
+#  "Module 6 - Revised.pptx", which no longer carries the edits made while
+#  taping.
+# ==========================================================================
 #  _build_Module6.py — build script for "Module 6 - Revised.pptx"
 #
 #  Complex Pricing and Advanced Pricing Strategies, per the approved outline
@@ -109,12 +116,16 @@ FOOTER_TEXT = _H.FOOTER_TEXT
 DECK_TITLE = "Complex Pricing"
 DECK_SUB = "Advanced Pricing Strategies"
 
-# Front matter sits OUTSIDE every video block: Module 6 has no introduction
-# video (the calendar's Video 1 is already a teaching video, "Simple vs.
-# Complex Pricing"), so per the taping rule the logistics and roadmap slides
-# keep a two-level tag.
-TAG_LOG = "Module 6 · Logistics"
-TAG_ROADMAP = "Module 6 · Course Roadmap"
+# 2026-09-23 (Nico): Module 6 now HAS an introduction video.  It is Video 1,
+# its title card opens the deck, and the front matter (logistics, roadmap,
+# the descriptive overview) sits inside its block, so per the taping rule
+# those slides carry "Video 1".  The eight topic videos move up to 2-9.
+# The introduction is NOT an outline row -- the agenda has no room for it
+# -- so the outline starts at Video 2.
+# (Before: no introduction video, and a two-level front-matter tag.)
+INTRO_VIDEO_NAME = "Introduction to Module 6"
+TAG_LOG = "Module 6 · Video 1 · Logistics"
+TAG_ROADMAP = "Module 6 · Video 1 · Course Roadmap"
 TAG_SUMMARY = "Module 6 · Summary"
 TAG_BACKUP = "Module 6 · Backup"
 
@@ -198,7 +209,9 @@ M6_ROWS = [
 
 # An umbrella's own coverage pill names the videos its children span, per
 # the coverage-pill rule ("Videos 1+2" rather than a sequence number).
-PARENT_PILL = {1: "Videos 2+3", 5: "Videos 5\u20137"}
+# 2026-09-23: shifted by one for the new introduction video (was
+# "Videos 2+3" / "Videos 5-7").
+PARENT_PILL = {1: "Videos 3+4", 5: "Videos 6\u20138"}
 
 # the eight taped topics in topic-index order -- what the rest of the deck
 # means by "an outline item"
@@ -219,9 +232,11 @@ VIDEO_NAME = {
     7: "Summary of Pricing Strategies",
 }
 IN_CLASS_ITEMS = set()
-COVERAGE_LABEL = {i: ("In class" if i in IN_CLASS_ITEMS else "Video %d" % (i + 1))
+# topic i is Video i + 2: Video 1 is the introduction (2026-09-23)
+VIDEO_OFFSET = 2
+COVERAGE_LABEL = {i: ("In class" if i in IN_CLASS_ITEMS else "Video %d" % (i + VIDEO_OFFSET))
                   for i in range(len(M6_OUTLINE))}
-ITEM_VIDEO = {i: (None if i in IN_CLASS_ITEMS else i + 1)
+ITEM_VIDEO = {i: (None if i in IN_CLASS_ITEMS else i + VIDEO_OFFSET)
               for i in range(len(M6_OUTLINE))}
 
 TAG_BASE = {i: _title_case(row[1][0].upper() + row[1][1:])
@@ -576,12 +591,22 @@ def video_card(prs, item_idx):
     Geometry from _video_title_slide in Module 2/_build_Module2Video.py.
     Carries NO speaker notes, per the taping rule.
     """
+    return _video_card(prs, VIDEO_NAME[item_idx], ITEM_VIDEO[item_idx])
+
+
+def intro_video_card(prs):
+    """The introduction video's card: Video 1, the VERY FIRST slide of the
+    deck, ahead of the title slide (2026-09-23)."""
+    return _video_card(prs, INTRO_VIDEO_NAME, 1)
+
+
+def _video_card(prs, name, k):
     slide = _blank_slide(prs)
     _add_text(slide, 0, Inches(2.10), SLIDE_W, Inches(1.1),
-              VIDEO_NAME[item_idx], size=60, bold=True, color=NAVY,
+              name, size=60, bold=True, color=NAVY,
               font="Calibri", align=PP_ALIGN.CENTER)
     _add_text(slide, 0, Inches(3.25), SLIDE_W, Inches(0.75),
-              "Module 6  ·  Video %d" % ITEM_VIDEO[item_idx],
+              "Module 6  ·  Video %d" % k,
               size=40, bold=True, color=GOLD, font="Calibri",
               align=PP_ALIGN.CENTER)
     _add_rect(slide, int((SLIDE_W - Inches(4.0)) / 2), Inches(4.28),
@@ -5169,11 +5194,17 @@ def main():
 
     n = 1                      # page numbers are live fields; n is the cache
 
-    # ---- front matter (outside every video block) --------------------
+    # ---- Video 2 · Introduction to Module 6 --------------------------
+    # 2026-09-23 (Nico): the introduction video's card opens the deck, and
+    # the front matter plus the descriptive overview form its block.  The
+    # overview used to open the Simple vs. Complex video.
+    intro_video_card(prs); n += 1
     slide_title(prs)
     n += 1
     slide_logistics(prs, n); n += 1
     slide_roadmap(prs, n); n += 1
+    make_m6_outline(prs, n, descriptions=True,
+                    tag="Module 6 · Video 1 · Agenda"); n += 1
 
     # ======================================================================
     #  2026-09-14 (Nico): "Integrate those fully within the regular slide
@@ -5195,12 +5226,8 @@ def main():
     #  that tag themselves; the rest are passed TAG_IC[k] here.
     # ======================================================================
 
-    # ---- Video 1 · Simple vs. Complex Pricing ------------------------
+    # ---- Video 2 · Simple vs. Complex Pricing ------------------------
     video_card(prs, 0); n += 1
-    # V1 carries BOTH of my outline slides: the descriptive overview and
-    # the section agenda for item 1.
-    make_m6_outline(prs, n, descriptions=True,
-                    tag="Module 6 · Video 1 · Agenda"); n += 1
     make_m6_outline(prs, n, highlight_idx=0); n += 1
     s_dilemma(prs, n); n += 1
     s_ic_podcast_dilemma(prs, n); n += 1          # [NVapp 8]
@@ -5232,7 +5259,7 @@ def main():
     s_dumdums(prs, n); n += 1                     # [PG1 20]
     s_three_degrees(prs, n); n += 1               # [NV 10]
 
-    # ---- Video 2 · First-Degree Price Discrimination -----------------
+    # ---- Video 3 · First-Degree Price Discrimination -----------------
     video_card(prs, 1); n += 1
     make_m6_outline(prs, n, highlight_idx=1); n += 1
     # 2026-09-14 (Nico): "slide 18: delete."  The question version and
@@ -5248,7 +5275,7 @@ def main():
     s_ic_dystopian_q(prs, n); n += 1              # [NVapp 12] · [NV 13]
     s_ic_uber(prs, n); n += 1                     # [NV 16]
 
-    # ---- Video 3 · Segment Pricing -----------------------------------
+    # ---- Video 4 · Segment Pricing -----------------------------------
     video_card(prs, 2); n += 1
     make_m6_outline(prs, n, highlight_idx=2); n += 1
     s_segment_concept(prs, n); n += 1             # [NV 18]
@@ -5284,7 +5311,7 @@ def main():
     s_bmw_graphical(prs, n); n += 1               # [PG1 40]
     s_bmw_challenges(prs, n); n += 1              # [NV 30]
 
-    # ---- Video 4 · Versioning and Coupons ----------------------------
+    # ---- Video 5 · Versioning and Coupons ----------------------------
     video_card(prs, 3); n += 1
     make_m6_outline(prs, n, highlight_idx=3); n += 1
     # 2026-09-14 (Nico): "slide 45: delete" -- same duplication as 18.
@@ -5304,7 +5331,7 @@ def main():
     s_coupons(prs, n); n += 1                     # [NV 42]
     s_ic_podcast_pd(prs, n); n += 1               # [NVapp 27]
 
-    # ---- Video 5 · Flat Fee Pricing ----------------------------------
+    # ---- Video 6 · Flat Fee Pricing ----------------------------------
     video_card(prs, 4); n += 1
     make_m6_outline(prs, n, highlight_idx=4); n += 1
     s_context(prs, n); n += 1                     # [NV 44]
@@ -5315,7 +5342,7 @@ def main():
     s_flat_rate_wrong(prs, n); n += 1             # [NV 49]
     s_classpass(prs, n); n += 1                   # [PG2 16]
 
-    # ---- Video 6 · Two-Part Tariffs ----------------------------------
+    # ---- Video 7 · Two-Part Tariffs ----------------------------------
     video_card(prs, 5); n += 1
     make_m6_outline(prs, n, highlight_idx=5); n += 1
     s_two_part_chart(prs, n); n += 1              # [NV 51]
@@ -5330,14 +5357,14 @@ def main():
     s_ic_zoo_flatfee(prs, n); n += 1              # [NVapp 41]
     s_ic_costco_combined(prs, n); n += 1          # [NV 59], the second one
 
-    # ---- Video 7 · Block Pricing -------------------------------------
+    # ---- Video 8 · Block Pricing -------------------------------------
     video_card(prs, 6); n += 1
     make_m6_outline(prs, n, highlight_idx=6); n += 1
     s_block_concept(prs, n); n += 1               # [NV 61]
     s_walmart_blocks(prs, n); n += 1              # [NV 62]
     s_ic_ice_cream(prs, n); n += 1                # [NV 63]
 
-    # ---- Video 8 · Summary of Pricing Strategies ---------------------
+    # ---- Video 9 · Summary of Pricing Strategies ---------------------
     # Decision B: the tape has no agenda slide here, but one is added so
     # all eight blocks follow card -> agenda -> content.
     video_card(prs, 7); n += 1

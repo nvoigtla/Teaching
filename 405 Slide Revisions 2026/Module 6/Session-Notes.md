@@ -1513,3 +1513,65 @@ was offered and not yet approved.
    the 27 MB deck alone is over it.
 3. `405 Slide Revisions 2026/Module 5/` has **no Session-Notes.md and is
    entirely untracked** — the position Module 6 was in before 09-15.
+
+## 2026-09-23 / 09-24 — introduction video added, then Module 6 FINALIZED
+
+**One-line summary.** Added an introduction video (Video 1) to the Revised
+deck and shifted the topic videos to 2–9. After Nico taped all the videos,
+assembled `Module 6 - Final.pptx` from the taped decks with the new
+"Finalize Module X" routine, now written into the project CLAUDE.md.
+
+### 09-23: introduction video, videos renumbered
+- `_build_Module6.py`: new `intro_video_card` ("Introduction to Module 6 /
+  Module 6 · Video 1") as slide 1. Title, logistics, roadmap and the
+  descriptive overview form Video 1's block and carry `Video 1` tags.
+  `VIDEO_OFFSET = 2`, so the outline starts at Video 2. Umbrella pills now
+  read "Videos 3+4" and "Videos 6–8".
+- Every display-number key shifted by the one inserted slide:
+  `WRITTEN_NOTES`, `NOTE_FIXES`, the `PLANS` in `_animate.py` (plus
+  `SKIP_STATIC` 3 -> 4) and `SPLICE_MAP` (37/53/72). Click counts were
+  checked against the old deck: 0 mismatches.
+- Lesson: the first renumber script matched brackets through string
+  literals and shifted `NOTE_FIXES` twice. The note title guard caught it.
+
+### 09-24: Finalize Module 6
+- Inputs: the 9 taped decks in `Recorded Video Slides/`. The practice-video
+  deck is out of scope.
+- Output: `Module 6 - Final.pptx`, 135 slides. Slides 1–93 are the main
+  deck (intro card dropped). Slide 94 is the in-class divider (copied from
+  Module 3 slide 93). Slides 95–128 are the 34 in-class copies, retagged
+  `In Class · Examples`. Slides 129–135 are Disneyland, moved from after
+  Backup. The seating chart stays in Backup (slide 93, linked from 53 and
+  116).
+- 55 taped slides replaced their Revised versions. All are verified
+  structurally identical to their sources; links, polls and notes check out,
+  and the slideshow probe passes on all five poll slides.
+- Pipeline (read-only first, then write):
+  `python _final_inventory.py` (pairing -> `_final_pairing.json`) ->
+  `_final_plan.json` -> `powershell -File _finalize.ps1` ->
+  `python _final_retag.py` -> `python _final_verify.py` and
+  `python _final_verify_tree.py`.
+- Retag gotcha: editing the tag through COM re-autofits the tag box
+  (0.42" -> 0.27"). The retag is therefore a string edit inside the run.
+- `_build_Module6.py` now carries a STALE banner. The **Final deck is the
+  source of truth** and is edited in place.
+
+### Decisions (Nico)
+- The in-class examples appear twice: once in the main deck, once in the
+  in-class section. Unlinked backup slides (Disneyland) move and are not
+  copied.
+- My calls, reported to Nico: logistics and the summary closer have no
+  in-class copy. The "Only if we have time" divider is copied with its six
+  slides. Disneyland stays one block.
+
+### Open
+1. Slide 80 (ice cream) sits in Video 8's block but its taped tag still
+   reads `In Class · Examples · Block Pricing`.
+2. Ten Video-tagged slides were not taped. They keep their `Video k` tags
+   in the main deck.
+3. The course calendar, website and podcasts may still number the videos
+   1–8.
+4. The Dum-Dums speaker note still says "an explicit contractual ban".
+   Nico will fix that himself.
+5. Carried forward: the deletion of the NV/PG source decks and the unused
+   `_source_images` still awaits his decision.

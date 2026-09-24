@@ -65,10 +65,11 @@ SOURCES = {"M6": ORIGINAL}
 # on video, and the polls are run on campus.  The activities are the same
 # in the applications deck (identical PollEverywhere ids), so the main deck
 # is the source.
+# 2026-09-23: +1 for the introduction video card at slide 1.
 SPLICE_MAP = {
-    36: ("M6", 1),    # Lodine: humans or dogs?
-    52: ("M6", 2),    # how should United respond to Southwest?
-    71: ("M6", 3),    # the optimal pricing strategy for the zoo
+    37: ("M6", 1),    # Lodine: humans or dogs?
+    53: ("M6", 2),    # how should United respond to Southwest?
+    72: ("M6", 3),    # the optimal pricing strategy for the zoo
 }
 
 def display_to_part(z):
