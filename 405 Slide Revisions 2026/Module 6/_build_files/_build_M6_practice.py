@@ -43,7 +43,7 @@ from _m6_helpers import (
 _omml_run = M6._omml_run
 _omml_text = M6._omml_text
 
-OUT = (Path(__file__).parent
+OUT = (Path(__file__).resolve().parents[1]
        / "Module 6 - Practice Video - Optimal Pricing in Two Markets.pptx")
 
 _H.FOOTER_TEXT = ("Management 405  ·  Module 6  ·  Practice Video: "

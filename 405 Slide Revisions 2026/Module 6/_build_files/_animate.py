@@ -37,10 +37,11 @@ from pathlib import Path
 from lxml import etree as ET
 
 HERE = Path(__file__).parent
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
 import sys as _sys
 _deckarg = [a for a in _sys.argv[1:]
             if a.endswith(".pptx")]
-DECK = Path(_deckarg[0]) if _deckarg else HERE / "Module 6 - Revised.pptx"
+DECK = Path(_deckarg[0]) if _deckarg else MODULE / "Module 6 - Revised.pptx"
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 P = "http://schemas.openxmlformats.org/presentationml/2006/main"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"

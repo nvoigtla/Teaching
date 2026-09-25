@@ -28,6 +28,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).parent
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
 P = "http://schemas.openxmlformats.org/presentationml/2006/main"
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -222,7 +223,7 @@ def title_case_bad(title):
 
 def main():
     deck = Path(sys.argv[1]) if len(sys.argv) > 1 else \
-        HERE / "Module 6 - Revised.pptx"
+        MODULE / "Module 6 - Full.pptx"
     z = zipfile.ZipFile(str(deck))
     parts = slide_parts(z)
     findings = []

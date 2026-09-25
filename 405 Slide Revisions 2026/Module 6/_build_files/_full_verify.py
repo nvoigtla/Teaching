@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Finalize routine, verification (read-only).
+"""Create the full slide version, verification (read-only).
 
-Checks "Module 6 - Final.pptx" against its sources:
+Checks "Module 6 - Full.pptx" against its sources:
   * every taped slide against its video-deck slide -- the slide XML with
     ids / rIds / cached page numbers normalised away, plus notes, click
     count, pictures, poll tags and hidden flag;
@@ -11,11 +11,12 @@ Checks "Module 6 - Final.pptx" against its sources:
 import json, re, sys, zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
-import _final_inventory as FI
+import _full_inventory as FI
 
 HERE = Path(__file__).resolve().parent
-FINAL = HERE / "Module 6 - Final.pptx"
-plan = json.loads((HERE / "_final_plan.json").read_text(encoding="utf-8"))
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
+FULL = MODULE / "Module 6 - Full.pptx"
+plan = json.loads((HERE / "_full_plan.json").read_text(encoding="utf-8"))
 
 
 def raw(path):
@@ -39,11 +40,11 @@ def clean(t):
     return [s for s in t if not re.fullmatch(r"\d+", s)]
 
 
-fz, fin = raw(FINAL)
+fz, fin = raw(FULL)
 rz, rev = raw(FI.REVISED)
-print("Final slides:", len(fin))
+print("Full slides:", len(fin))
 
-# expected layout of Final, by origin
+# expected layout of Full, by origin
 exp = []                                    # (kind, key)
 pairs = {x["r"]: x for x in plan["pairs"]}
 for n in range(2, 95):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Finalize routine, structural check (read-only): every slide of
-"Module 6 - Final.pptx" against its source slide as an XML TREE --
+"""Create the full slide version, structural check (read-only): every slide of
+"Module 6 - Full.pptx" against its source slide as an XML TREE --
 attribute order, namespace placement, ids / rIds, cached page numbers and
 default-valued attributes that a PowerPoint save drops are ignored;
 anything else (geometry, fills, run formatting, text, timing) counts.
@@ -10,8 +10,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 with contextlib.redirect_stdout(io.StringIO()):
-    import _final_verify as V
-import _final_inventory as FI
+    import _full_verify as V
+import _full_inventory as FI
 
 IGN = {"id", "spid", "creationId", "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id",
        "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed",
@@ -74,7 +74,7 @@ for i, (kind, key) in enumerate(V.exp, 1):
     diff(prep(V.fz, f["part"], kind == "copy"), prep(z, s["part"], kind == "copy"), "", out)
     if out:
         bad += 1
-        print("== Final %d (%s R%d): %d differences" % (i, kind, r, len(out)))
+        print("== Full %d (%s R%d): %d differences" % (i, kind, r, len(out)))
         for l in out[:4]:
             print("    ", l[:220])
 print("slides with structural differences:", bad)

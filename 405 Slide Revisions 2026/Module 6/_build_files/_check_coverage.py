@@ -14,7 +14,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).parent
-SRC = HERE / "Module 6 - NV Slides"
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
+# The NV source decks were deleted on 2026-09-24 (the rebuild is over).
+# Restore them from git history to run this check again.
+SRC = MODULE / "Module 6 - NV Slides"
 P_NS = 'http://schemas.openxmlformats.org/presentationml/2006/main'
 R_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 NS = {'p': P_NS, 'r': R_NS}
@@ -87,7 +90,7 @@ def norm(s):
 
 
 def main():
-    new = zipfile.ZipFile(str(HERE / "Module 6 - Revised.pptx"))
+    new = zipfile.ZipFile(str(MODULE / "Module 6 - Full.pptx"))
     pres = ET.fromstring(new.read("ppt/presentation.xml"))
     rels = {r.get('Id'): r.get('Target') for r in
             ET.fromstring(new.read("ppt/_rels/presentation.xml.rels"))}

@@ -26,6 +26,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).parent
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
 P = "http://schemas.openxmlformats.org/presentationml/2006/main"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
@@ -88,7 +89,7 @@ def seg_hits_rect(x1, y1, x2, y2, rx, ry, rw, rh):
 
 def main():
     deck = Path(sys.argv[1]) if len(sys.argv) > 1 else \
-        HERE / "Module 6 - Revised.pptx"
+        MODULE / "Module 6 - Full.pptx"
     z = zipfile.ZipFile(str(deck))
     covered, online, wrongend = [], [], []
     for n, part in enumerate(parts(z), 1):

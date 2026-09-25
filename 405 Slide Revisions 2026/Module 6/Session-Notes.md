@@ -1575,3 +1575,181 @@ assembled `Module 6 - Final.pptx` from the taped decks with the new
    Nico will fix that himself.
 5. Carried forward: the deletion of the NV/PG source decks and the unused
    `_source_images` still awaits his decision.
+
+## 2026-09-24 (later) — Folder cleaned up; support files moved to `_build_files/`
+
+**One-line summary.** Module 6 is finished, so the folder was reduced to the
+deliverables plus one support subfolder. `Module 6 - Final.pptx` remains the
+source of truth and is edited in place; nothing is regenerated.
+
+### What the module folder holds now
+
+| Item | What it is |
+|---|---|
+| `Module 6 - Final.pptx` | **The deliverable.** 135 slides, edited in place |
+| `Recorded Video Slides/` | The 9 taped decks + the taped practice-video deck. The only source if a taped slide has to be re-copied |
+| `Podcast Module 6 -- Intro.md` / `-- Wrap-up.md` | NotebookLM sources for the two episodes |
+| `Session-Notes.md` | This file |
+| `_build_files/` | Everything else — scripts, dumps, `_source_images/`, the poll sidecar |
+
+### Deleted (all recoverable from git history)
+
+- `Module 6 - NV Slides/` (11 decks, 58 MB) and `Module 6 - PG Slides/`
+  (3 decks, 49 MB) — the originals the rebuild started from.
+- `Module 6 - Revised.pptx` (27 MB), superseded by Final.
+- `Module 6 - Practice Video - Optimal Pricing in Two Markets.pptx` at the
+  root, superseded by the taped copy in `Recorded Video Slides/`.
+- `Module 6 - Revised - outline.md`.
+- 12 one-off scripts: `_final_detail.py`, `_map_sources.py`, `_mkside.py`,
+  `_pick_slides.py`, `_probe_build.py`, `_snap_titles.py`,
+  `_extract_anim.py`, `_extract_assets.py`, `_extract_pg_media.py`,
+  `_make_notes.py`, `_make_poll_sidecar.ps1`, `_deck_guard.py`.
+
+This closes open item 5 of the previous entry.
+
+### `_build_files/` — what is in it and why it was kept
+
+- **The drawing layer**: `_m6_helpers.py`, `_build_Module6.py` (STALE),
+  `_build_template_samples.py`, `_m6_notes.py`, `_m6_written_notes.py`,
+  `_source_images/`. This is what a **new** slide in the deck's style needs:
+  build it into a one-slide side deck, then `InsertFromFile` it into Final.
+  The chain is `_animate.py` -> `_build_Module6.py` -> `_m6_helpers.py` ->
+  `_build_template_samples.py`, so none of the five can go.
+- **Builds and grouping**: `_animate.py`, `_group_pass.py`,
+  `_splice_media.py` (with `_handoff_polls_M6.pptx`, the verbatim poll
+  slides with their notes and `tags` parts — a poll slide that loses its
+  notes part crashes the full-screen slideshow deck-wide).
+- **Read-only auditors**: `_audit_format.py`, `_check_labels.py`,
+  `_check_anim.py`, `_check_notes.py`, `_check_coverage.py`.
+- **Dumps and diffs**: `_dump_deck.py`, `_dump_raw.py`, `_dump_text_raw.py`,
+  `_diff_slides.py`. Use the raw dumps to read Final — python-pptx is blind
+  to `mc:AlternateContent`, which wraps every OMML formula box.
+- **Probes**: `_export_probe.ps1`, `_slideshow_probe.ps1`.
+- **The finalize pipeline**: `_finalize.ps1`, `_final_inventory.py`,
+  `_final_retag.py`, `_final_verify.py`, `_final_verify_tree.py`,
+  `_map_videos.py`, `_final_pairing.json`, `_final_plan.json`. Kept because
+  the project CLAUDE.md's "Finalize Module X" routine names these files, and
+  Modules 7 and 8 will run it.
+- **Research dumps**: `_source_inventory_*.md`, `_source_rawtext_*.md`,
+  `_assets_manifest_*.md`, `_anim_original_*.md`. Kept precisely because the
+  NV and PG decks are gone — these are their searchable text and animation
+  record at 1/300 of the size.
+
+### Path convention inside `_build_files/`
+
+Every script was repointed when it moved, and the rule is uniform:
+
+- `HERE` is `_build_files/` — `_source_images/`, `_handoff_polls_M6.pptx`
+  and the `_final_*.json` plans all moved with the scripts, so those
+  references did not change.
+- `MODULE = HERE.parent` is the module folder, and every reference to a
+  DECK or to `Recorded Video Slides/` goes through it. In PowerShell,
+  `$folder = Split-Path $PSScriptRoot -Parent`.
+- **Read-only auditors now default to `Module 6 - Final.pptx`**, so
+  `python _check_labels.py` with no argument audits the deliverable.
+- **Writer passes still default to the deleted `Module 6 - Revised.pptx`,
+  deliberately** — an accidental `python _animate.py` then fails loudly
+  instead of rewriting Final. Pass the deck explicitly to run one.
+- `_build_Module6.py` reaches the course calendar at `parents[3]`, not
+  `parents[2]`.
+
+### Two scripts that need the deleted source decks
+
+`_check_coverage.py` compares the rebuild against the NV decks, and
+`_dump_text_raw.py`'s deck KEYS ("NV", "V1", …) point into
+`Module 6 - NV Slides/`. Restore that folder from git history to use them.
+`_dump_text_raw.py` now also accepts a `.pptx` PATH, so
+`python _dump_text_raw.py "../Module 6 - Final.pptx" 9` works as it is.
+
+### Verified
+
+All 23 scripts compile and every local import resolves (checked statically
+with `py_compile` + an AST walk — never by importing, since these passes do
+their work at module level). The three `.ps1` files parse.
+`_check_labels.py` and `_audit_format.py` were run against Final from the
+new location: labels clean; the format audit reports 5 pre-existing
+findings (one trailing period on slide 9, four 15 pt labels that are the
+intended corner-pill and version-label sizes).
+
+## 2026-09-24 (later still) — "Final" renamed to "Full"; a second step is coming
+
+**One-line summary.** The deck assembled from the taped decks is the FULL
+slide version, not the final one. `Module 6 - Final.pptx` is now
+`Module 6 - Full.pptx`, the routine that builds it was renamed throughout,
+and the name `Module X - Final.pptx` is reserved for a second step that
+Nico will specify after he has edited the in-class example slides.
+
+**Reading the earlier entries:** everything they call `Module 6 - Final.pptx`
+is this same deck under its old name. They are left as written.
+
+### Renamed
+
+| Was | Is |
+|---|---|
+| `Module 6 - Final.pptx` | `Module 6 - Full.pptx` |
+| `_finalize.ps1` | `_assemble_full.ps1` |
+| `_final_inventory.py` | `_full_inventory.py` |
+| `_final_retag.py` | `_full_retag.py` |
+| `_final_verify.py` | `_full_verify.py` |
+| `_final_verify_tree.py` | `_full_verify_tree.py` |
+| `_final_pairing.json` | `_full_pairing.json` |
+| `_final_plan.json` | `_full_plan.json` |
+
+The scripts were renamed so that step 2 can have `_final_*` names of its
+own without colliding. All cross-references were updated: the imports
+between them, the two JSON filenames they read and write, the deck name in
+the seven auditors and dumps, the rolling-backup names in
+`_assemble_full.ps1`, and the STALE banner in `_build_Module6.py`. A repo
+grep for `Module 6 - Final`, `_final_` and `_finalize` comes back empty.
+
+### The routine, in the project CLAUDE.md
+
+`405 Slide Revisions 2026/CLAUDE.md` now heads the section **"End of
+Module, Step 1: Create the Full Slide Version"**, with the short name
+Nico gave it: *"Create the full slide version (based on `Module X -
+Revised` and on the recorded video slides)"*. The rules are otherwise
+unchanged — only the output name and the wording moved from Final to Full.
+
+Two things were added to that section:
+
+1. A note that a **second step follows and is not specified yet**, that
+   `Module X - Final.pptx` is RESERVED for its output, and that step 1
+   never writes that name.
+2. An instruction to **ask which step is meant** when a request says
+   "final", until step 2 is written down.
+
+The video decks are described as "**fixed** exactly as they are" rather
+than "FINAL exactly as they are", so the word "final" keeps one meaning in
+that section.
+
+### Verified
+
+All 23 scripts compile and every local import resolves, including the
+renamed chain `_full_verify_tree` -> `_full_verify` + `_full_inventory`.
+The three `.ps1` files parse. `_check_labels.py` and `_audit_format.py`
+run against `Module 6 - Full.pptx` with no argument and report the same 5
+pre-existing findings as before the rename.
+
+### Open
+
+- **Step 2 is undefined.** What it takes as input (the edited Full deck),
+  what it drops or keeps, and what it verifies all still need to be
+  written down before it can be run.
+
+### Addendum — the cleanup is now a written-down step
+
+`405 Slide Revisions 2026/CLAUDE.md` gained **"End of Module, Step 1b:
+Clean Up the Module Folder"**, generalized from what was done here: the
+five items the module folder keeps, what is deleted, the `_build_files/`
+subfolder and its seven groups, the import chain to resolve before
+deleting a script, the `HERE` / `MODULE` path convention, and the static
+verification. Step 1's section now points forward to it. Module 6 is the
+worked example of the routine.
+
+**`In Class Material/`** (2026-09-24, Nico) is now a sixth top-level item
+in a module folder, alongside the Full deck, `Recorded Video Slides/`, the
+podcast sources, `Session-Notes.md` and `_build_files/`. It is Nico's own
+folder for what he takes into the classroom, it is excluded from the
+cleanup step even when empty, and it will exist in every module folder.
+Nothing of ours goes in it. Note that git does not track an empty folder,
+so it will not appear on another machine until it has a file in it.

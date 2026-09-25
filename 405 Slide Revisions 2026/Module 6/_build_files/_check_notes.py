@@ -24,10 +24,12 @@ it blind.
 """
 import re
 import sys
+from pathlib import Path
 
 from pptx import Presentation
 
-DECK = sys.argv[1] if len(sys.argv) > 1 else "Module 6 - Revised.pptx"
+DECK = (sys.argv[1] if len(sys.argv) > 1 else
+        str(Path(__file__).resolve().parents[1] / "Module 6 - Full.pptx"))
 
 # slides that carry no note by design
 SKIP_TITLES = ("",)

@@ -55,7 +55,7 @@ from _build_template_samples import (
     _set_bullet_char,
 )
 
-OUT_DIR = Path(__file__).parent
+OUT_DIR = Path(__file__).resolve().parents[1]  # _build_files/ since 2026-09-24
 
 
 # --------------------------------------------------------------------------

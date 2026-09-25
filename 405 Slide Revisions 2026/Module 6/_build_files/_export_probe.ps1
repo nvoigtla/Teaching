@@ -5,8 +5,9 @@ param(
     [int[]]$Slides = @(1),
     [int]$Width = 1600
 )
-$folder = $PSScriptRoot
+$folder = $PSScriptRoot   # _build_files/ since 2026-09-24
 $path = Join-Path $folder $Deck
+if (-not (Test-Path $path)) { $path = Join-Path (Split-Path $folder -Parent) $Deck }
 $dir = Join-Path $folder "_probe"
 New-Item -ItemType Directory -Force $dir | Out-Null
 $pp = New-Object -ComObject PowerPoint.Application

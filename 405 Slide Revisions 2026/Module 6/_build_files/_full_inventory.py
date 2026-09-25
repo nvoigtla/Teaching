@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Finalize routine, step 1 (read-only): inventory the taped video decks
+"""Create the full slide version, step 1 (read-only): inventory the taped video decks
 in `Recorded Video Slides/` and pair every taped slide with a slide of
 `Module 6 - Revised.pptx` by content fingerprint (never by number).
 
-Writes `_final_pairing.json` and prints a table.  Reads only -- no deck is
-written.  Build input for `_finalize.py`; keep.
+Writes `_full_pairing.json` and prints a table.  Reads only -- no deck is
+written.  Build input for `_assemble_full.ps1`; keep.
 """
 import hashlib, json, re, sys, zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REVISED = HERE / "Module 6 - Revised.pptx"
-VDIR = HERE / "Recorded Video Slides"
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
+REVISED = MODULE / "Module 6 - Revised.pptx"
+VDIR = MODULE / "Recorded Video Slides"
 NP = "http://schemas.openxmlformats.org/presentationml/2006/main"
 NA = "http://schemas.openxmlformats.org/drawingml/2006/main"
 NR = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -131,7 +132,7 @@ def main():
                                 tags=s["tags"], jumps=s["jumps"],
                                 media=s["media"], hidden=s["hidden"]))
     unpaired = [s["n"] for s in rev if s["n"] not in used]
-    (HERE / "_final_pairing.json").write_text(json.dumps(
+    (HERE / "_full_pairing.json").write_text(json.dumps(
         dict(pairing=pairing, unpaired=unpaired,
              revised=[dict(n=s["n"], title=" | ".join(s["texts"][:2])[:90],
                            tags=s["tags"], jumps=s["jumps"],

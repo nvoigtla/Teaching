@@ -25,7 +25,10 @@ P_NS = 'http://schemas.openxmlformats.org/presentationml/2006/main'
 R_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 NS = {'p': P_NS, 'r': R_NS}
 
-SRC = Path(__file__).parent / "Module 6 - NV Slides"
+MODULE = Path(__file__).resolve().parents[1]  # _build_files/ since 2026-09-24
+# The NV source decks were deleted on 2026-09-24; pass a .pptx PATH
+# instead of a deck key to dump any deck (e.g. "Module 6 - Full.pptx").
+SRC = MODULE / "Module 6 - NV Slides"
 DECKS = {
     "NV": "Module 6.pptx",
     "APP": "Module 6 -- Slides On-Campus Applications with Solutions.pptx",
@@ -58,9 +61,10 @@ def unescape(s):
 
 
 def dump(tag, wanted=None):
-    z = zipfile.ZipFile(str(SRC / DECKS[tag]))
+    path = Path(tag) if tag.lower().endswith(".pptx") else SRC / DECKS[tag]
+    z = zipfile.ZipFile(str(path))
     parts = slide_parts(z)
-    print("# Raw-XML text dump: %s  (%d slides)" % (DECKS[tag], len(parts)))
+    print("# Raw-XML text dump: %s  (%d slides)" % (path.name, len(parts)))
     print("# AC = the shape sits inside mc:AlternateContent, so python-pptx "
           "does NOT see it.\n")
     for n, part in enumerate(parts, 1):

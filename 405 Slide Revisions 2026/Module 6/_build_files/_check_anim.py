@@ -34,7 +34,8 @@ R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 EMU = 914400.0
 
 HERE = Path(__file__).parent
-DECK = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "Module 6 - Revised.pptx"
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
+DECK = Path(sys.argv[1]) if len(sys.argv) > 1 else MODULE / "Module 6 - Full.pptx"
 
 GOLD = "E09F3E"
 

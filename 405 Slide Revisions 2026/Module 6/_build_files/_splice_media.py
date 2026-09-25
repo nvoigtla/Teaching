@@ -30,6 +30,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).parent
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
 ORIGINAL = HERE / "_handoff_polls_M6.pptx"
 
 NS_P = 'http://schemas.openxmlformats.org/presentationml/2006/main'
@@ -291,5 +292,5 @@ def splice(deck_path):
 
 if __name__ == '__main__':
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
-    deck = Path(args[0]) if args else HERE / 'Module 6 - Revised.pptx'
+    deck = Path(args[0]) if args else MODULE / 'Module 6 - Revised.pptx'
     splice(deck)

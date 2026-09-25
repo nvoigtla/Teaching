@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # ==========================================================================
-#  *** STALE since 2026-09-24 ***  Module 6 is taped and finalized.  The
-#  source of truth is now "Module 6 - Final.pptx" (assembled from the taped
-#  decks in "Recorded Video Slides" by _finalize.ps1 + _final_retag.py),
+#  *** STALE since 2026-09-24 ***  Module 6 is taped, and the full slide
+#  version has been created from the recorded video slides.  The
+#  source of truth is now "Module 6 - Full.pptx" (assembled from the taped
+#  decks in "Recorded Video Slides" by _assemble_full.ps1 + _full_retag.py),
 #  and it is edited in place.  Re-running this script regenerates only
 #  "Module 6 - Revised.pptx", which no longer carries the edits made while
 #  taping.
@@ -43,7 +44,7 @@ from pptx import Presentation
 # means the deck cannot disagree with either.  No fallback on purpose: if
 # the calendar ever moves, this should fail loudly rather than quietly
 # ship last year's date.
-_CAL_DIR = (Path(__file__).resolve().parents[2]
+_CAL_DIR = (Path(__file__).resolve().parents[3]
             / "405 Calendar and Website" / "Course Calendar")
 sys.path.insert(0, str(_CAL_DIR))
 import _calendar_content as _CAL
@@ -79,7 +80,7 @@ from _m6_helpers import (
 from _m6_notes import NOTES_NV, NOTES_APP, NOTES_V1, NOTES_V2, NOTES_V3
 from _m6_written_notes import WRITTEN_NOTES, NOTE_FIXES
 
-OUT = Path(__file__).parent / "Module 6 - Revised.pptx"
+OUT = Path(__file__).resolve().parents[1] / "Module 6 - Revised.pptx"
 
 # --------------------------------------------------------------------------
 #  The OMML helpers concatenate raw XML and do not escape their argument, so

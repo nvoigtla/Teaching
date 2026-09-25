@@ -1,29 +1,31 @@
-# Finalize routine (405 Slide Revisions CLAUDE.md, "End of Module"):
-# assemble "Module 6 - Final.pptx" from "Module 6 - Revised.pptx" and the
-# taped decks in "Recorded Video Slides", driven by _final_plan.json
-# (written from _final_pairing.json, which _final_inventory.py makes).
+# "Create the full slide version" (405 Slide Revisions CLAUDE.md,
+# "End of Module, step 1"):
+# assemble "Module 6 - Full.pptx" from "Module 6 - Revised.pptx" and the
+# taped decks in "Recorded Video Slides", driven by _full_plan.json
+# (written from _full_pairing.json, which _full_inventory.py makes).
 #
 # PowerPoint does every copy itself (InsertFromFile / Duplicate / MoveTo),
 # so notes, tags, animations, media and links travel intact.  Nothing is
 # rebuilt.  Revised is only read.
 $ErrorActionPreference = "Stop"
-$folder = $PSScriptRoot
+$support = $PSScriptRoot
+$folder = Split-Path $PSScriptRoot -Parent   # _build_files/ since 2026-09-24
 $rev = Join-Path $folder "Module 6 - Revised.pptx"
-$final = Join-Path $folder "Module 6 - Final.pptx"
+$full = Join-Path $folder "Module 6 - Full.pptx"
 $vdir = Join-Path $folder "Recorded Video Slides"
 $m3 = Join-Path $folder "..\Module 3\Module 3 - Revised.pptx"
-$plan = Get-Content (Join-Path $folder "_final_plan.json") -Raw | ConvertFrom-Json
+$plan = Get-Content (Join-Path $support "_full_plan.json") -Raw | ConvertFrom-Json
 $dot = [char]0x00B7
 
 # rolling backups of the deliverable
-$t1 = Join-Path $folder "Module 6 - Final_t-1.pptx"
-$t2 = Join-Path $folder "Module 6 - Final_t-2.pptx"
+$t1 = Join-Path $folder "Module 6 - Full_t-1.pptx"
+$t2 = Join-Path $folder "Module 6 - Full_t-2.pptx"
 if (Test-Path $t1) { Copy-Item $t1 $t2 -Force }
-if (Test-Path $final) { Copy-Item $final $t1 -Force }
-Copy-Item $rev $final -Force
+if (Test-Path $full) { Copy-Item $full $t1 -Force }
+Copy-Item $rev $full -Force
 
 $pp = New-Object -ComObject PowerPoint.Application
-$p = $pp.Presentations.Open($final, $false, $false, $false)
+$p = $pp.Presentations.Open($full, $false, $false, $false)
 if ($p.Slides.Count -ne $plan.total_rev) { throw "Revised has $($p.Slides.Count) slides, plan expects $($plan.total_rev)" }
 
 # 1. every paired slide -> its taped version (descending, so indices hold)
@@ -60,7 +62,7 @@ foreach ($n in $plan.copies) {
 }
 # The retagging is NOT done here: editing the tag through COM makes the
 # auto-fitting tag box shrink (0.42" -> 0.27", top 0 -> 0.075"), and
-# switching autofit off to stop that rewrites the box.  _final_retag.py
+# switching autofit off to stop that rewrites the box.  _full_retag.py
 # edits the text inside the tag's one run in the saved XML instead.
 "copies: " + $plan.copies.Count
 

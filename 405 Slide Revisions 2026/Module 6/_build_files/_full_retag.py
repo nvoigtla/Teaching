@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Finalize routine, step after _finalize.ps1: retag the in-class COPIES.
+"""Create the full slide version, step after _assemble_full.ps1: retag the in-class COPIES.
 
 `Module 6 · Video k · <topic>` -> `Module 6 · In Class · Examples · <topic>`
 on the slides between the in-class divider and the moved backup slides.
@@ -11,15 +11,16 @@ are left alone.
 import json, re, shutil, zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
-import _final_inventory as FI
+import _full_inventory as FI
 
 HERE = Path(__file__).resolve().parent
-FINAL = HERE / "Module 6 - Final.pptx"
-plan = json.loads((HERE / "_final_plan.json").read_text(encoding="utf-8"))
+MODULE = HERE.parent  # _build_files/ since 2026-09-24
+FULL = MODULE / "Module 6 - Full.pptx"
+plan = json.loads((HERE / "_full_plan.json").read_text(encoding="utf-8"))
 
-with zipfile.ZipFile(FINAL) as z:
+with zipfile.ZipFile(FULL) as z:
     items = {n: z.read(n) for n in z.namelist()}
-    order = [s["part"] for s in FI.deck(FINAL)]
+    order = [s["part"] for s in FI.deck(FULL)]
 
 n_main = 93                                  # R2..R94
 first = n_main + 2                           # after the divider
@@ -35,9 +36,9 @@ for disp in range(first, last + 1):
         n += 1
         print("retagged slide", disp)
 
-tmp = FINAL.with_suffix(".retag_tmp.pptx")
+tmp = FULL.with_suffix(".retag_tmp.pptx")
 with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zo:
     for name, data in items.items():
         zo.writestr(name, data)
-shutil.move(str(tmp), str(FINAL))
+shutil.move(str(tmp), str(FULL))
 print("retagged:", n)
