@@ -177,9 +177,14 @@ def main():
         sys.exit("no built pages found -- run `python _build_site.py` first")
     assets = asset_files()
     have_docs = sum(1 for src, _ in DOCS if os.path.exists(src))
-    n_slides = len(os.listdir(os.path.join(SITE, "slides")))         if os.path.isdir(os.path.join(SITE, "slides")) else 0
-    print("all %d pages, %d assets, %d slide decks and %d of %d PDFs present"
-          % (len(files), len(assets), n_slides, have_docs, len(DOCS)))
+    def _count(sub):
+        d = os.path.join(SITE, sub)
+        return len(os.listdir(d)) if os.path.isdir(d) else 0
+    n_slides, n_inclass = _count("slides"), _count("inclass")
+    print("all %d pages, %d assets, %d slide decks, %d in-class files "
+          "and %d of %d PDFs present"
+          % (len(files), len(assets), n_slides, n_inclass,
+             have_docs, len(DOCS)))
 
     if args.dry_run:
         print("\nwould publish to https://github.com/%s/%s" % (OWNER, REPO))
@@ -226,14 +231,22 @@ def main():
             print("   %d calendar feed(s)" % len(os.listdir(dst_feeds)))
 
         # the video slide decks, if this build produced any
-        src_slides = os.path.join(SITE, "slides")
-        if os.path.isdir(src_slides):
-            dst_slides = os.path.join(work, "slides")
-            os.makedirs(dst_slides, exist_ok=True)
-            for name in sorted(os.listdir(src_slides)):
-                shutil.copy2(os.path.join(src_slides, name),
-                             os.path.join(dst_slides, name))
-            print("   %d slide deck(s)" % len(os.listdir(dst_slides)))
+        # The built folders that are not pages or assets: the video decks
+        # and the in-class handouts / decks. Both are build OUTPUT here and
+        # .gitignore'd out of the private repo, so this is the only thing
+        # that puts them on the public one (2026-09-24 for inclass/).
+        for sub, what in (("slides", "slide deck"),
+                          ("inclass", "in-class file")):
+            src_dir = os.path.join(SITE, sub)
+            if not os.path.isdir(src_dir):
+                continue
+            dst_dir = os.path.join(work, sub)
+            os.makedirs(dst_dir, exist_ok=True)
+            for name in sorted(os.listdir(src_dir)):
+                shutil.copy2(os.path.join(src_dir, name),
+                             os.path.join(dst_dir, name))
+            n = len(os.listdir(dst_dir))
+            print("   %d %s%s" % (n, what, "" if n == 1 else "s"))
         for f in files:
             shutil.copy2(os.path.join(SITE, f), os.path.join(work, f))
         for a in assets:

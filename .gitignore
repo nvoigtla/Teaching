@@ -43,3 +43,5 @@ _preview/
 # and 51 MB per section has no business in this repo (2026-09-06).
 405 Calendar and Website/Course Website/slides/
 405 Calendar and Website/Course Website/*/slides/
+405 Calendar and Website/Course Website/inclass/
+405 Calendar and Website/Course Website/*/inclass/

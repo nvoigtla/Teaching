@@ -1305,16 +1305,37 @@ def inclass_material(w):
     return sorted(mods)
 
 
+INCLASS_DIR = "inclass"
+
+
 def tbd_rows(mods, kinds):
-    """Placeholder bullets -- "Module 3 – Handout (TBD)" -- one per module
-    and kind. Nico uploads the real files right before each class."""
+    """One bullet per module and kind -- a LINK once the file is in
+    ../In-Class Material, and "Module 3 – Handout (TBD)" until then.
+
+    The slide row says which deck is up: the blank one before the class,
+    the worked one after (2026-09-24, Nico). That qualifier is a
+    `.qual` span, NOT the `.tba` span the placeholder uses -- `_publish.py`
+    counts `.tba` to report what is still missing, and a deck that is
+    published is not missing."""
     rows = []
+    have = {n: {k: (v, q) for k, v, q in C.inclass_files(n)} for n in mods}
     for n in mods:
         for what in kinds:
+            got = have.get(n, {}).get(what)
+            if got:
+                src, qual = got
+                label = ('<a href="%s/%s" target="_blank" rel="noopener">'
+                         'Module %d – %s</a>'
+                         % (INCLASS_DIR, esc(C.inclass_pub_name(n, what, src)),
+                            n, what))
+                tail = (' <span class="qual">(%s)</span>' % esc(qual)
+                        if qual else "")
+            else:
+                label = "Module %d – %s" % (n, what)
+                tail = ' <span class="tba">(TBD)</span>'
             rows.append('<li><span class="g" aria-hidden="true">▤</span>'
-                        '<span class="txt">Module %d – %s '
-                        '<span class="tba">(TBD)</span></span></li>'
-                        % (n, what))
+                        '<span class="txt">%s%s</span></li>'
+                        % (label, tail))
     return "".join(rows)
 
 
@@ -2193,6 +2214,32 @@ def main():
     for gone in set(os.listdir(sl)) - keep:
         os.remove(os.path.join(sl, gone))
     print("  slides/                 (%d decks)" % len(keep))
+
+    # The in-class handouts and decks, for THIS section only: each site
+    # serves its own, which is the whole point of the section token in the
+    # file name (2026-09-24, Nico: "make sure to distinguish F/EMBA").
+    ic = os.path.join(OUT, INCLASS_DIR)
+    os.makedirs(ic, exist_ok=True)
+    keep = set()
+    for w in C.WEEKS:
+        for n in inclass_material(w):
+            for kind, src, _qual in C.inclass_files(n):
+                name = C.inclass_pub_name(n, kind, src)
+                keep.add(name)
+                dst = os.path.join(ic, name)
+                if (not os.path.exists(dst)
+                        or os.path.getmtime(dst) < os.path.getmtime(src)):
+                    shutil.copy2(src, dst)
+    # A file drops out of `keep` when its module flips to the worked deck
+    # under the SAME published name, so nothing is orphaned by the swap --
+    # this clears a module whose source files were removed entirely.
+    for gone in set(os.listdir(ic)) - keep:
+        os.remove(os.path.join(ic, gone))
+    print("  %s/                (%d file(s))" % (INCLASS_DIR, len(keep)))
+    bad = C.unparsed_inclass()
+    for f in bad:
+        print("     NOT PUBLISHED, name does not match the convention: %s"
+              % os.path.basename(f))
     pages = []
 
     if HOME_ON:

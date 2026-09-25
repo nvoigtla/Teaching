@@ -9,6 +9,59 @@ the page layout and the palette.
 
 ---
 
+## Module 1's in-class handout and slides are live (2026-09-24)
+
+Both sections, from `Course Website/In-Class Material/` -- Nico's own
+folder, NOT `405 Slide Revisions 2026/Module 1/In Class Material/`, which
+the prompt named and which is empty.
+
+**Discovered by scanning, like the video decks**, so a file dropped in
+shows up on the next build with no code change. `_scan_inclass()` in
+`_calendar_content.py` requires:
+
+    Module <N> - In Class - <EMBA|FEMBA> - Handout.pdf
+    Module <N> - In Class - <EMBA|FEMBA> - wo Solutions.pptx
+    Module <N> - In Class - <EMBA|FEMBA> - with Solutions.pptx
+
+`unparsed_inclass()` reports anything that does not match, so a mis-named
+file is named rather than silently left off. Word's `~$` lock files are
+skipped -- one was in the folder as this was written, because the deck was
+open in PowerPoint.
+
+**Each site serves only its OWN section's files.** `inclass_files()` filters
+on `SECTION_LABEL`. The two sections' files are genuinely different, the
+handouts included: same byte count, different sha1.
+
+### Swapping in the solutions after class
+
+`INCLASS_SOLUTIONS` in `_calendar_content.py` says which deck is published
+per module -- `{1: "with"}` after Module 1's class; anything unlisted
+publishes the blank deck. **The published file name carries no variant**
+(`Module-1-In-Class-EMBA-Slides.pptx`), so the swap reuses the same
+address and a link already handed out keeps working. The week page labels
+the row "(without solutions)" / "(with solutions)" from the same switch.
+
+That qualifier is a `.qual` span, deliberately NOT the `.tba` span the
+"(TBD)" placeholder uses: `_publish.py` counts `.tba` to report what is
+still missing, and a deck that is up is not missing. Week 1 went from 4
+TBD to 2 (Module 2 still to come).
+
+### Plumbing
+
+`inclass/` is build OUTPUT next to `slides/` -- .gitignore'd out of the
+private repo, and `_deploy.py` now ships BOTH folders through one loop
+rather than a slides-only block.
+
+**Repo growth to keep an eye on.** `_deploy.py` commits on top of history,
+so every new version of a 28 MB deck is another permanent blob in the
+public repo -- roughly 30 MB per section now, and another 28 MB per section
+when the solutions replace the blanks. Over eight modules that is a few
+hundred MB. Fine for now; worth revisiting if a repo nears 1 GB.
+
+The 111 MB source folder is untracked and NOT ignored, so it shows in
+`git status`. Whether it belongs in the private repo is Nico's call -- it
+was left untracked rather than committed unasked.
+
 ## OPEN: Module 1's four slide decks dropped off both live sites (2026-09-24)
 
 **Not our change, and not yet fixed.** `_calendar_content.py` discovers the

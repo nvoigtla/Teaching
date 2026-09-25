@@ -23,6 +23,24 @@ underline cannot travel with it.
 
 ---
 
+## The in-class material scan lives here too (2026-09-24)
+
+`_calendar_content.py` gained `_scan_inclass()` / `inclass_files()` /
+`inclass_pub_name()` and the `INCLASS_SOLUTIONS` switch, next to the video
+deck scan it is modelled on. It reads
+`../Course Website/In-Class Material/` -- Nico's folder of per-section
+handouts and decks.
+
+Only the WEBSITE consumes it so far. The calendar still prints its static
+"In-Class Material - Module N: Handout / Slides  (TBD)" line in
+`build_week()`, which is now out of date for Module 1; making it link the
+published files is a standing offer, not done. The scan sits in this file
+rather than in `_build_site.py` precisely so the calendar can read it when
+that happens.
+
+Full write-up, including the naming convention and how the solutions swap
+works, is in `../Course Website/Session-Notes.md`.
+
 ## A live-session card: "Coffee & Econ" on Zoom (2026-09-24)
 
 A week can now carry live sessions that are not the on-campus class. The

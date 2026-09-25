@@ -191,6 +191,95 @@ def slides_for(module, title):
     return VIDEO_SLIDES.get((module, int(m.group(1))))
 
 
+# ========================== IN-CLASS MATERIAL ==========================
+# The handout and the slide deck Nico hands out in class -- one pair per
+# module AND per section. DISCOVERED by scanning, exactly like the video
+# decks above, so a file he drops into the folder shows up on the next
+# build with no code change (2026-09-24).
+#
+# The scan requires this filename convention:
+#     Module <N> - In Class - <EMBA|FEMBA> - Handout.pdf
+#     Module <N> - In Class - <EMBA|FEMBA> - wo Solutions.pptx
+#     Module <N> - In Class - <EMBA|FEMBA> - with Solutions.pptx
+# `python _publish.py` reports any file it could not parse. Word's "~$"
+# lock files are skipped -- one was sitting in the folder the day this was
+# written, because the deck was open in PowerPoint.
+
+INCLASS_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir,
+    "Course Website", "In-Class Material"))
+
+_INCLASS_RE = re.compile(
+    r"Module (\d+) - In Class - (EMBA|FEMBA) - "
+    r"(Handout|wo Solutions|with Solutions)\.(pdf|pptx)$")
+
+
+def _scan_inclass():
+    found = {}
+    if not os.path.isdir(INCLASS_ROOT):
+        return found                      # another machine, or moved
+    for name in sorted(os.listdir(INCLASS_ROOT)):
+        if name.startswith("~$"):
+            continue
+        m = _INCLASS_RE.match(name)
+        if m:
+            found[(int(m.group(1)), m.group(2), m.group(3))] =                 os.path.join(INCLASS_ROOT, name)
+    return found
+
+
+INCLASS_MATERIAL = _scan_inclass()
+
+
+def unparsed_inclass():
+    """Files in the folder the convention above does not match, so a
+    mis-named one is reported rather than silently left off the site."""
+    bad = []
+    if not os.path.isdir(INCLASS_ROOT):
+        return bad
+    for name in sorted(os.listdir(INCLASS_ROOT)):
+        if name.startswith("~$") or name.startswith("."):
+            continue
+        if not _INCLASS_RE.match(name):
+            bad.append(os.path.join(INCLASS_ROOT, name))
+    return bad
+
+
+# WHICH slide deck is published for each module. The blank deck goes up
+# before the class and the worked one replaces it AFTER (2026-09-24,
+# Nico). Add a module here the day its class has been taught; anything not
+# listed publishes the blank deck. The published FILE NAME does not change
+# when it flips, so a link already handed out keeps working.
+INCLASS_SOLUTIONS = {
+    # 1: "with",     <- after Module 1's class
+}
+
+
+def inclass_files(module):
+    """[(kind, source path, qualifier)] for THIS section's module -- the
+    handout, then whichever slide deck is currently published. Missing
+    files are simply absent, and the page keeps its "(TBD)" for them."""
+    out = []
+    h = INCLASS_MATERIAL.get((module, SECTION_LABEL, "Handout"))
+    if h:
+        out.append(("Handout", h, ""))
+    with_sol = INCLASS_SOLUTIONS.get(module) == "with"
+    key = "with Solutions" if with_sol else "wo Solutions"
+    d = INCLASS_MATERIAL.get((module, SECTION_LABEL, key))
+    if d:
+        out.append(("Slides", d,
+                    "with solutions" if with_sol else "without solutions"))
+    return out
+
+
+def inclass_pub_name(module, kind, path):
+    """Published file name: no spaces, since it is served straight off
+    GitHub Pages, and DELIBERATELY free of the solutions variant -- the
+    blank and the worked deck publish to the SAME address, so swapping one
+    for the other cannot break a link a student already has."""
+    return "Module-%d-In-Class-%s-%s%s" % (
+        module, SECTION_LABEL, kind, os.path.splitext(path)[1].lower())
+
+
 # ============================== SECTIONS ==============================
 # MGMT 405 runs twice in Fall 2026 with the SAME material and the same due
 # dates (2026-09-05, Nico). Only the meeting pattern, the room, the TA
