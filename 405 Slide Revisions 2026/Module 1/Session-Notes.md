@@ -1,5 +1,346 @@
 # Session Notes — Module 1 (combined In-Class + Videos deck)
 
+## 2026-09-24 — End-of-module step 1b: folder cleaned up (PHASE B)
+
+The module folder now holds phase B's **six** items.
+
+| | |
+|---|---|
+| `Module 1 - Final.pptx` | the deliverable, 92 slides |
+| `Module 1 - In Class.pptx` | source of truth for every in-class slide |
+| `Recorded Video Slides/` | the taped decks; the only source if a taped slide has to be re-copied |
+| `Podcast Module 1 -- Intro.md`, `... -- Wrap-up.md` | the NotebookLM sources |
+| `Session-Notes.md` | this file |
+| `_build_files/` | 36 items, everything else |
+
+### `Module 1 - Full.pptx` was deleted (2026-09-24, Nico)
+It was held back at first because it is untracked, and step 1b refuses to
+delete what git does not hold. Nico then made Full the standing **exception**
+to that rule and it is now written into the project `CLAUDE.md`: **when Full
+and Final sit side by side, Full goes, commit or no commit** — Final holds
+every slide Full has, so Final is the backstop.
+
+Checked before deleting, not assumed: all **91 of 91** Full slides are
+present in Final — 79 carried over unchanged and 12 deliberately superseded
+(the 10 In-Class replacements plus the chrome fix on displays 12 and 13).
+Only Final 40, the in-class-only slide, has no Full origin.
+
+**Full is not in git either, so it is REGENERATED rather than restored:**
+restore `Module 1 - Revised.pptx` from git into the module folder, then run
+`_build_files/_assemble_full.ps1`. The four step-2 scripts that read Full
+(`_final_inventory.py`, `_final_pairdiff.py`, `_final_verify.py`,
+`_assemble_final.ps1`) each carry a header note saying exactly that.
+`_final_verify.py` now SKIPS its check 3 with a message when Full is absent,
+so checks 1 and 2 still run and the script still exits 0.
+
+**`Module 1 - Final.pptx`, `Recorded Video Slides/` and every script written
+on 2026-09-24 are still untracked — the module has no git backstop yet.**
+
+### Deleted
+- `Module 1 - Revised.pptx` and `Module 1 - Revised - outline.md` — tracked,
+  superseded by Full then Final.
+- `_ic_port.py` — the one-off 2026-09-23 in-class merge port, already
+  applied and guarded against re-running. Nothing imports it.
+- `_verify_anim.ps1` — the old COM click-count check, keyed to the 92-slide
+  Revised deck; superseded by `_full_verify_anim.ps1` and
+  `_final_verify_anim.ps1`.
+- Every rolling `_t-1` / `_t-2` backup (Final, Full, In Class, Revised,
+  Example Candidates).
+- `_probe/`, `__pycache__/`, and `In Class Material/` (it was empty, and Nico
+  dropped it from the CLAUDE.md on 2026-09-24).
+- `_slideshow_probe_final.ps1` — folded back into `_slideshow_probe.ps1`,
+  which now defaults to `Module 1 - Final.pptx`. Nothing lost.
+
+### `_build_files/` — what is in it and why
+1. **Drawing layer** — `_m1_helpers`-equivalent lives inside
+   `_build_Module1.py` (STALE), plus `_build_template_samples.py`,
+   `_m1_order.py`, `_source_images/` (98 files).
+   `SRC_IMG_DIR = Path(__file__).parent / "_source_images"`, which is why the
+   images moved WITH the scripts and that reference did not change.
+2. **Builders / grouping** — `_animate.py`, `_group_pass.py`,
+   `_splice_media.py`, sidecars `_handoff_polls_IC.pptx`,
+   `_handoff_polls_WS.pptx`.
+3. **Step-1 pipeline** — `_full_inventory.py`, `_assemble_full.ps1`,
+   `_full_verify.py`, `_full_verify_anim.ps1`, `_full_pairing.json`.
+4. **Step-2 pipeline** — `_final_inventory.py`, `_final_pairdiff.py`,
+   `_assemble_final.ps1`, `_final_verify.py`, `_final_verify_anim.ps1`,
+   `_final_pairing.json`, `_fix_candidates_chrome.py`.
+5. **Dumps and diffs** — `_diff2.py`, `_ic_vs_rev.py`, `_style_diff.py`,
+   `_xml_diff.py`, `_whatchanged.py`.
+6. **Probes** — `_slideshow_probe.ps1`, `_export_probe.ps1`.
+7. **Research dumps** — `_source_inventory.md`, `_runfmt_dump.md`,
+   `_assets_manifest.md`, and `Module 1 - Example Candidates.pptx` with
+   `_build_M1_candidates.py`. The candidates deck is where displays 12 and 13
+   picked up the chrome that `_fix_candidates_chrome.py` had to correct.
+8. `_repoint.py` — the one-off that did the path move below. Idempotent;
+   kept as the concrete record of the convention.
+
+### The `HERE` / `MODULE` convention after the move
+- `HERE` = `_build_files/` — `_source_images/`, the poll sidecars and the
+  JSON plans moved with the scripts, so those references did not change.
+- `MODULE = HERE.parent` — every reference to a DECK or to
+  `Recorded Video Slides/`. In PowerShell,
+  `$folder = Split-Path $PSScriptRoot -Parent`.
+- `_slideshow_probe.ps1` keeps `$outDir` on `$PSScriptRoot`, so captures land
+  in `_build_files/_probe/`.
+- **Writer passes still point at the deleted `Module 1 - Revised.pptx`,
+  deliberately** (`_animate.py`, `_group_pass.py`, `_splice_media.py`,
+  `_build_Module1.py`). An accidental run fails loudly instead of rewriting
+  Final. To run one, name the deck explicitly.
+
+### Tools that need a restore from git to work again
+`_ic_vs_rev.py`, `_style_diff.py` and `_xml_diff.py` compare In Class against
+`Module 1 - Revised.pptx`, which is gone. Each now carries a header note
+saying so and giving the `git checkout <commit> -- ...` line to restore the
+deck into the MODULE folder first.
+
+### Verification (all passed)
+- All 21 Python files compile (`py_compile`), and an AST walk confirms every
+  local `import _...` resolves inside `_build_files/`. Checked **statically**
+  — never by importing, since these passes do their work at module level.
+- All 8 `.ps1` files parse.
+- `_final_verify.py` run **from its new location** gives output identical to
+  the pre-move run: 57/57 vs In Class, 32/34 + 2 accepted deviations vs the
+  taped decks, 3/3 vs Full.
+- `_final_inventory.py` likewise reproduces its pre-move output.
+
+
+## 2026-09-24 — End-of-module step 2: `Module 1 - Final.pptx` built (92 slides)
+
+**`Module 1 - Final.pptx` is now the deliverable.** `_m1_frozen.py` guards
+all three decks (`DELIVERABLES` = Revised, Full, Final). Step 2 itself is
+written up in the project `CLAUDE.md` ("End of Module, Step 2"), added this
+session together with a phase-dependent rewrite of the step-1b cleanup.
+
+**92 slides = 91 Full + 1 in-class-only slide.** Nothing was deleted.
+
+### What step 2 did
+- **12 slides replaced** by their In-Class version (rule 3), in place:
+  Final 39, 45, 49, 50, 51, 63, 65, 67, 73, 78, 79, 85
+  (← IC 6, 12, 16, 17, 18, 30, 32, 34, 40, 45, 46, 52).
+- **1 slide added** (rule 5): IC 7 "Recall from Video 1: Economists as
+  Hedgehogs", now Final 40, between "Questions and Office Hours" and
+  "Making the Most of the Course". It is the in-class recall slide that
+  parallels "Recall from Video 2: Market Definition" — a different slide
+  from the taped "Economists as Hedgehogs" (Final 5), which was left alone
+  under rule 4.
+- **The in-class block was reordered into IN-CLASS order** (rule 5), three
+  moves: the deck title slide to the front of the block (Final 34), the
+  "Module 1 In-Class Part" divider down to just before the applications
+  divider (Final 47), and the Netflix case after the Kroger and Costco ones
+  (Final 52).
+- **43 in-class slides were already identical** in Full and were untouched.
+
+### Rule 4 — the video blocks were not disturbed
+Final 1–32, 87 and 91 came from the taped decks and were never written.
+Two In-Class slides matched into a video block and were correctly NOT acted
+on: IC 7 (handled as a new slide, above) and IC 53, the BACKUP divider,
+which is identical to the taped copy at Final 87.
+
+### Rule 6 — three slides In Class dropped, kept at their Full position
+- **Final 33** — the HIDDEN "Effect of Shifts in Demand and Supply Curves
+  in Isolation".
+- **Final 86** — "Next Steps" (the `Module 1 · Wrap-Up` closer).
+- **Final 91** — "People Respond to Incentives", which Final 2 jump-links
+  to, so it could not have gone anyway.
+Say the word if any of these should come out.
+
+### Verification run (all passed)
+- Opens in PowerPoint; 92 slides.
+- `_final_verify.py` — three checks, **94 comparisons, all clean**:
+  57 of 57 Final-vs-In-Class, 34 of 34 Final-vs-taped-decks (the guard that
+  step 2 did not disturb step 1), 3 of 3 Final-vs-Full for the rule 6 keeps.
+  Covers text, run formatting, member-level geometry with groups decoded,
+  notes, the timing tree, rel sets and hidden status; live `slidenum` fields
+  excluded.
+- `_final_verify_anim.ps1` — COM click-count check: **90 slides,
+  0 mismatches** on effect count and on-click beats.
+- `_slideshow_probe_final.ps1` — 14 slides captured
+  (1, 33, 34, 40, 47, 49, 52, 54, 57, 70, 86, 87, 91, 92), no failure
+  banner. **All three live PollEverywhere activities render live** (54, 57,
+  70), each with its `tags` part and notes payload.
+- All 10 jump links and "← Back" buttons land correctly, including the two
+  that survived a replace-and-reinsert: Final 45 (Homo Economicus, replaced
+  from IC 12) → 89, and Final 90's Back → 45.
+- Rule 10: **no empty placeholder slides.** The three empty poll slots added
+  on 2026-09-22 are gone from the In-Class deck; each poll is now set-up →
+  live activity → solution.
+
+### Chrome fix on Final 12 and 13 (2026-09-24, Nico)
+`_fix_candidates_chrome.py` corrected the Example-Candidates leftovers on
+the Tapestry–Capri and "Firms' Own Documents" slides:
+- top bar `Module 1 · Candidates · Market Definition` →
+  **`Module 1 · Video 2 · Markets`** (what Nico asked for);
+- footer `Management 405 · Module 1 · Example Candidates (for review)` →
+  the deck's own line, which the other 90 slides carry. Same leftover, so it
+  went with the top bar.
+Zip + lxml surgery, **2 of 464 parts rewritten**, single runs whose `rPr`
+already matched the correct neighbour (display 15). Verified in the real
+slideshow.
+
+**The taped `Module 1 - Video 2 - Markets.pptx` still carries the original
+chrome** — it is the record of what was taped, and rule 1 holds it fixed.
+`_final_verify.py` therefore records displays 12 and 13 in its `ACCEPTED`
+dict, with the reason, and prints them as "2 accepted deviations" rather
+than failing. **A re-copy of either slide from the taped deck would bring
+the wrong chrome back** — re-run `_fix_candidates_chrome.py` if that
+happens, or say the word and the taped deck gets the same fix.
+
+### Tag questions — RESOLVED 2026-09-24 (Nico)
+- Final 40 (`Module 1 · Introduction`) and Final 49
+  (`Module 1 · In Class · Examples · Markets`) are **both correct as they
+  are**. The video-block slide keeps the agenda-item tag; the in-class
+  application keeps the four-level tag.
+- Final 32's problem-set pointer is **correct as it is** (the ✞ → ➜ glyph
+  change flagged in step 1 was Nico's own, not a defect).
+- **The In-Class deck has NO Example-Candidates defect.** Its Market
+  Definition block (IC 16–19) already reads
+  `Module 1 · In Class · Examples · Markets`, the in-class convention; no
+  In-Class slide carries a `Candidates` tag, names a video in its top bar,
+  or has the review-deck footer. The two affected slides exist only in the
+  video block. **In the in-class part the convention is the four-level tag —
+  never `Video k`** (2026-09-24, Nico).
+
+### Step-2 toolkit in this folder
+- `_final_inventory.py` — pairs every In-Class slide with a Full slide by
+  fingerprint and classifies it; writes `_final_pairing.json`. Carries
+  `VIDEO_BLOCK`, the set of Full slides that came from a taped deck, which
+  is how rule 4 is enforced. `MODULE = HERE`.
+- `_final_pairdiff.py` — rule 2: what REALLY differs per pairing, page-number
+  aware. `--detail` prints the changed text lines.
+- `_assemble_final.ps1` — the build. Rolls `_t-1`/`_t-2`, copies Full to
+  Final, replaces the 12 changed slides, inserts the one new slide, applies
+  the three reorderings. Rerunnable from scratch.
+- `_final_verify.py`, `_final_verify_anim.ps1`, `_slideshow_probe_final.ps1`
+  — the verification battery above. All read-only.
+- **Tooling note:** an `[ordered]@{}` hashtable's keys come back in a type
+  PowerPoint's `Slides.Item()` rejects ("Bad argument type"). Use `[int[]]`
+  arrays and `Slides.Item($i)` rather than `Slides($i)` in these scripts.
+
+### What comes next
+- **Step 1b cleanup in PHASE B**, when asked: keep Final, `Module 1 - In
+  Class.pptx` and `Recorded Video Slides/`; `Module 1 - Full.pptx` and
+  `Module 1 - Revised.pptx` are then superseded and go.
+
+
+## 2026-09-24 — End-of-module step 1: `Module 1 - Full.pptx` built (91 slides)
+
+**`Module 1 - Full.pptx` is now the deliverable and is edited IN PLACE.**
+`_build_Module1.py` carries a STALE banner, and `_m1_frozen.py` now guards
+BOTH `Module 1 - Revised.pptx` and `Module 1 - Full.pptx` (`DELIVERABLES`).
+
+### Two structural decisions Nico made this session
+1. **No new "SLIDES NOT USED IN THE VIDEOS" section.** Rule 6 of step 1
+   duplicates nothing in Module 1: the Revised deck already ends with a
+   self-contained in-class half behind its own "Module 1 In-Class Part"
+   divider (R35–R86), unlike Module 6 where the in-class examples were
+   scattered through 91 video slides. Applying rule 6 literally would have
+   produced ~142 slides with ~50 back-to-back duplicates. The Teaching
+   CLAUDE.md already records that Module 1 has no appendix.
+2. **The taped order inside the video block is kept.** Rule 5 drops only
+   Video 1's own title card, so Full opens with "Introduction". Module 1's
+   deck title slide sits at R8 — seven slides into Video 1's block — and
+   was NOT lifted to the front (it is at position 7 in Full).
+
+So **Full = 91 slides = 92 Revised − 1 dropped Video 1 title card.**
+No taped-only slides, no in-class copies, no new divider.
+
+### Deck structure
+| Full | Source |
+|---|---|
+| 1–8 | Video 1 slides 2–9 (its title card dropped) |
+| 9–15 | Video 2 slides 1–7 |
+| 16–25 | Video 3 slides 1–10 |
+| 26–32 | Video 4 slides 1–7 |
+| 33 | R34, the HIDDEN "Effect of Shifts … in Isolation" |
+| 34–85 | R35–R86, the whole in-class half, unchanged |
+| 86 | BACKUP divider (taped, Video 1 s10 — identical to R87) |
+| 87–89 | R88, R89, R90 |
+| 90 | People Respond to Incentives (taped, Video 1 s11 — identical to R91) |
+| 91 | R92 |
+
+The BACKUP divider and "People Respond to Incentives" ride along in the
+Video 1 deck as its slides 10–11. They are inserted WITH Video 1 (so the
+Video 1 jump link between them survives `InsertFromFile`) and then
+`MoveTo`'d into the Backup section. That ordering is why `_assemble_full.ps1`
+deletes R87 and R91 from the Revised copy first.
+
+### Rule 7: nothing moved to an in-class section
+All five backup slides still have an inbound link, so all five stay in
+Backup: 87 ← 35, 88 ← 45, 89 is page 2 of 88 (its Back goes to 45 too),
+90 ← 2, 91 ← 44. Module 6's "unlinked backup slides move to the in-class
+section" has an empty set here.
+
+### What the taping changed (27 of 35 taped slides really differ)
+- **Tags rewritten.** V1.2–V1.7 dropped the video level
+  (`Module 1 · Video 1 · Introduction` → `Module 1 · Introduction`).
+  Video 3's topic was renamed *Demand and Supply* → **Supply and Demand**
+  on all nine of its slides. Every agenda slide's tag went `· Agenda` →
+  `· <topic>`.
+- **Agenda / outline slides redesigned**: 7 items → 6 (the "Introduction"
+  item is gone), coverage pills removed, item titles now sentence case,
+  9 shapes fewer each.
+- **Two links removed**: V1.7 (Course Roadmap) lost its backup pill to
+  "Can These Prices Be Optimal?", and V1.2 lost its link to "Do National
+  Leaders Matter?".
+- 8 taped slides are byte-identical to Revised: V1.1 (dropped anyway),
+  V1.8, V1.10, V1.11, V2.1, V2.7, V3 none, V4.1, V4.4.
+
+### OPEN — three defects inherited from the taped decks (flagged, NOT fixed)
+- **D1. Full 12 and 13** (Tapestry–Capri; "The Firms' Own Documents Drew
+  the Market Boundary") carry **Example-Candidates chrome**: top bar
+  `Module 1 · Candidates · Market Definition`, footer
+  `Management 405 · Module 1 · Example Candidates (for review)`. They were
+  pulled from the review deck into Video 2 and never retagged. They should
+  read `Module 1 · Video 2 · Markets` and the deck's normal footer.
+- **D2. Full 14** title reads "Market Definition: **the** Case of Netflix"
+  — Title Case broken (Revised has "The").
+- **D3. Full 32** problem-set pointer glyph changed ✞ → ➜, against the
+  fixed glyph vocabulary (✞ = problem set, ▤ = teaching note).
+- **D4** (pre-existing, inherited from Revised R92, not introduced here):
+  Full 91 carries TWO overlapping "Slide Number Placeholder" shapes mid-footer
+  at x 7.49" and 7.80", and no page number renders in the corner.
+
+Fixing D1–D3 means editing the taped slides, which rule 1 says are fixed
+as they are — so they need Nico's word first.
+
+### Verification run (all passed)
+- Opens in PowerPoint; 91 slides.
+- `_full_verify.py` — **91 of 91 slides diff clean** against their source
+  (taped slides vs. their video deck, the rest vs. Revised) across text,
+  run formatting, member-level geometry with groups decoded, speaker notes,
+  the timing tree, the rel set and hidden status. Live `slidenum` fields are
+  excluded, since their cached text moves with the slide's position.
+- `_full_verify_anim.ps1` — COM click-count check: **34 taped slides,
+  0 mismatches** on both effect count and on-click beat count.
+- `_slideshow_probe.ps1` — full-screen slideshow probe on 12 slides
+  (1, 8, 12, 20, 33, 47, 53, 56, 69, 86, 90, 91): all captured, no
+  "slide failed to open properly" banner. **All three live PollEverywhere
+  activities render live** in the show (53, 56, 69), each with its `tags`
+  part and its "Poll Title: Do not modify the notes…" payload intact.
+- All internal jump links and "← Back" buttons land correctly
+  (`_full_inventory.py` pairing + a link map). PowerPoint re-pointed
+  slide 87's Back button to the taped replacement of R2 on its own.
+
+### Step-1 toolkit in this folder
+- `_full_inventory.py` — module-agnostic: fingerprints every taped slide and
+  pairs it with Revised, writing `_full_pairing.json`. `MODULE = HERE`; set
+  it to `HERE.parent` when the script moves into `_build_files/`.
+- `_assemble_full.ps1` — the build. Rolls `_t-1`/`_t-2`, copies Revised to
+  Full, deletes R1–R33 + R87 + R91, inserts the four taped blocks with
+  `Slides.InsertFromFile`, then `MoveTo`s the two backup slides into place.
+  Rerunnable from scratch.
+- `_full_verify.py`, `_full_verify_anim.ps1`, `_slideshow_probe.ps1` — the
+  verification battery above. All read-only.
+
+### What comes next
+- **Step 1b** (folder cleanup) once Nico has looked at Full.
+- Nico said he will give instructions for the in-class slides later;
+  `Module 1 - In Class.pptx` was NOT touched this session.
+- The very-final step (`Module 1 - Final.pptx`) is still unspecified; that
+  name must not be written by step 1.
+
+
 ## PENDING (updated 2026-09-23)
 
 **STANDING RULES for Module 1 (2026-09-23, Nico)**

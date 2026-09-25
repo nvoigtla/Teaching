@@ -1,0 +1,1436 @@
+{
+ "pairing": [
+  {
+   "ic": 1,
+   "full": 36,
+   "score": 1.0,
+   "diff": [],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Basic Concepts and Economic Principles for Decision Making"
+  },
+  {
+   "ic": 2,
+   "full": 35,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 1,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Introduction"
+  },
+  {
+   "ic": 3,
+   "full": 37,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Logistics"
+  },
+  {
+   "ic": 4,
+   "full": 38,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Logistics"
+  },
+  {
+   "ic": 5,
+   "full": 39,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Logistics"
+  },
+  {
+   "ic": 6,
+   "full": 40,
+   "score": 0.843,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Logistics"
+  },
+  {
+   "ic": 7,
+   "full": 5,
+   "score": 0.941,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 2,
+   "empty": false,
+   "frozen": true,
+   "title": "Module 1 · Introduction"
+  },
+  {
+   "ic": 8,
+   "full": 41,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 4,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Introduction"
+  },
+  {
+   "ic": 9,
+   "full": 42,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Introduction"
+  },
+  {
+   "ic": 10,
+   "full": 43,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Introduction"
+  },
+  {
+   "ic": 11,
+   "full": 44,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 2,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Introduction"
+  },
+  {
+   "ic": 12,
+   "full": 45,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 2,
+   "pics": 3,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Introduction"
+  },
+  {
+   "ic": 13,
+   "full": 46,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Agenda"
+  },
+  {
+   "ic": 14,
+   "full": 34,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1"
+  },
+  {
+   "ic": 15,
+   "full": 47,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Some Applications of the Material"
+  },
+  {
+   "ic": 16,
+   "full": 48,
+   "score": 0.789,
+   "diff": [
+    "text",
+    "clicks 3->4"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Markets"
+  },
+  {
+   "ic": 17,
+   "full": 50,
+   "score": 0.879,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Markets"
+  },
+  {
+   "ic": 18,
+   "full": 51,
+   "score": 0.949,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Markets"
+  },
+  {
+   "ic": 19,
+   "full": 49,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Markets"
+  },
+  {
+   "ic": 20,
+   "full": 52,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 21,
+   "full": 53,
+   "score": 1.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "POLL"
+  },
+  {
+   "ic": 22,
+   "full": 54,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 23,
+   "full": 55,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 3,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 24,
+   "full": 56,
+   "score": 1.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "POLL"
+  },
+  {
+   "ic": 25,
+   "full": 57,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 26,
+   "full": 58,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 27,
+   "full": 59,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 28,
+   "full": 60,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 29,
+   "full": 61,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 30,
+   "full": 62,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · In Class · Examples · Supply and Demand"
+  },
+  {
+   "ic": 31,
+   "full": 63,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Agenda"
+  },
+  {
+   "ic": 32,
+   "full": 64,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 33,
+   "full": 65,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 34,
+   "full": 66,
+   "score": 1.0,
+   "diff": [
+    "text",
+    "clicks 1->2",
+    "pics 0->1"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 35,
+   "full": 67,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 36,
+   "full": 68,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 37,
+   "full": 69,
+   "score": 1.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "POLL"
+  },
+  {
+   "ic": 38,
+   "full": 70,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 39,
+   "full": 71,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 40,
+   "full": 72,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 41,
+   "full": 73,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 42,
+   "full": 74,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs"
+  },
+  {
+   "ic": 43,
+   "full": 75,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Agenda"
+  },
+  {
+   "ic": 44,
+   "full": 76,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Ignore Sunk Costs"
+  },
+  {
+   "ic": 45,
+   "full": 77,
+   "score": 1.0,
+   "diff": [
+    "text",
+    "clicks 1->2",
+    "pics 0->1"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Ignore Sunk Costs"
+  },
+  {
+   "ic": 46,
+   "full": 78,
+   "score": 0.968,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Ignore Sunk Costs"
+  },
+  {
+   "ic": 47,
+   "full": 79,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Ignore Sunk Costs"
+  },
+  {
+   "ic": 48,
+   "full": 80,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Agenda"
+  },
+  {
+   "ic": 49,
+   "full": 81,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Use Cost-Benefit and Marginal Analysis"
+  },
+  {
+   "ic": 50,
+   "full": 82,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Total Benefit of Hour 5"
+  },
+  {
+   "ic": 51,
+   "full": 83,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Use Cost-Benefit and Marginal Analysis"
+  },
+  {
+   "ic": 52,
+   "full": 84,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Summary"
+  },
+  {
+   "ic": 53,
+   "full": 86,
+   "score": 1.0,
+   "diff": [
+    "xml"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": true,
+   "title": "BACKUP"
+  },
+  {
+   "ic": 54,
+   "full": 87,
+   "score": 1.0,
+   "diff": [],
+   "tags": false,
+   "jumps": 1,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Backup"
+  },
+  {
+   "ic": 55,
+   "full": 88,
+   "score": 1.0,
+   "diff": [],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Backup"
+  },
+  {
+   "ic": 56,
+   "full": 89,
+   "score": 1.0,
+   "diff": [],
+   "tags": false,
+   "jumps": 1,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Backup"
+  },
+  {
+   "ic": 57,
+   "full": 91,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 1,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 1 · Backup"
+  }
+ ],
+ "dropped": [
+  33,
+  85
+ ],
+ "full": [
+  {
+   "n": 1,
+   "title": "Module 1 · Introduction | Introduction",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 2,
+   "title": "Module 1 · Introduction | Why Study Economics?",
+   "tags": false,
+   "jumps": 1,
+   "hidden": false
+  },
+  {
+   "n": 3,
+   "title": "Module 1 · Economic Models | Economic Models",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 4,
+   "title": "Module 1 · Economic Models | Find a Model That Matches Your Needs",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 5,
+   "title": "Module 1 · Introduction | Economists as Hedgehogs",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 6,
+   "title": "Module 1 · Course Roadmap | Agenda for the Class",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 7,
+   "title": "Basic Concepts and Economic Principles for Decision Making | Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 8,
+   "title": "Module 1 · Video 1 · Introduction | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 9,
+   "title": "Markets | Module 1 – Video 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 10,
+   "title": "Module 1 · Video 2 · Markets | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 11,
+   "title": "Module 1 · Video 2 · Markets | Market Definition",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 12,
+   "title": "Module 1 · Candidates · Market Definition | Market Definition Mini-Case: Tapestry–Capri",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 13,
+   "title": "Module 1 · Candidates · Market Definition | The Firms' Own Documents Drew the Market Bound",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 14,
+   "title": "Module 1 · Video 2 · Markets | Market Definition: the Case of Netflix",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 15,
+   "title": "Module 1 · Video 2 · Markets | Actors in the Market",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 16,
+   "title": "Demand and Supply | Module 1 – Video 3",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 17,
+   "title": "Module 1 · Video 3 · Supply and Demand | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 18,
+   "title": "Module 1 · Video 3 · Supply and Demand | Demand-Supply Analysis",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 19,
+   "title": "Module 1 · Video 3 · Supply and Demand | The Market Demand Curve",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 20,
+   "title": "Module 1 · Video 3 · Supply and Demand | “Holding Everything Else Constant” – “Ceteris Par",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 21,
+   "title": "Module 1 · Video 3 · Supply and Demand | The Market Demand Curve",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 22,
+   "title": "Module 1 · Video 3 · Supply and Demand | The Market Demand Curve",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 23,
+   "title": "Module 1 · Video 3 · Supply and Demand | AI and the Demand for Computer Chips",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 24,
+   "title": "Module 1 · Video 3 · Supply and Demand | The Market Supply Curve",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 25,
+   "title": "Module 1 · Video 3 · Supply and Demand | The Market Supply Curve",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 26,
+   "title": "Market Equilibrium | Module 1 – Video 4",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 27,
+   "title": "Module 1 · Video 4 · Market Equilibrium | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 28,
+   "title": "Module 1 · Video 4 · Market Equilibrium | The Market Mechanism",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 29,
+   "title": "Module 1 · Video 4 · Market Equilibrium | Summary of Terminology",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 30,
+   "title": "Module 1 · Video 4 · Market Equilibrium | Changes in Market Equilibrium",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 31,
+   "title": "Module 1 · Video 4 · Market Equilibrium | Changes in Market Equilibrium",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 32,
+   "title": "Module 1 · Video 4 · Market Equilibrium | Changes in Market Equilibrium",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 33,
+   "title": "Module 1 · Video 4 · Market Equilibrium | Effect of Shifts in Demand and Supply Curves in ",
+   "tags": false,
+   "jumps": 0,
+   "hidden": true
+  },
+  {
+   "n": 34,
+   "title": "Module 1 | In-Class Part",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 35,
+   "title": "Module 1 · Introduction | Introduction",
+   "tags": false,
+   "jumps": 1,
+   "hidden": false
+  },
+  {
+   "n": 36,
+   "title": "Basic Concepts and Economic Principles for Decision Making | Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 37,
+   "title": "Module 1 · Logistics | Logistics I",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 38,
+   "title": "Module 1 · Logistics | Logistics II",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 39,
+   "title": "Module 1 · Logistics | Logistics III",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 40,
+   "title": "Module 1 · Logistics | Questions and Office Hours",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 41,
+   "title": "Module 1 · Introduction | Making the Most of the Course",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 42,
+   "title": "Module 1 · Introduction | Making the Most of the Course",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 43,
+   "title": "Module 1 · Introduction | Teaching Philosophy",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 44,
+   "title": "Module 1 · Introduction | Agenda for the Class",
+   "tags": false,
+   "jumps": 2,
+   "hidden": false
+  },
+  {
+   "n": 45,
+   "title": "Module 1 · Introduction | Homo Economicus",
+   "tags": false,
+   "jumps": 2,
+   "hidden": false
+  },
+  {
+   "n": 46,
+   "title": "Module 1 · Agenda | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 47,
+   "title": "Some Applications of the Material | Covered in Videos 2 to 4",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 48,
+   "title": "Module 1 · In Class · Examples · Markets | Recall from Video 2: Market Definition",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 49,
+   "title": "Module 1 · In Class · Examples · Markets | Market Definition: The Case of Netflix",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 50,
+   "title": "Module 1 · In Class · Examples · Markets | Market Definition Mini-Case: Kroger–Albertsons",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 51,
+   "title": "Module 1 · In Class · Examples · Markets | Is a “Costco Run” a Substitute for Everyday Sho",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 52,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | How Can Heatwaves Affect the Demand f",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 53,
+   "title": "POLL",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 54,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Shifts of the Demand Curve for AC",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 55,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Swiftonomics",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 56,
+   "title": "POLL",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 57,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Solution: Swiftonomics",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 58,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Shortages When Disasters Loom",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 59,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Steps to Analyze “Shocks” to Supply a",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 60,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Example: How Did the War in Ukraine A",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 61,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Mini-Case: Los Angeles Residential Re",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 62,
+   "title": "Module 1 · In Class · Examples · Supply and Demand | Market for Los Angeles Residential Re",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 63,
+   "title": "Module 1 · Agenda | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 64,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Opportunity Costs",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 65,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Opportunity Cost: A Simple Example",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 66,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Example: Opportunity Costs When Buyi",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 67,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | What Is the Full Economic Cost of an",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 68,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Flip a House or Work?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 69,
+   "title": "POLL",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 70,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Solution: Flip a House or Work?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 71,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Another Possible Opportunity Cost",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 72,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | The (Full) Cost of Raising a Child",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 73,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Management 405  ·  Module 1  ·  Basi",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 74,
+   "title": "Module 1 · Economic Costs Include Opportunity Costs | Similar Figures for the US, Estimate",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 75,
+   "title": "Module 1 · Agenda | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 76,
+   "title": "Module 1 · Ignore Sunk Costs | Sunk Costs",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 77,
+   "title": "Module 1 · Ignore Sunk Costs | Examples of Sunk Costs (You Should Ignore!)",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 78,
+   "title": "Module 1 · Ignore Sunk Costs | The Case of Concorde",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 79,
+   "title": "Module 1 · Ignore Sunk Costs | Sunk Costs: Take-Away",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 80,
+   "title": "Module 1 · Agenda | Outline of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 81,
+   "title": "Module 1 · Use Cost-Benefit and Marginal Analysis | Cost-Benefit and Marginal Analysis",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 82,
+   "title": "Total Benefit of Hour 5 | Total Benefit of Hour 4",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 83,
+   "title": "Module 1 · Use Cost-Benefit and Marginal Analysis | Maximizing Net Benefit: The Standard A",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 84,
+   "title": "Module 1 · Summary | Module 1 Summary",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 85,
+   "title": "Module 1 · Wrap-Up | Next Steps",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 86,
+   "title": "BACKUP",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 87,
+   "title": "Module 1 · Backup | Do National Leaders Matter?",
+   "tags": false,
+   "jumps": 1,
+   "hidden": false
+  },
+  {
+   "n": 88,
+   "title": "Module 1 · Backup | Economics and a Common Critique: Does Money Buy Happiness?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 89,
+   "title": "Module 1 · Backup | Stevenson and Wolfers (2008)",
+   "tags": false,
+   "jumps": 1,
+   "hidden": false
+  },
+  {
+   "n": 90,
+   "title": "Module 1 · Backup | People Respond to Incentives",
+   "tags": false,
+   "jumps": 1,
+   "hidden": false
+  },
+  {
+   "n": 91,
+   "title": "Module 1 · Backup | Can These Prices Be Optimal?",
+   "tags": false,
+   "jumps": 1,
+   "hidden": false
+  }
+ ]
+}
