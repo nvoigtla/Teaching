@@ -19,6 +19,7 @@ import argparse
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -62,10 +63,27 @@ def page_files():
                   if f.endswith(".html") and not f.startswith("_"))
 
 
-ASSETS = ["site.css", "site.js", "search-index.js", "panopto-login.png",
-          # the teaching-team portraits on the Home page (2026-09-23)
-          "photo-nico.png", "photo-rafael.png",
-          "bruin-bear.png"]
+# The asset list is DISCOVERED from what the built pages reference, for the
+# same reason page_files() is (2026-09-24). A hardcoded list had exactly the
+# failure the comment above describes, one folder down: zoom-logo.png was
+# added to the week pages, built into this folder, and never copied to the
+# public repo. NOTHING caught it -- `_build_site.py` wrote the file, and
+# _publish.py's link check reads THIS folder, where it exists. It only
+# showed up on the live site, and not even as a broken-image icon: an <img>
+# with alt text renders the alt text, in whatever colour it inherits, so
+# Nico saw a gold word "Zoom" where the blue logo should have been.
+def asset_files():
+    want = set()
+    for f in page_files():
+        page = io.open(os.path.join(SITE, f), encoding="utf-8").read()
+        for m in re.finditer(r'(?:href|src)="assets/([^"?#]+)', page):
+            want.add(m.group(1))
+    gone = sorted(a for a in want
+                  if not os.path.exists(os.path.join(SITE, "assets", a)))
+    if gone:
+        sys.exit("pages reference assets that were not built: "
+                 + ", ".join(gone))
+    return sorted(want)
 
 # Documents published NEXT TO the site, so the General Logistics page can
 # link them (2026-09-04, Nico): (source path, published file name). The
@@ -127,7 +145,7 @@ def missing(skip_docs=False):
     for f in page_files():
         if not os.path.exists(os.path.join(SITE, f)):
             out.append(f)
-    for a in ASSETS:
+    for a in asset_files():
         if not os.path.exists(os.path.join(SITE, "assets", a)):
             out.append("assets/" + a)
     if not skip_docs:
@@ -157,17 +175,18 @@ def main():
     files = page_files()
     if not files:
         sys.exit("no built pages found -- run `python _build_site.py` first")
+    assets = asset_files()
     have_docs = sum(1 for src, _ in DOCS if os.path.exists(src))
     n_slides = len(os.listdir(os.path.join(SITE, "slides")))         if os.path.isdir(os.path.join(SITE, "slides")) else 0
     print("all %d pages, %d assets, %d slide decks and %d of %d PDFs present"
-          % (len(files), len(ASSETS), n_slides, have_docs, len(DOCS)))
+          % (len(files), len(assets), n_slides, have_docs, len(DOCS)))
 
     if args.dry_run:
         print("\nwould publish to https://github.com/%s/%s" % (OWNER, REPO))
         print("would serve at  https://%s.github.io/%s/" % (OWNER, REPO))
         for f in files:
             print("   " + f)
-        for a in ASSETS:
+        for a in assets:
             print("   assets/" + a)
         for _src, name in DOCS:
             print("   " + name)
@@ -217,7 +236,7 @@ def main():
             print("   %d slide deck(s)" % len(os.listdir(dst_slides)))
         for f in files:
             shutil.copy2(os.path.join(SITE, f), os.path.join(work, f))
-        for a in ASSETS:
+        for a in assets:
             shutil.copy2(os.path.join(SITE, "assets", a),
                          os.path.join(work, "assets", a))
         for src, name in DOCS:

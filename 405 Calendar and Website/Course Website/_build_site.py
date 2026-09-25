@@ -520,6 +520,37 @@ def box_hd(title, glyph=None, small=False, when=None):
                ('<span class="when">%s</span>' % esc(when)) if when else ""))
 
 
+# The mark on a live-session card is the ZOOM WORDMARK, not a glyph
+# (2026-09-24, Nico). It says which service the session is on before the
+# line is read. Wikimedia Commons, "Zoom Communications Logo.svg",
+# rasterised tight to the letters, so the 4.459 aspect below is the file's
+# own: 48x11 css px, stored at 4x so it stays sharp on retina -- the same
+# treatment as the Bruin Bear. It was 68x15 until Nico called it too big
+# (2026-09-24); the calendar's print mark was cut by the same 30%.
+# The file is "Zoom Logo 2022.svg", Zoom's CURRENT brand blue #0B5CFF. The
+# older "Zoom Communications Logo.svg" has identical letterforms in a much
+# paler #2D8CFF, which went grey on the cream row (2026-09-24, Nico).
+EVENT_MARK = ('<img class="zoom" src="assets/zoom-logo.png?v=__ASSETV__"'
+              ' width="48" height="11" alt="Zoom" aria-hidden="true">')
+
+
+EVENT_MARK_SM = ('<img class="zoom sm" src="assets/zoom-logo.png?v=__ASSETV__"'
+                 ' width="35" height="8" alt="Zoom" aria-hidden="true">')
+
+
+def event_card(w, ev):
+    """One live Zoom session -- the website twin of render_event() in
+    _build_calendar.py, and the same one-line card the due rows use."""
+    when = "%s · %s" % (C.fmt(C.dt(w["num"], ev["day"]), wd=True),
+                             ev["time"])
+    return ('<div class="pcard due event"><div class="pcard-bd">'
+            '<span class="g" aria-hidden="true">%s</span>'
+            '<div class="lead"><b>%s</b> &ndash; %s</div>'
+            '<time>%s</time></div></div>'
+            % (EVENT_MARK, esc(ev["title"]),
+               render_segments(ev["sub"]), esc(when)))
+
+
 def render_cat_card(cat, groups, filtered=None, gmods=None):
     body = []
     for i, g in enumerate(groups):
@@ -863,6 +894,20 @@ def assessments():
                         "date": d.isoformat() if d else "9999",
                         "when": C.fmt(d, wd=True) if d else "t.b.a.",
                         "exam": False, "watch": False})
+        # Live sessions sit in the Class Calendar column too (2026-09-24,
+        # Nico). The column is no longer "Deadlines & Exams", so a date to
+        # keep belongs in it as much as a date to hand something in by.
+        for ev in (w.get("events") or []):
+            d = C.dt(w["num"], ev["day"])
+            out.append({"week": w["num"],
+                        "label": C.seg_text(ev["row"]), "row": ev["row"],
+                        "note": None,
+                        "date": d.isoformat(),
+                        "when": "%s · %s" % (C.fmt(d, wd=True),
+                                                  ev["time"]),
+                        "utc": C.event_utc(w, ev),
+                        "url": C.LINKS.get(ev.get("link")),
+                        "exam": False, "watch": False, "event": True})
         if w.get("exam"):
             ex = w["exam"]
             (wd0, off0), (wd1, off1) = ex["window"]
@@ -887,7 +932,7 @@ def assessments():
 # The three categories the Export panel offers, and the file each is
 # published as. "all" is the convenience feed for someone who wants the lot.
 FEED_KINDS = (("assign", "Assignments"), ("video", "Videos"),
-              ("exam", "Exams"))
+              ("exam", "Exams"), ("event", "Live Sessions"))
 FEED_DIR = "feeds"
 
 # Every event title is prefixed, so a deadline is recognisable among
@@ -906,6 +951,8 @@ BUILD_SEQ = int((_dt.datetime.now(_dt.timezone.utc)
 
 
 def kind_of(a):
+    if a.get("event"):
+        return "event"
     return "exam" if a["exam"] else ("video" if a.get("watch") else "assign")
 
 
@@ -967,6 +1014,8 @@ def ics_text(kinds, stamp=None):
         # A fixed-slot exam is a real block on the student's calendar,
         # not an all-day banner, and it marks them busy. Everything else
         # stays all-day: a deadline has no hour (2026-09-10).
+        # A fixed-slot exam and a live session are real blocks on the
+        # student's calendar, not all-day banners, and they mark them busy.
         if a.get("utc"):
             when = ["DTSTART:" + a["utc"][0], "DTEND:" + a["utc"][1]]
             busy = "TRANSP:OPAQUE"
@@ -982,9 +1031,16 @@ def ics_text(kinds, stamp=None):
               busy,
               _fold("SUMMARY:" + _ics_esc(EVENT_PREFIX + a["label"])),
               _fold("DESCRIPTION:" + _ics_esc(
-                  "Week %d - %s. %s/week-%02d.html"
-                  % (a["week"], a["when"], C.SITE_BASE, a["week"]))),
-              _fold("URL:%s/week-%02d.html" % (C.SITE_BASE, a["week"])),
+                  "Week %d - %s.%s %s/week-%02d.html"
+                  % (a["week"], a["when"],
+                     (" Join: " + a["url"]) if a.get("url") else "",
+                     C.SITE_BASE, a["week"]))),
+              # A session's URL is the joining link, so the event in the
+              # student's calendar is the thing they click at 9 am. Every
+              # other row opens its week page.
+              _fold("URL:" + (a.get("url")
+                              or "%s/week-%02d.html" % (C.SITE_BASE,
+                                                        a["week"]))),
               "END:VEVENT"]
     L.append("END:VCALENDAR")
     return "\r\n".join(L) + "\r\n"
@@ -1024,7 +1080,7 @@ def write_feeds():
 
 
 def week_has_deadlines(n):
-    """Does this week have any row in the Deadlines & Exams column?"""
+    """Does this week have any row in the Class Calendar column?"""
     return any(a["week"] == n for a in assessments())
 
 
@@ -1037,6 +1093,8 @@ def right_column(current_week):
             cls.append("ex")
         if a.get("watch"):
             cls.append("watch")
+        if a.get("event"):
+            cls.append("ev")
         if current_week == a["week"]:
             cls.append("here")
         # the date rides along so the browser can flag what is due within
@@ -1049,8 +1107,12 @@ def right_column(current_week):
         # data-kind / data-end / data-title are what the Export button
         # reads. The three kinds are exactly the three tick-boxes it offers
         # (2026-09-09, Nico).
-        kind = "exam" if a["exam"] else ("video" if a.get("watch")
-                                         else "assign")
+        # kind_of() is the ONE place the four kinds are decided -- this
+        # used to repeat the test and was left behind when the live
+        # sessions were added, tagging every session "assign"
+        # (2026-09-24). The Export panel reads this attribute, so the
+        # session was being counted under Assignments.
+        kind = kind_of(a)
         # A problem set goes STRAIGHT to BruinLearn Assignments, which
         # serves the download and takes the upload -- not to the week page
         # it is listed under, which is usually the page the student is
@@ -1063,14 +1125,24 @@ def right_column(current_week):
         href, tgt = "week-%02d.html" % a["week"], ""
         rows.append(
             '<li%s%s data-week="%d" data-date="%s" data-kind="%s"%s'
-            ' data-title="%s"><span class="w">Week %d</span>'
-            '<span class="lb"><a href="%s"%s>%s</a>%s</span>'
+            ' data-title="%s"><span class="w">Week %d</span>%s'
+            '<span class="lb">%s%s</span>'
             '<time>%s</time></li>'
             % ((' class="%s"' % " ".join(cls)) if cls else "", anchor_id,
                a["week"], "" if a["date"] == "9999" else a["date"], kind,
                (' data-end="%s"' % a["end"]) if a.get("end") else "",
                esc(a["label"]),
-               a["week"], href, tgt, esc(a["label"]),
+               # The Zoom mark rides in the week-chip slot, not beside the
+               # label: it says what KIND of date this is, which is what
+               # that line is for, and the narrow column has no room for it
+               # on the label line (2026-09-24).
+               a["week"], EVENT_MARK_SM if a.get("event") else "",
+               # A live session's row links the word a student clicks to
+               # JOIN -- "Coffee & Econ Zoom with Nico" (2026-09-24,
+               # Nico). Every other row links its week page, which for a
+               # session would only be the page they are already on.
+               (render_segments(a["row"]) if a.get("row") else
+                '<a href="%s"%s>%s</a>' % (href, tgt, esc(a["label"]))),
                (' <span style="font-size:12.5px;color:var(--ink-3)">(%s)</span>'
                 % esc(a["note"])) if a["note"] else "",
                esc(a["when"])))
@@ -1083,7 +1155,7 @@ def right_column(current_week):
   </div>
   <div class="card" id="deadlines" data-course="MGMT 405 %s"
        data-seq="%s" data-feeds="%s">
-    <div class="box-hd small">Deadlines &amp; Exams
+    <div class="box-hd small">Class Calendar
       <button class="dl-exp" id="dl-exp" type="button" aria-expanded="false"
               aria-controls="dl-exp-pop"
               aria-label="Subscribe to calendar and updates"><svg class="ic" viewBox="0 0 20 20" width="30" height="30" aria-hidden="true" focusable="false"><rect x="4.8" y="0.9" width="2.5" height="3.6" rx="1.2" fill="#4C86DA"/><rect x="12.7" y="0.9" width="2.5" height="3.6" rx="1.2" fill="#4C86DA"/><rect x="1.5" y="2.7" width="17" height="15.2" rx="2.6" fill="#E6A93F"/><rect x="2.7" y="9.1" width="14.6" height="3.6" rx="1.3" fill="#3B76D1"/><g fill="#FFFFFF"><rect x="3.7" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="7.2" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="10.7" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="14.2" y="6.0" width="2.7" height="2.3" rx="0.5"/><rect x="3.7" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="7.2" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="10.7" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="14.2" y="9.8" width="2.7" height="2.3" rx="0.5"/><rect x="3.7" y="13.5" width="2.7" height="2.3" rx="0.5"/><rect x="7.2" y="13.5" width="2.7" height="2.3" rx="0.5"/></g><circle cx="15.1" cy="15.1" r="4.7" fill="#2F74D8" stroke="#0B2B4E" stroke-width="1.1"/><g stroke="#FFFFFF" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M15.1 17.3V12.9"/><path d="M13.3 14.6l1.8-1.8 1.8 1.8"/></g></svg><span
@@ -1099,6 +1171,8 @@ def right_column(current_week):
       <label><input type="checkbox" id="exp-video" checked> Videos
         <span class="sub">suggested watch-by dates</span></label>
       <label><input type="checkbox" id="exp-exam" checked> Exams</label>
+      <label><input type="checkbox" id="exp-event" checked> Live Sessions
+        <span class="sub">Zoom sessions with Nico</span></label>
       <p class="lab">Address to subscribe to</p>
       <p class="hint" id="exp-hint"></p>
       <div class="row">
@@ -1112,7 +1186,7 @@ def right_column(current_week):
     <div class="dl-legend"><span class="sw-due" aria-hidden="true"></span>
       <span>Upcoming within 3 days</span></div>
     <ul class="dl">%s</ul>
-    <button class="dl-all" id="dl-all" type="button">Show all deadlines</button>
+    <button class="dl-all" id="dl-all" type="button">Show all dates</button>
   </div>
 </aside>""" % ("(%s)" % C.SECTION_LABEL, BUILD_SEQ,
                  "%s/%s" % (C.SITE_BASE, FEED_DIR), "".join(rows))
@@ -1177,7 +1251,7 @@ def page(fname, page_title, nav_kind, current, main_html,
 </main>
 %(right)s
 <button class="sidebtn" id="sidebtn" type="button" aria-expanded="false"
-        aria-controls="sidebar">Deadlines / Search</button>
+        aria-controls="sidebar">Calendar / Search</button>
 </div>
 </body>
 </html>
@@ -1286,13 +1360,19 @@ def week_main(w):
              '<div class="who"><h1>Week %d</h1><span class="sp">%s</span></div>'
              '<div class="center">%s</div>%s'
              '<div class="dl-jump"><a href="%s" data-week="%d">'
-             'Deadlines for this week '
+             'Dates for this week '
              '<span aria-hidden="true">↓</span></a></div>'
              '</div>'
              % (n, esc(C.span(d1, d2)), band_center(w),
                 back_link(back[0], back[1]), anchor, n))
 
     h.append('<div class="body">')
+
+    # Live sessions and due cards share the top of the week. A session is
+    # held INSIDE the week and a problem set is normally due in the next
+    # one, so the sessions come first -- as in the calendar.
+    for ev in (w.get("events") or []):
+        h.append(event_card(w, ev))
 
     for label, dw, dwd, note in (w.get("due") or []):
         when = ("Due: %s" % C.fmt(C.dt(dw, dwd), wd=True)) if dw else ""
@@ -1781,7 +1861,7 @@ def home_main():
         "<li>The Module view is organized by topics and will help you "
         "study for exams.</li>"
         "</ul></li>"
-        '<li><a href="#deadlines"><b>Deadlines &amp; Exams</b></a> on the '
+        '<li><a href="#deadlines"><b>Class Calendar</b></a> on the '
         "right lists every due date. The calendar icon "
         # both links act on the deadlines card: the first scrolls to it,
         # this one also opens the subscribe panel (2026-09-23, Nico)
@@ -2066,7 +2146,7 @@ def stamp_assets():
     after the pages that reference it."""
     h = hashlib.sha1()
     for name in ("site.css", "site.js", "search-index.js",
-                 "bruin-bear.png"):
+                 "bruin-bear.png", "zoom-logo.png"):
         with io.open(os.path.join(OUT, "assets", name), "rb") as fh:
             h.update(fh.read())
     v = h.hexdigest()[:10]
@@ -2089,7 +2169,7 @@ def main():
         # Copy them in on every build so a second section can never drift
         # from the stylesheet Nico actually edits (2026-09-05).
         for _a in ("site.css", "site.js", "bruin-bear.png",
-                   "photo-nico.png", "photo-rafael.png"):
+                   "zoom-logo.png", "photo-nico.png", "photo-rafael.png"):
             shutil.copy2(os.path.join(SRC, "assets", _a),
                          os.path.join(OUT, "assets", _a))
     if not os.path.exists(PANOPTO_SHOT_SRC):
@@ -2162,7 +2242,8 @@ def main():
         if a["watch"]:
             continue                       # "Watch Videos 1 - 7" is the week
         due_rows.append(("week-%02d.html" % a["week"],
-                      "Exam" if a["exam"] else "Deadline",
+                      ("Exam" if a["exam"] else
+                       "Session" if a.get("event") else "Deadline"),
                       a["label"],
                       "Week %d  ·  %s" % (a["week"], a["when"]),
                       a.get("note") or ""))

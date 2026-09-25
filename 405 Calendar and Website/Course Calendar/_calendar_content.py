@@ -94,6 +94,32 @@ def exam_utc(wk):
         for h, m in ex["slot"])
 
 
+def seg_text(segs):
+    """Segments -> plain text. The .ics feed and the search index cannot
+    carry a link inside a title, so they read the same segments the page
+    renders rather than a second copy of the wording (2026-09-24)."""
+    return "".join(sg[1] if sg[0] == "t" else sg[2] for sg in segs)
+
+
+def event_utc(wk, ev):
+    """(DTSTART, DTEND) as UTC iCalendar stamps for a live session.
+
+    Same reasoning as exam_utc(): UTC is unambiguous in every calendar
+    client and needs no VTIMEZONE block kept in step with the tz database.
+    The hour comes from "time", which is written for READING -- so it is
+    parsed here rather than repeated as a number (2026-09-24)."""
+    m = re.match(r"\s*(\d{1,2})(?::(\d{2}))?\s*([ap])m?", ev["time"].lower())
+    if not m:
+        raise SystemExit("cannot read a start time out of %r" % ev["time"])
+    h = int(m.group(1)) % 12 + (12 if m.group(3) == "p" else 0)
+    mi = int(m.group(2) or 0)
+    d = dt(wk["num"], ev["day"])
+    start = datetime(d.year, d.month, d.day, h, mi) + timedelta(
+        hours=_pacific_offset(d))
+    return tuple(t.strftime("%Y%m%dT%H%M%SZ")
+                 for t in (start, start + timedelta(minutes=ev["mins"])))
+
+
 # ============================== VIDEO SLIDES ==============================
 # The slide deck behind each recorded video. DISCOVERED by scanning the
 # module folders, not listed here, so a deck Nico drops into a "Videos Final"
@@ -421,6 +447,10 @@ LINKS = {
     # because they are served straight off GitHub Pages.
     "calendar_pdf": SITE_BASE + "/MGMT-405-Calendar-Fall-2026.pdf",
     "syllabus_pdf": SITE_BASE + "/MGMT-405-Syllabus-Fall-2026.pdf",
+    # Live Zoom sessions (see "events" on a week below). One key per
+    # session -- a Zoom meeting id is per-meeting, so it cannot be
+    # derived (2026-09-24).
+    "zoom_coffee": "https://ucla.zoom.us/j/98762774970?pwd=3v56aqvWEAG88VCfyza2o1RUEaHiIp.1",
 }
 
 # ============================== HEADER / INTRO ==============================
@@ -596,6 +626,21 @@ def podcast_when(text):
 #   ("mix", [segments])                      segments as in MATH_REFRESHER_ITEMS
 # group: {"label": "...", "items": [...]}    label is the italic navy lead-in
 # due:   (label, week, weekday, note)        week/weekday None -> no date
+#
+# events: a LIVE session held during the week that is not the on-campus
+#   class -- a Zoom office hour, a review session. One dict per session:
+#     "title"  the card's bold lead-in
+#     "row"    the shorter line the website's Class Calendar column shows,
+#              as segments -- so the word a student clicks to JOIN can be
+#              the link there too. seg_text() flattens it for the .ics
+#              feed and the search index, which take plain text
+#     "day"    weekday within this week      "time"  "9:00 am PT"
+#     "mins"   how long it runs, for the calendar feed
+#     "sub"    segments as in MATH_REFRESHER_ITEMS -- the rest of the card
+#              line, with the link on whichever words should carry it
+#     "link"   LINKS key the feed's URL field points at
+#   Both builders render it as a one-line card at the top of the week, and
+#   the website also lists it in the Class Calendar column (2026-09-24).
 
 WEEKS = [
     {
@@ -707,6 +752,17 @@ WEEKS = [
                         "Teaching note: The Bang-for-the-Buck Rule")]},
         ],
         "due": [("Problem Set 1", 4, "Tue", None)],
+        "events": [
+            {"title": "Coffee & Econ",
+             "row": [("t", "Coffee & Econ "),
+                     ("l", "zoom_coffee", "Zoom"),
+                     ("t", " with Nico")],
+             "day": "Sun", "time": "9:00 am PT", "mins": 60,
+             "sub": [("t", "Zoom Session with Nico.  "),
+                     ("l", "zoom_coffee", "Zoom link here"),
+                     ("t", ".")],
+             "link": "zoom_coffee"},
+        ],
     },
     {
         "num": 4, "kind": "deadline",

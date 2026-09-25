@@ -9,6 +9,125 @@ the page layout and the palette.
 
 ---
 
+## OPEN: Module 1's four slide decks dropped off both live sites (2026-09-24)
+
+**Not our change, and not yet fixed.** `_calendar_content.py` discovers the
+video decks by scanning `405 Slide Revisions 2026/Module */Videos Final/`.
+Part-way through this session Module 1's folder was renamed from
+`Videos Final` to **`Recorded Video Slides`** -- another session was working
+in that folder -- so the scan fell from 19 decks to 15 and the next
+`_publish.py` removed Module 1's four "slides" links from both live sites.
+The four .pptx files are all still there under the new folder name.
+
+Deliberately NOT repaired here: the rename belongs to that session's
+in-progress work, and re-linking decks that were perhaps pulled on purpose
+would be the wrong call to make unasked. Two ways out once Nico says which:
+rename the folder back, or teach `_scan_slides()` the second folder name.
+
+**Worth noting for its own sake:** a deck folder renamed anywhere in the
+slides tree silently shrinks the published site, and `_publish.py` prints
+the deck count every run without comparing it to the last one. That count
+is the only warning, and only if someone reads it.
+
+## Live sessions, and "Deadlines & Exams" becomes the Class Calendar (2026-09-24)
+
+Live on both sections. `event_card()` in `_build_site.py` is the twin of
+`render_event()` in `../Course Calendar/_build_calendar.py`, reading the
+same `"events"` list on a week -- see the Course Calendar session notes for
+the data format and for why the card is one line rather than a headed box.
+
+### The week card
+
+The due card's markup with `event` added: `.pcard.due.event` takes a navy
+border instead of the problem set's dark red, so a date to keep does not
+read as something to hand in. The mark is the **Zoom wordmark**
+(`assets/zoom-logo.png`, **48x11** css px stored at 4x, the same retina
+treatment as the Bruin Bear), sitting in the `.g` slot the glyphs use. The
+Class Calendar row's copy is **35x8**. Both were 30% larger until Nico
+called the mark too big; the calendar's print mark was cut by the same 30%
+in the same pass, so the three stay in step. He confirmed all three
+("the size is fine everywhere"), so these are settled -- do not re-tune
+them on a later pass.
+
+### The right-hand column is now "Class Calendar"
+
+Renamed on Nico's instruction, and the live sessions joined it -- the column
+is no longer "Deadlines & Exams", so a date to keep belongs in it. The row
+reads **"Coffee & Econ Zoom with Nico"** with the link on the word *Zoom*
+(2026-09-24, Nico), so a student can join straight from the column. It is
+the only row in the column that does NOT link its week page -- for a
+session that page is the one they are already on, and the joining link is
+what they want at 9 am. The row comes from the event's `"row"` segments;
+every other row still gets the plain-label-plus-week-link branch.
+
+A small Zoom mark sits beside the WEEK chip rather than beside the label:
+that line is the one that says what KIND of date this is, and the narrow
+column has no room for the mark on the label line.
+
+**The mark is never dimmed.** It carried `opacity:.85` on the cream "this
+week" row so it would not look pasted on. A brand mark prints in its own
+colour or it is not the mark -- see the Course Calendar notes for which
+Commons file to take it from.
+
+### `_deploy.py` now DISCOVERS its assets, and that was the real bug
+
+Nico reported the logo showing up **gold**, twice, after the colour had
+already been corrected locally. It was never a colour problem the second
+time: `_deploy.py` carried a hardcoded `ASSETS` list, `zoom-logo.png` was
+not in it, and the file therefore never reached the public repo. The live
+`<img>` 404'd, and because it has `alt="Zoom"` the browser rendered the ALT
+TEXT -- which inherits `.pcard.due .g{color:var(--accent-ink)}`, a dark
+gold. Hence a gold word "Zoom" where the blue logo should have been.
+
+**Nothing in the pipeline could catch it.** `_build_site.py` wrote the file,
+and `_publish.py`'s link check reads the BUILD folder, where it exists. The
+gap is between that folder and the deploy, and only `_deploy.py` sees it.
+The comment above `page_files()` records the identical failure one level up
+-- a hardcoded page list silently dropped all-videos.html on 2026-09-03 --
+and the lesson had never been applied to the asset list beside it.
+
+`asset_files()` now scans the built pages for `assets/...` in any `href` or
+`src`, and exits if a page references something that was not built. It
+discovers exactly the old seven plus the logo.
+
+**The lesson for verifying a publish: screenshot the LIVE URL, not the
+local file.** Three rounds of local screenshots all looked correct, because
+locally the file was right there.
+
+
+**The id stayed `#deadlines`.** Every anchor, the phone jump link and four
+JS functions address it; renaming it would have bought nothing. What changed
+is what a student reads: the heading, "Show all dates" under the list,
+"Calendar / Search" on the phone toggle, "Dates for this week" in the week
+header, and the How to Use This Site entry.
+
+### A fourth feed kind
+
+The Class Calendar is subscribable, so a session in it has to be
+subscribable too -- otherwise the column and the feed quietly disagree.
+`FEED_KINDS` gained `("event", "Live Sessions")`: the panel has a fourth
+tick-box, and `write_feeds` now writes **15** files rather than 7 (one per
+non-empty combination). Nothing in `site.js` is per-kind any more -- a
+`KINDS` array drives the tick-boxes, the listeners and the file name -- so a
+fifth kind would need only its id in that array and its box in the panel.
+
+A session is a TIMED VEVENT with `TRANSP:OPAQUE`, like the fixed-slot final,
+not an all-day banner. Its `URL` is the **joining link**, so the entry in
+the student's calendar is the thing they click at 9 am; every other row
+still opens its week page.
+
+**One bug found in passing:** `right_column()` repeated the kind test
+(`"exam" if ... else "video" if ... else "assign"`) instead of calling
+`kind_of()`, so every session shipped as `data-kind="assign"` and the Export
+panel counted it under Assignments. It reads `kind_of()` now.
+
+### Build dependencies installed on this machine
+
+`pypdf` -- without it the syllabus drops out of the search index (232
+entries instead of 237) and `_build_site.py` only warns. `PyMuPDF` --
+without it `_publish.py` skips step 3 entirely, so the PDF link-count check
+that guards against the flattened-export bug never runs. Both are now in.
+
 ## A Home landing page, and search that reaches the documents (2026-09-23)
 
 Live on both sections. `python _publish.py` ran four times this day; the

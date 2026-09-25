@@ -23,6 +23,72 @@ underline cannot travel with it.
 
 ---
 
+## A live-session card: "Coffee & Econ" on Zoom (2026-09-24)
+
+A week can now carry live sessions that are not the on-campus class. The
+content file grows an `"events"` list per week; the key block above `WEEKS`
+documents every field. Week 3 of both sections carries the first one:
+
+    "events": [{"title": "Coffee & Econ",
+                "row": [("t", "Coffee & Econ "),
+                        ("l", "zoom_coffee", "Zoom"),
+                        ("t", " with Nico")],
+                "day": "Sun", "time": "9:00 am PT", "mins": 60,
+                "sub": [("t", "Zoom Session with Nico.  "),
+                        ("l", "zoom_coffee", "Zoom link here"),
+                        ("t", ".")],
+                "link": "zoom_coffee"}],
+
+`"sub"` and `"row"` are both the segment format `MATH_REFRESHER_ITEMS`
+uses, so the link sits on whichever words should carry it -- Nico moved it
+from "Zoom Session" to "Zoom link here" on the card, and asked for
+"Coffee & Econ **Zoom** with Nico" in the website's column, all on the same
+day. `"row"` is the shorter line that column shows; `seg_text()` flattens
+it for the .ics feed and the search index, which take plain text. The Zoom
+URL is `LINKS["zoom_coffee"]`: a meeting id is per-meeting and cannot be
+derived, so one key per session.
+
+**`"time"` is parsed, not repeated as a number.** `event_utc()` in
+`_calendar_content.py` reads the hour out of the printed string, the way
+`exam_utc()` does its slot, so the feed and the page cannot disagree.
+`"mins"` is how long the session runs; Nico confirmed 60 minutes.
+
+**The card is ONE LINE, and that is not a style choice.** The first version
+was a headed card in the on-campus class card's shape (navy header bar,
+white body), and `_check_pagination.ps1` failed: week 3 spanned 2 pages and
+the deck went to 15. Week 3 is dense -- seven Module 3 videos, three reading
+groups -- so it has no room for a headed card. `render_event` draws the due
+card's shape instead: the mark, the bold title, the rest of the line with
+its link, and the date and time right-aligned on a tab stop, navy border
+rather than the problem set's dark red. Back to 14 pages, PASS on both
+sections.
+
+**The mark is the ZOOM WORDMARK, not a glyph** (Nico, the same day -- it
+replaced a laptop). `Images/zoom-logo.png`, from Wikimedia Commons,
+rasterised tight to the letters at 372x84 for print.
+
+**Take it from "Zoom Logo 2022.svg", NOT "Zoom Communications Logo.svg".**
+The letterforms are identical; the colour is not. The older file is
+`#2D8CFF`, a pale sky blue, and the 2022 file is `#0B5CFF`, Zoom's current
+brand blue. The pale one shipped first and Nico asked for the mark "IN
+blue" -- on the website's cream "this week" row it read as grey rather than
+as a brand mark. Check the dominant colour of any re-rasterised file
+against `#0B5CFF` before shipping it. `render_event` sets the HEIGHT
+(`EVENT_MARK_H`) and computes the width from the file's own pixel ratio, so
+a re-rasterised logo cannot come out stretched. It is **0.095"**, cut 30%
+from 0.135" when Nico called the mark too big; the website's two marks were
+cut by the same 30% in the same pass.
+
+Placement: with the due cards at the top of the week, sessions first -- a
+session is held inside the week, a problem set is normally due in the next
+one. The website does the same, so the two artifacts agree.
+
+**One cosmetic artifact to know about:** Word's PDF export writes the card's
+hyperlink annotation TWICE, at the identical rectangle. The .docx has one
+`w:hyperlink`; it only happens on a link inside a text box that also holds
+an inline picture. Harmless -- but it is why the deck's link count is 118
+rather than 117, and `_publish.py` prints that number every build.
+
 ## Module 4's five videos linked (2026-09-09)
 
 All five re-recorded sessions are in, replacing the four `b08b...` keys that

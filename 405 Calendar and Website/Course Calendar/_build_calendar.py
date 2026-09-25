@@ -23,7 +23,7 @@ from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
-from PIL import ImageFont
+from PIL import Image, ImageFont
 
 # --section has to land in the environment BEFORE _calendar_content is
 # imported: that module reads MGMT405_SECTION at import time and everything
@@ -1195,6 +1195,45 @@ def band_right_label(wk):
     return ""
 
 
+# The mark on a live-session card is the ZOOM WORDMARK, not a glyph
+# (2026-09-24, Nico). It says which service the session is on before the
+# line is read. Wikimedia Commons, "Zoom Communications Logo.svg",
+# rasterised tight to the letters -- so the aspect ratio below is the
+# file's own and the width is computed from the height, never guessed.
+EVENT_MARK = os.path.join(HERE, "Images", "zoom-logo.png")
+# inches. 0.135 until Nico called the mark too big (2026-09-24); 30%
+# smaller is 0.095, and it still sits inside the 11.5 pt line.
+EVENT_MARK_H = 0.095
+
+
+def render_event(doc, wk, ev):
+    """One live Zoom session, as a ONE-LINE card in the due-card shape:
+    the Zoom mark, the title, the rest of the line with its link, and the
+    date and time right-aligned.
+
+    A headed card in the on-campus class card's shape was the first
+    version and pushed week 3 onto a second page, which no week may do
+    (2026-09-24)."""
+    def pop(cell, inner_w):
+        p = cp(cell)
+        p.paragraph_format.tab_stops.add_tab_stop(Inches(inner_w - 0.02),
+                                                  WD_TAB_ALIGNMENT.RIGHT)
+        with Image.open(EVENT_MARK) as im:
+            w_px, h_px = im.size
+        p.add_run().add_picture(EVENT_MARK,
+                                width=Inches(EVENT_MARK_H * w_px / h_px),
+                                height=Inches(EVENT_MARK_H))
+        add_run(p, "   ", size=11.5)
+        add_run(p, ev["title"] + "  –  ", bold=True, color=NAVY,
+                size=11.5)
+        render_segments(p, ev["sub"], base_size=11.5)
+        add_run(p, "	%s, %s" % (fmt(dt(wk["num"], ev["day"]), wd=True),
+                                 ev["time"]),
+                bold=True, color=NAVY, size=11.5)
+    rounded_card(doc, pop, fill="FFFFFF", border=NAVY, border_w=15875,
+                 width_in=WEEK_CARD_W)
+
+
 def build_week(doc, wk):
     n = wk["num"]
     tight_page_break(doc)
@@ -1219,6 +1258,12 @@ def build_week(doc, wk):
             bold=True, color="FFFFFF", size=BAND_LBL_PT)
 
     spacer(doc, 2)
+
+    # Live sessions and due cards share the top of the week, right under
+    # the band. A session is held INSIDE the week and a problem set is
+    # normally due in the next one, so the sessions come first.
+    for ev in (wk.get("events") or []):
+        render_event(doc, wk, ev)
 
     # due cards at the top, right under the week band
     for label, w, d, note in wk["due"]:
