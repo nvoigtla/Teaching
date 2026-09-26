@@ -1,5 +1,207 @@
 # Session Notes — Module 2 (In-Class + Video Part decks)
 
+## 2026-09-25 (last) — Step 1b cleanup, phase B: the folder is finished
+
+**One-line summary.** `Module 2 - Final.pptx` is the deliverable. The
+folder now holds Final, In Class, `Recorded Video Slides/`, the two
+podcast docs, this file, `_build_files/`, and the practice deck.
+
+### Deleted
+All of these except Full were git-tracked and unchanged against HEAD
+(last touched in b5484ae5):
+- `Module 2 - Revised.pptx`, `Module 2 - In Class Revised.pptx`,
+  `Module 2 - Video Part Revised.pptx`;
+- the two outlines (`… In Class Revised - outline.md`,
+  `… Video Part Revised - outline.md`);
+- `Module 2 - Full.pptx`, which was NOT in git, under the
+  Final-supersedes-Full exception. It was a byte copy of Revised, so it
+  can be regenerated: `git checkout b5484ae5 -- "…/Module 2 - Revised.pptx"`,
+  then copy it to `Module 2 - Full.pptx`;
+- `__pycache__/`.
+
+No source decks were left to ask about: the CT decks and the old
+originals went in the 2026-08-28 cleanup.
+
+### Kept at the root beyond the standard six
+`Module 2 - Potential Practice Exercises.pptx`, kept at Nico's request
+on 2026-08-28. It is a parking-lot deck, not part of the end-of-module
+routine. Say the word if it should go.
+
+### `_build_files/` (everything else, moved as is)
+- **Drawing layer:**
+  - `_build_Module2InClass.py` and `_build_Module2Video.py` (both STALE);
+  - `_build_template_samples.py`;
+  - `_notes_m2.py`, `_video_notes.py`;
+  - `_source_images/`, `_source_images_video/`;
+  - `_add_practice_lottery.py`, which targets the practice deck at the
+    root.
+- **Builds and grouping:**
+  - `_animate.py`, `_animate_video.py`, `_group_pass.py`;
+  - `_splice_media.py`, `_splice_video.py`, `_merge_Module2.py` (STALE);
+  - the sidecars `_handoff_polls_INCLASS.pptx`, `_handoff_excel_s13.pptx`
+    and `_handoff_pollbreak.xml`.
+- **Dumps, diffs and probes:** `_diff_slides.py`, `_ic_diff.py`,
+  `_render.ps1`, `_slideshow_probe.ps1` (defaults to Final now).
+- **Steps 1 and 2:**
+  - `_full_inventory.py`, `_full_verify.py`, `_full_verify_anim.ps1`;
+  - `_final_inventory.py`, `_final_pairdiff.py`, `_final_verify.py`,
+    `_final_verify_anim.ps1`, `_assemble_final.ps1`;
+  - both `_*_pairing.json` files.
+- **Research dumps:** `_source_inventory.md`, `_source_inventory_video.md`.
+
+### Paths
+- `HERE` = the script's folder (images, sidecars, JSON).
+- Every deck and `Recorded Video Slides/` go through `MODULE = HERE.parent`
+  (`Split-Path $PSScriptRoot -Parent` in PowerShell).
+- `_splice_video.py` still pointed at the long-gone `Videos Final/`. It
+  now reads `Recorded Video Slides/`.
+- The writer passes deliberately still point at the deleted
+  `… Revised.pptx` decks, so an accidental run fails loudly instead of
+  touching Final.
+
+### Tools that now need a restore
+These read Full or Revised and carry a header note saying how to
+regenerate Full:
+- `_full_inventory.py`, `_full_verify.py`, `_full_verify_anim.ps1`;
+- `_final_inventory.py`, `_final_pairdiff.py`, `_assemble_final.ps1`.
+
+`_final_verify.py` skips its check 2 (video slides against Full) when
+Full is absent.
+
+### Verification
+- All 19 scripts compile. Every local import resolves (AST walk, nothing
+  run). All 5 `.ps1` files parse.
+  - One BOM was stripped from `_full_inventory.py`: PowerShell 5.1's
+    `Set-Content -Encoding utf8` writes one.
+- `_final_verify.py` from `_build_files/` gives the same check-1 findings
+  as before the move.
+- Both runs flag **Final 62 notes**: Nico edited Final by hand at 10:04
+  and added the ECMA quote ("I conclude that prices in the industry are
+  consistent with noncollusive pricing behavior…") to slide 62's notes.
+  This is an intended in-place edit of the deliverable, not a defect.
+
+## 2026-09-25 (later) — End-of-module step 2: `Module 2 - Final.pptx` (109 slides)
+
+**One-line summary.** Final = `Module 2 - In Class.pptx` 1–64 in In-Class
+order, then Full's frozen video slides 72–116. Final is now the
+deliverable and is edited IN PLACE.
+
+### Nico's decisions (this session)
+- Step 2 applies to Full 1–71 only. There is no in-class applications
+  section.
+- **Polls.** Full carried every poll as an OLD two-slide embed
+  (instructions + chart; `flow=Engagement/Instructor`). In Class
+  re-embeds each poll as ONE slide (`flow=Default`), and the in-class
+  copy replaces the pair: Full 4+5 → IC2 (pace), 11+12 → IC8 (pizza),
+  32 → IC28 (water), 36 → IC32 (yoga), 45+46 → IC41 (point elasticity),
+  57+58 → IC53 (R3), 64+65 → IC59 (popcorn).
+- **Mega Millions.** The placeholder "Poll: Mega Millions Elasticity"
+  (Full 40) is replaced by IC36, the live Mega Millions poll.
+- **Logistics (Full 2) and Recap of Module 1 (Full 3)** are absent from
+  In Class and were DROPPED at Nico's request (not kept under rule 6).
+- So every Full slide 1–71 was either replaced or dropped.
+
+### What In Class changed (per `_final_pairdiff.py --detail`)
+- 35 slides replaced with real edits, e.g.:
+  - IC7: "Gjelina" dropped from the pizza question;
+  - IC19: retitled "The Snob Effect (Negative Network Effects)";
+  - IC45: the Uber note now points to a "Coffee & Econ" session;
+  - IC47: title "… for a Product?" and the firm-size bullet removed;
+  - IC54: "Ei" → "EI" (capital I for income);
+  - IC60: a CONVENTION box added;
+  - IC62: two cereal elasticities swapped;
+  - click changes on IC14, 17, 22, 43, 46, 47, 48, 50, 60 and 62.
+- 21 slides were already identical to Full.
+- **Order changes:**
+  - the snob-effect slide and the network-effects slide swapped (IC18/19);
+  - the cheat sheet moved up to IC49, right after "Market vs. Firm
+    Elasticity" (it was Full 69).
+- The 8 text-less In-Class slides are all live polls, not empty
+  placeholders (rule 10: nothing to report).
+- No internal jump links exist in either deck, so none needed re-pointing.
+
+### Verification (all passed)
+- Opens in PowerPoint, 109 slides.
+- `_final_verify.py` check 1: Final 1–64 are 64 of 64 clean against In
+  Class.
+- `_final_verify.py` check 2: 30 of 45 video slides show clean against
+  Full. The 15 others differ only by PowerPoint save normalization,
+  because Full had never been saved by PowerPoint:
+  - merged runs, with per-character formatting identical on all 45;
+  - OMML boxes wrapped in `mc:AlternateContent` with a fallback image
+    (each "missing" shape = one AlternateContent block);
+  - on 83, the notes page's cached page number (83 against Full's stale 7).
+  Text, timing and hidden status are clean on all 45. **Expect check 2 to
+  show these 15 on every future run.**
+- `_final_verify_anim.ps1`: 109 slides, 0 mismatches (In Class 64, V1 12,
+  V2 10, V3 23).
+- Slideshow probe on 1, 2, 8, 9, 28, 32, 36, 41, 53, 59, 64, 65, 83 and
+  109: all captured, no banner. All 8 in-class polls and the Video 2 MR
+  poll render, and the live Excel pizza chart (9) renders.
+
+### Files
+- New: `Module 2 - Final.pptx`, `_assemble_final.ps1` (rerunnable, rolls
+  `_t-1`/`_t-2`), `_final_inventory.py` → `_final_pairing.json`,
+  `_final_pairdiff.py`, `_final_verify.py`, `_final_verify_anim.ps1`.
+- `Module 2 - In Class.pptx` and `Module 2 - Full.pptx` were read, never
+  written.
+
+### Next
+- Step 1b cleanup, phase B (Final exists): Full goes, and In Class plus
+  `Recorded Video Slides/` stay. Only when Nico asks.
+
+## 2026-09-25 — End-of-module step 1: `Module 2 - Full.pptx` (116 slides)
+
+**One-line summary.** Taping changed nothing in the video decks, so Full
+is `Module 2 - Revised.pptx` as it stands (Nico's "option 1"). Full is now
+the deliverable and is edited IN PLACE. The build scripts carry STALE
+banners.
+
+### What the comparison found (slides 72–116 only, per Nico)
+- The three decks in `Recorded Video Slides/` are **byte-identical** to the
+  "Videos Final" decks of commit 740a4567 (2026-08-25). Revised 72–116 was
+  built FROM them and then edited further, so every difference runs the
+  other way: Revised is newer.
+- Pairing (`_full_inventory.py` → `_full_pairing.json`): clean one-to-one,
+  V1.1–12 = R72–83, V2.1–10 = R84–93, V3.1–23 = R94–116. No taped-only
+  slides, no slide used twice. Notes and click counts match on all 45.
+- Visible Revised-only edits, KEPT in Full:
+  - V1 tags `… · Elasticity and Revenue` (taped: `Demand and Revenue`);
+  - agenda slides 73/85/95 with `Video k · Agenda` tags and coverage pills
+    (taped: `Module 2 · Outline`, no pills);
+  - title case on 79 and 110;
+  - dark-red answers on 107/108;
+  - Fade on every beat (the taped decks use Appear on some beats of 73, 74,
+    81, 101, 103, 104, 106, 108, 112 and 113 — click structure identical).
+- Everything else differing is PowerPoint save artifacts: run splits,
+  spAutoFit heights, and OMML fallback images.
+
+### Step-1 rules that had nothing to do here
+- Rule 5: Video 1 opens with its own "Elasticity and Revenue" card, not an
+  "Introduction to Module 2" card — nothing dropped.
+- Rules 6/7: Revised has no Backup section. The in-class slides 1–71 were
+  left as they are; Nico deferred them ("we'll do that step later").
+
+### Verification (all passed)
+- Opens in PowerPoint, 116 slides.
+- `_full_verify.py`: 116 of 116 slides diff clean against Revised.
+- `_full_verify_anim.ps1`: 45 video slides, 0 mismatches in effect count
+  and on-click beats against the taped decks.
+- `_slideshow_probe.ps1 -Deck "Module 2 - Full.pptx"` on 1, 13, 40, 72, 84,
+  90, 94, 107, 116: all captured, no error banner; the MR poll (90) renders.
+
+### Files
+- New: `Module 2 - Full.pptx`; `_full_inventory.py`, `_full_pairing.json`,
+  `_full_verify.py`, `_full_verify_anim.ps1` (copied from Module 1 and
+  adapted, `MODULE = HERE`).
+- STALE banners on `_build_Module2Video.py`, `_build_Module2InClass.py`
+  and `_merge_Module2.py`. None of them writes Full.
+
+### Next
+- The in-class slides (1–71) against `Module 2 - In Class.pptx` (untracked,
+  hand-edited by Nico 2026-09-25 09:03) — Nico will give instructions.
+- Step 1b (folder cleanup) once Nico has looked at Full.
+
 ## 2026-09-20 — Lottery example moves to the MA article numbers
 
 **One-line summary.** Nico found a WROR/WBZ article confirming the MA

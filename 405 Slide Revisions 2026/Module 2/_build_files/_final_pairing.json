@@ -1,0 +1,1723 @@
+{
+ "pairing": [
+  {
+   "ic": 1,
+   "full": 1,
+   "score": 1.0,
+   "diff": [
+    "xml"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Demand Analysis"
+  },
+  {
+   "ic": 2,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 3,
+   "full": 6,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Course Roadmap"
+  },
+  {
+   "ic": 4,
+   "full": 7,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Agenda"
+  },
+  {
+   "ic": 5,
+   "full": 8,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Agenda"
+  },
+  {
+   "ic": 6,
+   "full": 9,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 7,
+   "full": 10,
+   "score": 0.974,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 8,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 9,
+   "full": 13,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 10,
+   "full": 14,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 11,
+   "full": 15,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 12,
+   "full": 16,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 13,
+   "full": 17,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 14,
+   "full": 18,
+   "score": 1.0,
+   "diff": [
+    "text",
+    "clicks 4->3"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 15,
+   "full": 19,
+   "score": 0.885,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 16,
+   "full": 20,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 17,
+   "full": 21,
+   "score": 0.957,
+   "diff": [
+    "text",
+    "clicks 10->12"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 18,
+   "full": 23,
+   "score": 0.958,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 19,
+   "full": 22,
+   "score": 0.844,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 4,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 20,
+   "full": 24,
+   "score": 0.982,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · The Law of Demand"
+  },
+  {
+   "ic": 21,
+   "full": 25,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Agenda"
+  },
+  {
+   "ic": 22,
+   "full": 26,
+   "score": 0.867,
+   "diff": [
+    "text",
+    "clicks 0->2"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 23,
+   "full": 27,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 24,
+   "full": 28,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 25,
+   "full": 29,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 26,
+   "full": 30,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 27,
+   "full": 31,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 28,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 29,
+   "full": 33,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 30,
+   "full": 34,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 31,
+   "full": 35,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 32,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 33,
+   "full": 37,
+   "score": 0.939,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 34,
+   "full": 38,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 35,
+   "full": 39,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 36,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 37,
+   "full": 41,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 38,
+   "full": 42,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 39,
+   "full": 43,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 40,
+   "full": 44,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 41,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 42,
+   "full": 47,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 43,
+   "full": 48,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 44,
+   "full": 49,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 45,
+   "full": 50,
+   "score": 0.689,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 2,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 46,
+   "full": 51,
+   "score": 0.774,
+   "diff": [
+    "text",
+    "clicks 3->2"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 47,
+   "full": 52,
+   "score": 0.892,
+   "diff": [
+    "text",
+    "clicks 8->7"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 4,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 48,
+   "full": 53,
+   "score": 1.0,
+   "diff": [
+    "text",
+    "clicks 1->3"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 49,
+   "full": 69,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 50,
+   "full": 54,
+   "score": 1.0,
+   "diff": [
+    "text",
+    "clicks 3->2"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 51,
+   "full": 55,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 3,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 52,
+   "full": 56,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 53,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 54,
+   "full": 59,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 55,
+   "full": 60,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 56,
+   "full": 61,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 3,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 57,
+   "full": 62,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 4,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 58,
+   "full": 63,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 1,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 59,
+   "full": null,
+   "score": 0.0,
+   "diff": [],
+   "tags": true,
+   "jumps": 0,
+   "pics": 1,
+   "empty": true,
+   "frozen": false,
+   "title": "<no text>"
+  },
+  {
+   "ic": 60,
+   "full": 66,
+   "score": 0.81,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 61,
+   "full": 67,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 4,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 62,
+   "full": 68,
+   "score": 1.0,
+   "diff": [
+    "text",
+    "clicks 1->7"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 6,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Elasticities"
+  },
+  {
+   "ic": 63,
+   "full": 70,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Agenda"
+  },
+  {
+   "ic": 64,
+   "full": 71,
+   "score": 1.0,
+   "diff": [
+    "text"
+   ],
+   "tags": false,
+   "jumps": 0,
+   "pics": 0,
+   "empty": false,
+   "frozen": false,
+   "title": "Module 2 · Agenda"
+  }
+ ],
+ "dropped": [
+  2,
+  3,
+  4,
+  5,
+  11,
+  12,
+  32,
+  36,
+  40,
+  45,
+  46,
+  57,
+  58,
+  64,
+  65
+ ],
+ "full": [
+  {
+   "n": 1,
+   "title": "Demand Analysis | Module 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 2,
+   "title": "Module 2 · Logistics | Logistics",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 3,
+   "title": "Module 2 · Recap | Recap of Module 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 4,
+   "title": "4",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 5,
+   "title": "5",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 6,
+   "title": "Module 2 · Course Roadmap | Agenda for the Class",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 7,
+   "title": "Module 2 · Agenda | Outline of Module 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 8,
+   "title": "Module 2 · Agenda | Outline of Module 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 9,
+   "title": "Module 2 · The Law of Demand | The Law of Demand",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 10,
+   "title": "Module 2 · The Law of Demand | 1. MORE Customers Buy the Product",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 11,
+   "title": "11",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 12,
+   "title": "12",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 13,
+   "title": "Module 2 · The Law of Demand | 1. MORE Customers Buy the Product",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 14,
+   "title": "Module 2 · The Law of Demand | 2. Existing Customers Buy MORE",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 15,
+   "title": "Module 2 · The Law of Demand | To the Same Consumer, Each Extra Slice Is Worth Less",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 16,
+   "title": "Module 2 · The Law of Demand | Diminishing Marginal Personal Value",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 17,
+   "title": "Module 2 · The Law of Demand | Diminishing MPV: Income and Life Satisfaction",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 18,
+   "title": "Module 2 · The Law of Demand | Consumer Optimization",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 19,
+   "title": "Module 2 · The Law of Demand | Optimal Number of Movies to Watch (per Week, by One Custome",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 20,
+   "title": "Module 2 · The Law of Demand | Aggregating Individual Consumers’ Demand",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 21,
+   "title": "Module 2 · The Law of Demand | Factors Affecting Demand",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 22,
+   "title": "Module 2 · The Law of Demand | The Snob Effect in the News",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 23,
+   "title": "Module 2 · The Law of Demand | Implications of Positive Network Effects",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 24,
+   "title": "Module 2 · The Law of Demand | Remember About Demand",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 25,
+   "title": "Module 2 · Agenda | Outline of Module 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 26,
+   "title": "Module 2 · Elasticities | Generic Definition of Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 27,
+   "title": "Module 2 · Elasticities | We Use Elasticity to Study Effects of Price Increases",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 28,
+   "title": "Module 2 · Elasticities | What Is the Elasticity of Demand?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 29,
+   "title": "Module 2 · Elasticities | Three Types of Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 30,
+   "title": "Module 2 · Elasticities | Own-Price Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 31,
+   "title": "Module 2 · Elasticities | Example: Demand Elasticity for Water",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 32,
+   "title": "32",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 33,
+   "title": "Module 2 · Elasticities | Solution",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 34,
+   "title": "Module 2 · Elasticities | Categories of Own-Price Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 35,
+   "title": "Module 2 · Elasticities | Example: Demand Elasticity for Yoga Lessons",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 36,
+   "title": "36",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 37,
+   "title": "Module 2 · Elasticities | Solution",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 38,
+   "title": "Module 2 · Elasticities | Computing Elasticity:  Method 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 39,
+   "title": "Module 2 · Elasticities | Lottery Sales: Mega Millions Raises Its Price",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 40,
+   "title": "Module 2 · Elasticities | Poll: Mega Millions Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 41,
+   "title": "Module 2 · Elasticities | Solution: Mega Millions",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 42,
+   "title": "Module 2 · Elasticities | Computing Elasticity:  Method 2  (“Point Elasticity”)",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 43,
+   "title": "Module 2 · Elasticities | Computing the Point Elasticity: Method 2 – Step-by-Step",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 44,
+   "title": "Module 2 · Elasticities | Obtain Price Elasticity from the Demand Function",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 45,
+   "title": "45",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 46,
+   "title": "46",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 47,
+   "title": "Module 2 · Elasticities | Solution: If  Q = 10 − P , Elasticity at  P = 2 ?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 48,
+   "title": "Module 2 · Elasticities | Elasticity Along the Demand Curve: Linear Case",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 49,
+   "title": "Module 2 · Elasticities | Important Insight",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 50,
+   "title": "Module 2 · Elasticities | Estimated Demand Curve for Uber (Surge Prices, 2016)",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 51,
+   "title": "Module 2 · Elasticities | Special Cases of Price Elasticities",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 52,
+   "title": "Module 2 · Elasticities | What Determines the Price Elasticity of Demand?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 53,
+   "title": "Module 2 · Elasticities | Market vs. Firm Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 54,
+   "title": "Module 2 · Elasticities | Next: Other Elasticities",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 55,
+   "title": "Module 2 · Elasticities | Income Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 56,
+   "title": "Module 2 · Elasticities | Example: Income Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 57,
+   "title": "57",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 58,
+   "title": "58",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 59,
+   "title": "Module 2 · Elasticities | Solution: Income Elasticity of R3",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 60,
+   "title": "Module 2 · Elasticities | Which Retailers Do Well in a Recession? Clues from Income Elasti",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 61,
+   "title": "Module 2 · Elasticities | Inferior Goods in the News",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 62,
+   "title": "Module 2 · Elasticities | Cross-Price Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 63,
+   "title": "Module 2 · Elasticities | Example: Movie Ticket and Popcorn",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 64,
+   "title": "64",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 65,
+   "title": "65",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 66,
+   "title": "Module 2 · Elasticities | Solution",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 67,
+   "title": "Module 2 · Elasticities | Cross-Price Elasticity in the News",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 68,
+   "title": "Module 2 · Elasticities | Estimated Cross-Price Elasticities: Ready-to-Eat Cereal",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 69,
+   "title": "Module 2 · Elasticities | Cheat Sheet: Own-Price Elasticity",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 70,
+   "title": "Module 2 · Agenda | Outline of Module 2: Upcoming Videos 1+2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 71,
+   "title": "Module 2 · Agenda | Outline of Module 2: Upcoming Video 3",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 72,
+   "title": "Elasticity and Revenue | Module 2  ·  Video 1",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 73,
+   "title": "Module 2 · Video 1 · Agenda | Outline of Module 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 74,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | Plotting the (Inverse) Demand Curve",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 75,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | From Demand to Total Revenue",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 76,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | Effect of a Price Change on Total Revenue",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 77,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | Effect of a Price Change on Total Revenue: I",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 78,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | Effect of a Price Change on Total Revenue: I",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 79,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | What Can a Price Cut and Revenues Tell Us Ab",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 80,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | Solution",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 81,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | What About Profits?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 82,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | Summary: Effect of a Price Change on TR — It",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 83,
+   "title": "Module 2 · Video 1 · Elasticity and Revenue | Why Is McDonald's Cutting Prices?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 84,
+   "title": "Marginal Revenue | Module 2  ·  Video 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 85,
+   "title": "Module 2 · Video 2 · Agenda | Outline of Module 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 86,
+   "title": "Module 2 · Video 2 · Marginal Revenue | Context: Why Do We Care About Marginal Revenue?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 87,
+   "title": "Module 2 · Video 2 · Marginal Revenue | Marginal Revenue: Definition",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 88,
+   "title": "Module 2 · Video 2 · Marginal Revenue | Calculus Refresher: Derivatives",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 89,
+   "title": "Module 2 · Video 2 · Marginal Revenue | 3-Step Method to Compute Marginal Revenue",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 90,
+   "title": "Poll Break | 90",
+   "tags": true,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 91,
+   "title": "Module 2 · Video 2 · Marginal Revenue | Solution: If  Q = 10 − 0.5P , What Is  MR ?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 92,
+   "title": "Module 2 · Video 2 · Marginal Revenue | MR: Graphical Representation",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 93,
+   "title": "Module 2 · Video 2 · Marginal Revenue | Why Is MR Different From the Price?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 94,
+   "title": "Demand Estimation | Module 2  ·  Video 3",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 95,
+   "title": "Module 2 · Video 3 · Agenda | Outline of Module 2",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 96,
+   "title": "Module 2 · Video 3 · Demand Estimation | How to Estimate a Demand Curve?",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 97,
+   "title": "Module 2 · Video 3 · Demand Estimation | A/B Testing: What Is the Demand Function for This",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 98,
+   "title": "Module 2 · Video 3 · Demand Estimation | A/B Testing: Amazon “Experiments”",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 99,
+   "title": "Module 2 · Video 3 · Demand Estimation | Recent Amazon “Experiments”",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 100,
+   "title": "Module 2 · Video 3 · Demand Estimation | Econometric Estimates",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 101,
+   "title": "Module 2 · Video 3 · Demand Estimation | Ordinary Least Squares: Estimating the Demand Fun",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 102,
+   "title": "Module 2 · Video 3 · Demand Estimation | Airline Ticket Experimentation: Data",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 103,
+   "title": "Module 2 · Video 3 · Demand Estimation | First Pass: Eyeball the Relationship",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 104,
+   "title": "Module 2 · Video 3 · Demand Estimation | Least Squares Estimation",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 105,
+   "title": "Module 2 · Video 3 · Demand Estimation | Regression Results for the Airline Data",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 106,
+   "title": "Module 2 · Video 3 · Demand Estimation | Application Using the Airline Demand Function",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 107,
+   "title": "Module 2 · Video 3 · Demand Estimation | Solution: ED at P=140",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 108,
+   "title": "Module 2 · Video 3 · Demand Estimation | Solution: MR at P=140",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 109,
+   "title": "Module 2 · Video 3 · Demand Estimation | Solution: Raise the Price",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 110,
+   "title": "Module 2 · Video 3 · Demand Estimation | Note: We Can Also Run Multivariate Regressions",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 111,
+   "title": "Module 2 · Video 3 · Demand Estimation | Results With Added Variables",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 112,
+   "title": "Module 2 · Video 3 · Demand Estimation | Issues With Transaction Data: Why Randomization I",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 113,
+   "title": "Module 2 · Video 3 · Demand Estimation | Correlation Does Not Mean Causation",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 114,
+   "title": "Module 2 · Video 3 · Demand Estimation | Correlation Does Not Mean Causation",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 115,
+   "title": "Module 2 · Video 3 · Demand Estimation | Spurious Correlations",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  },
+  {
+   "n": 116,
+   "title": "Module 2 · Video 3 · Demand Estimation | Why Randomization Is Key",
+   "tags": false,
+   "jumps": 0,
+   "hidden": false
+  }
+ ]
+}
