@@ -23,6 +23,22 @@ underline cannot travel with it.
 
 ---
 
+## In-class files may be SHARED by both sections (2026-09-25)
+
+`_INCLASS_RE` now makes the section optional:
+
+    Module N - In Class - [EMBA|FEMBA - ]<Handout|wo Solutions|with Solutions>.<pdf|pptx>
+
+A file without a section serves BOTH sections -- Module 2's handout and decks
+are one copy each, because the material is identical. A file with one serves
+that section only, as Module 1 does. `inclass_files()` picks the
+section-specific file first and falls back to the shared one, so a module can
+start shared and be split later without renaming the shared file.
+
+Shared files are stored under an empty-string section key, and
+`inclass_pub_name()` is untouched: it still stamps the section into the
+PUBLISHED name, so the two sites keep independent addresses for one source.
+
 ## The in-class material scan lives here too (2026-09-24)
 
 `_calendar_content.py` gained `_scan_inclass()` / `inclass_files()` /

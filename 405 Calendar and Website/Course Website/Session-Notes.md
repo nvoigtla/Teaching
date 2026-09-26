@@ -9,6 +9,57 @@ the page layout and the palette.
 
 ---
 
+## Module 2's in-class material, and a shared-file naming convention (2026-09-25)
+
+Module 2's handout and its deck WITHOUT solutions are live on both sections.
+Week 1 went from 4 "(TBD)" rows to none: Modules 1 and 2 are both complete.
+Verified by fetching both files off each live site (HTTP 200, 2.4 MB and
+23.9 MB).
+
+**The section in the filename is now optional.** Nico dropped the files in as
+`Module 2 - In Class - Handout.pdf` -- no EMBA/FEMBA -- because "those are the
+same for FEMBA and EMBA". The old pattern required a section, so all three
+files matched nothing and would have been reported as unparseable. The scan in
+`_calendar_content.py` now accepts both forms, and a section-specific file
+WINS over a shared one, so a module can start shared and be split later
+without renaming the shared file. Module 1 keeps its per-section pair.
+
+Each section still publishes under its own address
+(`Module-2-In-Class-EMBA-Slides.pptx` / `-FEMBA-`), so one source file serves
+two independent sites.
+
+The deck with solutions is in the folder but NOT published:
+`INCLASS_SOLUTIONS` has no entry for module 2, so the blank deck ships. Adding
+`2: "with"` swaps it at the same address after the class.
+
+## THE DECK SCAN NOW FINDS ZERO DECKS -- do not rebuild blind (2026-09-25)
+
+Follow-on to the OPEN item below, and worse than it was. `_scan_slides()`
+looks for `405 Slide Revisions 2026/Module */Videos Final/`. **Every one of
+those folders has now been renamed to `Recorded Video Slides`** -- modules 1
+and 2 upstream (commits 21a3719b / 7cf93cc9), modules 3, 4 and 6 in the
+working tree today.
+
+State as it actually stands:
+
+| | |
+|---|---|
+| Built output in this folder (09:19 today) | 12 decks -- modules 3 and 4 only |
+| The live sites | the same 12; modules 1, 2 and 6 already lost their links |
+| A rebuild **right now** | 0 decks, and the 120 `Slides` rows drop out of the search index |
+
+So the next `python _build_site.py` strips the remaining deck links from both
+live sites. That is why this commit does NOT rebuild -- the HTML committed
+here is the 09:19 build and matches what is live.
+
+**The fix is now unambiguous and it is one line:** point `_scan_slides()` at
+`Recorded Video Slides`. The earlier session left the choice open ("rename the
+folder back, or teach the scan the second name") because the rename was
+mid-flight; it is finished now, consistent across all five folders and
+committed upstream for two of them, so renaming back would fight committed
+work. NOT done here because it changes what students see and was explicitly
+left for Nico -- offered, not built.
+
 ## Module 1's in-class handout and slides are live (2026-09-24)
 
 Both sections, from `Course Website/In-Class Material/` -- Nico's own

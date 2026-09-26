@@ -256,6 +256,18 @@ jump menu together.
   uploaded. The module list comes from `inclass_modules()` in the calendar's
   content file — the week's topics as well as the class card's own items — so
   the website and the calendar name the same modules.
+  - The files live in `In-Class Material/` and are picked up by name:
+    `Module N - In Class - [EMBA|FEMBA - ]<Handout|wo Solutions|with
+    Solutions>.<pdf|pptx>`. **The section is optional** (2026-09-25): a file
+    without one serves BOTH sections, which is how Module 2 ships, while
+    Module 1 has a pair per section. A section-specific file wins over a
+    shared one, so a module can start shared and be split later without
+    renaming anything. `unparsed_inclass()` reports a file the pattern does
+    not match rather than leaving it silently off the site.
+  - Which deck publishes is `INCLASS_SOLUTIONS` in the calendar content:
+    the blank deck until the class has been taught, the worked one after.
+    The published NAME does not change when it flips, so a link already
+    handed out keeps working.
 - **Module podcasts read "Podcast (_before_ class):" and "Podcast (_after_
   class):"**, with the timing word underlined. Done in `podcast_label()` at
   render time rather than in the calendar content, because the item format

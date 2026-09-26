@@ -209,8 +209,13 @@ INCLASS_ROOT = os.path.abspath(os.path.join(
     os.path.dirname(os.path.abspath(__file__)), os.pardir,
     "Course Website", "In-Class Material"))
 
+# The section is OPTIONAL (2026-09-25, Nico: Module 2's handout and deck are
+# "the same for FEMBA and EMBA"). "Module 2 - In Class - Handout.pdf" serves
+# both sections; "Module 1 - In Class - EMBA - Handout.pdf" serves one. A
+# section-specific file WINS over a shared one for that section, so a module
+# can start shared and later be split without renaming the shared file.
 _INCLASS_RE = re.compile(
-    r"Module (\d+) - In Class - (EMBA|FEMBA) - "
+    r"Module (\d+) - In Class - (?:(EMBA|FEMBA) - )?"
     r"(Handout|wo Solutions|with Solutions)\.(pdf|pptx)$")
 
 
@@ -223,7 +228,9 @@ def _scan_inclass():
             continue
         m = _INCLASS_RE.match(name)
         if m:
-            found[(int(m.group(1)), m.group(2), m.group(3))] =                 os.path.join(INCLASS_ROOT, name)
+            # group 2 is None for a shared file -> empty-string key
+            found[(int(m.group(1)), m.group(2) or "",
+                   m.group(3))] = os.path.join(INCLASS_ROOT, name)
     return found
 
 
@@ -258,13 +265,18 @@ def inclass_files(module):
     """[(kind, source path, qualifier)] for THIS section's module -- the
     handout, then whichever slide deck is currently published. Missing
     files are simply absent, and the page keeps its "(TBD)" for them."""
+    def pick(kind):
+        """This section's own file, else the one shared by both sections."""
+        return (INCLASS_MATERIAL.get((module, SECTION_LABEL, kind))
+                or INCLASS_MATERIAL.get((module, "", kind)))
+
     out = []
-    h = INCLASS_MATERIAL.get((module, SECTION_LABEL, "Handout"))
+    h = pick("Handout")
     if h:
         out.append(("Handout", h, ""))
     with_sol = INCLASS_SOLUTIONS.get(module) == "with"
     key = "with Solutions" if with_sol else "wo Solutions"
-    d = INCLASS_MATERIAL.get((module, SECTION_LABEL, key))
+    d = pick(key)
     if d:
         out.append(("Slides", d,
                     "with solutions" if with_sol else "without solutions"))
